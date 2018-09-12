@@ -1,0 +1,13 @@
+# IDE configuration
+*.ipr
+*.iml
+*.iws
+.idea/
+.classpath
+.project
+.settings
+
+# ignore sbt's output folders
+/target/
+/project/
+/*/target/
