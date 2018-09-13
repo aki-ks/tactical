@@ -11,6 +11,6 @@ public class ByteType implements IntLikeType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{}";
+        return ByteType.class.getSimpleName() + "{}";
     }
 }

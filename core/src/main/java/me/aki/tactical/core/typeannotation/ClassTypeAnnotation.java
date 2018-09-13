@@ -47,7 +47,7 @@ public class ClassTypeAnnotation extends AbstractTypeAnnotation {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" +
+        return ClassTypeAnnotation.class.getSimpleName() + '{' +
                 "targetType=" + targetType +
                 ", typePath=" + getTypePath() +
                 ", annotation=" + getAnnotation() +

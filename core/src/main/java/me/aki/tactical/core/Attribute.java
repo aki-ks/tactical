@@ -48,7 +48,7 @@ public class Attribute {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '{' +
+        return Attribute.class.getSimpleName() + '{' +
                 "name='" + name + '\'' +
                 ", data=" + Arrays.toString(data) +
                 '}';

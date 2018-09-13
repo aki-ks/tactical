@@ -11,6 +11,6 @@ public class BooleanType implements IntLikeType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{}";
+        return BooleanType.class.getSimpleName() + "{}";
     }
 }

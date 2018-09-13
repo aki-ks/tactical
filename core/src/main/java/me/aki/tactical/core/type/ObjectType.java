@@ -37,7 +37,7 @@ public class ObjectType implements RefType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '{' +
+        return ObjectType.class.getSimpleName() + '{' +
                 "name=" + name +
                 '}';
     }

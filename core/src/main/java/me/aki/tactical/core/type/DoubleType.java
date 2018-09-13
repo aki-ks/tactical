@@ -11,6 +11,6 @@ public class DoubleType implements PrimitiveType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{}";
+        return DoubleType.class.getSimpleName() + "{}";
     }
 }

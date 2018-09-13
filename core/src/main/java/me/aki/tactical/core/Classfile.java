@@ -487,18 +487,18 @@ public class Classfile {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(name, outerName, innerName, access);
-        }
-
-        @Override
         public String toString() {
-            return getClass().getSimpleName() + '{' +
+            return InnerClass.class.getSimpleName() + '{' +
                     "name='" + name + '\'' +
                     ", outerName=" + outerName +
                     ", innerName=" + innerName +
                     ", access=" + access +
                     '}';
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, outerName, innerName, access);
         }
 
         public static enum Flag {

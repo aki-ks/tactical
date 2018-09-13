@@ -224,7 +224,7 @@ public class Module {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + '{' +
+            return Require.class.getSimpleName() + '{' +
                     "name=" + name +
                     ", flags=" + flags +
                     ", version=" + version +
@@ -302,7 +302,7 @@ public class Module {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + '{' +
+            return Export.class.getSimpleName() + '{' +
                     "name=" + name +
                     ", flags=" + flags +
                     ", modules=" + modules +
@@ -376,7 +376,7 @@ public class Module {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + '{' +
+            return Open.class.getSimpleName() + '{' +
                     "name=" + name +
                     ", access=" + access +
                     ", modules=" + modules +
@@ -392,6 +392,14 @@ public class Module {
      * Implementation of a service interface
      */
     public static class Provide {
+        @Override
+        public String toString() {
+            return Provide.class.getSimpleName() + '{' +
+                    "service=" + service +
+                    ", providers=" + providers +
+                    '}';
+        }
+
         /**
          * Name of the implemented service interface.
          */
@@ -437,12 +445,5 @@ public class Module {
             return Objects.hash(service, providers);
         }
 
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + '{' +
-                    "service=" + service +
-                    ", providers=" + providers +
-                    '}';
-        }
     }
 }

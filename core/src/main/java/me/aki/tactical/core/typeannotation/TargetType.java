@@ -89,8 +89,9 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "{" +
+            return TypeParameterBound.class.getSimpleName() + '{' +
                     "parameterIndex=" + parameterIndex +
+                    ", boundIndex=" + boundIndex +
                     '}';
         }
     }
@@ -123,7 +124,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName();
+            return Extends.class.getSimpleName() + "{}";
         }
     }
 
@@ -179,7 +180,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "{" +
+            return Implements.class.getSimpleName() + '{' +
                     "index=" + index +
                     '}';
         }
@@ -233,7 +234,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "{" +
+            return TypeParameter.class.getSimpleName() + '{' +
                     "parameterIndex=" + parameterIndex +
                     '}';
         }
@@ -267,7 +268,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "{}";
+            return ReturnType.class.getSimpleName() + "{}";
         }
     }
 
@@ -301,7 +302,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "{}";
+            return MethodReceiver.class.getSimpleName() + "{}";
         }
     }
 
@@ -353,7 +354,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "{" +
+            return MethodParameter.class.getSimpleName() + '{' +
                     "parameter=" + parameter +
                     '}';
         }
@@ -407,7 +408,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "{" +
+            return CheckedException.class.getSimpleName() + '{' +
                     "exception=" + exception +
                     '}';
         }

@@ -17,7 +17,7 @@ public class FieldTypeAnnotation extends AbstractTypeAnnotation {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" +
+        return FieldTypeAnnotation.class.getSimpleName() + '{' +
                 "typePath=" + getTypePath() +
                 ", annotation=" + getAnnotation() +
                 '}';

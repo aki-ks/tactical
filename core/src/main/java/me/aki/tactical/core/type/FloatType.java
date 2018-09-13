@@ -11,6 +11,6 @@ public class FloatType implements PrimitiveType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{}";
+        return FloatType.class.getSimpleName() + "{}";
     }
 }

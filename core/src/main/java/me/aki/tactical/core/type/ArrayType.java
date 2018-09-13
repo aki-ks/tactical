@@ -45,7 +45,7 @@ public class ArrayType implements RefType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '{' +
+        return ArrayType.class.getSimpleName() + '{' +
                 "dimensions=" + dimensions +
                 ", baseType=" + baseType +
                 '}';

@@ -39,7 +39,7 @@ public class TypePath {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" +
+        return TypePath.class.getSimpleName() + '{' +
                 "paths=" + paths +
                 '}';
     }
@@ -78,7 +78,7 @@ public class TypePath {
 
             @Override
             public String toString() {
-                return getClass().getSimpleName() + "{}";
+                return Array.class.getSimpleName() + "{}";
             }
         }
 
@@ -110,7 +110,7 @@ public class TypePath {
 
             @Override
             public String toString() {
-                return getClass().getSimpleName() + "{}";
+                return InnerClass.class.getSimpleName() + "{}";
             }
         }
 
@@ -145,7 +145,7 @@ public class TypePath {
 
             @Override
             public String toString() {
-                return getClass().getSimpleName() + "{}";
+                return WildcardBound.class.getSimpleName() + "{}";
             }
         }
 
@@ -199,9 +199,7 @@ public class TypePath {
 
             @Override
             public String toString() {
-                return getClass().getSimpleName() + "{" +
-                        "index=" + index +
-                        '}';
+                return TypeArgument.class.getSimpleName() + "{}";
             }
         }
     }

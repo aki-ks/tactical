@@ -11,6 +11,6 @@ public class ShortType implements IntLikeType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{}";
+        return ShortType.class.getSimpleName() + "{}";
     }
 }

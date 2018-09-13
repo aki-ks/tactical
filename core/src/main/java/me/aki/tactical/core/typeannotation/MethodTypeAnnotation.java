@@ -47,7 +47,7 @@ public class MethodTypeAnnotation extends AbstractTypeAnnotation {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" +
+        return MethodTypeAnnotation.class.getSimpleName() + '{' +
                 "targetType=" + targetType +
                 ", typePath=" + getTypePath() +
                 ", annotation=" + getAnnotation() +

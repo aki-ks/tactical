@@ -11,6 +11,6 @@ public class IntType implements IntLikeType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{}";
+        return IntType.class.getSimpleName() + "{}";
     }
 }
