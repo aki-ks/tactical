@@ -1,9 +1,11 @@
 package me.aki.tactical.core;
 
 import me.aki.tactical.core.annotation.Annotation;
+import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,6 +38,16 @@ public class Method {
      * Signature of the method with type variables.
      */
     private Optional<String> signature;
+
+    /**
+     * Default value for methods in interfaces.
+     */
+    private Optional<AnnotationValue> defaultValue;
+
+    /**
+     * A list of parameter annotations.
+     */
+    private List<List<Annotation>> parameterAnnotations;
 
     /**
      * Annotations of this methods.
@@ -119,6 +131,14 @@ public class Method {
         return returnType;
     }
 
+    public void setReturnType(Optional<Type> returnType) {
+        this.returnType = returnType;
+    }
+
+    public boolean isVoid() {
+        return !returnType.isPresent();
+    }
+
     public Optional<String> getSignature() {
         return signature;
     }
@@ -127,12 +147,20 @@ public class Method {
         this.signature = signature;
     }
 
-    public void setReturnType(Optional<Type> returnType) {
-        this.returnType = returnType;
+    public Optional<AnnotationValue> getDefaultValue() {
+        return defaultValue;
     }
 
-    public boolean isVoid() {
-        return !returnType.isPresent();
+    public void setDefaultValue(Optional<AnnotationValue> defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public List<List<Annotation>> getParameterAnnotations() {
+        return parameterAnnotations;
+    }
+
+    public void setParameterAnnotations(List<List<Annotation>> parameterAnnotations) {
+        this.parameterAnnotations = parameterAnnotations;
     }
 
     public List<Annotation> getAnnotations() {
@@ -161,5 +189,46 @@ public class Method {
 
     public static enum Flag {
         PUBLIC, PRIVATE, PROTECTED, STATIC, FINAL, SYNCHRONIZED, BRIDGE, VARARGS, NATIVE, ABSTRACT, STRICT, SYNTHETIC
+    }
+
+    public static class Parameter {
+        /**
+         * Name of the parameter
+         */
+        private Optional<String> name;
+
+        /**
+         * Access flags of the parameter
+         */
+        private Set<Flag> flags;
+
+        public Parameter() {
+            this(Optional.empty(), new HashSet<>());
+        }
+
+        public Parameter(Optional<String> name, Set<Flag> flags) {
+            this.name = name;
+            this.flags = flags;
+        }
+
+        public Optional<String> getName() {
+            return name;
+        }
+
+        public void setName(Optional<String> name) {
+            this.name = name;
+        }
+
+        public Set<Flag> getFlags() {
+            return flags;
+        }
+
+        public void setFlags(Set<Flag> flags) {
+            this.flags = flags;
+        }
+
+        public static enum Flag {
+            FINAL, SYNTHETIC, MANDATED
+        }
     }
 }
