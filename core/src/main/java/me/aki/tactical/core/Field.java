@@ -33,17 +33,25 @@ public class Field {
     private Optional<String> signature;
 
     /**
+     * The value of a constant (static, final field of primitive or String type).
+     */
+    private Optional<FieldConstant> constant;
+
+    /**
      * Annotations of this field.
      */
     private List<Annotation> annotations;
 
     private List<FieldTypeAnnotation> typeAnnotations;
 
-    public Field(Set<Flag> accessFlags, String name, Type type, List<Annotation> annotations,
+    public Field(Set<Flag> accessFlags, String name, Type type, Optional<String> signature,
+                 Optional<FieldConstant> constant, List<Annotation> annotations,
                  List<FieldTypeAnnotation> typeAnnotations, List<Attribute> attributes) {
         this.accessFlags = accessFlags;
         this.name = name;
         this.type = type;
+        this.signature = signature;
+        this.constant = constant;
         this.annotations = annotations;
         this.typeAnnotations = typeAnnotations;
         this.attributes = attributes;
@@ -111,6 +119,14 @@ public class Field {
 
     public void setSignature(Optional<String> signature) {
         this.signature = signature;
+    }
+
+    public Optional<FieldConstant> getConstant() {
+        return constant;
+    }
+
+    public void setConstant(Optional<FieldConstant> constant) {
+        this.constant = constant;
     }
 
     public List<Annotation> getAnnotations() {
