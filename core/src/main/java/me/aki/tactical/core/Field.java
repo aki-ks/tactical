@@ -33,6 +33,16 @@ public class Field {
 
     private List<FieldTypeAnnotation> typeAnnotations;
 
+    public Field(Set<Flag> accessFlags, String name, Type type, List<Annotation> annotations,
+                 List<FieldTypeAnnotation> typeAnnotations, List<Attribute> attributes) {
+        this.accessFlags = accessFlags;
+        this.name = name;
+        this.type = type;
+        this.annotations = annotations;
+        this.typeAnnotations = typeAnnotations;
+        this.attributes = attributes;
+    }
+
     /**
      * Non-parsed attributes of this field.
      *

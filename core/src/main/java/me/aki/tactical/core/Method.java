@@ -50,6 +50,18 @@ public class Method {
      */
     private List<Attribute> attributes;
 
+    public Method(Set<Flag> accessFlags, String name, List<Type> parameterTypes,
+                  Optional<Type> returnType, List<Annotation> annotations,
+                  List<MethodTypeAnnotation> typeAnnotations, List<Attribute> attributes) {
+        this.accessFlags = accessFlags;
+        this.name = name;
+        this.parameterTypes = parameterTypes;
+        this.returnType = returnType;
+        this.annotations = annotations;
+        this.typeAnnotations = typeAnnotations;
+        this.attributes = attributes;
+    }
+
     public Set<Flag> getAccessFlags() {
         return accessFlags;
     }
