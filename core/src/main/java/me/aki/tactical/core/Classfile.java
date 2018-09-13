@@ -41,6 +41,11 @@ public class Classfile {
     private List<Path> interfaces;
 
     /**
+     * Class signature with type variables.
+     */
+    private Optional<String> signature;
+
+    /**
      * Name of file from which the classfile was compiled.
      */
     private Optional<String> source;
@@ -146,6 +151,14 @@ public class Classfile {
 
     public void setInterfaces(List<Path> interfaces) {
         this.interfaces = interfaces;
+    }
+
+    public Optional<String> getSignature() {
+        return signature;
+    }
+
+    public void setSignature(Optional<String> signature) {
+        this.signature = signature;
     }
 
     public Optional<String> getSource() {

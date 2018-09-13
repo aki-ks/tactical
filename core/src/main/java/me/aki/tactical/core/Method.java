@@ -33,6 +33,11 @@ public class Method {
     private Optional<Type> returnType;
 
     /**
+     * Signature of the method with type variables.
+     */
+    private Optional<String> signature;
+
+    /**
      * Annotations of this methods.
      */
     private List<Annotation> annotations;
@@ -112,6 +117,14 @@ public class Method {
 
     public Optional<Type> getReturnType() {
         return returnType;
+    }
+
+    public Optional<String> getSignature() {
+        return signature;
+    }
+
+    public void setSignature(Optional<String> signature) {
+        this.signature = signature;
     }
 
     public void setReturnType(Optional<Type> returnType) {

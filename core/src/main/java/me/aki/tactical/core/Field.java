@@ -5,6 +5,7 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -25,6 +26,11 @@ public class Field {
      * Type of values that can be stored in the field.
      */
     private Type type;
+
+    /**
+     * Type of the field with type variables.
+     */
+    private Optional<String> signature;
 
     /**
      * Annotations of this field.
@@ -97,6 +103,14 @@ public class Field {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public Optional<String> getSignature() {
+        return signature;
+    }
+
+    public void setSignature(Optional<String> signature) {
+        this.signature = signature;
     }
 
     public List<Annotation> getAnnotations() {
