@@ -3,29 +3,35 @@ package me.aki.tactical.core;
 import me.aki.tactical.core.type.Type;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
- * A field definition within a {@link Classfile}.
+ * A method definition within a {@link Classfile}
  */
-public class Field {
+public class Method {
     /**
-     * Access flags of the field
+     * All access flags that are set for this method.
      */
     private Set<Flag> accessFlags;
 
     /**
-     * Name of the field
+     * Name of the method
      */
     private String name;
 
     /**
-     * Type of values that can be stored in the field.
+     * Types of the parameters
      */
-    private Type type;
+    private List<Type> parameterTypes;
 
     /**
-     * Non-parsed attributes of this field.
+     * Type returned by the method or empty for void.
+     */
+    private Optional<Type> returnType;
+
+    /**
+     * Non-parsed attributes of this method.
      *
      * They are either not part of the JVM spec or
      * are not yet supported by this library.
@@ -72,23 +78,27 @@ public class Field {
         this.name = name;
     }
 
-    public Type getType() {
-        return type;
+    public List<Type> getParameterTypes() {
+        return parameterTypes;
     }
 
-    public void setType(Type type) {
-        this.type = type;
+    public void setParameterTypes(List<Type> parameterTypes) {
+        this.parameterTypes = parameterTypes;
     }
 
-    public List<Attribute> getAttributes() {
-        return attributes;
+    public Optional<Type> getReturnType() {
+        return returnType;
     }
 
-    public void setAttributes(List<Attribute> attributes) {
-        this.attributes = attributes;
+    public void setReturnType(Optional<Type> returnType) {
+        this.returnType = returnType;
+    }
+
+    public boolean isVoid() {
+        return !returnType.isPresent();
     }
 
     public static enum Flag {
-        PUBLIC, PRIVATE, PROTECTED, STATIC, FINAL, VOLATILE, TRANSIENT, SYNTHETIC, ENUM
+        PUBLIC, PRIVATE, PROTECTED, STATIC, FINAL, SYNCHRONIZED, BRIDGE, VARARGS, NATIVE, ABSTRACT, STRICT, SYNTHETIC
     }
 }

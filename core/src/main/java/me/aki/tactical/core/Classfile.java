@@ -41,7 +41,10 @@ public class Classfile {
     private List<Field> fields;
 
     /**
-     * All attributes of this classfile that could not be parsed
+     * Non-parsed attributes of this classfile.
+     *
+     * They are either not part of the JVM spec or
+     * are not yet supported by this library.
      */
     private List<Attribute> attributes;
 
