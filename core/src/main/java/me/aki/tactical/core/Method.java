@@ -1,5 +1,6 @@
 package me.aki.tactical.core;
 
+import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.type.Type;
 
 import java.util.List;
@@ -29,6 +30,11 @@ public class Method {
      * Type returned by the method or empty for void.
      */
     private Optional<Type> returnType;
+
+    /**
+     * Annotations of this methods.
+     */
+    private List<Annotation> annotations;
 
     /**
      * Non-parsed attributes of this method.
@@ -96,6 +102,22 @@ public class Method {
 
     public boolean isVoid() {
         return !returnType.isPresent();
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+
+    public List<Attribute> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(List<Attribute> attributes) {
+        this.attributes = attributes;
     }
 
     public static enum Flag {

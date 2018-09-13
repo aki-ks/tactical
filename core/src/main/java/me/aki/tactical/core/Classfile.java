@@ -1,5 +1,7 @@
 package me.aki.tactical.core;
 
+import me.aki.tactical.core.annotation.Annotation;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -39,6 +41,11 @@ public class Classfile {
      * All field definitions of this classfile.
      */
     private List<Field> fields;
+
+    /**
+     * Annotations of this classfile.
+     */
+    private List<Annotation> annotations;
 
     /**
      * Non-parsed attributes of this classfile.
@@ -114,6 +121,18 @@ public class Classfile {
 
     public List<Attribute> getAttributes() {
         return attributes;
+    }
+
+    public void setAttributes(List<Attribute> attributes) {
+        this.attributes = attributes;
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     /**
