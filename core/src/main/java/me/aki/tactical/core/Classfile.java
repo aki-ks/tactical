@@ -44,6 +44,11 @@ public class Classfile {
     private List<Field> fields;
 
     /**
+     * All method definitions of this classfile.
+     */
+    private List<Method> methods;
+
+    /**
      * Annotations of this classfile.
      */
     private List<Annotation> annotations;
@@ -139,6 +144,14 @@ public class Classfile {
 
     public void setFields(List<Field> fields) {
         this.fields = fields;
+    }
+
+    public List<Method> getMethods() {
+        return methods;
+    }
+
+    public void setMethods(List<Method> methods) {
+        this.methods = methods;
     }
 
     public List<Annotation> getAnnotations() {
