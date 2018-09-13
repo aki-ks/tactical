@@ -61,6 +61,11 @@ public class Classfile {
     private Optional<EnclosingMethod> enclosingMethod;
 
     /**
+     * Module definition if the classfile is a "module-info".
+     */
+    private Optional<Module> module;
+
+    /**
      * All field definitions of this classfile.
      */
     private List<Field> fields;
@@ -83,8 +88,9 @@ public class Classfile {
     public Classfile(Version version, Set<Flag> accessFlags, Path name, Path supertype,
                      List<Path> interfaces, Optional<String> source, Optional<String> sourceDebug,
                      List<InnerClass> innerClasses, Optional<EnclosingMethod> enclosingMethod,
-                     List<Field> fields, List<Method> methods, List<Annotation> annotations,
-                     List<ClassTypeAnnotation> typeAnnotations, List<Attribute> attributes) {
+                     Optional<Module> module, List<Field> fields, List<Method> methods,
+                     List<Annotation> annotations, List<ClassTypeAnnotation> typeAnnotations,
+                     List<Attribute> attributes) {
         this.version = version;
         this.accessFlags = accessFlags;
         this.name = name;
@@ -94,6 +100,7 @@ public class Classfile {
         this.sourceDebug = sourceDebug;
         this.innerClasses = innerClasses;
         this.enclosingMethod = enclosingMethod;
+        this.module = module;
         this.fields = fields;
         this.methods = methods;
         this.annotations = annotations;
@@ -163,6 +170,22 @@ public class Classfile {
 
     public void setInnerClasses(List<InnerClass> innerClasses) {
         this.innerClasses = innerClasses;
+    }
+
+    public Optional<EnclosingMethod> getEnclosingMethod() {
+        return enclosingMethod;
+    }
+
+    public void setEnclosingMethod(Optional<EnclosingMethod> enclosingMethod) {
+        this.enclosingMethod = enclosingMethod;
+    }
+
+    public Optional<Module> getModule() {
+        return module;
+    }
+
+    public void setModule(Optional<Module> module) {
+        this.module = module;
     }
 
     public Set<Flag> getAccessFlags() {
