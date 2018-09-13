@@ -16,7 +16,7 @@ public class Classfile {
     /**
      * Access flags of this classfile
      */
-    private Set<Flag> access;
+    private Set<Flag> accessFlags;
 
     /**
      * Package and name of the classfile
@@ -36,6 +36,11 @@ public class Classfile {
     private List<Path> interfaces;
 
     /**
+     * All field definitions of this classfile.
+     */
+    private List<Field> fields;
+
+    /**
      * All attributes of this classfile that could not be parsed
      */
     private List<Attribute> attributes;
@@ -48,24 +53,12 @@ public class Classfile {
         this.version = version;
     }
 
-    public Set<Flag> getAccess() {
-        return access;
-    }
-
-    public void setAccess(Set<Flag> access) {
-        this.access = access;
-    }
-
     public Path getName() {
         return name;
     }
 
     public void setName(Path name) {
         this.name = name;
-    }
-
-    public Set<Flag> getAccessFlags() {
-        return access;
     }
 
     public Path getSupertype() {
@@ -84,6 +77,14 @@ public class Classfile {
         this.interfaces = interfaces;
     }
 
+    public Set<Flag> getAccessFlags() {
+        return accessFlags;
+    }
+
+    public void setAccessFlags(Set<Flag> accessFlags) {
+        this.accessFlags = accessFlags;
+    }
+
     /**
      * Check whether a {@link Flag} is set for this classfile.
      *
@@ -91,20 +92,20 @@ public class Classfile {
      * @return is the flag set
      */
     public boolean getFlag(Flag flag) {
-        return access.contains(flag);
+        return accessFlags.contains(flag);
     }
 
     /**
      * Set/remove a {@link Flag}.
      *
      * @param flag to be set/removed
-     * @param isSet should the flag be set or removed
+     * @param shouldSet should the flag be set or removed
      */
-    public void setFlag(Flag flag, boolean isSet) {
-        if (isSet) {
-            access.add(flag);
+    public void setFlag(Flag flag, boolean shouldSet) {
+        if (shouldSet) {
+            accessFlags.add(flag);
         } else {
-            access.remove(flag);
+            accessFlags.remove(flag);
         }
     }
 
