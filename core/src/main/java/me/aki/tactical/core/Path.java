@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
  * Immutable name of a class and its package.
  */
 public class Path {
+    public final static Path OBJECT = Path.of("java", "lang", "Object");
+    public final static Path STRING = Path.of("java", "lang", "String");
+    public final static Path CLASS = Path.of("java", "lang", "Class");
+
     /**
      * Packages of the class stored in an immutable list.
      */
@@ -38,7 +42,7 @@ public class Path {
         List<String> pkg = Arrays.stream(path)
                 .limit(path.length - 1)
                 .collect(Collectors.toUnmodifiableList());
-    
+
         return new Path(pkg, name);
     }
 
