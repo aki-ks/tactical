@@ -2,6 +2,7 @@ package me.aki.tactical.core;
 
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
 
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,8 @@ public class Field {
      * Annotations of this field.
      */
     private List<Annotation> annotations;
+
+    private List<FieldTypeAnnotation> typeAnnotations;
 
     /**
      * Non-parsed attributes of this field.
@@ -92,6 +95,14 @@ public class Field {
 
     public void setAnnotations(List<Annotation> annotations) {
         this.annotations = annotations;
+    }
+
+    public List<FieldTypeAnnotation> getTypeAnnotations() {
+        return typeAnnotations;
+    }
+
+    public void setTypeAnnotations(List<FieldTypeAnnotation> typeAnnotations) {
+        this.typeAnnotations = typeAnnotations;
     }
 
     public List<Attribute> getAttributes() {

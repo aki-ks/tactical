@@ -2,6 +2,7 @@ package me.aki.tactical.core;
 
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,11 @@ public class Method {
      * Annotations of this methods.
      */
     private List<Annotation> annotations;
+
+    /**
+     * Annotations on types within this method.
+     */
+    private List<MethodTypeAnnotation> typeAnnotations;
 
     /**
      * Non-parsed attributes of this method.
@@ -110,6 +116,14 @@ public class Method {
 
     public void setAnnotations(List<Annotation> annotations) {
         this.annotations = annotations;
+    }
+
+    public List<MethodTypeAnnotation> getTypeAnnotations() {
+        return typeAnnotations;
+    }
+
+    public void setTypeAnnotations(List<MethodTypeAnnotation> typeAnnotations) {
+        this.typeAnnotations = typeAnnotations;
     }
 
     public List<Attribute> getAttributes() {
