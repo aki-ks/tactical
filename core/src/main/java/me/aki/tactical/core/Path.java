@@ -1,24 +1,23 @@
 package me.aki.tactical.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Store the name of a classfile with its package.
+ * Immutable name of a class and its package.
  */
 public class Path {
     /**
-     * Packages of the the classfile
+     * Packages of the class stored in an immutable list.
      */
-    private List<String> pkg;
+    private final List<String> pkg;
 
     /**
-     * Name of the classfile
+     * Name of the class
      */
-    private String name;
+    private final String name;
 
     /**
      * Syntactic sugar for initialization of a path constant.
@@ -38,17 +37,18 @@ public class Path {
 
         List<String> pkg = Arrays.stream(path)
                 .limit(path.length - 1)
-                .collect(Collectors.toList());
-
+                .collect(Collectors.toUnmodifiableList());
+    
         return new Path(pkg, name);
     }
 
     public Path(String[] pkg, String name) {
-        this(new ArrayList<>(Arrays.asList(pkg)), name);
+        this.pkg = List.of(pkg);
+        this.name = name;
     }
 
     public Path(List<String> pkg, String name) {
-        this.pkg = pkg;
+        this.pkg = List.copyOf(pkg);
         this.name = name;
     }
 
@@ -56,16 +56,8 @@ public class Path {
         return pkg;
     }
 
-    public void setPackage(List<String> pkg) {
-        this.pkg = pkg;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
