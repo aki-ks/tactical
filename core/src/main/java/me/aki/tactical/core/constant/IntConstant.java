@@ -1,5 +1,8 @@
 package me.aki.tactical.core.constant;
 
+import me.aki.tactical.core.type.IntType;
+import me.aki.tactical.core.type.Type;
+
 import java.util.Objects;
 
 public class IntConstant implements FieldConstant {
@@ -31,5 +34,10 @@ public class IntConstant implements FieldConstant {
         return me.aki.tactical.core.constant.IntConstant.class.getSimpleName() + '{' +
                 "value=" + value +
                 '}';
+    }
+
+    @Override
+    public Type getType() {
+        return IntType.getInstance();
     }
 }

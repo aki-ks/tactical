@@ -9,6 +9,5 @@ import java.util.Objects;
  *
  * @see Field#constant
  */
-public interface FieldConstant {
-
+public interface FieldConstant extends Constant {
 }

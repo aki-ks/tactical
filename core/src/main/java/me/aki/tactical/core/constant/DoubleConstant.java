@@ -1,5 +1,8 @@
 package me.aki.tactical.core.constant;
 
+import me.aki.tactical.core.type.DoubleType;
+import me.aki.tactical.core.type.Type;
+
 import java.util.Objects;
 
 public class DoubleConstant implements FieldConstant {
@@ -31,5 +34,10 @@ public class DoubleConstant implements FieldConstant {
         return me.aki.tactical.core.constant.DoubleConstant.class.getSimpleName() + '{' +
                 "value=" + value +
                 '}';
+    }
+
+    @Override
+    public Type getType() {
+        return DoubleType.getInstance();
     }
 }

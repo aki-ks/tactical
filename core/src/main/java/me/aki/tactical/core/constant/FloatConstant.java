@@ -1,5 +1,8 @@
 package me.aki.tactical.core.constant;
 
+import me.aki.tactical.core.type.FloatType;
+import me.aki.tactical.core.type.Type;
+
 import java.util.Objects;
 
 public class FloatConstant implements FieldConstant {
@@ -31,5 +34,10 @@ public class FloatConstant implements FieldConstant {
         return me.aki.tactical.core.constant.FloatConstant.class.getSimpleName() + '{' +
                 "value=" + value +
                 '}';
+    }
+
+    @Override
+    public Type getType() {
+        return FloatType.getInstance();
     }
 }

@@ -1,5 +1,8 @@
 package me.aki.tactical.core.constant;
 
+import me.aki.tactical.core.type.LongType;
+import me.aki.tactical.core.type.Type;
+
 import java.util.Objects;
 
 public class LongConstant implements FieldConstant {
@@ -31,5 +34,10 @@ public class LongConstant implements FieldConstant {
         return me.aki.tactical.core.constant.LongConstant.class.getSimpleName() + '{' +
                 "value=" + value +
                 '}';
+    }
+
+    @Override
+    public Type getType() {
+        return LongType.getInstance();
     }
 }
