@@ -2,6 +2,15 @@ package me.aki.tactical.stack.insn;
 
 public interface Instruction {
     /**
+     * May the instruction followed by this one be ever executed?
+     *
+     * @return false if the succeeding instruction is unreachable
+     */
+    default boolean continuesExecution() {
+        return true;
+    }
+
+    /**
      * Get the amount of values that this instructions pushes onto the stack.
      *
      * @return amount of pushed values

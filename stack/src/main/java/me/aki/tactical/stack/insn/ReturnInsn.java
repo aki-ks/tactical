@@ -41,4 +41,9 @@ public class ReturnInsn implements Instruction {
     public int getPopCount() {
         return type.isPresent() ? 1 : 0;
     }
+
+    @Override
+    public boolean continuesExecution() {
+        return false;
+    }
 }
