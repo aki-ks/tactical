@@ -13,8 +13,10 @@ import me.aki.tactical.core.type.Type;
 public class UShrInsn extends AbstractBinaryMathInsn {
     public UShrInsn(Type type) {
         super(type);
-        if (!(type instanceof IntType) && !(type instanceof LongType)) {
-            throw new IllegalArgumentException(type + " cannot be computed by ushr instruction");
-        }
+    }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof IntType || type instanceof LongType;
     }
 }

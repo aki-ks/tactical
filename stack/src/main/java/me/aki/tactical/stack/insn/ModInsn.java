@@ -12,9 +12,11 @@ import me.aki.tactical.core.type.Type;
 public class ModInsn extends AbstractBinaryMathInsn {
     public ModInsn(Type type) {
         super(type);
-        if (!(type instanceof IntType) && !(type instanceof LongType) &&
-                !(type instanceof FloatType) && !(type instanceof DoubleType)) {
-            throw new IllegalArgumentException(type + " cannot be computed by divide instruction");
-        }
+    }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof IntType || type instanceof LongType ||
+                type instanceof FloatType || type instanceof DoubleType;
     }
 }

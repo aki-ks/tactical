@@ -16,8 +16,10 @@ import me.aki.tactical.core.type.Type;
 public class CmpgInsn extends AbstractBinaryMathInsn {
     public CmpgInsn(Type type) {
         super(type);
-        if (!(type instanceof FloatType) && !(type instanceof DoubleType)) {
-            throw new IllegalArgumentException(type + " cannot be processed by cmpg instruction");
-        }
+    }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof FloatType || type instanceof DoubleType;
     }
 }

@@ -14,4 +14,9 @@ public class XorInsn extends AbstractBinaryMathInsn {
             throw new IllegalArgumentException(type + " is not supported by logical xor instruction");
         }
     }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof IntType || type instanceof LongType;
+    }
 }

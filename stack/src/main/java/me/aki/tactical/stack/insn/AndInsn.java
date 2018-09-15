@@ -10,8 +10,10 @@ import me.aki.tactical.core.type.Type;
 public class AndInsn extends AbstractBinaryMathInsn {
     public AndInsn(Type type) {
         super(type);
-        if (!(type instanceof IntType) && !(type instanceof LongType)) {
-            throw new IllegalArgumentException(type + " is not supported by logical and instruction");
-        }
+    }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof IntType || type instanceof LongType;
     }
 }

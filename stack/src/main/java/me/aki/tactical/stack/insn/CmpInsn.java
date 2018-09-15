@@ -1,5 +1,8 @@
 package me.aki.tactical.stack.insn;
 
+import me.aki.tactical.core.type.LongType;
+import me.aki.tactical.core.type.Type;
+
 /**
  * Pop two values of type 'long' from the stack,
  * compare them and push a result of int type.
@@ -8,14 +11,13 @@ package me.aki.tactical.stack.insn;
  * Otherwise either 1 or -1 is pushed,
  * depending on which number is greater.
  */
-public class CmpInsn implements Instruction {
-    @Override
-    public int getPushCount() {
-        return 1;
+public class CmpInsn extends AbstractBinaryMathInsn implements Instruction {
+    public CmpInsn() {
+        super(LongType.getInstance());
     }
 
     @Override
-    public int getPopCount() {
-        return 2;
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof LongType;
     }
 }

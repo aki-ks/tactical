@@ -12,9 +12,10 @@ import me.aki.tactical.core.type.Type;
 public class MulInsn extends AbstractBinaryMathInsn {
     public MulInsn(Type type) {
         super(type);
-        if (!(type instanceof IntType) && !(type instanceof LongType) &&
-                !(type instanceof FloatType) && !(type instanceof DoubleType)) {
-            throw new IllegalArgumentException(type + " cannot be computed by multiply instruction");
-        }
+    }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof IntType || type instanceof LongType || type instanceof FloatType || type instanceof DoubleType;
     }
 }

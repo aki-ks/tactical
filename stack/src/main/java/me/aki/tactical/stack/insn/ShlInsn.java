@@ -11,8 +11,10 @@ import me.aki.tactical.core.type.Type;
 public class ShlInsn extends AbstractBinaryMathInsn {
     public ShlInsn(Type type) {
         super(type);
-        if (!(type instanceof IntType) && !(type instanceof LongType)) {
-            throw new IllegalArgumentException(type + " cannot be computed by shl instruction");
-        }
+    }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof IntType || type instanceof LongType;
     }
 }

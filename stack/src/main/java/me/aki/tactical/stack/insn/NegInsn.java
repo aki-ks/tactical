@@ -9,18 +9,15 @@ import me.aki.tactical.core.type.Type;
 /**
  * Pop one number from the stack and push it with the opposite sign.
  */
-public class NegInsn implements Instruction {
-    /**
-     * Type of number that is negated.
-     */
-    private Type type;
-
+public class NegInsn extends AbstractTypeInsn implements Instruction {
     public NegInsn(Type type) {
-        this.type = type;
-        if (!(type instanceof IntType) && !(type instanceof LongType) &&
-                !(type instanceof FloatType) && !(type instanceof DoubleType)) {
-            throw new IllegalArgumentException(type + " is not supported by the negate instruction");
-        }
+        super(type);
+    }
+
+    @Override
+    protected boolean isTypeSupported(Type type) {
+        return type instanceof IntType || type instanceof LongType ||
+                type instanceof FloatType || type instanceof DoubleType;
     }
 
     @Override
