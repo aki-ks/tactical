@@ -1,6 +1,7 @@
 package me.aki.tactical.core;
 
 import me.aki.tactical.core.annotation.Annotation;
+import me.aki.tactical.core.constant.FieldConstant;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
 
