@@ -1,7 +1,7 @@
 package me.aki.tactical.core.annotation;
 
 /**
- * A annotation as declared within classes/methods/etc.
+ * An annotation as declared within classes/methods/field and for types.
  */
 public class Annotation extends AbstractAnnotation {
     /**

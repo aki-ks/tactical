@@ -1,7 +1,6 @@
 package me.aki.tactical.core.typeannotation;
 
-import me.aki.tactical.core.annotation.AnnotationAnnotationValue;
-import me.aki.tactical.core.annotation.BasicAnnotation;
+import me.aki.tactical.core.annotation.Annotation;
 
 import java.util.Objects;
 
@@ -19,9 +18,9 @@ public abstract class AbstractTypeAnnotation {
     /**
      * The actual annotation for the type.
      */
-    private BasicAnnotation annotation;
+    private Annotation annotation;
 
-    public AbstractTypeAnnotation(TypePath typePath, BasicAnnotation annotation) {
+    public AbstractTypeAnnotation(TypePath typePath, Annotation annotation) {
         this.typePath = typePath;
         this.annotation = annotation;
     }
@@ -34,11 +33,11 @@ public abstract class AbstractTypeAnnotation {
         this.typePath = typePath;
     }
 
-    public BasicAnnotation getAnnotation() {
+    public Annotation getAnnotation() {
         return annotation;
     }
 
-    public void setAnnotation(BasicAnnotation annotation) {
+    public void setAnnotation(Annotation annotation) {
         this.annotation = annotation;
     }
 

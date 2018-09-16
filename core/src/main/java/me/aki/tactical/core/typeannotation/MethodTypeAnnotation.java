@@ -1,6 +1,6 @@
 package me.aki.tactical.core.typeannotation;
 
-import me.aki.tactical.core.annotation.BasicAnnotation;
+import me.aki.tactical.core.annotation.Annotation;
 
 import java.util.Objects;
 
@@ -13,7 +13,7 @@ public class MethodTypeAnnotation extends AbstractTypeAnnotation {
      */
     private TargetType.MethodTargetType targetType;
 
-    public MethodTypeAnnotation(TypePath typePath, BasicAnnotation annotation, TargetType.MethodTargetType targetType) {
+    public MethodTypeAnnotation(TypePath typePath, Annotation annotation, TargetType.MethodTargetType targetType) {
         super(typePath, annotation);
         this.targetType = targetType;
     }
