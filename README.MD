@@ -6,7 +6,7 @@ Building a referenced based intermediation for java bytecode is the main objecti
 
 # Objectives
 * [X] implement basic classfile structure shared between all intermediations
-* [ ] build basic stack intermediation
+* [X] build basic stack intermediation
 * [ ] build basic reference based intermediation
 * [ ] conversion: bytecode ([asm](https://asm.ow2.io/)) <-> stack
 * [ ] conversion: stack <-> reference
