@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public class StackBody implements Body {
     /**
-     * All locals of this method (including argument and this local).
+     * All locals of this method.
+     *
+     * This includes also e.g. the "this", parameter and catch-block local.
      */
     private List<Local> locals;
 
@@ -27,7 +29,15 @@ public class StackBody implements Body {
      */
     private List<Local> parameterLocals;
 
+    /**
+     * The instructions of this method
+     */
     private List<Instruction> instructions;
+
+    /**
+     * The try-catch-blocks of this method.
+     */
+    private List<TryCatchBlock> tryCatchBlocks;
 
     public StackBody(List<Local> locals, Optional<Local> thisLocal, List<Local> parameterLocals,
                      List<Instruction> instructions) {
@@ -67,5 +77,13 @@ public class StackBody implements Body {
 
     public void setInstructions(List<Instruction> instructions) {
         this.instructions = instructions;
+    }
+
+    public List<TryCatchBlock> getTryCatchBlocks() {
+        return tryCatchBlocks;
+    }
+
+    public void setTryCatchBlocks(List<TryCatchBlock> tryCatchBlocks) {
+        this.tryCatchBlocks = tryCatchBlocks;
     }
 }
