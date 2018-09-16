@@ -16,6 +16,11 @@ public class NullConstant implements Constant {
     private NullConstant() {}
 
     @Override
+    public String toString() {
+        return NullConstant.class.getSimpleName() + "{}";
+    }
+
+    @Override
     public Type getType() {
         return ObjectType.OBJECT;
     }

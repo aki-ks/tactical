@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 
 import java.util.Objects;
 
-public class FloatConstant implements FieldConstant {
+public class FloatConstant implements FieldConstant, BootstrapConstant {
     private final float value;
 
     public FloatConstant(float value) {
@@ -20,7 +20,7 @@ public class FloatConstant implements FieldConstant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        me.aki.tactical.core.constant.FloatConstant that = (me.aki.tactical.core.constant.FloatConstant) o;
+        FloatConstant that = (FloatConstant) o;
         return Float.compare(that.value, value) == 0;
     }
 
@@ -31,7 +31,7 @@ public class FloatConstant implements FieldConstant {
 
     @Override
     public String toString() {
-        return me.aki.tactical.core.constant.FloatConstant.class.getSimpleName() + '{' +
+        return FloatConstant.class.getSimpleName() + '{' +
                 "value=" + value +
                 '}';
     }

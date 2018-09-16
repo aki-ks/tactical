@@ -1,11 +1,14 @@
 package me.aki.tactical.core.constant;
 
+import me.aki.tactical.core.type.ObjectType;
+import me.aki.tactical.core.type.Type;
+
 import java.util.Objects;
 
 /**
  * An instance of "java.lang.String".
  */
-public class StringConstant implements FieldConstant {
+public class StringConstant implements FieldConstant, BootstrapConstant {
     private final String value;
 
     public StringConstant(String value) {
@@ -20,7 +23,7 @@ public class StringConstant implements FieldConstant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        me.aki.tactical.core.constant.StringConstant that = (me.aki.tactical.core.constant.StringConstant) o;
+        StringConstant that = (StringConstant) o;
         return Objects.equals(value, that.value);
     }
 
@@ -31,8 +34,13 @@ public class StringConstant implements FieldConstant {
 
     @Override
     public String toString() {
-        return me.aki.tactical.core.constant.StringConstant.class.getSimpleName() + '{' +
+        return StringConstant.class.getSimpleName() + '{' +
                 "value='" + value + '\'' +
                 '}';
+    }
+
+    @Override
+    public Type getType() {
+        return ObjectType.STRING;
     }
 }

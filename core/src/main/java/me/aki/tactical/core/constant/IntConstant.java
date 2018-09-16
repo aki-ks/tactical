@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 
 import java.util.Objects;
 
-public class IntConstant implements FieldConstant {
+public class IntConstant implements FieldConstant, BootstrapConstant {
     private final int value;
 
     public IntConstant(int value) {
@@ -20,7 +20,7 @@ public class IntConstant implements FieldConstant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        me.aki.tactical.core.constant.IntConstant that = (me.aki.tactical.core.constant.IntConstant) o;
+        IntConstant that = (IntConstant) o;
         return value == that.value;
     }
 
@@ -31,7 +31,7 @@ public class IntConstant implements FieldConstant {
 
     @Override
     public String toString() {
-        return me.aki.tactical.core.constant.IntConstant.class.getSimpleName() + '{' +
+        return IntConstant.class.getSimpleName() + '{' +
                 "value=" + value +
                 '}';
     }

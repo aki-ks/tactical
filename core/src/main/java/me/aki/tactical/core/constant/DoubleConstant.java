@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 
 import java.util.Objects;
 
-public class DoubleConstant implements FieldConstant {
+public class DoubleConstant implements FieldConstant, BootstrapConstant {
     private final double value;
 
     public DoubleConstant(double value) {
@@ -20,7 +20,7 @@ public class DoubleConstant implements FieldConstant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        me.aki.tactical.core.constant.DoubleConstant that = (me.aki.tactical.core.constant.DoubleConstant) o;
+        DoubleConstant that = (DoubleConstant) o;
         return Double.compare(that.value, value) == 0;
     }
 
@@ -31,7 +31,7 @@ public class DoubleConstant implements FieldConstant {
 
     @Override
     public String toString() {
-        return me.aki.tactical.core.constant.DoubleConstant.class.getSimpleName() + '{' +
+        return DoubleConstant.class.getSimpleName() + '{' +
                 "value=" + value +
                 '}';
     }
