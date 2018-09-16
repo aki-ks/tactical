@@ -67,9 +67,16 @@ public class Method {
      */
     private List<Attribute> attributes;
 
+    /**
+     * Body of the method that contains the instructions.
+     * It is absent for abstract methods.
+     */
+    private Optional<Body> body;
+
     public Method(Set<Flag> accessFlags, String name, List<Type> parameterTypes,
                   Optional<Type> returnType, List<Annotation> annotations,
-                  List<MethodTypeAnnotation> typeAnnotations, List<Attribute> attributes) {
+                  List<MethodTypeAnnotation> typeAnnotations, List<Attribute> attributes,
+                  Optional<Body> body) {
         this.accessFlags = accessFlags;
         this.name = name;
         this.parameterTypes = parameterTypes;
@@ -77,6 +84,7 @@ public class Method {
         this.annotations = annotations;
         this.typeAnnotations = typeAnnotations;
         this.attributes = attributes;
+        this.body = body;
     }
 
     public Set<Flag> getAccessFlags() {
@@ -185,6 +193,14 @@ public class Method {
 
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
+    }
+
+    public Optional<Body> getBody() {
+        return body;
+    }
+
+    public void setBody(Optional<Body> body) {
+        this.body = body;
     }
 
     public static enum Flag {
