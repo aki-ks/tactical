@@ -1,5 +1,6 @@
 package me.aki.tactical.core.typeannotation;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 public interface TargetType {
@@ -23,6 +24,10 @@ public interface TargetType {
         int SORT_IMPLEMENTS = Implements.SORT;
         int SORT_TYPE_PARAMETER = TypeParameter.SORT;
         int SORT_TYPE_PARAMETER_BOUND = TypeParameterBound.SORT;
+    }
+
+    interface InsnTargetType extends TargetType {
+
     }
 
     /**
@@ -410,6 +415,359 @@ public interface TargetType {
         public String toString() {
             return CheckedException.class.getSimpleName() + '{' +
                     "exception=" + exception +
+                    '}';
+        }
+    }
+
+    /**
+     * Annotate the type in a "instanceof" statement.
+     *
+     * Example:
+     * <pre><code>obj instanceOf @MyAnno String</code></pre>
+     */
+    final class InstanceOfExpr implements InsnTargetType {
+        public static final int SORT = 8;
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof InstanceOfExpr;
+        }
+
+        @Override
+        public int hashCode() {
+            return getSort();
+        }
+
+        @Override
+        public String toString() {
+            return InstanceOfExpr.class.getSimpleName() + "{}";
+        }
+    }
+
+    /**
+     * Annotate the class in a "new" expression.
+     *
+     * Example:
+     * <pre><code>new @MyAnno Object()</code></pre>
+     */
+    final class NewExpr implements InsnTargetType {
+        public static final int SORT = 9;
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof NewExpr;
+        }
+
+        @Override
+        public int hashCode() {
+            return getSort();
+        }
+
+        @Override
+        public String toString() {
+            return NewExpr.class.getSimpleName() + "{}";
+        }
+    }
+
+    /**
+     * Annotate the class in a "::new" expression.
+     *
+     * Example:
+     * <pre><code>@MyAnno Object::new</code></pre>
+     */
+    final class ConstructorReference implements InsnTargetType {
+        public static final int SORT = 10;
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof ConstructorReference;
+        }
+
+        @Override
+        public int hashCode() {
+            return getSort();
+        }
+
+        @Override
+        public String toString() {
+            return ConstructorReference.class.getSimpleName() + "{}";
+        }
+    }
+
+    /**
+     * Annotate the class in a method reference
+     *
+     * Example:
+     * <pre><code>@MyAnno Object::toString</code></pre>
+     */
+    final class MethodReference implements InsnTargetType {
+        public static final int SORT = 11;
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof MethodReference;
+        }
+
+        @Override
+        public int hashCode() {
+            return getSort();
+        }
+
+        @Override
+        public String toString() {
+            return MethodReference.class.getSimpleName() + "{}";
+        }
+    }
+
+    /**
+     * Annotate one type of a cast instruction.
+     *
+     * Example:
+     * <pre><code>(Serializable & @TestAnno Cloneable) obj</code></pre>
+     */
+    final class Cast implements InsnTargetType, Serializable {
+        public static final int SORT = 12;
+
+        /**
+         * Index of the intersected type that is annotated.
+         *
+         * Examples:
+         * - 0 for <pre><code>(@TestAnno Serializable) obj</code></pre>
+         * - 0 for <pre><code>(@TestAnno Serializable & Cloneable) obj</code></pre>
+         * - 1 for <pre><code>(Serializable & @TestAnno Cloneable) obj</code></pre>
+         */
+        private int intersection;
+
+        public Cast(int intersection) {
+            this.intersection = intersection;
+        }
+
+        public int getIntersection() {
+            return intersection;
+        }
+
+        public void setIntersection(int intersection) {
+            this.intersection = intersection;
+        }
+
+        @Override
+        public int getSort() {
+            return 12;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Cast cast = (Cast) o;
+            return intersection == cast.intersection;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getSort(), intersection);
+        }
+
+        @Override
+        public String toString() {
+            return Cast.class.getSimpleName() + '{' +
+                    "intersection=" + intersection +
+                    '}';
+        }
+    }
+
+    abstract class AbstractTypeParameterInsnTargetType implements InsnTargetType {
+        /**
+         * Index of the annotated type parameter
+         */
+        private int typeParameter;
+
+        public AbstractTypeParameterInsnTargetType(int typeParameter) {
+            this.typeParameter = typeParameter;
+        }
+
+        public int getTypeParameter() {
+            return typeParameter;
+        }
+
+        public void setTypeParameter(int typeParameter) {
+            this.typeParameter = typeParameter;
+        }
+    }
+
+    /**
+     * Annotate a type parameter of a constructor call.
+     *
+     * Example:
+     * <pre><code>new <@MyAnno Bar>Foo()</code></pre>
+     */
+    final class ConstructorInvokeTypeParameter extends AbstractTypeParameterInsnTargetType {
+        public static final int SORT = 13;
+
+        public ConstructorInvokeTypeParameter(int typeParameter) {
+            super(typeParameter);
+        }
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ConstructorInvokeTypeParameter that = (ConstructorInvokeTypeParameter) o;
+            return getTypeParameter() == that.getTypeParameter();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getSort(), getTypeParameter());
+        }
+
+        @Override
+        public String toString() {
+            return ConstructorInvokeTypeParameter.class.getSimpleName() + '{' +
+                    "typeParameter=" + getTypeParameter() +
+                    '}';
+        }
+    }
+
+    /**
+     * Annotate a type parameter of a method call.
+     *
+     * Example:
+     * <pre><code>this.<@MyAnno Bar>foo()</code></pre>
+     */
+    final class MethodInvokeTypeParameter extends AbstractTypeParameterInsnTargetType {
+        public static final int SORT = 14;
+
+        public MethodInvokeTypeParameter(int typeParameter) {
+            super(typeParameter);
+        }
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MethodInvokeTypeParameter that = (MethodInvokeTypeParameter) o;
+            return getTypeParameter() == that.getTypeParameter();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getSort(), getTypeParameter());
+        }
+
+        @Override
+        public String toString() {
+            return MethodInvokeTypeParameter.class.getSimpleName() + '{' +
+                    "typeParameter=" + getTypeParameter() +
+                    '}';
+        }
+    }
+
+
+    /**
+     * Annotate a type parameter of a constructor reference.
+     *
+     * Example:
+     * <pre><code>Foo::<@MyAnno Bar>new</code></pre>
+     */
+    final class ConstructorReferenceTypeParameter extends AbstractTypeParameterInsnTargetType {
+        public static final int SORT = 15;
+
+        public ConstructorReferenceTypeParameter(int typeParameter) {
+            super(typeParameter);
+        }
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ConstructorReferenceTypeParameter that = (ConstructorReferenceTypeParameter) o;
+            return getTypeParameter() == that.getTypeParameter();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getSort(), getTypeParameter());
+        }
+
+        @Override
+        public String toString() {
+            return ConstructorReferenceTypeParameter.class.getSimpleName() + '{' +
+                    "typeParameter=" + getTypeParameter() +
+                    '}';
+        }
+    }
+
+    /**
+     * Annotate a type parameter of a method reference.
+     *
+     * Example:
+     * <pre><code>this::<@MyAnno Bar>foo"</code></pre>
+     */
+    final class MethodReferenceTypeParameter extends AbstractTypeParameterInsnTargetType {
+        public static final int SORT = 16;
+
+        public MethodReferenceTypeParameter(int typeParameter) {
+            super(typeParameter);
+        }
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MethodReferenceTypeParameter that = (MethodReferenceTypeParameter) o;
+            return getTypeParameter() == that.getTypeParameter();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getSort(), getTypeParameter());
+        }
+
+        @Override
+        public String toString() {
+            return MethodReferenceTypeParameter.class.getSimpleName() + '{' +
+                    "typeParameter=" + getTypeParameter() +
                     '}';
         }
     }
