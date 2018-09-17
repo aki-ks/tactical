@@ -9,6 +9,7 @@ public abstract class AbstractTypeAnnotation {
     public final static int SORT_FIELD = 1;
     public final static int SORT_METHOD = 2;
     public final static int SORT_INSN = 3;
+    public final static int SORT_EXCEPTION = 4;
 
     /**
      * What part of the type should be annotated

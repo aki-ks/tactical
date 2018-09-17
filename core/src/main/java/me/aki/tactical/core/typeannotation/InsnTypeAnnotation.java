@@ -4,6 +4,9 @@ import me.aki.tactical.core.annotation.Annotation;
 
 import java.util.Objects;
 
+/**
+ * Annotate types within instructions
+ */
 public class InsnTypeAnnotation extends AbstractTypeAnnotation {
     private TargetType.InsnTargetType targetType;
 

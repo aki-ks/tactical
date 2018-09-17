@@ -1,8 +1,10 @@
 package me.aki.tactical.stack;
 
 import me.aki.tactical.core.type.ObjectType;
+import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
 import me.aki.tactical.stack.insn.Instruction;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,12 +38,18 @@ public class TryCatchBlock {
      */
     private Optional<ObjectType> exceptionType;
 
-    public TryCatchBlock(Instruction first, Instruction last, Instruction handler, Local exceptionLocal, Optional<ObjectType> exceptionType) {
+    /**
+     * Type annotations of the exception type.
+     */
+    private List<ExceptionTypeAnnotation> typeAnnotations;
+
+    public TryCatchBlock(Instruction first, Instruction last, Instruction handler, Local exceptionLocal, Optional<ObjectType> exceptionType, List<ExceptionTypeAnnotation> typeAnnotations) {
         this.first = first;
         this.last = last;
         this.handler = handler;
         this.exceptionLocal = exceptionLocal;
         this.exceptionType = exceptionType;
+        this.typeAnnotations = typeAnnotations;
     }
 
     public Instruction getFirst() {
@@ -82,5 +90,13 @@ public class TryCatchBlock {
 
     public void setExceptionType(Optional<ObjectType> exceptionType) {
         this.exceptionType = exceptionType;
+    }
+
+    public List<ExceptionTypeAnnotation> getTypeAnnotations() {
+        return typeAnnotations;
+    }
+
+    public void setTypeAnnotations(List<ExceptionTypeAnnotation> typeAnnotations) {
+        this.typeAnnotations = typeAnnotations;
     }
 }
