@@ -2,6 +2,7 @@ package me.aki.tactical.stack;
 
 import me.aki.tactical.core.Body;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.StoreInsn;
 
@@ -46,18 +47,25 @@ public class StackBody implements Body {
     private List<LocalVariable> localVariables;
 
     /**
+     * Annotations of the types of local variables
+     */
+    private List<LocalVariableAnnotation> localVariableAnnotations;
+
+    /**
      * Debug info about the line numbers of the source file.
      */
     private List<LineNumber> lineNumbers;
 
     public StackBody(List<Local> locals, Optional<Local> thisLocal, List<Local> parameterLocals,
                      List<Instruction> instructions, List<LocalVariable> localVariables,
+                     List<LocalVariableAnnotation> localVariableAnnotations,
                      List<LineNumber> lineNumbers) {
         this.locals = locals;
         this.thisLocal = thisLocal;
         this.parameterLocals = parameterLocals;
         this.instructions = instructions;
         this.localVariables = localVariables;
+        this.localVariableAnnotations = localVariableAnnotations;
         this.lineNumbers = lineNumbers;
     }
 
@@ -107,6 +115,14 @@ public class StackBody implements Body {
 
     public void setLocalVariables(List<LocalVariable> localVariables) {
         this.localVariables = localVariables;
+    }
+
+    public List<LocalVariableAnnotation> getLocalVariableAnnotations() {
+        return localVariableAnnotations;
+    }
+
+    public void setLocalVariableAnnotations(List<LocalVariableAnnotation> localVariableAnnotations) {
+        this.localVariableAnnotations = localVariableAnnotations;
     }
 
     public List<LineNumber> getLineNumbers() {
@@ -209,6 +225,89 @@ public class StackBody implements Body {
 
         public void setLocal(Local local) {
             this.local = local;
+        }
+    }
+
+    public static class LocalVariableAnnotation {
+        /**
+         * Annotation of the local variable
+         */
+        private LocalVariableTypeAnnotation annotation;
+
+        /**
+         * Code ranges where this local has the annotation.
+         */
+        private List<Location> locations;
+
+        public LocalVariableAnnotation(LocalVariableTypeAnnotation annotation, List<Location> locations) {
+            this.annotation = annotation;
+            this.locations = locations;
+        }
+
+        public LocalVariableTypeAnnotation getAnnotation() {
+            return annotation;
+        }
+
+        public void setAnnotation(LocalVariableTypeAnnotation annotation) {
+            this.annotation = annotation;
+        }
+
+        public List<Location> getLocations() {
+            return locations;
+        }
+
+        public void setLocations(List<Location> locations) {
+            this.locations = locations;
+        }
+
+        /**
+         * A range of instructions where a local correlates to a local variable in source.
+         */
+        public static class Location {
+            /**
+             * First instruction of the code range.
+             */
+            private Instruction start;
+
+            /**
+             * Last instruction of the code range.
+             */
+            private Instruction end;
+
+            /**
+             * Local that corresponds to the local variable within the range of instruction.
+             */
+            private Local local;
+
+            public Location(Instruction start, Instruction end, Local local) {
+                this.start = start;
+                this.end = end;
+                this.local = local;
+            }
+
+            public Instruction getStart() {
+                return start;
+            }
+
+            public void setStart(Instruction start) {
+                this.start = start;
+            }
+
+            public Instruction getEnd() {
+                return end;
+            }
+
+            public void setEnd(Instruction end) {
+                this.end = end;
+            }
+
+            public Local getLocal() {
+                return local;
+            }
+
+            public void setLocal(Local local) {
+                this.local = local;
+            }
         }
     }
 
