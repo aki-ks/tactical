@@ -40,15 +40,25 @@ public class StackBody implements Body {
      */
     private List<TryCatchBlock> tryCatchBlocks;
 
+    /**
+     * Debug info about local variables that existed in source code.
+     */
     private List<LocalVariable> localVariables;
 
+    /**
+     * Debug info about the line numbers of the source file.
+     */
+    private List<LineNumber> lineNumbers;
+
     public StackBody(List<Local> locals, Optional<Local> thisLocal, List<Local> parameterLocals,
-                     List<Instruction> instructions, List<LocalVariable> localVariables) {
+                     List<Instruction> instructions, List<LocalVariable> localVariables,
+                     List<LineNumber> lineNumbers) {
         this.locals = locals;
         this.thisLocal = thisLocal;
         this.parameterLocals = parameterLocals;
         this.instructions = instructions;
         this.localVariables = localVariables;
+        this.lineNumbers = lineNumbers;
     }
 
     public List<Local> getLocals() {
@@ -97,6 +107,14 @@ public class StackBody implements Body {
 
     public void setLocalVariables(List<LocalVariable> localVariables) {
         this.localVariables = localVariables;
+    }
+
+    public List<LineNumber> getLineNumbers() {
+        return lineNumbers;
+    }
+
+    public void setLineNumbers(List<LineNumber> lineNumbers) {
+        this.lineNumbers = lineNumbers;
     }
 
     /**
@@ -191,6 +209,42 @@ public class StackBody implements Body {
 
         public void setLocal(Local local) {
             this.local = local;
+        }
+    }
+
+    /**
+     * Debug information that relates instructions and their line number in sourcecode.
+     */
+    public static class LineNumber {
+        /**
+         * The line number of the corresponding statement in sourcecode.
+         */
+        private int line;
+
+        /**
+         * First instruction from that line in the sourcecode.
+         */
+        private Instruction instruction;
+
+        public LineNumber(int line, Instruction instruction) {
+            this.line = line;
+            this.instruction = instruction;
+        }
+
+        public int getLine() {
+            return line;
+        }
+
+        public void setLine(int line) {
+            this.line = line;
+        }
+
+        public Instruction getInstruction() {
+            return instruction;
+        }
+
+        public void setInstruction(Instruction instruction) {
+            this.instruction = instruction;
         }
     }
 }
