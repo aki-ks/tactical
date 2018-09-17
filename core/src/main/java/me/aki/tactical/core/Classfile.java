@@ -3,6 +3,7 @@ package me.aki.tactical.core;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.typeannotation.ClassTypeAnnotation;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +22,7 @@ public class Classfile {
     /**
      * Access flags of this classfile
      */
-    private Set<Flag> accessFlags;
+    private Set<Flag> accessFlags = new HashSet<>();
 
     /**
      * Package and name of the classfile
@@ -43,75 +44,52 @@ public class Classfile {
     /**
      * Class signature with type variables.
      */
-    private Optional<String> signature;
+    private Optional<String> signature = Optional.empty();
 
     /**
      * Name of file from which the classfile was compiled.
      */
-    private Optional<String> source;
+    private Optional<String> source = Optional.empty();
 
     /**
      * Additional debug informations that compilers may store within a classfile.
      */
-    private Optional<String> sourceDebug;
+    private Optional<String> sourceDebug = Optional.empty();
 
     /**
      * Classes declared within this class.
      */
-    private List<InnerClass> innerClasses;
+    private List<InnerClass> innerClasses = new ArrayList<>();
 
     /**
      * Method in the enclosing class that contains this class.
      */
-    private Optional<EnclosingMethod> enclosingMethod;
+    private Optional<EnclosingMethod> enclosingMethod = Optional.empty();
 
     /**
      * Module definition if the classfile is a "module-info".
      */
-    private Optional<Module> module;
+    private Optional<Module> module = Optional.empty();
 
     /**
      * All field definitions of this classfile.
      */
-    private List<Field> fields;
+    private List<Field> fields = new ArrayList<>();
 
     /**
      * All method definitions of this classfile.
      */
-    private List<Method> methods;
+    private List<Method> methods = new ArrayList<>();
 
     /**
      * Annotations of this classfile.
      */
-    private List<Annotation> annotations;
+    private List<Annotation> annotations = new ArrayList<>();
 
     /**
      * Annotations on types within this classfile.
      */
-    private List<ClassTypeAnnotation> typeAnnotations;
-
-    public Classfile(Version version, Set<Flag> accessFlags, Path name, Path supertype,
-                     List<Path> interfaces, Optional<String> source, Optional<String> sourceDebug,
-                     List<InnerClass> innerClasses, Optional<EnclosingMethod> enclosingMethod,
-                     Optional<Module> module, List<Field> fields, List<Method> methods,
-                     List<Annotation> annotations, List<ClassTypeAnnotation> typeAnnotations,
-                     List<Attribute> attributes) {
-        this.version = version;
-        this.accessFlags = accessFlags;
-        this.name = name;
-        this.supertype = supertype;
-        this.interfaces = interfaces;
-        this.source = source;
-        this.sourceDebug = sourceDebug;
-        this.innerClasses = innerClasses;
-        this.enclosingMethod = enclosingMethod;
-        this.module = module;
-        this.fields = fields;
-        this.methods = methods;
-        this.annotations = annotations;
-        this.typeAnnotations = typeAnnotations;
-        this.attributes = attributes;
-    }
+    private List<ClassTypeAnnotation> typeAnnotations = new ArrayList<>();
 
     /**
      * Non-parsed attributes of this classfile.
@@ -119,7 +97,14 @@ public class Classfile {
      * They are either not part of the JVM spec or
      * are not yet supported by this library.
      */
-    private List<Attribute> attributes;
+    private List<Attribute> attributes = new ArrayList<>();
+
+    public Classfile(Version version, Path name, Path supertype, List<Path> interfaces) {
+        this.version = version;
+        this.name = name;
+        this.supertype = supertype;
+        this.interfaces = interfaces;
+    }
 
     public Version getVersion() {
         return version;
@@ -340,7 +325,7 @@ public class Classfile {
         /**
          * Name of the class that contains the enclosing method.
          */
-        private String owner;
+        private Path owner;
 
         /**
          * Name of the method that contains the class.
@@ -352,21 +337,21 @@ public class Classfile {
          */
         private Optional<MethodDescriptor> descriptor;
 
-        public EnclosingMethod(String owner) {
+        public EnclosingMethod(Path owner) {
             this(owner, Optional.empty(), Optional.empty());
         }
 
-        public EnclosingMethod(String owner, Optional<String> name, Optional<MethodDescriptor> descriptor) {
+        public EnclosingMethod(Path owner, Optional<String> name, Optional<MethodDescriptor> descriptor) {
             this.owner = owner;
             this.name = name;
             this.descriptor = descriptor;
         }
 
-        public String getOwner() {
+        public Path getOwner() {
             return owner;
         }
 
-        public void setOwner(String owner) {
+        public void setOwner(Path owner) {
             this.owner = owner;
         }
 

@@ -1,5 +1,7 @@
 package me.aki.tactical.core;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,61 +19,50 @@ public class Module {
     /**
      * Access flags of the module.
      */
-    private Set<Flag> accessFlags;
+    private Set<Flag> accessFlags = new HashSet<>();
 
     /**
      * Version of the module.
      */
-    private Optional<String> version;
+    private Optional<String> version = Optional.empty();
 
     /**
      * Name of the main class in the module.
      */
-    private Optional<String> mainClass;
+    private Optional<Path> mainClass = Optional.empty();
 
     /**
      * Packages of the module.
      */
-    private List<Path> packages;
+    private List<Path> packages = new ArrayList<>();
 
     /**
      * Modules that this module required/depends on.
      */
-    private List<Require> requires;
+    private List<Require> requires = new ArrayList<>();
 
     /**
      * Packages that the module exports.
      */
-    private List<Export> exports;
+    private List<Export> exports = new ArrayList<>();
 
     /**
      * Packages that the module opens for reflection.
      */
-    private List<Open> opens;
+    private List<Open> opens = new ArrayList<>();
 
     /**
      * List of service interfaces used by this module.
      */
-    private List<Path> uses;
+    private List<Path> uses = new ArrayList<>();
 
     /**
      * List of service interface implementations
      */
-    private List<Provide> provides;
+    private List<Provide> provides = new ArrayList<>();
 
-    public Module(Path module, Set<Flag> accessFlags, Optional<String> version,
-                  Optional<String> mainClass, List<Path> packages, List<Require> requires,
-                  List<Export> exports, List<Open> opens, List<Path> uses, List<Provide> provides) {
+    public Module(Path module) {
         this.module = module;
-        this.accessFlags = accessFlags;
-        this.version = version;
-        this.mainClass = mainClass;
-        this.packages = packages;
-        this.requires = requires;
-        this.exports = exports;
-        this.opens = opens;
-        this.uses = uses;
-        this.provides = provides;
     }
 
     public Path getModule() {
@@ -98,11 +89,11 @@ public class Module {
         this.version = version;
     }
 
-    public Optional<String> getMainClass() {
+    public Optional<Path> getMainClass() {
         return mainClass;
     }
 
-    public void setMainClass(Optional<String> mainClass) {
+    public void setMainClass(Optional<Path> mainClass) {
         this.mainClass = mainClass;
     }
 
@@ -307,6 +298,10 @@ public class Module {
                     ", flags=" + flags +
                     ", modules=" + modules +
                     '}';
+        }
+
+        public static enum Flag {
+            SYNTHETIC, MANDATED
         }
     }
 
