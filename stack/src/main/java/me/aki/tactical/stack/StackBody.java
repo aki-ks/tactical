@@ -1,6 +1,7 @@
 package me.aki.tactical.stack;
 
 import me.aki.tactical.core.Body;
+import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.StoreInsn;
 
@@ -39,12 +40,15 @@ public class StackBody implements Body {
      */
     private List<TryCatchBlock> tryCatchBlocks;
 
+    private List<LocalVariable> localVariables;
+
     public StackBody(List<Local> locals, Optional<Local> thisLocal, List<Local> parameterLocals,
-                     List<Instruction> instructions) {
+                     List<Instruction> instructions, List<LocalVariable> localVariables) {
         this.locals = locals;
         this.thisLocal = thisLocal;
         this.parameterLocals = parameterLocals;
         this.instructions = instructions;
+        this.localVariables = localVariables;
     }
 
     public List<Local> getLocals() {
@@ -85,5 +89,108 @@ public class StackBody implements Body {
 
     public void setTryCatchBlocks(List<TryCatchBlock> tryCatchBlocks) {
         this.tryCatchBlocks = tryCatchBlocks;
+    }
+
+    public List<LocalVariable> getLocalVariables() {
+        return localVariables;
+    }
+
+    public void setLocalVariables(List<LocalVariable> localVariables) {
+        this.localVariables = localVariables;
+    }
+
+    /**
+     * Debug information about a local variable that existed in source.
+     */
+    public static class LocalVariable {
+        /**
+         * Name of the local variable
+         */
+        private String name;
+
+        /**
+         * Type of this local variable
+         */
+        private Type type;
+
+        /**
+         * Type of this local variable with type variables.
+         */
+        private Optional<String> signature;
+
+        /**
+         * First instruction in the range of instructions within this
+         * local variable existed in source.
+         */
+        private Instruction start;
+
+        /**
+         * Last instruction in the range of instructions within this
+         * local variable existed in source.
+         */
+        private Instruction end;
+
+        /**
+         * Local that corresponds to the local variable in source.
+         */
+        private Local local;
+
+        public LocalVariable(String name, Type type, Optional<String> signature, Instruction start,
+                             Instruction end, Local local) {
+            this.name = name;
+            this.type = type;
+            this.signature = signature;
+            this.start = start;
+            this.end = end;
+            this.local = local;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public void setType(Type type) {
+            this.type = type;
+        }
+
+        public Optional<String> getSignature() {
+            return signature;
+        }
+
+        public void setSignature(Optional<String> signature) {
+            this.signature = signature;
+        }
+
+        public Instruction getStart() {
+            return start;
+        }
+
+        public void setStart(Instruction start) {
+            this.start = start;
+        }
+
+        public Instruction getEnd() {
+            return end;
+        }
+
+        public void setEnd(Instruction end) {
+            this.end = end;
+        }
+
+        public Local getLocal() {
+            return local;
+        }
+
+        public void setLocal(Local local) {
+            this.local = local;
+        }
     }
 }
