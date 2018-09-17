@@ -27,11 +27,6 @@ public class ClassTypeAnnotation extends AbstractTypeAnnotation {
     }
 
     @Override
-    public int getSort() {
-        return AbstractTypeAnnotation.SORT_CLASS;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

@@ -5,12 +5,6 @@ import me.aki.tactical.core.annotation.Annotation;
 import java.util.Objects;
 
 public abstract class AbstractTypeAnnotation {
-    public final static int SORT_CLASS = 0;
-    public final static int SORT_FIELD = 1;
-    public final static int SORT_METHOD = 2;
-    public final static int SORT_INSN = 3;
-    public final static int SORT_EXCEPTION = 4;
-
     /**
      * What part of the type should be annotated
      * (e.g. a type parameters or the base type of an array)
@@ -42,11 +36,6 @@ public abstract class AbstractTypeAnnotation {
     public void setAnnotation(Annotation annotation) {
         this.annotation = annotation;
     }
-
-    /**
-     * Constant that allows to switch on the type.
-     */
-    public abstract int getSort();
 
     @Override
     public boolean equals(Object o) {

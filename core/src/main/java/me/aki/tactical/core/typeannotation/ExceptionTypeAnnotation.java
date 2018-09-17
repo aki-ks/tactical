@@ -11,11 +11,6 @@ public class ExceptionTypeAnnotation extends AbstractTypeAnnotation {
     }
 
     @Override
-    public int getSort() {
-        return SORT_EXCEPTION;
-    }
-
-    @Override
     public String toString() {
         return FieldTypeAnnotation.class.getSimpleName() + '{' +
                 "typePath=" + getTypePath() +

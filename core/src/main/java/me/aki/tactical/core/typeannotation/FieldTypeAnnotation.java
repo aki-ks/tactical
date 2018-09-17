@@ -11,11 +11,6 @@ public class FieldTypeAnnotation extends AbstractTypeAnnotation {
     }
 
     @Override
-    public int getSort() {
-        return AbstractTypeAnnotation.SORT_FIELD;
-    }
-
-    @Override
     public String toString() {
         return FieldTypeAnnotation.class.getSimpleName() + '{' +
                 "typePath=" + getTypePath() +
