@@ -9,7 +9,7 @@ package me.aki.tactical.stack.insn;
  * - before: value1, value2, ...
  * - after:  value2, value1, ...
  */
-public class SwapInsn implements Instruction {
+public class SwapInsn extends AbstractInstruction {
     @Override
     public int getPushCount() {
         return 2;

@@ -6,7 +6,7 @@ package me.aki.tactical.stack.insn;
  *
  * @see MonitorEnterInsn gain a lock on an object
  */
-public class MonitorExitInsn implements Instruction {
+public class MonitorExitInsn extends AbstractInstruction {
     @Override
     public int getPushCount() {
         return 0;

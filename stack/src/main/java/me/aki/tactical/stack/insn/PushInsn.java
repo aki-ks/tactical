@@ -5,7 +5,7 @@ import me.aki.tactical.core.constant.Constant;
 /**
  * Push a constant value onto the stack.
  */
-public class PushInsn implements Instruction {
+public class PushInsn extends AbstractInstruction {
     private Constant constant;
 
     public PushInsn(Constant constant) {

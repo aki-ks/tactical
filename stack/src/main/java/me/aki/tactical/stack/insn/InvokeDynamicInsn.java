@@ -20,7 +20,7 @@ import java.util.List;
  * {@link MethodType} will be passed to bootstrap methods.
  * Some of these parameters might be caught in a varargs parameter.
  */
-public class InvokeDynamicInsn implements BranchInsn {
+public class InvokeDynamicInsn extends AbstractInstruction implements BranchInsn {
     /**
      * The {@link String} parameter that is passed to the bootstrap method.
      *

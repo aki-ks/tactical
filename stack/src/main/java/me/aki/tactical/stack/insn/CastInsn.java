@@ -8,7 +8,7 @@ import me.aki.tactical.core.type.PrimitiveType;
  *
  * @see CheckCastInsn for casts of reference types
  */
-public class CastInsn implements Instruction {
+public class CastInsn extends AbstractInstruction {
     /**
      * Type of the value before the cast.
      */

@@ -5,7 +5,7 @@ import me.aki.tactical.core.FieldRef;
 /**
  * Instruction that operates on a field
  */
-public abstract class AbstractFieldInsn implements Instruction {
+public abstract class AbstractFieldInsn extends AbstractInstruction {
     /**
      * Field that this instruction operates on
      */

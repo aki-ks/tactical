@@ -6,7 +6,7 @@ import me.aki.tactical.core.Path;
  * Create a new instance of a class.
  * The constructor must be called before the instance can be used.
  */
-public class NewInsn implements Instruction {
+public class NewInsn extends AbstractInstruction {
     /**
      * Class whose instance gets created.
      */

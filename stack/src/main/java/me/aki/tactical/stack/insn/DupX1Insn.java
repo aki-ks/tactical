@@ -7,7 +7,7 @@ package me.aki.tactical.stack.insn;
  * - before: value, someOtherValue, ...
  * - after: value, someOtherValue, value, ...
  */
-public class DupX1Insn implements Instruction {
+public class DupX1Insn extends AbstractInstruction {
     @Override
     public int getPushCount() {
         return 3;

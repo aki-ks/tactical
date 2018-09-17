@@ -6,7 +6,7 @@ import me.aki.tactical.core.type.RefType;
  * Pop a value from the stack and check whether it is an instance of a certain class / array-type.
  * The result, either 1 (true) or 0 (false) will be pushed onto the stack.
  */
-public class InstanceOfInsn implements Instruction {
+public class InstanceOfInsn extends AbstractInstruction {
     /**
      * Check whether the popped object is an instance of this class.
      */

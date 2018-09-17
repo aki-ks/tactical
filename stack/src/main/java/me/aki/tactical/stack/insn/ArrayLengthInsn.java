@@ -3,7 +3,7 @@ package me.aki.tactical.stack.insn;
 /**
  * Pop an array from the stack and push its length.
  */
-public class ArrayLengthInsn implements Instruction {
+public class ArrayLengthInsn extends AbstractInstruction {
     @Override
     public int getPushCount() {
         return 1;

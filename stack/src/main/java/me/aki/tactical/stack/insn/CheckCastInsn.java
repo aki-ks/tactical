@@ -7,7 +7,7 @@ import me.aki.tactical.core.type.RefType;
  *
  * @see CastInsn for casts between primitive types.
  */
-public class CheckCastInsn implements Instruction {
+public class CheckCastInsn extends AbstractInstruction {
     /**
      * Type that the value should be casted to.
      */

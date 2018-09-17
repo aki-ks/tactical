@@ -5,7 +5,7 @@ import me.aki.tactical.stack.InvokableMethodRef;
 /**
  * Invoke a method and push the result (unless it's a void).
  */
-public class InvokeInsn implements Instruction {
+public class InvokeInsn extends AbstractInstruction {
     /**
      * Method that will be invoked.
      */

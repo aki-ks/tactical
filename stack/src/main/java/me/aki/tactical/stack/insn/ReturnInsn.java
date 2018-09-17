@@ -10,7 +10,7 @@ import java.util.Optional;
  * If the method is not of 'void' type, a value will
  * be popped from the stack and returned.
  */
-public class ReturnInsn implements Instruction {
+public class ReturnInsn extends AbstractInstruction {
     /**
      * Type that is returned by the method or empty for 'void' methods.
      */

@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Branch to another instruction if a certain condition applies to the top value of the stack.
  */
-public class IfInsn implements BranchInsn {
+public class IfInsn extends AbstractInstruction implements BranchInsn {
     // Pop one reference value and compare it with null
     public static final ReferenceCondition IF_NULL = new ReferenceCondition(EQ.getInstance(), NullValue.getInstance());
     public static final ReferenceCondition IF_NONNULL = new ReferenceCondition(NE.getInstance(), NullValue.getInstance());

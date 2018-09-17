@@ -1,6 +1,12 @@
 package me.aki.tactical.stack.insn;
 
+import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
+
+import java.util.List;
+
 public interface Instruction {
+    List<InsnTypeAnnotation> getTypeAnnotations();
+
     /**
      * May the instruction followed by this one be ever executed?
      *
@@ -33,4 +39,5 @@ public interface Instruction {
     default int stackSizeDelta() {
         return getPushCount() - getPopCount();
     }
+
 }

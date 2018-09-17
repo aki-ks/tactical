@@ -8,7 +8,7 @@ import me.aki.tactical.core.type.ArrayType;
  * This instruction is capable of initializing multidimensional instructions.
  * It replaces the opcodes "NEWARRAY", "ANEWARRAY" and "MULTIANEWARRAY".
  */
-public class NewArrayInsn implements Instruction {
+public class NewArrayInsn extends AbstractInstruction {
     /**
      * Type of array that will be created.
      */

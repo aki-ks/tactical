@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 /**
  * Code shared between instruction that can only operate on certain types.
  */
-public abstract class AbstractTypeInsn implements Instruction {
+public abstract class AbstractTypeInsn extends AbstractInstruction {
     /**
      * Types that this instruction may operate on.
      */

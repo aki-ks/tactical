@@ -3,7 +3,7 @@ package me.aki.tactical.stack.insn;
 /**
  * Unconditionally jump to another instruction.
  */
-public class GotoInsn implements BranchInsn {
+public class GotoInsn extends AbstractInstruction implements BranchInsn {
     /**
      * Instruction that will be executed after this one.
      */

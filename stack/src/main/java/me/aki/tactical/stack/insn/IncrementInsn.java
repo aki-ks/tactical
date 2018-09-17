@@ -5,7 +5,7 @@ import me.aki.tactical.stack.Local;
 /**
  * Increment a local containing an int by a statically known value.
  */
-public class IncrementInsn implements Instruction {
+public class IncrementInsn extends AbstractInstruction {
     /**
      * Local whose value will be incremented
      */

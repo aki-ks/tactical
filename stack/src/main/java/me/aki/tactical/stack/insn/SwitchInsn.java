@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * This instruction replaces the TABLE_SWITCH and LOOKUP_SWITCH opcode.
  */
-public class SwitchInsn implements BranchInsn {
+public class SwitchInsn extends AbstractInstruction implements BranchInsn {
     /**
      * Mapping from int constants to their corresponding branch location.
      */

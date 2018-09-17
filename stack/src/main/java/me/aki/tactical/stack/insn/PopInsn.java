@@ -3,7 +3,7 @@ package me.aki.tactical.stack.insn;
 /**
  * Pop two upper value from the stack.
  */
-public class PopInsn implements Instruction {
+public class PopInsn extends AbstractInstruction {
     @Override
     public int getPushCount() {
         return 0;
