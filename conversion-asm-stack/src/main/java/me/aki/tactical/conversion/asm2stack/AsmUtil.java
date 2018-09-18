@@ -14,6 +14,7 @@ import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.TypePath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -177,5 +178,39 @@ public class AsmUtil {
                 .collect(Collectors.toList());
 
         return new MethodDescriptor(convertedArgTypes, fromAsmReturnType(returnType));
+    }
+
+    /**
+     * Convert an asm TypePath representation to a our {@link TypePath} representation.
+     *
+     * @param asmPath type path to be converted
+     * @return converted type path
+     */
+    public static TypePath fromAsmTypePath(org.objectweb.asm.TypePath asmPath) {
+        int length = asmPath.getLength();
+        List<TypePath.Kind> kinds = new ArrayList<>(length);
+        for (int step = 0; step < length; step++) {
+            kinds.add(convertTypePathKind(asmPath, step));
+        }
+        return new TypePath(kinds);
+    }
+
+    private static TypePath.Kind convertTypePathKind(org.objectweb.asm.TypePath asmPath, int step) {
+        switch (asmPath.getStep(step)) {
+            case org.objectweb.asm.TypePath.ARRAY_ELEMENT:
+                return new TypePath.Kind.Array();
+
+            case org.objectweb.asm.TypePath.INNER_TYPE:
+                return new TypePath.Kind.InnerClass();
+
+            case org.objectweb.asm.TypePath.WILDCARD_BOUND:
+                return new TypePath.Kind.WildcardBound();
+
+            case org.objectweb.asm.TypePath.TYPE_ARGUMENT:
+                return new TypePath.Kind.TypeArgument(asmPath.getStepArgument(step));
+
+            default:
+                throw new AssertionError();
+        }
     }
 }

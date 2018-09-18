@@ -54,8 +54,9 @@ public interface TargetType {
          */
         private int boundIndex;
 
-        public TypeParameterBound(int parameterIndex) {
+        public TypeParameterBound(int parameterIndex, int boundIndex) {
             this.parameterIndex = parameterIndex;
+            this.boundIndex = boundIndex;
         }
 
         public int getParameterIndex() {

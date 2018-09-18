@@ -5,6 +5,8 @@ import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.Module;
 import me.aki.tactical.core.annotation.Annotation;
+import me.aki.tactical.core.typeannotation.ClassTypeAnnotation;
+import me.aki.tactical.core.typeannotation.TargetType;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -12,6 +14,7 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.TypePath;
+import org.objectweb.asm.TypeReference;
 
 import java.util.Arrays;
 import java.util.List;
@@ -87,6 +90,7 @@ public class ClassConvertVisitor extends ClassVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
         Annotation annotation = new Annotation(AsmUtil.pathFromObjectDescriptor(descriptor), visible);
+        this.classfile.getAnnotations().add(annotation);
 
         AnnotationVisitor av = super.visitAnnotation(descriptor, visible);
         av = new AnnotationConvertVisitor(av, annotation);
@@ -95,8 +99,32 @@ public class ClassConvertVisitor extends ClassVisitor {
 
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-//        return super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
-        throw new RuntimeException("Not yet implemented");
+        Annotation annotation = new Annotation(AsmUtil.pathFromObjectDescriptor(descriptor), visible);
+        TargetType.ClassTargetType targetType = convertClassTargetType(typeRef);
+        this.classfile.getTypeAnnotations().add(new ClassTypeAnnotation(AsmUtil.fromAsmTypePath(typePath), annotation, targetType));
+
+        AnnotationVisitor av = super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
+        av = new AnnotationConvertVisitor(av, annotation);
+        return av;
+    }
+
+    private TargetType.ClassTargetType convertClassTargetType(int typeRef) {
+        TypeReference tref = new TypeReference(typeRef);
+        switch (tref.getSort()) {
+            case TypeReference.CLASS_TYPE_PARAMETER:
+                return new TargetType.TypeParameter(tref.getTypeParameterIndex());
+
+            case TypeReference.CLASS_TYPE_PARAMETER_BOUND:
+                return new TargetType.TypeParameterBound(tref.getTypeParameterIndex(), tref.getTypeParameterBoundIndex());
+
+            case TypeReference.CLASS_EXTENDS:
+                int interfaceIndex = tref.getSuperTypeIndex();
+                return interfaceIndex == -1 ? new TargetType.Extends() :
+                        new TargetType.Implements(interfaceIndex);
+
+            default:
+                throw new AssertionError();
+        }
     }
 
     @Override
