@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  *
  * @param <F> flag enum
  */
-public class AccessConverter<F> {
+public class AccessConverter<F extends Enum<F>> {
     public static final AccessConverter<Classfile.Flag> classfile = new AccessConverter<>(Map.of(
             Classfile.Flag.PUBLIC, Opcodes.ACC_PUBLIC,
             Classfile.Flag.FINAL, Opcodes.ACC_FINAL,
@@ -47,6 +47,19 @@ public class AccessConverter<F> {
     public static final AccessConverter<Module.Open.Flag> moduleOpen = new AccessConverter<>(Map.of(
             Module.Open.Flag.MANDATED, Opcodes.ACC_MANDATED,
             Module.Open.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC
+    ));
+
+    public static AccessConverter<Classfile.InnerClass.Flag> innerClass = new AccessConverter<>(Map.of(
+            Classfile.InnerClass.Flag.PUBLIC, Opcodes.ACC_PUBLIC,
+            Classfile.InnerClass.Flag.PRIVATE, Opcodes.ACC_PRIVATE,
+            Classfile.InnerClass.Flag.PROTECTED, Opcodes.ACC_PROTECTED,
+            Classfile.InnerClass.Flag.STATIC, Opcodes.ACC_STATIC,
+            Classfile.InnerClass.Flag.FINAL, Opcodes.ACC_FINAL,
+            Classfile.InnerClass.Flag.INTERFACE, Opcodes.ACC_INTERFACE,
+            Classfile.InnerClass.Flag.ABSTRACT, Opcodes.ACC_ABSTRACT,
+            Classfile.InnerClass.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC,
+            Classfile.InnerClass.Flag.ANNOTATION, Opcodes.ACC_ANNOTATION,
+            Classfile.InnerClass.Flag.ENUM, Opcodes.ACC_ENUM
     ));
 
     private final Map<F, Integer> flagMap;

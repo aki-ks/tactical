@@ -136,7 +136,12 @@ public class ClassConvertVisitor extends ClassVisitor {
     @Override
     public void visitInnerClass(String name, String outerName, String innerName, int access) {
         super.visitInnerClass(name, outerName, innerName, access);
-        throw new RuntimeException("Not yet implemented");
+
+        this.classfile.getInnerClasses().add(new Classfile.InnerClass(
+                AsmUtil.pathFromInternalName(name),
+                Optional.ofNullable(outerName).map(AsmUtil::pathFromInternalName),
+                Optional.ofNullable(innerName),
+                AccessConverter.innerClass.fromBitMap(access)));
     }
 
     @Override

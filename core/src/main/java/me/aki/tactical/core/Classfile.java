@@ -400,12 +400,12 @@ public class Classfile {
         /**
          * Classfile name of the inner class.
          */
-        private String name;
+        private Path name;
 
         /**
          * Name of the class that contains the inner class.
          */
-        private Optional<String> outerName;
+        private Optional<Path> outerName;
 
         /**
          * Name of the inner class as declared in source.
@@ -417,30 +417,30 @@ public class Classfile {
          */
         private Set<Flag> access;
 
-        public InnerClass(String name) {
+        public InnerClass(Path name) {
             this(name, Optional.empty(), Optional.empty(), new HashSet<>());
         }
 
-        public InnerClass(String name, Optional<String> outerName, Optional<String> innerName, Set<Flag> access) {
+        public InnerClass(Path name, Optional<Path> outerName, Optional<String> innerName, Set<Flag> access) {
             this.name = name;
             this.outerName = outerName;
             this.innerName = innerName;
             this.access = access;
         }
 
-        public String getName() {
+        public Path getName() {
             return name;
         }
 
-        public void setName(String name) {
+        public void setName(Path name) {
             this.name = name;
         }
 
-        public Optional<String> getOuterName() {
+        public Optional<Path> getOuterName() {
             return outerName;
         }
 
-        public void setOuterName(Optional<String> outerName) {
+        public void setOuterName(Optional<Path> outerName) {
             this.outerName = outerName;
         }
 
