@@ -5,6 +5,7 @@ import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class Method {
     /**
      * All access flags that are set for this method.
      */
-    private Set<Flag> accessFlags;
+    private Set<Flag> accessFlags = new HashSet<>();
 
     /**
      * Name of the method
@@ -35,29 +36,34 @@ public class Method {
     private Optional<Type> returnType;
 
     /**
+     * Checked exceptions that might be thrown by this method.
+     */
+    private List<Path> exceptions = new ArrayList<>();
+
+    /**
      * Signature of the method with type variables.
      */
-    private Optional<String> signature;
+    private Optional<String> signature = Optional.empty();
 
     /**
      * Default value for methods in interfaces.
      */
-    private Optional<AnnotationValue> defaultValue;
+    private Optional<AnnotationValue> defaultValue = Optional.empty();
 
     /**
      * A list of parameter annotations.
      */
-    private List<List<Annotation>> parameterAnnotations;
+    private List<List<Annotation>> parameterAnnotations = new ArrayList<>();
 
     /**
      * Annotations of this methods.
      */
-    private List<Annotation> annotations;
+    private List<Annotation> annotations = new ArrayList<>();
 
     /**
      * Annotations on types within this method.
      */
-    private List<MethodTypeAnnotation> typeAnnotations;
+    private List<MethodTypeAnnotation> typeAnnotations = new ArrayList<>();
 
     /**
      * Non-parsed attributes of this method.
@@ -65,26 +71,18 @@ public class Method {
      * They are either not part of the JVM spec or
      * are not yet supported by this library.
      */
-    private List<Attribute> attributes;
+    private List<Attribute> attributes = new ArrayList<>();
 
     /**
      * Body of the method that contains the instructions.
      * It is absent for abstract methods.
      */
-    private Optional<Body> body;
+    private Optional<Body> body = Optional.empty();
 
-    public Method(Set<Flag> accessFlags, String name, List<Type> parameterTypes,
-                  Optional<Type> returnType, List<Annotation> annotations,
-                  List<MethodTypeAnnotation> typeAnnotations, List<Attribute> attributes,
-                  Optional<Body> body) {
-        this.accessFlags = accessFlags;
+    public Method(String name, List<Type> parameterTypes, Optional<Type> returnType) {
         this.name = name;
         this.parameterTypes = parameterTypes;
         this.returnType = returnType;
-        this.annotations = annotations;
-        this.typeAnnotations = typeAnnotations;
-        this.attributes = attributes;
-        this.body = body;
     }
 
     public Set<Flag> getAccessFlags() {
@@ -145,6 +143,14 @@ public class Method {
 
     public boolean isVoid() {
         return !returnType.isPresent();
+    }
+
+    public List<Path> getExceptions() {
+        return exceptions;
+    }
+
+    public void setExceptions(List<Path> exceptions) {
+        this.exceptions = exceptions;
     }
 
     public Optional<String> getSignature() {
