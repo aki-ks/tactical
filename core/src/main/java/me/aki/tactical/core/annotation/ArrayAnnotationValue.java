@@ -1,9 +1,14 @@
 package me.aki.tactical.core.annotation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArrayAnnotationValue implements AnnotationValue {
     private List<AnnotationValue> array;
+
+    public ArrayAnnotationValue() {
+        this(new ArrayList<>());
+    }
 
     public ArrayAnnotationValue(List<AnnotationValue> array) {
         this.array = array;
