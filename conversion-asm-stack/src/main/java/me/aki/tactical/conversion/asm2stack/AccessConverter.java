@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.core.Classfile;
+import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Module;
 import org.objectweb.asm.Opcodes;
 
@@ -60,6 +61,18 @@ public class AccessConverter<F extends Enum<F>> {
             Classfile.InnerClass.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC,
             Classfile.InnerClass.Flag.ANNOTATION, Opcodes.ACC_ANNOTATION,
             Classfile.InnerClass.Flag.ENUM, Opcodes.ACC_ENUM
+    ));
+
+    public static AccessConverter<Field.Flag> field = new AccessConverter<>(Map.of(
+            Field.Flag.PUBLIC, Opcodes.ACC_PUBLIC,
+            Field.Flag.PRIVATE, Opcodes.ACC_PRIVATE,
+            Field.Flag.PROTECTED, Opcodes.ACC_PROTECTED,
+            Field.Flag.STATIC, Opcodes.ACC_STATIC,
+            Field.Flag.FINAL, Opcodes.ACC_FINAL,
+            Field.Flag.VOLATILE, Opcodes.ACC_VOLATILE,
+            Field.Flag.TRANSIENT, Opcodes.ACC_TRANSIENT,
+            Field.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC,
+            Field.Flag.ENUM, Opcodes.ACC_ENUM
     ));
 
     private final Map<F, Integer> flagMap;

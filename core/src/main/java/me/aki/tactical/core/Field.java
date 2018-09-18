@@ -5,6 +5,8 @@ import me.aki.tactical.core.constant.FieldConstant;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,7 +18,7 @@ public class Field {
     /**
      * Access flags of the field
      */
-    private Set<Flag> accessFlags;
+    private Set<Flag> accessFlags = new HashSet<>();
 
     /**
      * Name of the field
@@ -31,31 +33,26 @@ public class Field {
     /**
      * Type of the field with type variables.
      */
-    private Optional<String> signature;
+    private Optional<String> signature = Optional.empty();
 
     /**
-     * The value of a constant (static, final field of primitive or String type).
+     * The initial value of a static field of primitive or {@link String} type.
      */
-    private Optional<FieldConstant> constant;
+    private Optional<FieldConstant> value = Optional.empty();
 
     /**
      * Annotations of this field.
      */
-    private List<Annotation> annotations;
+    private List<Annotation> annotations = new ArrayList<>();
 
-    private List<FieldTypeAnnotation> typeAnnotations;
+    /**
+     * Type annotations on the type of this field.
+     */
+    private List<FieldTypeAnnotation> typeAnnotations = new ArrayList<>();
 
-    public Field(Set<Flag> accessFlags, String name, Type type, Optional<String> signature,
-                 Optional<FieldConstant> constant, List<Annotation> annotations,
-                 List<FieldTypeAnnotation> typeAnnotations, List<Attribute> attributes) {
-        this.accessFlags = accessFlags;
+    public Field(String name, Type type) {
         this.name = name;
         this.type = type;
-        this.signature = signature;
-        this.constant = constant;
-        this.annotations = annotations;
-        this.typeAnnotations = typeAnnotations;
-        this.attributes = attributes;
     }
 
     /**
@@ -122,12 +119,12 @@ public class Field {
         this.signature = signature;
     }
 
-    public Optional<FieldConstant> getConstant() {
-        return constant;
+    public Optional<FieldConstant> getValue() {
+        return value;
     }
 
-    public void setConstant(Optional<FieldConstant> constant) {
-        this.constant = constant;
+    public void setValue(Optional<FieldConstant> value) {
+        this.value = value;
     }
 
     public List<Annotation> getAnnotations() {

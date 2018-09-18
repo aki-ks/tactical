@@ -1,10 +1,17 @@
 package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.core.Classfile;
+import me.aki.tactical.core.Field;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.Module;
 import me.aki.tactical.core.annotation.Annotation;
+import me.aki.tactical.core.constant.DoubleConstant;
+import me.aki.tactical.core.constant.FieldConstant;
+import me.aki.tactical.core.constant.FloatConstant;
+import me.aki.tactical.core.constant.IntConstant;
+import me.aki.tactical.core.constant.LongConstant;
+import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.typeannotation.ClassTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import org.objectweb.asm.AnnotationVisitor;
@@ -13,6 +20,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ModuleVisitor;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
 
@@ -146,8 +154,32 @@ public class ClassConvertVisitor extends ClassVisitor {
 
     @Override
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-//        return super.visitField(access, name, descriptor, signature, value);
-        throw new RuntimeException("Not yet implemented");
+        Field field = new Field(name, AsmUtil.fromAsmType(Type.getType(descriptor)));
+        field.getAccessFlags().addAll(AccessConverter.field.fromBitMap(access));
+        field.setSignature(Optional.ofNullable(signature));
+        field.setValue(Optional.ofNullable(value).map(this::convertFieldValue));
+
+        this.classfile.getFields().add(field);
+
+        FieldVisitor fv = super.visitField(access, name, descriptor, signature, value);
+        fv = new FieldConvertVisitor(fv, field);
+        return fv;
+    }
+
+    private FieldConstant convertFieldValue(Object value) {
+        if (value instanceof Integer) {
+            return new IntConstant((Integer) value);
+        } else if (value instanceof Long) {
+            return new LongConstant((Long) value);
+        } else if (value instanceof Float) {
+            return new FloatConstant((Float) value);
+        } else if (value instanceof Double) {
+            return new DoubleConstant((Double) value);
+        } else if (value instanceof String) {
+            return new StringConstant((String) value);
+        } else {
+            throw new AssertionError();
+        }
     }
 
     @Override

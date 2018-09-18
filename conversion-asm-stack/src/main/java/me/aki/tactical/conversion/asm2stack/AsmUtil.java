@@ -77,6 +77,16 @@ public class AsmUtil {
                 Optional.empty() : Optional.of(fromAsmType(type));
     }
 
+    /**
+     * Convert a jvm descriptor to {@link Type}.
+     *
+     * @param descriptor to be parsed
+     * @return descriptor represented as {@link Type}
+     */
+    public static Type fromDescriptor(String descriptor) {
+        return fromAsmType(org.objectweb.asm.Type.getType(descriptor));
+    }
+
     public static Type fromAsmType(org.objectweb.asm.Type type) {
         switch (type.getSort()) {
             case org.objectweb.asm.Type.VOID: throw new IllegalStateException();
