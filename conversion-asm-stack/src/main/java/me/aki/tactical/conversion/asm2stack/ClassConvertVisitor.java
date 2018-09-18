@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
+import me.aki.tactical.core.Method;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.Module;
@@ -184,7 +185,19 @@ public class ClassConvertVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-//        return super.visitMethod(access, name, descriptor, signature, exceptions);
-        throw new RuntimeException("Not yet implemented");
+        MethodDescriptor desc = AsmUtil.parseMethodDescriptor(descriptor);
+        Method method = new Method(name, desc.getParameterTypes(), desc.getReturnType());
+        method.getAccessFlags().addAll(AccessConverter.method.fromBitMap(access));
+        method.setSignature(Optional.ofNullable(signature));
+
+        (exceptions == null ? Stream.<String>empty() : Arrays.stream(exceptions))
+                .map(AsmUtil::pathFromInternalName)
+                .forEach(method.getExceptions()::add);
+
+        this.classfile.getMethods().add(method);
+
+        MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+        mv = new MethodConvertVisitor(mv, method);
+        return mv;
     }
 }

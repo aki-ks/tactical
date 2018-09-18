@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
+import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Module;
 import org.objectweb.asm.Opcodes;
 
@@ -50,7 +51,7 @@ public class AccessConverter<F extends Enum<F>> {
             Module.Open.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC
     ));
 
-    public static AccessConverter<Classfile.InnerClass.Flag> innerClass = new AccessConverter<>(Map.of(
+    public static final AccessConverter<Classfile.InnerClass.Flag> innerClass = new AccessConverter<>(Map.of(
             Classfile.InnerClass.Flag.PUBLIC, Opcodes.ACC_PUBLIC,
             Classfile.InnerClass.Flag.PRIVATE, Opcodes.ACC_PRIVATE,
             Classfile.InnerClass.Flag.PROTECTED, Opcodes.ACC_PROTECTED,
@@ -63,7 +64,7 @@ public class AccessConverter<F extends Enum<F>> {
             Classfile.InnerClass.Flag.ENUM, Opcodes.ACC_ENUM
     ));
 
-    public static AccessConverter<Field.Flag> field = new AccessConverter<>(Map.of(
+    public static final AccessConverter<Field.Flag> field = new AccessConverter<>(Map.of(
             Field.Flag.PUBLIC, Opcodes.ACC_PUBLIC,
             Field.Flag.PRIVATE, Opcodes.ACC_PRIVATE,
             Field.Flag.PROTECTED, Opcodes.ACC_PROTECTED,
@@ -73,6 +74,21 @@ public class AccessConverter<F extends Enum<F>> {
             Field.Flag.TRANSIENT, Opcodes.ACC_TRANSIENT,
             Field.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC,
             Field.Flag.ENUM, Opcodes.ACC_ENUM
+    ));
+
+    public static final AccessConverter<Method.Flag> method = new AccessConverter<>(Map.ofEntries(
+            Map.entry(Method.Flag.PUBLIC, Opcodes.ACC_PUBLIC),
+            Map.entry(Method.Flag.PRIVATE, Opcodes.ACC_PRIVATE),
+            Map.entry(Method.Flag.PROTECTED, Opcodes.ACC_PROTECTED),
+            Map.entry(Method.Flag.STATIC, Opcodes.ACC_STATIC),
+            Map.entry(Method.Flag.FINAL, Opcodes.ACC_FINAL),
+            Map.entry(Method.Flag.SYNCHRONIZED, Opcodes.ACC_SYNCHRONIZED),
+            Map.entry(Method.Flag.BRIDGE, Opcodes.ACC_BRIDGE),
+            Map.entry(Method.Flag.VARARGS, Opcodes.ACC_VARARGS),
+            Map.entry(Method.Flag.NATIVE, Opcodes.ACC_NATIVE),
+            Map.entry(Method.Flag.ABSTRACT, Opcodes.ACC_ABSTRACT),
+            Map.entry(Method.Flag.STRICT, Opcodes.ACC_STRICT),
+            Map.entry(Method.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC)
     ));
 
     private final Map<F, Integer> flagMap;
