@@ -102,6 +102,17 @@ public class AsmUtil {
     }
 
     /**
+     * Get the path of a class file descriptor.
+     *
+     * @param descriptor descriptor of an object type
+     * @return path of the class in the descriptor
+     */
+    public static Path pathFromObjectDescriptor(String descriptor) {
+        String internalName = org.objectweb.asm.Type.getType(descriptor).getInternalName();
+        return pathFromInternalName(internalName);
+    }
+
+    /**
      * Parse a slash separated class path (e.g. "java/lang/String");
      *
      * @param internalName slash separated class name

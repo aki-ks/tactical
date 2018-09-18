@@ -4,6 +4,7 @@ import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.Module;
+import me.aki.tactical.core.annotation.Annotation;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -85,8 +86,11 @@ public class ClassConvertVisitor extends ClassVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-//        return super.visitAnnotation(descriptor, visible);
-        throw new RuntimeException("Not yet implemented");
+        Annotation annotation = new Annotation(AsmUtil.pathFromObjectDescriptor(descriptor), visible);
+
+        AnnotationVisitor av = super.visitAnnotation(descriptor, visible);
+        av = new AnnotationConvertVisitor(av, annotation);
+        return av;
     }
 
     @Override
