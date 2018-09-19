@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.core.Method;
+import me.aki.tactical.core.annotation.AnnotationValue;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -35,8 +36,14 @@ public class MethodConvertVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
-//        return super.visitAnnotationDefault();
-        throw new RuntimeException("Not yet implemented");
+        AnnotationVisitor av = super.visitAnnotationDefault();
+        av = new AbstractAnnotationConvertVisitor(av) {
+            @Override
+            public void visitConvertedAnnotationValue(String name, AnnotationValue value) {
+                MethodConvertVisitor.this.method.setDefaultValue(Optional.of(value));
+            }
+        };
+        return av;
     }
 
     @Override
