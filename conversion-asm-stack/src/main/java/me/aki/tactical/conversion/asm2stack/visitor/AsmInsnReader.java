@@ -33,8 +33,8 @@ import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.InvokeInsn;
-import me.aki.tactical.stack.insn.SwitchInsn;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
@@ -727,7 +727,45 @@ public class AsmInsnReader {
     }
 
     private void convertJumpInsnNode(JumpInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        int opcode = insn.getOpcode();
+        switch (opcode) {
+            case Opcodes.GOTO:
+                iv.visitGoto(insn.label.getLabel());
+                return;
+
+            case Opcodes.JSR:
+                throw new IllegalStateException("Subroutine was not inlined by JSRInlinerAdapter");
+
+            default:
+                IfInsn.Condition condition = getIfCondition(opcode);
+                iv.visitIf(condition, insn.label.getLabel());
+        }
+    }
+
+    private IfInsn.Condition getIfCondition(int opcode) {
+        switch (opcode) {
+            case Opcodes.IFNULL: return IfInsn.IF_NULL;
+            case Opcodes.IFNONNULL: return IfInsn.IF_NONNULL;
+
+            case Opcodes.IFEQ: return IfInsn.IF_EQ_ZERO;
+            case Opcodes.IFNE: return IfInsn.IF_NE_ZERO;
+            case Opcodes.IFLT: return IfInsn.IF_LT_ZERO;
+            case Opcodes.IFGE: return IfInsn.IF_GE_ZERO;
+            case Opcodes.IFGT: return IfInsn.IF_GT_ZERO;
+            case Opcodes.IFLE: return IfInsn.IF_LE_ZERO;
+
+            case Opcodes.IF_ACMPEQ: return IfInsn.IF_REF_EQ;
+            case Opcodes.IF_ACMPNE: return IfInsn.IF_REF_NE;
+
+            case Opcodes.IF_ICMPEQ: return IfInsn.IF_INT_EQ;
+            case Opcodes.IF_ICMPNE: return IfInsn.IF_INT_NE;
+            case Opcodes.IF_ICMPLT: return IfInsn.IF_INT_LT;
+            case Opcodes.IF_ICMPGE: return IfInsn.IF_INT_GE;
+            case Opcodes.IF_ICMPGT: return IfInsn.IF_INT_GT;
+            case Opcodes.IF_ICMPLE: return IfInsn.IF_INT_LE;
+
+            default: throw new AssertionError();
+        }
     }
 
     private void convertLdcInsnNode(LdcInsnNode insn) {
