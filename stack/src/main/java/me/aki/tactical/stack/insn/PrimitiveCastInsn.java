@@ -6,9 +6,9 @@ import me.aki.tactical.core.type.PrimitiveType;
 /**
  * Pop a primitive value from the stack, cast it to another primitive type and push it again.
  *
- * @see CheckCastInsn for casts of reference types
+ * @see RefCastInsn for casts of reference types
  */
-public class CastInsn extends AbstractInstruction {
+public class PrimitiveCastInsn extends AbstractInstruction {
     /**
      * Type of the value before the cast.
      */
@@ -19,7 +19,7 @@ public class CastInsn extends AbstractInstruction {
      */
     private PrimitiveType toType;
 
-    public CastInsn(PrimitiveType fromType, PrimitiveType toType) {
+    public PrimitiveCastInsn(PrimitiveType fromType, PrimitiveType toType) {
         setFromType(fromType);
         setToType(toType);
     }

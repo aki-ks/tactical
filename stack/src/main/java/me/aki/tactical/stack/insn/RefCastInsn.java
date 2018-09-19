@@ -5,15 +5,15 @@ import me.aki.tactical.core.type.RefType;
 /**
  * Pop a reference type, cast it to another object/array-type and push it again.
  *
- * @see CastInsn for casts between primitive types.
+ * @see PrimitiveCastInsn for casts between primitive types.
  */
-public class CheckCastInsn extends AbstractInstruction {
+public class RefCastInsn extends AbstractInstruction {
     /**
      * Type that the value should be casted to.
      */
     private RefType type;
 
-    public CheckCastInsn(RefType type) {
+    public RefCastInsn(RefType type) {
         this.type = type;
     }
 
