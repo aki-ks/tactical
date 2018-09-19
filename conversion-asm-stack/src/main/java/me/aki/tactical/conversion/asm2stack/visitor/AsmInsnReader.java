@@ -5,6 +5,8 @@ import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.LongConstant;
 import me.aki.tactical.core.constant.NullConstant;
+import me.aki.tactical.core.type.ArrayType;
+import me.aki.tactical.core.type.BooleanType;
 import me.aki.tactical.core.type.ByteType;
 import me.aki.tactical.core.type.CharType;
 import me.aki.tactical.core.type.DoubleType;
@@ -490,7 +492,34 @@ public class AsmInsnReader {
     }
 
     private void convertIntInsnNode(IntInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        switch (insn.getOpcode()) {
+            case Opcodes.BIPUSH:
+            case Opcodes.SIPUSH:
+                iv.visitPush(new IntConstant(insn.operand));
+                break;
+
+            case Opcodes.NEWARRAY:
+                ArrayType array = new ArrayType(getArrayBaseType(insn.operand), 1);
+                iv.visitNewArray(array, 1);
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    private Type getArrayBaseType(int operand) {
+        switch (operand) {
+            case Opcodes.T_BOOLEAN: return BooleanType.getInstance();
+            case Opcodes.T_CHAR: return CharType.getInstance();
+            case Opcodes.T_FLOAT: return FloatType.getInstance();
+            case Opcodes.T_DOUBLE: return DoubleType.getInstance();
+            case Opcodes.T_BYTE: return ByteType.getInstance();
+            case Opcodes.T_SHORT: return ShortType.getInstance();
+            case Opcodes.T_INT: return IntType.getInstance();
+            case Opcodes.T_LONG: return LongType.getInstance();
+            default: throw new AssertionError();
+        }
     }
 
     private void convertVarInsnNode(VarInsnNode insn) {
