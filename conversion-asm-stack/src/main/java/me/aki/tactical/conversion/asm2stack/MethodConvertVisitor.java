@@ -62,8 +62,38 @@ public class MethodConvertVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-//        return super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
-        throw new RuntimeException("Not yet implemented");
+        Annotation annotation = new Annotation(AsmUtil.pathFromObjectDescriptor(descriptor), visible);
+        TargetType.MethodTargetType targetType = convertTargetType(new TypeReference(typeRef));
+        this.method.getTypeAnnotations().add(new MethodTypeAnnotation(AsmUtil.fromAsmTypePath(typePath), annotation, targetType));
+
+        AnnotationVisitor av = super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
+        av = new AnnotationConvertVisitor(av, annotation);
+        return av;
+    }
+
+    private TargetType.MethodTargetType convertTargetType(TypeReference tref) {
+        switch (tref.getSort()) {
+            case TypeReference.THROWS:
+                return new TargetType.CheckedException(tref.getExceptionIndex());
+
+            case TypeReference.METHOD_FORMAL_PARAMETER:
+                return new TargetType.MethodParameter(tref.getFormalParameterIndex());
+
+            case TypeReference.METHOD_RECEIVER:
+                return new TargetType.MethodReceiver();
+
+            case TypeReference.METHOD_RETURN:
+                return new TargetType.ReturnType();
+
+            case TypeReference.METHOD_TYPE_PARAMETER:
+                return new TargetType.TypeParameter(tref.getTypeParameterIndex());
+
+            case TypeReference.METHOD_TYPE_PARAMETER_BOUND:
+                return new TargetType.TypeParameterBound(tref.getTypeParameterIndex(), tref.getTypeParameterBoundIndex());
+
+            default:
+                throw new AssertionError();
+        }
     }
 
     @Override
