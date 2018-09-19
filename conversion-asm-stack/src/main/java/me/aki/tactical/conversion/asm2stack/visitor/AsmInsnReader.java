@@ -762,6 +762,7 @@ public class AsmInsnReader {
     }
 
     private void convertMultiANewArrayInsnNode(MultiANewArrayInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        ArrayType array = (ArrayType) AsmUtil.fromDescriptor(insn.desc);
+        iv.visitNewArray(array, insn.dims);
     }
 }
