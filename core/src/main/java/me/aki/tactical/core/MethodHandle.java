@@ -1,5 +1,7 @@
 package me.aki.tactical.core;
 
+import java.util.Objects;
+
 public interface MethodHandle {
     abstract class AbstractFieldHandle implements MethodHandle {
         private final FieldRef fieldRef;
@@ -10,6 +12,26 @@ public interface MethodHandle {
 
         public FieldRef getFieldRef() {
             return fieldRef;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            AbstractFieldHandle that = (AbstractFieldHandle) o;
+            return Objects.equals(fieldRef, that.fieldRef);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(fieldRef);
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + '{' +
+                    "fieldRef=" + fieldRef +
+                    '}';
         }
     }
 
@@ -22,6 +44,26 @@ public interface MethodHandle {
 
         public MethodRef getMethodRef() {
             return methodRef;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            AbstractMethodHandle that = (AbstractMethodHandle) o;
+            return Objects.equals(methodRef, that.methodRef);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(methodRef);
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + '{' +
+                    "methodRef=" + methodRef +
+                    '}';
         }
     }
 

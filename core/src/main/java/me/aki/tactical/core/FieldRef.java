@@ -2,6 +2,8 @@ package me.aki.tactical.core;
 
 import me.aki.tactical.core.type.Type;
 
+import java.util.Objects;
+
 public class FieldRef {
     /**
      * Class that contains the field
@@ -34,5 +36,29 @@ public class FieldRef {
 
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FieldRef fieldRef = (FieldRef) o;
+        return Objects.equals(owner, fieldRef.owner) &&
+                Objects.equals(name, fieldRef.name) &&
+                Objects.equals(type, fieldRef.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(owner, name, type);
+    }
+
+    @Override
+    public String toString() {
+        return FieldRef.class.getSimpleName() + '{' +
+                "owner=" + owner +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                '}';
     }
 }

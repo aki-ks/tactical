@@ -5,6 +5,7 @@ import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.Type;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class InvokableMethodRef extends MethodRef {
@@ -26,5 +27,30 @@ public class InvokableMethodRef extends MethodRef {
 
     public void setInterface(boolean anInterface) {
         isInterface = anInterface;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        InvokableMethodRef that = (InvokableMethodRef) o;
+        return isInterface == that.isInterface;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), isInterface);
+    }
+
+    @Override
+    public String toString() {
+        return InvokableMethodRef.class.getSimpleName() + '{' +
+                "owner=" + getOwner() +
+                ", name='" + getName() + '\'' +
+                ", arguments=" + getArguments() +
+                ", returnType=" + getReturnType() +
+                "isInterface=" + isInterface +
+                '}';
     }
 }

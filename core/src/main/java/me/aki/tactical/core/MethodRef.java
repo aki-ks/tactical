@@ -3,6 +3,7 @@ package me.aki.tactical.core;
 import me.aki.tactical.core.type.Type;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class MethodRef {
@@ -63,5 +64,31 @@ public class MethodRef {
 
     public void setReturnType(Optional<Type> returnType) {
         this.returnType = returnType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MethodRef methodRef = (MethodRef) o;
+        return Objects.equals(owner, methodRef.owner) &&
+                Objects.equals(name, methodRef.name) &&
+                Objects.equals(arguments, methodRef.arguments) &&
+                Objects.equals(returnType, methodRef.returnType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(owner, name, arguments, returnType);
+    }
+
+    @Override
+    public String toString() {
+        return MethodRef.class.getSimpleName() + '{' +
+                "owner=" + owner +
+                ", name='" + name + '\'' +
+                ", arguments=" + arguments +
+                ", returnType=" + returnType +
+                '}';
     }
 }
