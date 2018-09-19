@@ -71,7 +71,7 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
         return getCondition().getCompareValue() == StackValue.getInstance() ? 2 : 1;
     }
 
-    interface Condition {
+    public static interface Condition {
         /**
          * Against what value should the popped value be compared.
          */
@@ -173,9 +173,9 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
         }
     }
 
-    interface CompareValue {}
-    interface IntCompareValue extends CompareValue {}
-    interface ReferenceCompareValue extends CompareValue {}
+    public static interface CompareValue {}
+    public static interface IntCompareValue extends CompareValue {}
+    public static interface ReferenceCompareValue extends CompareValue {}
 
     /**
      * Compare with another value popped from the stack
@@ -231,16 +231,16 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
         }
     }
 
-    interface Comparison {
+    public static  interface Comparison {
         public Comparison negate();
     }
 
-    interface IntComparison extends Comparison {
+    public static  interface IntComparison extends Comparison {
         @Override
         public IntComparison negate();
     }
 
-    interface ReferenceComparison extends Comparison {
+    public static interface ReferenceComparison extends Comparison {
         @Override
         public ReferenceComparison negate();
     }
