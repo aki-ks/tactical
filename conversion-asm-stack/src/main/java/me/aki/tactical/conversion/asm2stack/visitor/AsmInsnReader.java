@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.asm2stack.visitor;
 
 import me.aki.tactical.conversion.asm2stack.AsmUtil;
+import me.aki.tactical.conversion.asm2stack.ConversionContext;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodHandle;
@@ -59,14 +60,16 @@ import java.util.stream.Collectors;
  * Utility that calls events of {@link InsnVisitor} based on asm {@link AbstractInsnNode}.
  */
 public class AsmInsnReader {
-    private InsnVisitor iv;
+    private final InsnVisitor iv;
+    private final ConversionContext ctx;
 
-    public AsmInsnReader(InsnVisitor iv) {
+    public AsmInsnReader(InsnVisitor iv, ConversionContext ctx) {
         this.iv = iv;
+        this.ctx = ctx;
     }
 
     private Local getLocal(int var) {
-        throw new RuntimeException("Not yet implemented");
+        return ctx.getLocal(var);
     }
 
     public void accept(AbstractInsnNode insn) {
