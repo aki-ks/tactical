@@ -14,6 +14,8 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -97,15 +99,18 @@ public class MethodConvertVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitAnnotableParameterCount(int parameterCount, boolean visible) {
-        super.visitAnnotableParameterCount(parameterCount, visible);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter, String descriptor, boolean visible) {
-//        return super.visitParameterAnnotation(parameter, descriptor, visible);
-        throw new RuntimeException("Not yet implemented");
+        List<List<Annotation>> parameterAnnotations = this.method.getParameterAnnotations();
+        while (parameterAnnotations.size() <= parameter) {
+            parameterAnnotations.add(new ArrayList<>());
+        }
+
+        Annotation annotation = new Annotation(AsmUtil.pathFromObjectDescriptor(descriptor), visible);
+        parameterAnnotations.get(parameter).add(annotation);
+
+        AnnotationVisitor av = super.visitParameterAnnotation(parameter, descriptor, visible);
+        av = new AnnotationConvertVisitor(av, annotation);
+        return av;
     }
 
     @Override
