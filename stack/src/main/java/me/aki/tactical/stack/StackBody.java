@@ -6,6 +6,7 @@ import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.StoreInsn;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,59 +16,46 @@ public class StackBody implements Body {
      *
      * This includes also e.g. the "this", parameter and catch-block local.
      */
-    private List<Local> locals;
+    private List<Local> locals = new ArrayList<>();
 
     /**
      * Local that initially contains the "this" value for non-static method.
      *
      * Note that other values can be assigned to this local with a {@link StoreInsn}.
      */
-    private Optional<Local> thisLocal;
+    private Optional<Local> thisLocal = Optional.empty();
 
     /**
      * Locals that initially contain the parameter values.
      *
      * Note that other values can be assigned to these local with a {@link StoreInsn}.
      */
-    private List<Local> parameterLocals;
+    private List<Local> parameterLocals = new ArrayList<>();
 
     /**
      * The instructions of this method
      */
-    private List<Instruction> instructions;
+    private List<Instruction> instructions = new ArrayList<>();
 
     /**
      * The try-catch-blocks of this method.
      */
-    private List<TryCatchBlock> tryCatchBlocks;
+    private List<TryCatchBlock> tryCatchBlocks = new ArrayList<>();
 
     /**
      * Debug info about local variables that existed in source code.
      */
-    private List<LocalVariable> localVariables;
+    private List<LocalVariable> localVariables = new ArrayList<>();
 
     /**
      * Annotations of the types of local variables
      */
-    private List<LocalVariableAnnotation> localVariableAnnotations;
+    private List<LocalVariableAnnotation> localVariableAnnotations = new ArrayList<>();
 
     /**
      * Debug info about the line numbers of the source file.
      */
-    private List<LineNumber> lineNumbers;
-
-    public StackBody(List<Local> locals, Optional<Local> thisLocal, List<Local> parameterLocals,
-                     List<Instruction> instructions, List<LocalVariable> localVariables,
-                     List<LocalVariableAnnotation> localVariableAnnotations,
-                     List<LineNumber> lineNumbers) {
-        this.locals = locals;
-        this.thisLocal = thisLocal;
-        this.parameterLocals = parameterLocals;
-        this.instructions = instructions;
-        this.localVariables = localVariables;
-        this.localVariableAnnotations = localVariableAnnotations;
-        this.lineNumbers = lineNumbers;
-    }
+    private List<LineNumber> lineNumbers = new ArrayList<>();
 
     public List<Local> getLocals() {
         return locals;

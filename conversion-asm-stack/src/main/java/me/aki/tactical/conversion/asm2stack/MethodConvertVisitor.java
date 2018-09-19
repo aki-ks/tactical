@@ -5,6 +5,7 @@ import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
+import me.aki.tactical.stack.StackBody;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -23,6 +24,7 @@ import java.util.Optional;
  */
 public class MethodConvertVisitor extends MethodVisitor {
     private Method method;
+    private StackBody body;
 
     public MethodConvertVisitor(MethodVisitor methodVisitor, Method method) {
         super(Opcodes.ASM6, methodVisitor);
@@ -122,7 +124,9 @@ public class MethodConvertVisitor extends MethodVisitor {
     @Override
     public void visitCode() {
         super.visitCode();
-        throw new RuntimeException("Not yet implemented");
+
+        this.body = new StackBody();
+        this.method.setBody(Optional.of(this.body));
     }
 
     @Override
