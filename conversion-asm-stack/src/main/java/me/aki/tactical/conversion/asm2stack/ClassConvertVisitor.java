@@ -197,7 +197,7 @@ public class ClassConvertVisitor extends ClassVisitor {
         this.classfile.getMethods().add(method);
 
         MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-        mv = new MethodConvertVisitor(mv, method);
+        mv = new MethodConvertVisitor(mv, method, access, name, descriptor, signature, exceptions);
         return mv;
     }
 }

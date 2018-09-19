@@ -14,6 +14,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
+import org.objectweb.asm.commons.JSRInlinerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +23,12 @@ import java.util.Optional;
 /**
  * Visitor that converts all events and stores them in a {@link Method}.
  */
-public class MethodConvertVisitor extends MethodVisitor {
+public class MethodConvertVisitor extends JSRInlinerAdapter {
     private Method method;
     private StackBody body;
 
-    public MethodConvertVisitor(MethodVisitor methodVisitor, Method method) {
-        super(Opcodes.ASM6, methodVisitor);
+    public MethodConvertVisitor(MethodVisitor methodVisitor, Method method, int access, String name, String descriptor, String signature, String[] exceptions) {
+        super(Opcodes.ASM6, methodVisitor, access, name, descriptor, signature, exceptions);
         this.method = method;
     }
 
@@ -130,93 +131,12 @@ public class MethodConvertVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
-        super.visitFrame(type, nLocal, local, nStack, stack);
-        throw new RuntimeException("Not yet implemented");
-    }
+    public void visitEnd() {
+        super.visitEnd();
 
-    @Override
-    public void visitInsn(int opcode) {
-        super.visitInsn(opcode);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitIntInsn(int opcode, int operand) {
-        super.visitIntInsn(opcode, operand);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitVarInsn(int opcode, int var) {
-        super.visitVarInsn(opcode, var);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitTypeInsn(int opcode, String type) {
-        super.visitTypeInsn(opcode, type);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-        super.visitFieldInsn(opcode, owner, name, descriptor);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-        super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
-        super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitJumpInsn(int opcode, Label label) {
-        super.visitJumpInsn(opcode, label);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitLabel(Label label) {
-        super.visitLabel(label);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitLdcInsn(Object value) {
-        super.visitLdcInsn(value);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitIincInsn(int var, int increment) {
-        super.visitIincInsn(var, increment);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-        super.visitTableSwitchInsn(min, max, dflt, labels);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-        super.visitLookupSwitchInsn(dflt, keys, labels);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-        super.visitMultiANewArrayInsn(descriptor, numDimensions);
-        throw new RuntimeException("Not yet implemented");
+        if (this.body != null) {
+            new BodyConverter(this.method, this.body, this).convert();
+        }
     }
 
     @Override
