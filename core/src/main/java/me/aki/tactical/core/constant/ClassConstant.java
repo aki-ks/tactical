@@ -1,7 +1,7 @@
 package me.aki.tactical.core.constant;
 
-import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
+import me.aki.tactical.core.type.RefType;
 
 import java.util.Objects;
 
@@ -9,13 +9,13 @@ import java.util.Objects;
  * An instance of "java.lang.Class".
  */
 public class ClassConstant implements BootstrapConstant {
-    private final Path value;
+    private final RefType value;
 
-    public ClassConstant(Path value) {
+    public ClassConstant(RefType value) {
         this.value = value;
     }
 
-    public Path getPath() {
+    public RefType getValue() {
         return value;
     }
 

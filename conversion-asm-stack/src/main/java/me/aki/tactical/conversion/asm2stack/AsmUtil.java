@@ -12,6 +12,7 @@ import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.PrimitiveType;
+import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.TypePath;
@@ -180,14 +181,15 @@ public class AsmUtil {
     }
 
     public static MethodDescriptor parseMethodDescriptor(String descriptor) {
-        org.objectweb.asm.Type returnType = org.objectweb.asm.Type.getReturnType(descriptor);
-        org.objectweb.asm.Type[] argumentTypes = org.objectweb.asm.Type.getArgumentTypes(descriptor);
+        return parseMethodDescriptor(org.objectweb.asm.Type.getType(descriptor));
+    }
 
-        List<Type> convertedArgTypes = Arrays.stream(argumentTypes)
+    public static MethodDescriptor parseMethodDescriptor(org.objectweb.asm.Type methodType) {
+        List<Type> convertedArgTypes = Arrays.stream(methodType.getArgumentTypes())
                 .map(AsmUtil::fromAsmType)
                 .collect(Collectors.toList());
 
-        return new MethodDescriptor(convertedArgTypes, fromAsmReturnType(returnType));
+        return new MethodDescriptor(convertedArgTypes, fromAsmReturnType(methodType.getReturnType()));
     }
 
     /**
@@ -222,5 +224,9 @@ public class AsmUtil {
             default:
                 throw new AssertionError();
         }
+    }
+
+    public static RefType refTypeFromInternalName(String internalName) {
+        return (RefType) fromAsmType(org.objectweb.asm.Type.getObjectType(internalName));
     }
 }

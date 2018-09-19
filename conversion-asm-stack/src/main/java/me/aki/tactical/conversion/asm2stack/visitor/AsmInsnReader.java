@@ -3,13 +3,19 @@ package me.aki.tactical.conversion.asm2stack.visitor;
 import me.aki.tactical.conversion.asm2stack.AsmUtil;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.MethodHandle;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
+import me.aki.tactical.core.constant.ClassConstant;
+import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.LongConstant;
+import me.aki.tactical.core.constant.MethodHandleConstant;
+import me.aki.tactical.core.constant.MethodTypeConstant;
 import me.aki.tactical.core.constant.NullConstant;
+import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.BooleanType;
 import me.aki.tactical.core.type.ByteType;
@@ -26,6 +32,7 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.InvokeInsn;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -667,7 +674,79 @@ public class AsmInsnReader {
     }
 
     private void convertLdcInsnNode(LdcInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        iv.visitPush(convertLdcValue(insn.cst));
+    }
+
+    private Constant convertLdcValue(Object value) {
+        if (value instanceof Integer) {
+            return new IntConstant((Integer) value);
+        } else if (value instanceof Long) {
+            return new LongConstant((Long) value);
+        } else if (value instanceof Float) {
+            return new FloatConstant((Float) value);
+        } else if (value instanceof Double) {
+            return new DoubleConstant((Double) value);
+        } else if (value instanceof String) {
+            return new StringConstant((String) value);
+        } else if (value instanceof org.objectweb.asm.Type) {
+            org.objectweb.asm.Type asmType = (org.objectweb.asm.Type) value;
+            switch (asmType.getSort()) {
+                case org.objectweb.asm.Type.METHOD:
+                    MethodDescriptor desc = AsmUtil.parseMethodDescriptor(asmType);
+                    return new MethodTypeConstant(desc.getParameterTypes(), desc.getReturnType());
+
+                case org.objectweb.asm.Type.OBJECT:
+                case org.objectweb.asm.Type.ARRAY:
+                    return new ClassConstant((RefType) AsmUtil.fromAsmType(asmType));
+
+                default:
+                    throw new AssertionError();
+            }
+        } else if (value instanceof Handle) {
+            return new MethodHandleConstant(convertMethodHandle((Handle) value));
+        } else {
+            throw new AssertionError();
+        }
+    }
+
+    private MethodHandle convertMethodHandle(Handle handle) {
+        Path owner = AsmUtil.pathFromInternalName(handle.getOwner());
+        int tag = handle.getTag();
+        switch (tag) {
+            case Opcodes.H_GETFIELD:
+            case Opcodes.H_GETSTATIC:
+            case Opcodes.H_PUTFIELD:
+            case Opcodes.H_PUTSTATIC:
+                FieldRef fieldRef = new FieldRef(owner, handle.getName(), AsmUtil.fromDescriptor(handle.getDesc()));
+
+                switch (tag) {
+                    case Opcodes.H_GETFIELD: return new MethodHandle.GetFieldHandle(fieldRef);
+                    case Opcodes.H_GETSTATIC: return new MethodHandle.GetStaticHandle(fieldRef);
+                    case Opcodes.H_PUTFIELD: return new MethodHandle.SetFieldHandle(fieldRef);
+                    case Opcodes.H_PUTSTATIC: return new MethodHandle.SetStaticHandle(fieldRef);
+                    default: throw new AssertionError();
+                }
+
+            case Opcodes.H_INVOKEVIRTUAL:
+            case Opcodes.H_INVOKESTATIC:
+            case Opcodes.H_INVOKESPECIAL:
+            case Opcodes.H_NEWINVOKESPECIAL:
+            case Opcodes.H_INVOKEINTERFACE:
+                MethodDescriptor desc = AsmUtil.parseMethodDescriptor(handle.getDesc());
+                MethodRef methodRef = new MethodRef(owner, handle.getName(), desc.getParameterTypes(), desc.getReturnType());
+
+                switch (tag) {
+                    case Opcodes.H_INVOKEVIRTUAL: return new MethodHandle.InvokeVirtualHandle(methodRef);
+                    case Opcodes.H_INVOKESTATIC: return new MethodHandle.InvokeStaticHandle(methodRef);
+                    case Opcodes.H_INVOKESPECIAL: return new MethodHandle.InvokeSpecialHandle(methodRef);
+                    case Opcodes.H_NEWINVOKESPECIAL: return new MethodHandle.NewInstanceHandle(methodRef);
+                    case Opcodes.H_INVOKEINTERFACE: return new MethodHandle.InvokeInterfaceHandle(methodRef);
+                    default: throw new AssertionError();
+                }
+
+            default:
+                throw new AssertionError();
+        }
     }
 
     private void convertIIncInsnNode(IincInsnNode insn) {

@@ -129,7 +129,7 @@ public class InsnVisitor {
             iv.visitCmpg(type);
         }
     }
-    
+
     // ARRAY RELATED INSTRUCTIONS
 
     public void visitNewArray(ArrayType type, int initializedDimensions) {
