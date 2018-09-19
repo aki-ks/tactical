@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.asm2stack.visitor;
 
 import me.aki.tactical.conversion.asm2stack.AsmUtil;
+import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
@@ -609,7 +610,30 @@ public class AsmInsnReader {
     }
 
     private void convertFieldInsnNode(FieldInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        Path fieldOwner = AsmUtil.pathFromInternalName(insn.owner);
+        Type fieldType = AsmUtil.fromDescriptor(insn.desc);
+        FieldRef fieldRef = new FieldRef(fieldOwner, insn.name, fieldType);
+
+        switch (insn.getOpcode()) {
+            case Opcodes.GETFIELD:
+                iv.visitFieldGet(fieldRef, false);
+                break;
+
+            case Opcodes.GETSTATIC:
+                iv.visitFieldGet(fieldRef, true);
+                break;
+
+            case Opcodes.PUTFIELD:
+                iv.visitFieldSet(fieldRef, false);
+                break;
+
+            case Opcodes.PUTSTATIC:
+                iv.visitFieldSet(fieldRef, true);
+                break;
+
+            default:
+                throw new AssertionError();
+        }
     }
 
     private void convertMethodInsnNode(MethodInsnNode insn) {
