@@ -17,6 +17,7 @@ import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.stack.Local;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -43,6 +44,10 @@ public class AsmInsnReader {
 
     public AsmInsnReader(InsnVisitor iv) {
         this.iv = iv;
+    }
+
+    private Local getLocal(int var) {
+        throw new RuntimeException("Not yet implemented");
     }
 
     public void accept(AbstractInsnNode insn) {
@@ -523,7 +528,57 @@ public class AsmInsnReader {
     }
 
     private void convertVarInsnNode(VarInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        int opcode = insn.getOpcode();
+        switch (opcode) {
+            case Opcodes.ILOAD:
+            case Opcodes.LLOAD:
+            case Opcodes.FLOAD:
+            case Opcodes.DLOAD:
+            case Opcodes.ALOAD:
+                iv.visitLoad(getVarLoadStoreType(opcode), getLocal(insn.var));
+                break;
+
+            case Opcodes.ISTORE:
+            case Opcodes.LSTORE:
+            case Opcodes.FSTORE:
+            case Opcodes.DSTORE:
+            case Opcodes.ASTORE:
+                iv.visitStore(getVarLoadStoreType(opcode), getLocal(insn.var));
+                break;
+
+            case Opcodes.RET:
+                throw new IllegalStateException("Subroutine was not inlined by JSRInlinerAdapter");
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    private Type getVarLoadStoreType(int opcode) {
+        switch (opcode) {
+            case Opcodes.ILOAD:
+            case Opcodes.ISTORE:
+                return IntType.getInstance();
+
+            case Opcodes.LLOAD:
+            case Opcodes.LSTORE:
+                return LongType.getInstance();
+
+            case Opcodes.FLOAD:
+            case Opcodes.FSTORE:
+                return FloatType.getInstance();
+
+            case Opcodes.DLOAD:
+            case Opcodes.DSTORE:
+                return DoubleType.getInstance();
+
+            case Opcodes.ALOAD:
+            case Opcodes.ASTORE:
+                return ObjectType.OBJECT;
+                
+            default:
+                throw new AssertionError();
+        }
     }
 
     private void convertTypeInsnNode(TypeInsnNode insn) {
