@@ -671,7 +671,7 @@ public class AsmInsnReader {
     }
 
     private void convertIIncInsnNode(IincInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        iv.visitIncrement(getLocal(insn.var), insn.incr);
     }
 
     private void convertTableSwitchInsnNode(TableSwitchInsnNode insn) {
