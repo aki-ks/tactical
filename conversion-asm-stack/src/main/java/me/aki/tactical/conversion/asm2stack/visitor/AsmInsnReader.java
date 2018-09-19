@@ -6,6 +6,7 @@ import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodHandle;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
+import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.ClassConstant;
 import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.constant.DoubleConstant;
@@ -49,7 +50,10 @@ import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Utility that calls events of {@link InsnVisitor} based on asm {@link AbstractInsnNode}.
@@ -666,7 +670,51 @@ public class AsmInsnReader {
     }
 
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        MethodDescriptor descriptor = AsmUtil.parseMethodDescriptor(insn.desc);
+        MethodRef bootstrapMethod = handleToMethodRef(insn.bsm);
+        List<BootstrapConstant> bootstrapArguments = Arrays.stream(insn.bsmArgs)
+                .map(this::convertBootstrapArgument)
+                .collect(Collectors.toList());
+
+        iv.visitInvokeDynamicInsn(insn.name, descriptor, bootstrapMethod, bootstrapArguments);
+    }
+
+    private BootstrapConstant convertBootstrapArgument(Object value) {
+        if (value instanceof Integer) {
+            return new IntConstant((Integer) value);
+        } else if (value instanceof Long) {
+            return new LongConstant((Long) value);
+        } else if (value instanceof Float) {
+            return new FloatConstant((Float) value);
+        } else if (value instanceof Double) {
+            return new DoubleConstant((Double) value);
+        } else if (value instanceof String) {
+            return new StringConstant((String) value);
+        } else if (value instanceof org.objectweb.asm.Type) {
+            org.objectweb.asm.Type asmType = (org.objectweb.asm.Type) value;
+            switch (asmType.getSort()) {
+                case org.objectweb.asm.Type.METHOD:
+                    MethodDescriptor desc = AsmUtil.parseMethodDescriptor(asmType);
+                    return new MethodTypeConstant(desc.getParameterTypes(), desc.getReturnType());
+
+                case org.objectweb.asm.Type.OBJECT:
+                case org.objectweb.asm.Type.ARRAY:
+                    return new ClassConstant((RefType) AsmUtil.fromAsmType(asmType));
+
+                default:
+                    throw new AssertionError();
+            }
+        } else if (value instanceof Handle) {
+            return new MethodHandleConstant(convertMethodHandle((Handle) value));
+        } else {
+            throw new AssertionError();
+        }
+    }
+
+    private MethodRef handleToMethodRef(Handle bsm) {
+        Path bsmOwner = AsmUtil.pathFromInternalName(bsm.getOwner());
+        MethodDescriptor bsmDesc = AsmUtil.parseMethodDescriptor(bsm.getDesc());
+        return new MethodRef(bsmOwner, bsm.getName(), bsmDesc.getParameterTypes(), bsmDesc.getReturnType());
     }
 
     private void convertJumpInsnNode(JumpInsnNode insn) {
