@@ -3,7 +3,9 @@ package me.aki.tactical.stack.insn;
 import me.aki.tactical.core.util.Cell;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * An int value is popped from the stack and checked against a table of branch locations.
@@ -35,6 +37,12 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
         this.branchTable = branchTable;
     }
 
+    public List<Cell<Instruction>> getBranchTableCells() {
+        return branchTable.entrySet().stream()
+                .map(e -> Cell.ofMap(e.getKey(), branchTable))
+                .collect(Collectors.toList());
+    }
+
     public Instruction getDefaultLocation() {
         return defaultLocation;
     }
@@ -60,5 +68,12 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
     @Override
     public boolean continuesExecution() {
         return false;
+    }
+
+    @Override
+    public List<Cell<Instruction>> getInstructionCells() {
+        List<Cell<Instruction>> cells = getBranchTableCells();
+        cells.add(getDefaultLocationCell());
+        return cells;
     }
 }

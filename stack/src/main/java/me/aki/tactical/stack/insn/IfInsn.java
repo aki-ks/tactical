@@ -2,6 +2,7 @@ package me.aki.tactical.stack.insn;
 
 import me.aki.tactical.core.util.Cell;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -75,6 +76,11 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
     @Override
     public int getPopCount() {
         return getCondition().getCompareValue() == StackValue.getInstance() ? 2 : 1;
+    }
+
+    @Override
+    public List<Cell<Instruction>> getInstructionCells() {
+        return List.of(getTargetCell());
     }
 
     public static interface Condition {
