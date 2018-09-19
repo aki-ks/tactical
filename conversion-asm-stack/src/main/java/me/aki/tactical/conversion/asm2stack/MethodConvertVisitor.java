@@ -1,7 +1,10 @@
 package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.core.Method;
+import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
+import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
+import me.aki.tactical.core.typeannotation.TargetType;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -9,6 +12,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
+import org.objectweb.asm.TypeReference;
 
 import java.util.Optional;
 
@@ -48,8 +52,12 @@ public class MethodConvertVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-//        return super.visitAnnotation(descriptor, visible);
-        throw new RuntimeException("Not yet implemented");
+        Annotation annotation = new Annotation(AsmUtil.pathFromObjectDescriptor(descriptor), visible);
+        this.method.getAnnotations().add(annotation);
+
+        AnnotationVisitor av = super.visitAnnotation(descriptor, visible);
+        av = new AnnotationConvertVisitor(av, annotation);
+        return av;
     }
 
     @Override
