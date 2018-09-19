@@ -34,7 +34,9 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.InvokeInsn;
+import me.aki.tactical.stack.insn.SwitchInsn;
 import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -43,6 +45,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -52,7 +55,10 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -60,10 +66,10 @@ import java.util.stream.Collectors;
  * Utility that calls events of {@link InsnVisitor} based on asm {@link AbstractInsnNode}.
  */
 public class AsmInsnReader {
-    private final InsnVisitor iv;
+    private final InsnVisitor.Asm iv;
     private final ConversionContext ctx;
 
-    public AsmInsnReader(InsnVisitor iv, ConversionContext ctx) {
+    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx) {
         this.iv = iv;
         this.ctx = ctx;
     }
@@ -805,11 +811,23 @@ public class AsmInsnReader {
     }
 
     private void convertTableSwitchInsnNode(TableSwitchInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        Map<Integer, Label> table = new HashMap<>();
+        Iterator<LabelNode> labelIter = insn.labels.iterator();
+        for (int key = insn.min; key <= insn.max; key++) {
+            table.put(key, labelIter.next().getLabel());
+        }
+
+        iv.visitSwitch(table, insn.dflt.getLabel());
     }
 
     private void convertLookupSwitchInsnNode(LookupSwitchInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        Map<Integer, Label> table = new HashMap<>();
+        Iterator<LabelNode> labelIter = insn.labels.iterator();
+        for (Integer key : insn.keys) {
+            table.put(key, labelIter.next().getLabel());
+        }
+
+        iv.visitSwitch(table, insn.dflt.getLabel());
     }
 
     private void convertMultiANewArrayInsnNode(MultiANewArrayInsnNode insn) {
