@@ -15,7 +15,7 @@ import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.InvokeInsn;
-import org.objectweb.asm.Label;
+import org.objectweb.asm.tree.LabelNode;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.Optional;
  * @param <T> Type of instruction references
  */
 public class InsnVisitor<T> {
-    public static class Asm extends InsnVisitor<Label> {
+    public static class Asm extends InsnVisitor<LabelNode> {
         public Asm(InsnVisitor iv) {
             super(iv);
         }

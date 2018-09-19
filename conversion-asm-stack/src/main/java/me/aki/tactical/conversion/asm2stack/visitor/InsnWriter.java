@@ -62,6 +62,7 @@ import me.aki.tactical.stack.insn.ThrowInsn;
 import me.aki.tactical.stack.insn.UShrInsn;
 import me.aki.tactical.stack.insn.XorInsn;
 import org.objectweb.asm.Label;
+import org.objectweb.asm.tree.LabelNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -310,7 +311,7 @@ public class InsnWriter extends InsnVisitor.Asm {
     }
 
     @Override
-    public void visitGoto(Label target) {
+    public void visitGoto(LabelNode target) {
         GotoInsn insn = new GotoInsn(null);
         ctx.registerInsnCell(target, insn.getTargetCell());
 
@@ -318,7 +319,7 @@ public class InsnWriter extends InsnVisitor.Asm {
     }
 
     @Override
-    public void visitIf(IfInsn.Condition condition, Label target) {
+    public void visitIf(IfInsn.Condition condition, LabelNode target) {
         IfInsn insn = new IfInsn(condition, null);
         ctx.registerInsnCell(target, insn.getTargetCell());
 
@@ -326,7 +327,7 @@ public class InsnWriter extends InsnVisitor.Asm {
     }
 
     @Override
-    public void visitSwitch(Map<Integer, Label> targetTable, Label defaultTarget) {
+    public void visitSwitch(Map<Integer, LabelNode> targetTable, LabelNode defaultTarget) {
         Map<Integer, Instruction> table = new HashMap<>();
         SwitchInsn insn = new SwitchInsn(table, null);
 

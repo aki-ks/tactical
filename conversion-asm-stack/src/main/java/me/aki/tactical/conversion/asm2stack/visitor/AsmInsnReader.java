@@ -36,7 +36,6 @@ import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.InvokeInsn;
 import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -730,7 +729,7 @@ public class AsmInsnReader {
         int opcode = insn.getOpcode();
         switch (opcode) {
             case Opcodes.GOTO:
-                iv.visitGoto(insn.label.getLabel());
+                iv.visitGoto(insn.label);
                 return;
 
             case Opcodes.JSR:
@@ -738,7 +737,7 @@ public class AsmInsnReader {
 
             default:
                 IfInsn.Condition condition = getIfCondition(opcode);
-                iv.visitIf(condition, insn.label.getLabel());
+                iv.visitIf(condition, insn.label);
         }
     }
 
@@ -849,23 +848,23 @@ public class AsmInsnReader {
     }
 
     private void convertTableSwitchInsnNode(TableSwitchInsnNode insn) {
-        Map<Integer, Label> table = new HashMap<>();
+        Map<Integer, LabelNode> table = new HashMap<>();
         Iterator<LabelNode> labelIter = insn.labels.iterator();
         for (int key = insn.min; key <= insn.max; key++) {
-            table.put(key, labelIter.next().getLabel());
+            table.put(key, labelIter.next());
         }
 
-        iv.visitSwitch(table, insn.dflt.getLabel());
+        iv.visitSwitch(table, insn.dflt);
     }
 
     private void convertLookupSwitchInsnNode(LookupSwitchInsnNode insn) {
-        Map<Integer, Label> table = new HashMap<>();
+        Map<Integer, LabelNode> table = new HashMap<>();
         Iterator<LabelNode> labelIter = insn.labels.iterator();
         for (Integer key : insn.keys) {
-            table.put(key, labelIter.next().getLabel());
+            table.put(key, labelIter.next());
         }
 
-        iv.visitSwitch(table, insn.dflt.getLabel());
+        iv.visitSwitch(table, insn.dflt);
     }
 
     private void convertMultiANewArrayInsnNode(MultiANewArrayInsnNode insn) {
