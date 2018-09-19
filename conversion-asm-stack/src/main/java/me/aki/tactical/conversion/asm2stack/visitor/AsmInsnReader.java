@@ -1,5 +1,7 @@
 package me.aki.tactical.conversion.asm2stack.visitor;
 
+import me.aki.tactical.conversion.asm2stack.AsmUtil;
+import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
@@ -15,6 +17,7 @@ import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.PrimitiveType;
+import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.Local;
@@ -575,14 +578,34 @@ public class AsmInsnReader {
             case Opcodes.ALOAD:
             case Opcodes.ASTORE:
                 return ObjectType.OBJECT;
-                
+
             default:
                 throw new AssertionError();
         }
     }
 
     private void convertTypeInsnNode(TypeInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        switch (insn.getOpcode()) {
+            case Opcodes.NEW:
+                iv.visitNew(AsmUtil.pathFromInternalName(insn.desc));
+                break;
+
+            case Opcodes.ANEWARRAY:
+                RefType baseType = AsmUtil.refTypeFromInternalName(insn.desc);
+                iv.visitNewArray(new ArrayType(baseType, 1), 1);
+                break;
+
+            case Opcodes.CHECKCAST:
+                iv.visitReferenceCast(AsmUtil.refTypeFromInternalName(insn.desc));
+                break;
+
+            case Opcodes.INSTANCEOF:
+                iv.visitInstanceOf(AsmUtil.refTypeFromInternalName(insn.desc));
+                break;
+
+            default:
+                throw new AssertionError();
+        }
     }
 
     private void convertFieldInsnNode(FieldInsnNode insn) {
