@@ -112,9 +112,9 @@ public class InsnVisitor {
         }
     }
 
-    public void visitCmp(Type type) {
+    public void visitCmp() {
         if (iv != null) {
-            iv.visitCmp(type);
+            iv.visitCmp();
         }
     }
 
@@ -263,9 +263,9 @@ public class InsnVisitor {
         }
     }
 
-    public void visitThrow(Path exception) {
+    public void visitThrow() {
         if (iv != null) {
-            iv.visitThrow(exception);
+            iv.visitThrow();
         }
     }
 

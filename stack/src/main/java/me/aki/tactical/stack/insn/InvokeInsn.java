@@ -7,14 +7,19 @@ import me.aki.tactical.stack.InvokableMethodRef;
  */
 public class InvokeInsn extends AbstractInstruction {
     /**
+     * How should the method be invoked.
+     */
+    private InvokeType invokeType;
+
+    /**
      * Method that will be invoked.
      */
     private InvokableMethodRef method;
 
-    /**
-     * How should the method be invoked.
-     */
-    private InvokeType invokeType;
+    public InvokeInsn(InvokeType invokeType, InvokableMethodRef method) {
+        this.invokeType = invokeType;
+        this.method = method;
+    }
 
     @Override
     public int getPushCount() {

@@ -31,25 +31,17 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
     public static final IntCondition IF_INT_GE = new IntCondition(GE.getInstance(), StackValue.getInstance());
 
     /**
-     * Instruction that will be executed next, if the condition is true.
-     */
-    private Instruction target;
-
-    /**
      * Do a branch if this condition applies.
      */
     private Condition condition;
 
-    public IfInsn(Instruction target, Condition condition) {
-        this.target = target;
+    /**
+     * Instruction that will be executed next, if the condition is true.
+     */
+    private Instruction target;
+
+    public IfInsn(Condition condition, Instruction target) {
         this.condition = condition;
-    }
-
-    public Instruction getTarget() {
-        return target;
-    }
-
-    public void setTarget(Instruction target) {
         this.target = target;
     }
 
@@ -59,6 +51,14 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
 
     public void setCondition(Condition condition) {
         this.condition = condition;
+    }
+
+    public Instruction getTarget() {
+        return target;
+    }
+
+    public void setTarget(Instruction target) {
+        this.target = target;
     }
 
     @Override

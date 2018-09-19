@@ -32,6 +32,10 @@ public class ReturnInsn extends AbstractInstruction {
         this.type = Optional.of(type);
     }
 
+    public ReturnInsn(Optional<Type> type) {
+        this.type = type;
+    }
+
     @Override
     public int getPushCount() {
         return 0;
