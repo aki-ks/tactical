@@ -91,6 +91,12 @@ public class AccessConverter<F extends Enum<F>> {
             Map.entry(Method.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC)
     ));
 
+    public static final AccessConverter<Method.Parameter.Flag> parameter = new AccessConverter<>(Map.of(
+            Method.Parameter.Flag.FINAL, Opcodes.ACC_FINAL,
+            Method.Parameter.Flag.SYNTHETIC, Opcodes.ACC_SYNTHETIC,
+            Method.Parameter.Flag.MANDATED, Opcodes.ACC_MANDATED
+    ));
+
     private final Map<F, Integer> flagMap;
 
     public AccessConverter(Map<F, Integer> flagMap) {

@@ -9,6 +9,8 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 
+import java.util.Optional;
+
 /**
  * Visitor that converts all events and stores them in a {@link Method}.
  */
@@ -23,7 +25,12 @@ public class MethodConvertVisitor extends MethodVisitor {
     @Override
     public void visitParameter(String name, int access) {
         super.visitParameter(name, access);
-        throw new RuntimeException("Not yet implemented");
+
+        Method.Parameter parameter = new Method.Parameter();
+        parameter.setName(Optional.ofNullable(name));
+        parameter.setFlags(AccessConverter.parameter.fromBitMap(access));
+
+        this.method.getParameterInfo().add(parameter);
     }
 
     @Override

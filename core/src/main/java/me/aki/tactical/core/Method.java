@@ -51,6 +51,14 @@ public class Method {
     private Optional<AnnotationValue> defaultValue = Optional.empty();
 
     /**
+     * Additional debug informations about parameters.
+     *
+     * It will only be added to a classfile if javac is run with the "-parameters" flag.
+     * The information is runtime accessible via the java reflection api.
+     */
+    private List<Parameter> parameterInfo = new ArrayList<>();
+
+    /**
      * A list of parameter annotations.
      */
     private List<List<Annotation>> parameterAnnotations = new ArrayList<>();
@@ -167,6 +175,14 @@ public class Method {
 
     public void setDefaultValue(Optional<AnnotationValue> defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    public List<Parameter> getParameterInfo() {
+        return parameterInfo;
+    }
+
+    public void setParameterInfo(List<Parameter> parameterInfo) {
+        this.parameterInfo = parameterInfo;
     }
 
     public List<List<Annotation>> getParameterAnnotations() {
