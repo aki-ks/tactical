@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.asm2stack.visitor;
 
+import me.aki.tactical.conversion.asm2stack.ConversionContext;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
@@ -10,6 +11,7 @@ import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.AddInsn;
@@ -59,8 +61,10 @@ import me.aki.tactical.stack.insn.SwitchInsn;
 import me.aki.tactical.stack.insn.ThrowInsn;
 import me.aki.tactical.stack.insn.UShrInsn;
 import me.aki.tactical.stack.insn.XorInsn;
+import org.objectweb.asm.Label;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,11 +72,13 @@ import java.util.Optional;
 /**
  * Instruction visitor that collects all events represented as {@link Instruction}.
  */
-public class InsnWriter extends InsnVisitor {
+public class InsnWriter extends InsnVisitor.Asm {
+    private final ConversionContext ctx;
     private List<Instruction> instructions = new ArrayList<>();
 
-    public InsnWriter() {
+    public InsnWriter(ConversionContext ctx) {
         super(null);
+        this.ctx = ctx;
     }
 
     /**
@@ -304,17 +310,32 @@ public class InsnWriter extends InsnVisitor {
     }
 
     @Override
-    public void visitGoto(Instruction target) {
-        visitInsn(new GotoInsn(target));
+    public void visitGoto(Label target) {
+        GotoInsn insn = new GotoInsn(null);
+        ctx.registerInsnCell(target, insn.getTargetCell());
+
+        visitInsn(insn);
     }
 
     @Override
-    public void visitIf(IfInsn.Condition condition, Instruction target) {
-        visitInsn(new IfInsn(condition, target));
+    public void visitIf(IfInsn.Condition condition, Label target) {
+        IfInsn insn = new IfInsn(condition, null);
+        ctx.registerInsnCell(target, insn.getTargetCell());
+
+        visitInsn(insn);
     }
 
     @Override
-    public void visitSwitch(Map<Integer, Instruction> targetTable, Instruction defaultTarget) {
-        visitInsn(new SwitchInsn(targetTable, defaultTarget));
+    public void visitSwitch(Map<Integer, Label> targetTable, Label defaultTarget) {
+        Map<Integer, Instruction> table = new HashMap<>();
+        SwitchInsn insn = new SwitchInsn(table, null);
+
+        ctx.registerInsnCell(defaultTarget, insn.getDefaultLocationCell());
+        targetTable.forEach((key, label) -> {
+            table.put(key, null);
+            ctx.registerInsnCell(label, Cell.ofMap(key, table));
+        });
+
+        visitInsn(insn);
     }
 }

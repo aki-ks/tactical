@@ -1,5 +1,6 @@
 package me.aki.tactical.core.util;
 
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -29,6 +30,11 @@ public interface Cell<T> {
     public static <T> Cell<T> ofArray(T[] array, int index) {
         return Cell.of(() -> array[index], newValue -> array[index] = newValue);
     }
+
+    public static <T, K> Cell<T> ofMap(K key, Map<K, T> map) {
+        return Cell.of(() -> map.get(key), newValue -> map.put(key, newValue));
+    }
+
 
     /**
      * Get the value behind this reference.

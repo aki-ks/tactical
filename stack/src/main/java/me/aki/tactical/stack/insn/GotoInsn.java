@@ -1,5 +1,7 @@
 package me.aki.tactical.stack.insn;
 
+import me.aki.tactical.core.util.Cell;
+
 /**
  * Unconditionally jump to another instruction.
  */
@@ -19,6 +21,10 @@ public class GotoInsn extends AbstractInstruction implements BranchInsn {
 
     public void setTarget(Instruction target) {
         this.target = target;
+    }
+
+    public Cell<Instruction> getTargetCell() {
+        return Cell.of(this::getTarget, this::setTarget);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package me.aki.tactical.stack.insn;
 
+import me.aki.tactical.core.util.Cell;
+
 import java.util.Objects;
 
 /**
@@ -59,6 +61,10 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
 
     public void setTarget(Instruction target) {
         this.target = target;
+    }
+
+    public Cell<Instruction> getTargetCell() {
+        return Cell.of(this::getTarget, this::setTarget);
     }
 
     @Override

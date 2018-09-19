@@ -1,5 +1,7 @@
 package me.aki.tactical.stack.insn;
 
+import me.aki.tactical.core.util.Cell;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,6 +41,10 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
 
     public void setDefaultLocation(Instruction defaultLocation) {
         this.defaultLocation = defaultLocation;
+    }
+
+    public Cell<Instruction> getDefaultLocationCell() {
+        return Cell.of(this::getDefaultLocation, this::setDefaultLocation);
     }
 
     @Override
