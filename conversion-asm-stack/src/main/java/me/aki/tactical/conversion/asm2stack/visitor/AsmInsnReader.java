@@ -2,6 +2,8 @@ package me.aki.tactical.conversion.asm2stack.visitor;
 
 import me.aki.tactical.conversion.asm2stack.AsmUtil;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
@@ -21,7 +23,9 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.stack.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.insn.InvokeInsn;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -637,7 +641,21 @@ public class AsmInsnReader {
     }
 
     private void convertMethodInsnNode(MethodInsnNode insn) {
-        throw new RuntimeException("Not yet implemented");
+        Path owner = AsmUtil.pathFromInternalName(insn.owner);
+        MethodDescriptor desc = AsmUtil.parseMethodDescriptor(insn.desc);
+        InvokableMethodRef methodRef = new InvokableMethodRef(owner, insn.name, desc.getParameterTypes(), desc.getReturnType(), insn.itf);
+
+        iv.visitInvokeInsn(getInvokeType(insn.getOpcode()), methodRef);
+    }
+
+    private InvokeInsn.InvokeType getInvokeType(int opcode) {
+        switch (opcode) {
+            case Opcodes.INVOKEVIRTUAL: return InvokeInsn.InvokeType.VIRTUAL;
+            case Opcodes.INVOKESPECIAL: return InvokeInsn.InvokeType.SPECIAL;
+            case Opcodes.INVOKESTATIC: return InvokeInsn.InvokeType.STATIC;
+            case Opcodes.INVOKEINTERFACE: return InvokeInsn.InvokeType.INTERFACE;
+            default: throw new AssertionError();
+        }
     }
 
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
