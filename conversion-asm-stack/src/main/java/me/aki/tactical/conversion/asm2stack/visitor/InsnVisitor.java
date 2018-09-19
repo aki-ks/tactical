@@ -15,6 +15,7 @@ import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.InvokeInsn;
+import org.objectweb.asm.Label;
 
 import java.util.List;
 import java.util.Map;
@@ -22,11 +23,25 @@ import java.util.Optional;
 
 /**
  * Visitor that visits instructions in a way similar to the stack intermediation instructions.
+ *
+ * @param <T> Type of instruction references
  */
-public class InsnVisitor {
+public class InsnVisitor<T> {
+    public static class Asm extends InsnVisitor<Label> {
+        public Asm(InsnVisitor iv) {
+            super(iv);
+        }
+    }
+
+    public static class Tactical extends InsnVisitor<Instruction> {
+        public Tactical(InsnVisitor<Instruction> iv) {
+            super(iv);
+        }
+    }
+
     private InsnVisitor iv;
 
-    public InsnVisitor(InsnVisitor iv) {
+    public InsnVisitor(InsnVisitor<T> iv) {
         this.iv = iv;
     }
 
@@ -311,19 +326,19 @@ public class InsnVisitor {
 
     // CFG
 
-    public void visitGoto(Instruction target) {
+    public void visitGoto(T target) {
         if (iv != null) {
             iv.visitGoto(target);
         }
     }
 
-    public void visitIf(IfInsn.Condition condition, Instruction target) {
+    public void visitIf(IfInsn.Condition condition, T target) {
         if (iv != null) {
             iv.visitIf(condition, target);
         }
     }
 
-    public void visitSwitch(Map<Integer, Instruction> targetTable, Instruction defaultTarget) {
+    public void visitSwitch(Map<Integer, T> targetTable, T defaultTarget) {
         if (iv != null) {
             iv.visitSwitch(targetTable, defaultTarget);
         }
