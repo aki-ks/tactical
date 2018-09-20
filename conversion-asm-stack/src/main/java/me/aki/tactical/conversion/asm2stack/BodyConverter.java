@@ -34,7 +34,7 @@ public class BodyConverter {
         }
 
         int localIndex = 0;
-        if (this.method.getFlag(Method.Flag.STATIC)) {
+        if (!this.method.getFlag(Method.Flag.STATIC)) {
             this.body.setThisLocal(Optional.of(ctx.getLocal(localIndex++)));
         }
 
