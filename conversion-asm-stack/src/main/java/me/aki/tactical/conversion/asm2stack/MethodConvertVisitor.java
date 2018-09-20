@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.asm2stack;
 
+import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
@@ -8,13 +9,13 @@ import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.stack.StackBody;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +25,14 @@ import java.util.Optional;
  * Visitor that converts all events and stores them in a {@link Method}.
  */
 public class MethodConvertVisitor extends JSRInlinerAdapter {
-    private Method method;
+    private final Classfile classfile;
+    private final Method method;
     private StackBody body;
 
-    public MethodConvertVisitor(MethodVisitor methodVisitor, Method method, int access, String name, String descriptor, String signature, String[] exceptions) {
+    public MethodConvertVisitor(MethodVisitor methodVisitor, Classfile classfile, Method method, int access, String name, String descriptor, String signature, String[] exceptions) {
         super(Opcodes.ASM6, methodVisitor, access, name, descriptor, signature, exceptions);
         this.method = method;
+        this.classfile = classfile;
     }
 
     @Override
@@ -135,7 +138,7 @@ public class MethodConvertVisitor extends JSRInlinerAdapter {
         super.visitEnd();
 
         if (this.body != null) {
-            new BodyConverter(this.method, this.body, this).convert();
+            new BodyConverter(this.classfile, this.method, this.body, this).convert();
         }
     }
 

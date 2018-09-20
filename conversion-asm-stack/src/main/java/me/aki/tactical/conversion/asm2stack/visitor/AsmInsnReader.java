@@ -84,13 +84,17 @@ public class AsmInsnReader {
     private final MethodNode mn;
     private final Frame<BasicValue>[] frames;
 
-    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx, MethodNode mn) throws AnalyzerException {
+    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx, String owner, MethodNode mn) {
         this.iv = iv;
         this.ctx = ctx;
         this.mn = mn;
 
-        Analyzer<BasicValue> analyzer = new Analyzer<>(new BasicInterpreter());
-        this.frames = analyzer.analyze("java/lang/Object", mn);
+        try {
+            Analyzer<BasicValue> analyzer = new Analyzer<>(new BasicInterpreter());
+            this.frames = analyzer.analyze(owner, mn);
+        } catch (AnalyzerException e) {
+            throw new RuntimeException("Asm cannot analyze method " + owner + "#" + mn.name + mn.desc);
+        }
     }
 
     private Local getLocal(int var) {

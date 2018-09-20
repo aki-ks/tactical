@@ -64,6 +64,22 @@ public class Path {
         return name;
     }
 
+    /**
+     * Join the package and class name.
+     *
+     * @param separator char separating each package and the name
+     * @return joined path
+     */
+    public String join(char separator) {
+        StringBuilder builder = new StringBuilder();
+        for (String pkg : this.pkg) {
+            builder.append(pkg);
+            builder.append(separator);
+        }
+        builder.append(this.name);
+        return builder.toString();
+    }
+
     @Override
     public String toString() {
         return "Path{" +
