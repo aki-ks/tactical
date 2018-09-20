@@ -81,9 +81,18 @@ public class BodyConverter {
 
     private void updateInsnCells() {
         ctx.getLabelCells().forEach((label, insnCells) -> {
-            List<Instruction> insns = convertedInsns.get(label);
-            if (insns == null || insns.isEmpty()) {
-                throw new RuntimeException("Not yet converted insns");
+            List<Instruction> insns;
+
+            AbstractInsnNode node = label;
+            while (true) {
+                insns = convertedInsns.get(node);
+                if (insns != null && !insns.isEmpty()) {
+                    break;
+                }
+
+                if ((node = node.getNext()) == null) {
+                    throw new RuntimeException("Label could not be resolved");
+                }
             }
 
             for (Cell<Instruction> cell : insnCells) {
