@@ -1,6 +1,5 @@
 package me.aki.tactical.core.typeannotation;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 public interface TargetType {
@@ -27,8 +26,8 @@ public interface TargetType {
     }
 
     interface InsnTargetType extends TargetType {
-        int SORT_INSTANCE_OF = InstanceOfExpr.SORT;
-        int SORT_NEW = NewExpr.SORT;
+        int SORT_INSTANCE_OF = InstanceOf.SORT;
+        int SORT_NEW = New.SORT;
         int SORT_CONSTRUCTOR_REFERENCE = ConstructorReference.SORT;
         int SORT_METHOD_REFERENCE = MethodReference.SORT;
         int SORT_CAST = Cast.SORT;
@@ -434,7 +433,7 @@ public interface TargetType {
      * Example:
      * <pre><code>obj instanceOf @MyAnno String</code></pre>
      */
-    final class InstanceOfExpr implements InsnTargetType {
+    final class InstanceOf implements InsnTargetType {
         public static final int SORT = 8;
 
         @Override
@@ -444,7 +443,7 @@ public interface TargetType {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof InstanceOfExpr;
+            return obj instanceof InstanceOf;
         }
 
         @Override
@@ -454,7 +453,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return InstanceOfExpr.class.getSimpleName() + "{}";
+            return InstanceOf.class.getSimpleName() + "{}";
         }
     }
 
@@ -464,7 +463,7 @@ public interface TargetType {
      * Example:
      * <pre><code>new @MyAnno Object()</code></pre>
      */
-    final class NewExpr implements InsnTargetType {
+    final class New implements InsnTargetType {
         public static final int SORT = 9;
 
         @Override
@@ -474,7 +473,7 @@ public interface TargetType {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof NewExpr;
+            return obj instanceof New;
         }
 
         @Override
@@ -484,7 +483,7 @@ public interface TargetType {
 
         @Override
         public String toString() {
-            return NewExpr.class.getSimpleName() + "{}";
+            return New.class.getSimpleName() + "{}";
         }
     }
 
