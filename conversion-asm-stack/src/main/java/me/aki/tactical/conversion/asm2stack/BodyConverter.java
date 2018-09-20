@@ -10,12 +10,16 @@ import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.insn.Instruction;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.BasicInterpreter;
+import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +31,7 @@ public class BodyConverter {
     private final MethodNode mn;
 
     private final ConversionContext ctx = new ConversionContext();
+    private Frame<BasicValue>[] frames;
 
     private final Map<AbstractInsnNode, List<Instruction>> convertedInsns = new HashMap<>();
 
@@ -55,28 +60,42 @@ public class BodyConverter {
     public void convert() {
         initLocals();
 
+        runAsmClassAnalysis();
         convertInsns();
 
         updateInsnCells();
     }
 
+    private void runAsmClassAnalysis() {
+        String owner = classfile.getName().join('/');
+        try {
+            Analyzer<BasicValue> analyzer = new Analyzer<>(new BasicInterpreter());
+            this.frames = analyzer.analyze(owner, mn);
+        } catch (AnalyzerException e) {
+            throw new RuntimeException("Asm cannot analyze method " + owner + "#" + mn.name + mn.desc);
+        }
+    }
+
     private void convertInsns() {
         InsnWriter iw = new InsnWriter(ctx);
-        String owner = classfile.getName().join('/');
-        AsmInsnReader reader = new AsmInsnReader(iw, ctx, owner, mn);
+        AsmInsnReader reader = new AsmInsnReader(iw, ctx);
 
-        mn.instructions.iterator().forEachRemaining(insn -> {
-            reader.accept(insn);
+        InsnList instructions = mn.instructions;
+        for (int index = 0; index < instructions.size(); index++) {
+            AbstractInsnNode insn = instructions.get(index);
+            Frame<BasicValue> frame = this.frames[index];
+            if (frame == null) {
+                // this instruction is dead code
+                continue;
+            }
+
+            reader.accept(insn, frame);
 
             List<Instruction> convertedInsns = iw.getInstructions();
-            if (convertedInsns.isEmpty()) {
-                // The converted instruction was dead code
-            } else {
-                this.convertedInsns.put(insn, new ArrayList<>(convertedInsns));
-                this.body.getInstructions().addAll(convertedInsns);
-                convertedInsns.clear();
-            }
-        });
+            this.convertedInsns.put(insn, new ArrayList<>(convertedInsns));
+            this.body.getInstructions().addAll(convertedInsns);
+            convertedInsns.clear();
+        }
     }
 
     private void updateInsnCells() {

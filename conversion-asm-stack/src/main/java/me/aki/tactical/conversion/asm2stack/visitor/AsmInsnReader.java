@@ -48,14 +48,10 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.tree.analysis.Analyzer;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.BasicInterpreter;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
@@ -70,8 +66,6 @@ import java.util.stream.Collectors;
 /**
  * Utility that calls events of {@link InsnVisitor} based on asm {@link AbstractInsnNode}.
  *
- * The visitor does not call events for instructions that are dead code.
- *
  * This visitor abstracts away the existence of computational types 2.
  *
  * Example:
@@ -81,33 +75,17 @@ import java.util.stream.Collectors;
 public class AsmInsnReader {
     private final InsnVisitor.Asm iv;
     private final ConversionContext ctx;
-    private final MethodNode mn;
-    private final Frame<BasicValue>[] frames;
 
-    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx, String owner, MethodNode mn) {
+    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx) {
         this.iv = iv;
         this.ctx = ctx;
-        this.mn = mn;
-
-        try {
-            Analyzer<BasicValue> analyzer = new Analyzer<>(new BasicInterpreter());
-            this.frames = analyzer.analyze(owner, mn);
-        } catch (AnalyzerException e) {
-            throw new RuntimeException("Asm cannot analyze method " + owner + "#" + mn.name + mn.desc);
-        }
     }
 
     private Local getLocal(int var) {
         return ctx.getLocal(var);
     }
 
-    public void accept(AbstractInsnNode insn) {
-        Frame<BasicValue> frame = frames[mn.instructions.indexOf(insn)];
-        if (frame == null) {
-            // This instruction is dead code
-            return;
-        }
-
+    public void accept(AbstractInsnNode insn, Frame<BasicValue> frame) {
         switch (insn.getType()) {
             case AbstractInsnNode.INSN:
                 convertInsnNode((InsnNode) insn, frame);
