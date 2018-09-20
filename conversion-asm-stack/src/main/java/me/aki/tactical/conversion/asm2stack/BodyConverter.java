@@ -7,6 +7,7 @@ import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
 import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.core.typeannotation.TypePath;
@@ -197,7 +198,28 @@ public class BodyConverter {
             this.ctx.registerInsnCell(block.start, tryCatchBlock.getFirstCell());
             this.ctx.registerInsnCell(block.end, tryCatchBlock.getLastCell());
             this.ctx.registerInsnCell(block.handler, tryCatchBlock.getHandlerCell());
+
+            if (block.visibleTypeAnnotations != null) {
+                for (TypeAnnotationNode anno : block.visibleTypeAnnotations) {
+                    tryCatchBlock.getTypeAnnotations().add(convertExceptionTypeAnnotation(anno, true));
+                }
+            }
+
+            if (block.invisibleTypeAnnotations != null) {
+                for (TypeAnnotationNode anno : block.invisibleTypeAnnotations) {
+                    tryCatchBlock.getTypeAnnotations().add(convertExceptionTypeAnnotation(anno, false));
+                }
+            }
         }
+    }
+
+    private ExceptionTypeAnnotation convertExceptionTypeAnnotation(TypeAnnotationNode typeAnnotation, boolean visible) {
+        TypePath typePath = AsmUtil.fromAsmTypePath(typeAnnotation.typePath);
+
+        Annotation annotation = new Annotation(AsmUtil.pathFromInternalName(typeAnnotation.desc), visible);
+        typeAnnotation.accept(new AnnotationConvertVisitor(null, annotation));
+
+        return new ExceptionTypeAnnotation(typePath, annotation);
     }
 
     /**
