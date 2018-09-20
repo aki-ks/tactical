@@ -27,7 +27,15 @@ public interface TargetType {
     }
 
     interface InsnTargetType extends TargetType {
-
+        int SORT_INSTANCE_OF = InstanceOfExpr.SORT;
+        int SORT_NEW = NewExpr.SORT;
+        int SORT_CONSTRUCTOR_REFERENCE = ConstructorReference.SORT;
+        int SORT_METHOD_REFERENCE = MethodReference.SORT;
+        int SORT_CAST = Cast.SORT;
+        int SORT_CONSTRUCTOR_INVOKE_TYPE_PARAMETER = ConstructorInvokeTypeParameter.SORT;
+        int SORT_METHOD_INVOKE_TYPE_PARAMETER = MethodInvokeTypeParameter.SORT;
+        int SORT_CONSTRUCTOR_REFERENCE_TYPE_PARAMETER = ConstructorReferenceTypeParameter.SORT;
+        int SORT_METHOD_REFERENCE_TYPE_PARAMETER = MethodReferenceTypeParameter.SORT;
     }
 
     /**
@@ -546,7 +554,7 @@ public interface TargetType {
      * Example:
      * <pre><code>(Serializable & @TestAnno Cloneable) obj</code></pre>
      */
-    final class Cast implements InsnTargetType, Serializable {
+    final class Cast implements InsnTargetType {
         public static final int SORT = 12;
 
         /**
@@ -693,7 +701,6 @@ public interface TargetType {
                     '}';
         }
     }
-
 
     /**
      * Annotate a type parameter of a constructor reference.
