@@ -1,9 +1,11 @@
 package me.aki.tactical.stack;
 
-import me.aki.tactical.core.type.ObjectType;
+import me.aki.tactical.core.Path;
 import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
+import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.insn.Instruction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,29 +29,21 @@ public class TryCatchBlock {
     private Instruction handler;
 
     /**
-     * If an exception was caught, it gets stored in that local and the jvm branches
-     * to the {@link TryCatchBlock#handler} instruction.
+     * Kind of exceptions that get caught by this block or empty
+     * to catch any exception (see <tt>finally</tt> blocks).
      */
-    private Local exceptionLocal;
-
-    /**
-     * Kind of exceptions that get caught by this block
-     * or empty to catch any exception.
-     */
-    private Optional<ObjectType> exceptionType;
+    private Optional<Path> exceptionType;
 
     /**
      * Type annotations of the exception type.
      */
-    private List<ExceptionTypeAnnotation> typeAnnotations;
+    private List<ExceptionTypeAnnotation> typeAnnotations = new ArrayList<>();
 
-    public TryCatchBlock(Instruction first, Instruction last, Instruction handler, Local exceptionLocal, Optional<ObjectType> exceptionType, List<ExceptionTypeAnnotation> typeAnnotations) {
+    public TryCatchBlock(Instruction first, Instruction last, Instruction handler, Optional<Path> exceptionType) {
         this.first = first;
         this.last = last;
         this.handler = handler;
-        this.exceptionLocal = exceptionLocal;
         this.exceptionType = exceptionType;
-        this.typeAnnotations = typeAnnotations;
     }
 
     public Instruction getFirst() {
@@ -60,12 +54,20 @@ public class TryCatchBlock {
         this.first = first;
     }
 
+    public Cell<Instruction> getFirstCell() {
+        return Cell.of(this::getFirst, this::setFirst);
+    }
+
     public Instruction getLast() {
         return last;
     }
 
     public void setLast(Instruction last) {
         this.last = last;
+    }
+
+    public Cell<Instruction> getLastCell() {
+        return Cell.of(this::getLast, this::setLast);
     }
 
     public Instruction getHandler() {
@@ -76,19 +78,15 @@ public class TryCatchBlock {
         this.handler = handler;
     }
 
-    public Local getExceptionLocal() {
-        return exceptionLocal;
+    public Cell<Instruction> getHandlerCell() {
+        return Cell.of(this::getHandler, this::setHandler);
     }
 
-    public void setExceptionLocal(Local exceptionLocal) {
-        this.exceptionLocal = exceptionLocal;
-    }
-
-    public Optional<ObjectType> getExceptionType() {
+    public Optional<Path> getExceptionType() {
         return exceptionType;
     }
 
-    public void setExceptionType(Optional<ObjectType> exceptionType) {
+    public void setExceptionType(Optional<Path> exceptionType) {
         this.exceptionType = exceptionType;
     }
 

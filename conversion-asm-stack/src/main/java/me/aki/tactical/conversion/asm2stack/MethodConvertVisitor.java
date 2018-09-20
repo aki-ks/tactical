@@ -143,12 +143,6 @@ public class MethodConvertVisitor extends JSRInlinerAdapter {
     }
 
     @Override
-    public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-        super.visitTryCatchBlock(start, end, handler, type);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
     public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
 //        return super.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible);
         throw new RuntimeException("Not yet implemented");

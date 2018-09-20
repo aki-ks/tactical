@@ -4,6 +4,7 @@ import me.aki.tactical.conversion.asm2stack.visitor.AsmInsnReader;
 import me.aki.tactical.conversion.asm2stack.visitor.InsnWriter;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
+import me.aki.tactical.core.Path;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
@@ -12,13 +13,15 @@ import me.aki.tactical.core.typeannotation.TypePath;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.StackBody;
+import me.aki.tactical.stack.TryCatchBlock;
 import me.aki.tactical.stack.insn.Instruction;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.TypeReference;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeAnnotationNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -71,7 +74,7 @@ public class BodyConverter {
         runAsmClassAnalysis();
         convertInsns();
 
-        convertLineNumbers();
+        convertTryCatchBlocks();
 
         updateInsnCells();
     }
@@ -178,6 +181,42 @@ public class BodyConverter {
         StackBody.LineNumber line = new StackBody.LineNumber(insn.line, null);
         this.body.getLineNumbers().add(line);
         this.ctx.registerInsnCell(insn.start, line.getInstructionCell());
+    }
+
+    private void convertTryCatchBlocks() {
+        for (TryCatchBlockNode block : mn.tryCatchBlocks) {
+            if (isRangeEmpty(block.start, block.end)) {
+                // This handler handles only dead code
+                continue;
+            }
+
+            Optional<Path> exceptionType = Optional.ofNullable(block.type).map(AsmUtil::pathFromInternalName);
+            TryCatchBlock tryCatchBlock = new TryCatchBlock(null, null, null, exceptionType);
+            this.body.getTryCatchBlocks().add(tryCatchBlock);
+
+            this.ctx.registerInsnCell(block.start, tryCatchBlock.getFirstCell());
+            this.ctx.registerInsnCell(block.end, tryCatchBlock.getLastCell());
+            this.ctx.registerInsnCell(block.handler, tryCatchBlock.getHandlerCell());
+        }
+    }
+
+    /**
+     * Check whether any reachable (= no dead code) instructions are within a range
+     * of instructions defined by two labels.
+     *
+     * @param start of the range
+     * @param end of the range
+     * @return whether the range contains no reachable statements
+     */
+    private boolean isRangeEmpty(LabelNode start, LabelNode end) {
+        AbstractInsnNode node = start;
+        do {
+            int insnIndex = mn.instructions.indexOf(node);
+            if (frames[insnIndex] != null) {
+                return false;
+            }
+        } while((node = node.getNext()) != end);
+        return true;
     }
 
     private void updateInsnCells() {
