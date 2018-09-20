@@ -21,6 +21,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeAnnotationNode;
@@ -76,6 +77,7 @@ public class BodyConverter {
         convertInsns();
 
         convertTryCatchBlocks();
+        convertLocalVariables();
 
         updateInsnCells();
     }
@@ -220,6 +222,18 @@ public class BodyConverter {
         typeAnnotation.accept(new AnnotationConvertVisitor(null, annotation));
 
         return new ExceptionTypeAnnotation(typePath, annotation);
+    }
+
+    private void convertLocalVariables() {
+        for (LocalVariableNode asmVar : mn.localVariables) {
+            StackBody.LocalVariable localVar = new StackBody.LocalVariable(asmVar.name,
+                    AsmUtil.fromDescriptor(asmVar.desc), Optional.ofNullable(asmVar.signature),
+                    null, null, ctx.getLocal(asmVar.index));
+            this.body.getLocalVariables().add(localVar);
+
+            this.ctx.registerInsnCell(asmVar.start, localVar.getStartCell());
+            this.ctx.registerInsnCell(asmVar.end, localVar.getEndCell());
+        }
     }
 
     /**
