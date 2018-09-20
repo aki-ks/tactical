@@ -21,6 +21,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ModuleVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
@@ -37,8 +38,8 @@ import java.util.stream.Stream;
 public class ClassConvertVisitor extends ClassVisitor {
     private Classfile classfile;
 
-    public ClassConvertVisitor(int api) {
-        super(api);
+    public ClassConvertVisitor() {
+        super(Opcodes.ASM6);
     }
 
     public Classfile getClassfile() {
