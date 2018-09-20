@@ -70,6 +70,8 @@ import java.util.stream.Collectors;
 /**
  * Utility that calls events of {@link InsnVisitor} based on asm {@link AbstractInsnNode}.
  *
+ * The visitor does not call events for instructions that are dead code.
+ *
  * This visitor abstracts away the existence of computational types 2.
  *
  * Example:
@@ -96,9 +98,15 @@ public class AsmInsnReader {
     }
 
     public void accept(AbstractInsnNode insn) {
+        Frame<BasicValue> frame = frames[mn.instructions.indexOf(insn)];
+        if (frame == null) {
+            // This instruction is dead code
+            return;
+        }
+
         switch (insn.getType()) {
             case AbstractInsnNode.INSN:
-                convertInsnNode((InsnNode) insn);
+                convertInsnNode((InsnNode) insn, frame);
                 break;
 
             case AbstractInsnNode.INT_INSN:
@@ -159,7 +167,7 @@ public class AsmInsnReader {
         }
     }
 
-    private void convertInsnNode(InsnNode insn) {
+    private void convertInsnNode(InsnNode insn, Frame<BasicValue> frame) {
         int opcode = insn.getOpcode();
         switch (opcode) {
             case Opcodes.NOP:
@@ -226,7 +234,7 @@ public class AsmInsnReader {
             case Opcodes.DUP2_X1:
             case Opcodes.DUP2_X2:
             case Opcodes.SWAP:
-                visitStackInsns(insn);
+                visitStackInsns(insn, frame);
                 break;
 
             case Opcodes.IADD:
@@ -360,9 +368,7 @@ public class AsmInsnReader {
         }
     }
 
-    private void visitStackInsns(InsnNode insn) {
-        Frame<BasicValue> frame = frames[mn.instructions.indexOf(insn)];
-
+    private void visitStackInsns(InsnNode insn, Frame<BasicValue> frame) {
         switch (insn.getOpcode()) {
             case Opcodes.SWAP:
                 if (is32bit(frame, 0)) {
