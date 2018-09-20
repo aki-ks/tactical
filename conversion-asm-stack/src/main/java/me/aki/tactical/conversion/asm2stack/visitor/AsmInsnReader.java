@@ -48,10 +48,16 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.BasicInterpreter;
+import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,14 +69,26 @@ import java.util.stream.Collectors;
 
 /**
  * Utility that calls events of {@link InsnVisitor} based on asm {@link AbstractInsnNode}.
+ *
+ * This visitor abstracts away the existence of computational types 2.
+ *
+ * Example:
+ * A <tt>DUP2</tt> instruction is used by the jvm to duplicate one <tt>long</tt> value.
+ * In such a case, this utility visits a <tt>DUP</tt> insn instead.
  */
 public class AsmInsnReader {
     private final InsnVisitor.Asm iv;
     private final ConversionContext ctx;
+    private final MethodNode mn;
+    private final Frame<BasicValue>[] frames;
 
-    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx) {
+    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx, MethodNode mn) throws AnalyzerException {
         this.iv = iv;
         this.ctx = ctx;
+        this.mn = mn;
+
+        Analyzer<BasicValue> analyzer = new Analyzer<>(new BasicInterpreter());
+        this.frames = analyzer.analyze("java/lang/Object", mn);
     }
 
     private Local getLocal(int var) {
@@ -200,40 +218,15 @@ public class AsmInsnReader {
                 break;
 
             case Opcodes.POP:
-                iv.visitPop();
-                break;
-
             case Opcodes.POP2:
-                iv.visitPop();
-                iv.visitPop();
-                break;
-
             case Opcodes.DUP:
-                iv.visitDup();
-                break;
-
             case Opcodes.DUP_X1:
-                iv.visitDupX1();
-                break;
-
             case Opcodes.DUP_X2:
-                iv.visitDupX2();
-                break;
-
             case Opcodes.DUP2:
-                iv.visitDup2();
-                break;
-
             case Opcodes.DUP2_X1:
-                iv.visitDup2X1();
-                break;
-
             case Opcodes.DUP2_X2:
-                iv.visitDup2X2();
-                break;
-
             case Opcodes.SWAP:
-                iv.visitSwap();
+                visitStackInsns(insn);
                 break;
 
             case Opcodes.IADD:
@@ -365,6 +358,148 @@ public class AsmInsnReader {
                 iv.visitMonitorExit();
                 break;
         }
+    }
+
+    private void visitStackInsns(InsnNode insn) {
+        Frame<BasicValue> frame = frames[mn.instructions.indexOf(insn)];
+
+        switch (insn.getOpcode()) {
+            case Opcodes.SWAP:
+                if (is32bit(frame, 0)) {
+                    iv.visitSwap();
+                    break;
+                }
+                throw new StackTypeException();
+
+            case Opcodes.POP:
+                if (is32bit(frame, 0)) {
+                    iv.visitPop();
+                    break;
+                }
+                throw new StackTypeException();
+
+            case Opcodes.POP2:
+                if (is32bit(frame, 0)) {
+                    // Form 1
+                    iv.visitPop();
+                    iv.visitPop();
+                    break;
+                } else {
+                    // Form 2
+                    iv.visitPop();
+                    break;
+                }
+
+            case Opcodes.DUP:
+                if (is32bit(frame, 0)) {
+                    iv.visitDup();
+                    break;
+                }
+                throw new StackTypeException();
+
+            case Opcodes.DUP_X1:
+                if (is32bit(frame, 0) && is32bit(frame, 1)) {
+                    iv.visitDupX1();
+                    break;
+                }
+                throw new StackTypeException();
+
+            case Opcodes.DUP_X2:
+                if (is32bit(frame, 0)) {
+                    if (is32bit(frame, 1)) {
+                        if (is32bit(frame, 2)) {
+                            // Form 1
+                            iv.visitDupX2();
+                            break;
+                        }
+                    } else {
+                        // Form 2
+                        iv.visitDupX1();
+                        break;
+                    }
+                }
+                throw new StackTypeException();
+
+            case Opcodes.DUP2:
+                if (is32bit(frame, 0)) {
+                    if (is32bit(frame, 1)) {
+                        // Form 1
+                        iv.visitDup2();
+                        break;
+                    }
+                } else {
+                    // Form 2
+                    iv.visitDup();
+                    break;
+                }
+                throw new StackTypeException();
+
+            case Opcodes.DUP2_X1:
+                if (is32bit(frame, 0)) {
+                    if (is32bit(frame, 1)) {
+                        if (is32bit(frame, 2)) {
+                            // Form 1
+                            iv.visitDup2X1();
+                            break;
+                        }
+                    }
+                } else {
+                    if (is32bit(frame, 1)) {
+                        // Form 2
+                        iv.visitDupX1();
+                        break;
+                    }
+                }
+                throw new StackTypeException();
+
+            case Opcodes.DUP2_X2:
+                if (is32bit(frame, 0)) {
+                    if (is32bit(frame, 1)) {
+                        if (is32bit(frame, 2)) {
+                            if (is32bit(frame, 3)) {
+                                // Form 1
+                                iv.visitDup2X2();
+                                break;
+                            }
+                        } else {
+                            // Form 3
+                            iv.visitDup2X1();
+                            break;
+                        }
+                    }
+                } else {
+                    if (is32bit(frame, 1)) {
+                        if (is32bit(frame, 2)) {
+                            // Form 2
+                            iv.visitDupX2();
+                            break;
+                        }
+                    } else {
+                        // Form 4
+                        iv.visitDupX1();
+                        break;
+                    }
+                }
+                throw new StackTypeException();
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    /**
+     * Is a value n-elements down in the stack of computational type 1.
+     *
+     * @param frame frame of the current instruction
+     * @param index index of stack where 0 is the must recent value
+     * @return is the value of computational type 1
+     */
+    private boolean is32bit(Frame<BasicValue> frame, int index) {
+        BasicValue value = frame.getStack(frame.getStackSize() - 1 - index);
+        int sort = value.getType().getSort();
+
+        return sort == org.objectweb.asm.Type.LONG ||
+                sort == org.objectweb.asm.Type.DOUBLE;
     }
 
     private Type getArrayLoadType(int opcode) {
@@ -870,5 +1005,13 @@ public class AsmInsnReader {
     private void convertMultiANewArrayInsnNode(MultiANewArrayInsnNode insn) {
         ArrayType array = (ArrayType) AsmUtil.fromDescriptor(insn.desc);
         iv.visitNewArray(array, insn.dims);
+    }
+
+    public static class StackTypeException extends IllegalStateException {
+        public StackTypeException() {}
+
+        public StackTypeException(String s) {
+            super(s);
+        }
     }
 }
