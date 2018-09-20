@@ -13,9 +13,11 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.insn.Instruction;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.TypeReference;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeAnnotationNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
@@ -69,6 +71,8 @@ public class BodyConverter {
         runAsmClassAnalysis();
         convertInsns();
 
+        convertLineNumbers();
+
         updateInsnCells();
     }
 
@@ -92,6 +96,11 @@ public class BodyConverter {
             Frame<BasicValue> frame = this.frames[index];
             if (frame == null) {
                 // this instruction is dead code
+                continue;
+            }
+
+            if (insn instanceof LineNumberNode) {
+                convertLineNumber((LineNumberNode) insn);
                 continue;
             }
 
@@ -163,6 +172,12 @@ public class BodyConverter {
             default:
                 throw new AssertionError();
         }
+    }
+
+    private void convertLineNumber(LineNumberNode insn) {
+        StackBody.LineNumber line = new StackBody.LineNumber(insn.line, null);
+        this.body.getLineNumbers().add(line);
+        this.ctx.registerInsnCell(insn.start, line.getInstructionCell());
     }
 
     private void updateInsnCells() {

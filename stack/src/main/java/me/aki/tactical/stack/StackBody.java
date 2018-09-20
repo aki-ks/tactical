@@ -3,6 +3,7 @@ package me.aki.tactical.stack;
 import me.aki.tactical.core.Body;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
+import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.StoreInsn;
 
@@ -332,6 +333,10 @@ public class StackBody implements Body {
 
         public void setInstruction(Instruction instruction) {
             this.instruction = instruction;
+        }
+
+        public Cell<Instruction> getInstructionCell() {
+            return Cell.of(this::getInstruction, this::setInstruction);
         }
     }
 }

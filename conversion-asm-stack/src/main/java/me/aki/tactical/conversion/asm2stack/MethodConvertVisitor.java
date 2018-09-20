@@ -165,10 +165,4 @@ public class MethodConvertVisitor extends JSRInlinerAdapter {
 //        return super.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, descriptor, visible);
         throw new RuntimeException("Not yet implemented");
     }
-
-    @Override
-    public void visitLineNumber(int line, Label start) {
-        super.visitLineNumber(line, start);
-        throw new RuntimeException("Not yet implemented");
-    }
 }
