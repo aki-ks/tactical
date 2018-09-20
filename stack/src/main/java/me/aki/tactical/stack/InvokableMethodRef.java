@@ -50,7 +50,7 @@ public class InvokableMethodRef extends MethodRef {
                 ", name='" + getName() + '\'' +
                 ", arguments=" + getArguments() +
                 ", returnType=" + getReturnType() +
-                "isInterface=" + isInterface +
+                ", isInterface=" + isInterface +
                 '}';
     }
 }
