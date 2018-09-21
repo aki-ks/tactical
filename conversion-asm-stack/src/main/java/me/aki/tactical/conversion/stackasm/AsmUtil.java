@@ -210,4 +210,16 @@ public class AsmUtil {
     public static RefType refTypeFromInternalName(String internalName) {
         return (RefType) fromAsmType(org.objectweb.asm.Type.getObjectType(internalName));
     }
+
+    public static String methodDescriptorToString(MethodDescriptor descriptor) {
+        org.objectweb.asm.Type returnType = descriptor.getReturnType()
+                .map(AsmUtil::toAsmType)
+                .orElse(org.objectweb.asm.Type.VOID_TYPE);
+
+        org.objectweb.asm.Type[] paramTypes = descriptor.getParameterTypes().stream()
+                .map(AsmUtil::toAsmType)
+                .toArray(org.objectweb.asm.Type[]::new);
+
+        org.objectweb.asm.Type.getMethodType(returnType, paramTypes);
+    }
 }

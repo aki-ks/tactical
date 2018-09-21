@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.conversion.stackasm.AsmUtil;
 import me.aki.tactical.core.Classfile;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
@@ -20,6 +21,7 @@ public class TacticalClassReader {
     public void accept(ClassVisitor cv) {
         doVisit(cv);
         doSourceVisit(cv);
+        doOuterClassVisit(cv);
     }
 
     private void doVisit(ClassVisitor cv) {
@@ -47,5 +49,16 @@ public class TacticalClassReader {
         if (source.isPresent() || debug.isPresent()) {
             cv.visitSource(source.orElse(null), debug.orElse(null));
         }
+    }
+
+    private void doOuterClassVisit(ClassVisitor cv) {
+        classfile.getEnclosingMethod().ifPresent(enclosingMethod -> {
+            String owner = enclosingMethod.getOwner().join('/');
+            String name = enclosingMethod.getName().orElse(null);
+            String descriptor = enclosingMethod.getDescriptor()
+                    .map(AsmUtil::methodDescriptorToString).orElse(null);
+
+            cv.visitOuterClass(owner, name, descriptor);
+        });
     }
 }
