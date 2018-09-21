@@ -1,7 +1,8 @@
 package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.asm2stack.visitor.AsmInsnReader;
-import me.aki.tactical.conversion.asm2stack.visitor.InsnWriter;
+import me.aki.tactical.conversion.stackasm.AsmInsnReader;
+import me.aki.tactical.conversion.stackasm.InsnWriter;
+import me.aki.tactical.conversion.stackasm.AsmUtil;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;

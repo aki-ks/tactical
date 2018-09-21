@@ -1,4 +1,4 @@
-package me.aki.tactical.conversion.asm2stack;
+package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;

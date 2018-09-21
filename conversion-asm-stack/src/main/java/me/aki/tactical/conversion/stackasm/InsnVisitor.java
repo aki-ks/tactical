@@ -1,4 +1,4 @@
-package me.aki.tactical.conversion.asm2stack.visitor;
+package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;

@@ -1,6 +1,7 @@
-package me.aki.tactical.conversion.asm2stack.visitor;
+package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.conversion.asm2stack.ConversionContext;
+import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
@@ -61,7 +62,6 @@ import me.aki.tactical.stack.insn.SwitchInsn;
 import me.aki.tactical.stack.insn.ThrowInsn;
 import me.aki.tactical.stack.insn.UShrInsn;
 import me.aki.tactical.stack.insn.XorInsn;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.LabelNode;
 
 import java.util.ArrayList;
