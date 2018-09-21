@@ -53,7 +53,7 @@ public class AsmUtil {
             }
         } else if (type instanceof ObjectType) {
             Path name = ((ObjectType) type).getName();
-            return org.objectweb.asm.Type.getObjectType(joinPath(name, '/'));
+            return org.objectweb.asm.Type.getObjectType(name.join('/'));
         } else if (type instanceof ArrayType) {
             ArrayType array = (ArrayType) type;
             int dimensions = array.getDimensions();
@@ -159,25 +159,6 @@ public class AsmUtil {
         }
 
         return new Path(pkgs, builder.toString());
-    }
-
-    /**
-     * Concatenate packages and class name.
-     *
-     * @param path to be joined
-     * @param separator between all packages and the classname.
-     * @return the joined path.
-     */
-    public static String joinPath(Path path, char separator) {
-        StringBuilder builder = new StringBuilder();
-
-        for (String pkg : path.getPackage()) {
-            builder.append(pkg);
-            builder.append(separator);
-        }
-
-        builder.append(path.getName());
-        return builder.toString();
     }
 
     public static MethodDescriptor parseMethodDescriptor(String descriptor) {
