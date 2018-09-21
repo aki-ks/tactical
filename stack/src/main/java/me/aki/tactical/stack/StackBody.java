@@ -290,12 +290,20 @@ public class StackBody implements Body {
                 this.start = start;
             }
 
+            public Cell<Instruction> getStartCell() {
+                return Cell.of(this::getStart, this::setStart);
+            }
+
             public Instruction getEnd() {
                 return end;
             }
 
             public void setEnd(Instruction end) {
                 this.end = end;
+            }
+
+            public Cell<Instruction> getEndCell() {
+                return Cell.of(this::getEnd, this::setEnd);
             }
 
             public Local getLocal() {

@@ -9,6 +9,7 @@ import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
 import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
+import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.core.typeannotation.TypePath;
 import me.aki.tactical.core.util.Cell;
@@ -21,6 +22,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LocalVariableAnnotationNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
@@ -33,6 +35,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,6 +81,7 @@ public class BodyConverter {
 
         convertTryCatchBlocks();
         convertLocalVariables();
+        convertLocalVariableAnnotations();
 
         updateInsnCells();
     }
@@ -234,6 +238,55 @@ public class BodyConverter {
             this.ctx.registerInsnCell(asmVar.start, localVar.getStartCell());
             this.ctx.registerInsnCell(asmVar.end, localVar.getEndCell());
         }
+    }
+
+    private void convertLocalVariableAnnotations() {
+        for (LocalVariableAnnotationNode varAnno : mn.visibleLocalVariableAnnotations) {
+            convertLocalVariableAnnotation(varAnno, true);
+        }
+
+        for (LocalVariableAnnotationNode varAnno : mn.visibleLocalVariableAnnotations) {
+            convertLocalVariableAnnotation(varAnno, false);
+        }
+    }
+
+    private void convertLocalVariableAnnotation(LocalVariableAnnotationNode varAnno, boolean visible) {
+        List<StackBody.LocalVariableAnnotation.Location> locations = convertLocalVariableAnnotationLocations(varAnno);
+        if (locations.isEmpty()) {
+            // The annotated local variable exists only within dead code
+            return;
+        }
+
+        TypePath typePath = AsmUtil.fromAsmTypePath(varAnno.typePath);
+
+        Annotation annotation = new Annotation(AsmUtil.pathFromInternalName(varAnno.desc), visible);
+        varAnno.accept(new AnnotationConvertVisitor(null, annotation));
+
+        LocalVariableTypeAnnotation typeAnno = new LocalVariableTypeAnnotation(typePath, annotation);
+        body.getLocalVariableAnnotations().add(new StackBody.LocalVariableAnnotation(typeAnno, locations));
+    }
+
+    private List<StackBody.LocalVariableAnnotation.Location> convertLocalVariableAnnotationLocations(LocalVariableAnnotationNode varAnno) {
+        List<StackBody.LocalVariableAnnotation.Location> locations = new ArrayList<>();
+
+        Iterator<LabelNode> startIter = varAnno.start.iterator();
+        Iterator<LabelNode> endIter = varAnno.end.iterator();
+        Iterator<Integer> indexIter = varAnno.index.iterator();
+        while (startIter.hasNext()) {
+            LabelNode start = startIter.next();
+            LabelNode end = endIter.next();
+            Integer index = indexIter.next();
+
+            if (!isRangeEmpty(start, end)) {
+                StackBody.LocalVariableAnnotation.Location location = new StackBody.LocalVariableAnnotation.Location(null, null, ctx.getLocal(index));
+                locations.add(location);
+
+                this.ctx.registerInsnCell(start, location.getStartCell());
+                this.ctx.registerInsnCell(end, location.getEndCell());
+            }
+        }
+
+        return locations;
     }
 
     /**
