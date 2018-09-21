@@ -5,6 +5,8 @@ import me.aki.tactical.core.Classfile;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.util.Optional;
+
 /**
  * Calls events on a {@link ClassVisitor} that generate bytecode for a {@link Classfile}.
  */
@@ -17,6 +19,7 @@ public class TacticalClassReader {
 
     public void accept(ClassVisitor cv) {
         doVisit(cv);
+        doSourceVisit(cv);
     }
 
     private void doVisit(ClassVisitor cv) {
@@ -35,5 +38,14 @@ public class TacticalClassReader {
 
     private int convertVersion(Classfile.Version version) {
         return version.getMajor() | (version.getMinor() << 16);
+    }
+
+    private void doSourceVisit(ClassVisitor cv) {
+        Optional<String> source = classfile.getSource();
+        Optional<String> debug = classfile.getSourceDebug();
+
+        if (source.isPresent() || debug.isPresent()) {
+            cv.visitSource(source.orElse(null), debug.orElse(null));
+        }
     }
 }
