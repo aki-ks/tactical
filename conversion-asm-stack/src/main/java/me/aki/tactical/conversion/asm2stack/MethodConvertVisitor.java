@@ -141,16 +141,4 @@ public class MethodConvertVisitor extends JSRInlinerAdapter {
             new BodyConverter(this.classfile, this.method, this.body, this).convert();
         }
     }
-
-    @Override
-    public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
-        super.visitLocalVariable(name, descriptor, signature, start, end, index);
-        throw new RuntimeException("Not yet implemented");
-    }
-
-    @Override
-    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end, int[] index, String descriptor, boolean visible) {
-//        return super.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, descriptor, visible);
-        throw new RuntimeException("Not yet implemented");
-    }
 }
