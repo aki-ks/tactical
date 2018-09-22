@@ -3,9 +3,13 @@ package me.aki.tactical.conversion.stack2asm;
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.annotation.Annotation;
+import me.aki.tactical.core.typeannotation.ClassTypeAnnotation;
+import me.aki.tactical.core.typeannotation.TargetType;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ModuleVisitor;
+import org.objectweb.asm.TypePath;
+import org.objectweb.asm.TypeReference;
 
 import java.util.Optional;
 
@@ -25,6 +29,7 @@ public class TacticalClassReader {
         visitModule(cv);
         visitOuterClass(cv);
         visitAnnotations(cv);
+        visitTypeAnnotations(cv);
         cv.visitEnd();
     }
 
@@ -88,6 +93,37 @@ public class TacticalClassReader {
             if (av != null) {
                 new TacticalAnnotationReader(annotation).accept(av);
             }
+        }
+    }
+
+    private void visitTypeAnnotations(ClassVisitor cv) {
+        for (ClassTypeAnnotation typeAnnotation : classfile.getTypeAnnotations()) {
+            Annotation annotation = typeAnnotation.getAnnotation();
+
+            int typeRef = convertTargetType(typeAnnotation.getTargetType()).getValue();
+            TypePath typePath = AsmUtil.toAsmTypePath(typeAnnotation.getTypePath());
+            String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
+            boolean isVisible = annotation.isRuntimeVisible();
+
+            cv.visitTypeAnnotation(typeRef, typePath, descriptor, isVisible);
+        }
+    }
+
+    private TypeReference convertTargetType(TargetType.ClassTargetType targetType) {
+        if (targetType instanceof TargetType.Extends) {
+            return TypeReference.newSuperTypeReference(-1);
+        } else if (targetType instanceof TargetType.Implements) {
+            int index = ((TargetType.Implements) targetType).getIndex();
+            return TypeReference.newSuperTypeReference(index);
+        } else if (targetType instanceof TargetType.TypeParameter) {
+            int parameterIndex = ((TargetType.TypeParameter) targetType).getParameterIndex();
+            return TypeReference.newTypeParameterReference(TypeReference.CLASS_TYPE_PARAMETER, parameterIndex);
+        } else if (targetType instanceof TargetType.TypeParameterBound) {
+            int parameterIndex = ((TargetType.TypeParameterBound) targetType).getParameterIndex();
+            int boundIndex = ((TargetType.TypeParameterBound) targetType).getBoundIndex();
+            return TypeReference.newTypeParameterBoundReference(TypeReference.CLASS_TYPE_PARAMETER_BOUND, parameterIndex, boundIndex);
+        } else {
+            throw new AssertionError();
         }
     }
 }

@@ -14,6 +14,7 @@ import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.TypePath;
 
 import java.util.Optional;
 
@@ -85,5 +86,25 @@ public class AsmUtil {
 
     public static String pathToDescriptor(Path path) {
         return "L" + path.join('/') + ";";
+    }
+
+    public static org.objectweb.asm.TypePath toAsmTypePath(TypePath typePath) {
+        StringBuilder builder = new StringBuilder();
+        for (TypePath.Kind kind : typePath.getPaths()) {
+            if (kind instanceof TypePath.Kind.Array) {
+                builder.append('[');
+            } else if (kind instanceof TypePath.Kind.InnerClass) {
+                builder.append('.');
+            } else if (kind instanceof TypePath.Kind.TypeArgument) {
+                int index = ((TypePath.Kind.TypeArgument) kind).getTypeArgumentIndex();
+                builder.append(index);
+                builder.append(';');
+            } else if (kind instanceof TypePath.Kind.WildcardBound) {
+                builder.append('*');
+            } else {
+                throw new AssertionError();
+            }
+        }
+        return org.objectweb.asm.TypePath.fromString(builder.toString());
     }
 }
