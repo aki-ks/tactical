@@ -3,6 +3,7 @@ package me.aki.tactical.conversion.stack2asm;
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Classfile;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ModuleVisitor;
 
 import java.util.Optional;
 
@@ -19,7 +20,9 @@ public class TacticalClassReader {
     public void accept(ClassVisitor cv) {
         doVisit(cv);
         doSourceVisit(cv);
+        doVisitModule(cv);
         doOuterClassVisit(cv);
+        cv.visitEnd();
     }
 
     private void doVisit(ClassVisitor cv) {
@@ -47,6 +50,19 @@ public class TacticalClassReader {
         if (source.isPresent() || debug.isPresent()) {
             cv.visitSource(source.orElse(null), debug.orElse(null));
         }
+    }
+
+    private void doVisitModule(ClassVisitor cv) {
+        classfile.getModule().ifPresent(module -> {
+            String name = module.getModule().join('.');
+            int access = AccessConverter.module.toBitMap(module.getAccessFlags());
+            String version = module.getVersion().orElse(null);
+
+            ModuleVisitor mv = cv.visitModule(name, access, version);
+            if (mv != null) {
+                new TacticalModuleReader(module).accept(mv);
+            }
+        });
     }
 
     private void doOuterClassVisit(ClassVisitor cv) {
