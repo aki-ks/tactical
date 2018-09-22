@@ -1,7 +1,6 @@
 package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.conversion.stackasm.AccessConverter;
-import me.aki.tactical.conversion.stackasm.AsmUtil;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;

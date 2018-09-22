@@ -1,6 +1,6 @@
-package me.aki.tactical.conversion.stackasm;
+package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.stackasm.AsmUtil;
+import me.aki.tactical.conversion.asm2stack.AsmUtil;
 import me.aki.tactical.conversion.asm2stack.ConversionContext;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;

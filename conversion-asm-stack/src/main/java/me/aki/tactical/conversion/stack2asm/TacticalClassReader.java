@@ -1,10 +1,8 @@
 package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.AccessConverter;
-import me.aki.tactical.conversion.stackasm.AsmUtil;
 import me.aki.tactical.core.Classfile;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
 
 import java.util.Optional;
 

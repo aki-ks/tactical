@@ -1,6 +1,5 @@
 package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.stackasm.AsmUtil;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
