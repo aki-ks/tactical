@@ -130,12 +130,16 @@ public class AsmUtil {
      * @return converted type path
      */
     public static TypePath fromAsmTypePath(org.objectweb.asm.TypePath asmPath) {
-        int length = asmPath.getLength();
-        List<TypePath.Kind> kinds = new ArrayList<>(length);
-        for (int step = 0; step < length; step++) {
-            kinds.add(convertTypePathKind(asmPath, step));
+        if (asmPath == null) {
+            return new TypePath(new ArrayList<>());
+        } else {
+            int length = asmPath.getLength();
+            List<TypePath.Kind> kinds = new ArrayList<>(length);
+            for (int step = 0; step < length; step++) {
+                kinds.add(convertTypePathKind(asmPath, step));
+            }
+            return new TypePath(kinds);
         }
-        return new TypePath(kinds);
     }
 
     private static TypePath.Kind convertTypePathKind(org.objectweb.asm.TypePath asmPath, int step) {
