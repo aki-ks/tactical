@@ -2,6 +2,8 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Classfile;
+import me.aki.tactical.core.annotation.Annotation;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ModuleVisitor;
 
@@ -18,14 +20,15 @@ public class TacticalClassReader {
     }
 
     public void accept(ClassVisitor cv) {
-        doVisit(cv);
-        doSourceVisit(cv);
-        doVisitModule(cv);
-        doOuterClassVisit(cv);
+        visit(cv);
+        visitSource(cv);
+        visitModule(cv);
+        visitOuterClass(cv);
+        visitAnnotations(cv);
         cv.visitEnd();
     }
 
-    private void doVisit(ClassVisitor cv) {
+    private void visit(ClassVisitor cv) {
         int version = convertVersion(classfile.getVersion());
         int access = AccessConverter.classfile.toBitMap(classfile.getAccessFlags());
         String name = classfile.getName().join('/');
@@ -43,7 +46,7 @@ public class TacticalClassReader {
         return version.getMajor() | (version.getMinor() << 16);
     }
 
-    private void doSourceVisit(ClassVisitor cv) {
+    private void visitSource(ClassVisitor cv) {
         Optional<String> source = classfile.getSource();
         Optional<String> debug = classfile.getSourceDebug();
 
@@ -52,7 +55,7 @@ public class TacticalClassReader {
         }
     }
 
-    private void doVisitModule(ClassVisitor cv) {
+    private void visitModule(ClassVisitor cv) {
         classfile.getModule().ifPresent(module -> {
             String name = module.getModule().join('.');
             int access = AccessConverter.module.toBitMap(module.getAccessFlags());
@@ -65,7 +68,7 @@ public class TacticalClassReader {
         });
     }
 
-    private void doOuterClassVisit(ClassVisitor cv) {
+    private void visitOuterClass(ClassVisitor cv) {
         classfile.getEnclosingMethod().ifPresent(enclosingMethod -> {
             String owner = enclosingMethod.getOwner().join('/');
             String name = enclosingMethod.getName().orElse(null);
@@ -74,5 +77,17 @@ public class TacticalClassReader {
 
             cv.visitOuterClass(owner, name, descriptor);
         });
+    }
+
+    private void visitAnnotations(ClassVisitor cv) {
+        for (Annotation annotation : classfile.getAnnotations()) {
+            String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
+            boolean isVisible = annotation.isRuntimeVisible();
+
+            AnnotationVisitor av = cv.visitAnnotation(descriptor, isVisible);
+            if (av != null) {
+                new TacticalAnnotationReader(annotation).accept(av);
+            }
+        }
     }
 }

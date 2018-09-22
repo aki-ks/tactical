@@ -83,4 +83,7 @@ public class AsmUtil {
         return org.objectweb.asm.Type.getMethodType(returnType, paramTypes);
     }
 
+    public static String pathToDescriptor(Path path) {
+        return "L" + path.join('/') + ";";
+    }
 }
