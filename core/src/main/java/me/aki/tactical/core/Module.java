@@ -317,16 +317,16 @@ public class Module {
         /**
          * Additional flags for the "opens" expression.
          */
-        private Set<Flag> access;
+        private Set<Flag> flags;
 
         /**
          * The package is opened for these modules.
          */
         private List<Path> modules;
 
-        public Open(Path name, Set<Flag> access, List<Path> modules) {
+        public Open(Path name, Set<Flag> flags, List<Path> modules) {
             this.name = name;
-            this.access = access;
+            this.flags = flags;
             this.modules = modules;
         }
 
@@ -338,12 +338,12 @@ public class Module {
             this.name = name;
         }
 
-        public Set<Flag> getAccess() {
-            return access;
+        public Set<Flag> getFlags() {
+            return flags;
         }
 
-        public void setAccess(Set<Flag> access) {
-            this.access = access;
+        public void setFlags(Set<Flag> flags) {
+            this.flags = flags;
         }
 
         public List<Path> getModules() {
@@ -360,20 +360,20 @@ public class Module {
             if (o == null || getClass() != o.getClass()) return false;
             Open opens = (Open) o;
             return Objects.equals(name, opens.name) &&
-                    Objects.equals(access, opens.access) &&
+                    Objects.equals(flags, opens.flags) &&
                     Objects.equals(modules, opens.modules);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, access, modules);
+            return Objects.hash(name, flags, modules);
         }
 
         @Override
         public String toString() {
             return Open.class.getSimpleName() + '{' +
                     "name=" + name +
-                    ", access=" + access +
+                    ", flags=" + flags +
                     ", modules=" + modules +
                     '}';
         }
