@@ -30,6 +30,8 @@ public class TacticalClassReader {
         visitOuterClass(cv);
         visitAnnotations(cv);
         visitTypeAnnotations(cv);
+        //TODO: visitAttributes(cv);
+        visitInnerClasses(cv);
         cv.visitEnd();
     }
 
@@ -124,6 +126,17 @@ public class TacticalClassReader {
             return TypeReference.newTypeParameterBoundReference(TypeReference.CLASS_TYPE_PARAMETER_BOUND, parameterIndex, boundIndex);
         } else {
             throw new AssertionError();
+        }
+    }
+
+    private void visitInnerClasses(ClassVisitor cv) {
+        for (Classfile.InnerClass innerClass : classfile.getInnerClasses()) {
+            String name = innerClass.getName().join('/');
+            String outerName = innerClass.getOuterName().map(n -> n.join('/')).orElse(null);
+            String innerName = innerClass.getInnerName().orElse(null);
+            int access = AccessConverter.innerClass.toBitMap(innerClass.getFlags());
+
+            cv.visitInnerClass(name, outerName, innerName, access);
         }
     }
 }

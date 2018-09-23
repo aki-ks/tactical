@@ -415,17 +415,17 @@ public class Classfile {
         /**
          * Access flags of the inner class as declared in source.
          */
-        private Set<Flag> access;
+        private Set<Flag> flags;
 
         public InnerClass(Path name) {
             this(name, Optional.empty(), Optional.empty(), new HashSet<>());
         }
 
-        public InnerClass(Path name, Optional<Path> outerName, Optional<String> innerName, Set<Flag> access) {
+        public InnerClass(Path name, Optional<Path> outerName, Optional<String> innerName, Set<Flag> flags) {
             this.name = name;
             this.outerName = outerName;
             this.innerName = innerName;
-            this.access = access;
+            this.flags = flags;
         }
 
         public Path getName() {
@@ -452,12 +452,12 @@ public class Classfile {
             this.innerName = innerName;
         }
 
-        public Set<Flag> getAccess() {
-            return access;
+        public Set<Flag> getFlags() {
+            return flags;
         }
 
-        public void setAccess(Set<Flag> access) {
-            this.access = access;
+        public void setFlags(Set<Flag> flags) {
+            this.flags = flags;
         }
 
         @Override
@@ -468,7 +468,7 @@ public class Classfile {
             return Objects.equals(name, that.name) &&
                     Objects.equals(outerName, that.outerName) &&
                     Objects.equals(innerName, that.innerName) &&
-                    Objects.equals(access, that.access);
+                    Objects.equals(flags, that.flags);
         }
 
         @Override
@@ -477,13 +477,13 @@ public class Classfile {
                     "name='" + name + '\'' +
                     ", outerName=" + outerName +
                     ", innerName=" + innerName +
-                    ", access=" + access +
+                    ", flags=" + flags +
                     '}';
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, outerName, innerName, access);
+            return Objects.hash(name, outerName, innerName, flags);
         }
 
         public static enum Flag {
