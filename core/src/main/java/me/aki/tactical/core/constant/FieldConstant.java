@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * A the value of constant (a "static final" field of primitive or String type).
  *
- * @see Field#constant
+ * @see Field#value
  */
 public interface FieldConstant extends Constant {
 }
