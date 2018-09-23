@@ -68,6 +68,10 @@ public class AsmUtil {
         throw new AssertionError();
     }
 
+    public static String toDescriptor(Type type) {
+        return toAsmType(type).getDescriptor();
+    }
+
     public static String methodDescriptorToString(MethodDescriptor descriptor) {
         return methodDescriptorToType(descriptor).getDescriptor();
     }

@@ -2,11 +2,19 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Classfile;
+import me.aki.tactical.core.Field;
 import me.aki.tactical.core.annotation.Annotation;
+import me.aki.tactical.core.constant.DoubleConstant;
+import me.aki.tactical.core.constant.FieldConstant;
+import me.aki.tactical.core.constant.FloatConstant;
+import me.aki.tactical.core.constant.IntConstant;
+import me.aki.tactical.core.constant.LongConstant;
+import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.typeannotation.ClassTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
@@ -32,6 +40,7 @@ public class TacticalClassReader {
         visitTypeAnnotations(cv);
         //TODO: visitAttributes(cv);
         visitInnerClasses(cv);
+        visitFields(cv);
         cv.visitEnd();
     }
 
@@ -137,6 +146,37 @@ public class TacticalClassReader {
             int access = AccessConverter.innerClass.toBitMap(innerClass.getFlags());
 
             cv.visitInnerClass(name, outerName, innerName, access);
+        }
+    }
+
+    private void visitFields(ClassVisitor cv) {
+        for (Field field : this.classfile.getFields()) {
+            int access = AccessConverter.field.toBitMap(field.getAccessFlags());
+            String name = field.getName();
+            String descriptor = AsmUtil.toDescriptor(field.getType());
+            String signature = field.getSignature().orElse(null);
+            Object value = field.getValue().map(this::convertFieldConstant).orElse(null);
+
+            FieldVisitor fv = cv.visitField(access, name, descriptor, signature, value);
+            if (fv != null) {
+                new TacticalFieldReader(field).accept(fv);
+            }
+        }
+    }
+
+    private Object convertFieldConstant(FieldConstant constant) {
+        if (constant instanceof StringConstant) {
+            return ((StringConstant) constant).getValue();
+        } else if (constant instanceof IntConstant) {
+            return ((IntConstant) constant).getValue();
+        } else if (constant instanceof LongConstant) {
+            return ((LongConstant) constant).getValue();
+        } else if (constant instanceof FloatConstant) {
+            return ((FloatConstant) constant).getValue();
+        } else if (constant instanceof DoubleConstant) {
+            return ((DoubleConstant) constant).getValue();
+        } else {
+            throw new AssertionError();
         }
     }
 }
