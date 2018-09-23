@@ -116,7 +116,10 @@ public class TacticalClassReader {
             String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
             boolean isVisible = annotation.isRuntimeVisible();
 
-            cv.visitTypeAnnotation(typeRef, typePath, descriptor, isVisible);
+            AnnotationVisitor av = cv.visitTypeAnnotation(typeRef, typePath, descriptor, isVisible);
+            if (av != null) {
+                new TacticalAnnotationReader(annotation).accept(av);
+            }
         }
     }
 
