@@ -3,6 +3,7 @@ package me.aki.tactical.conversion.stack2asm;
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
+import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FieldConstant;
@@ -15,6 +16,7 @@ import me.aki.tactical.core.typeannotation.TargetType;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
@@ -41,6 +43,7 @@ public class TacticalClassReader {
         //TODO: visitAttributes(cv);
         visitInnerClasses(cv);
         visitFields(cv);
+        visitMethods(cv);
         cv.visitEnd();
     }
 
@@ -180,6 +183,23 @@ public class TacticalClassReader {
             return ((DoubleConstant) constant).getValue();
         } else {
             throw new AssertionError();
+        }
+    }
+
+    private void visitMethods(ClassVisitor cv) {
+        for (Method method : classfile.getMethods()) {
+            int access = AccessConverter.method.toBitMap(method.getAccessFlags());
+            String name = method.getName();
+            String descriptor = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getParameterTypes());
+            String signature = method.getSignature().orElse(name);
+            String[] exceptions = method.getExceptions().stream()
+                    .map(path -> path.join('/'))
+                    .toArray(String[]::new);
+
+            MethodVisitor mv = cv.visitMethod(access, name, descriptor, signature, exceptions);
+            if (mv != null) {
+                new TacticalMethodReader(method).accept(mv);
+            }
         }
     }
 }

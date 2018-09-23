@@ -16,6 +16,7 @@ import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.TypePath;
 
+import java.util.List;
 import java.util.Optional;
 
 public class AsmUtil {
@@ -76,16 +77,23 @@ public class AsmUtil {
         return methodDescriptorToType(descriptor).getDescriptor();
     }
 
+    public static String methodDescriptorToString(Optional<Type> returnType, List<Type> parameterTypes) {
+        return methodDescriptorToType(returnType, parameterTypes).getDescriptor();
+    }
+
     public static org.objectweb.asm.Type methodDescriptorToType(MethodDescriptor descriptor) {
-        org.objectweb.asm.Type returnType = descriptor.getReturnType()
-                .map(AsmUtil::toAsmType)
+        return methodDescriptorToType(descriptor.getReturnType(), descriptor.getParameterTypes());
+    }
+
+    public static org.objectweb.asm.Type methodDescriptorToType(Optional<Type> returnType, List<Type> parameterTypes) {
+        org.objectweb.asm.Type asmReturnType = returnType.map(AsmUtil::toAsmType)
                 .orElse(org.objectweb.asm.Type.VOID_TYPE);
 
-        org.objectweb.asm.Type[] paramTypes = descriptor.getParameterTypes().stream()
+        org.objectweb.asm.Type[] asmParameterTypes = parameterTypes.stream()
                 .map(AsmUtil::toAsmType)
                 .toArray(org.objectweb.asm.Type[]::new);
 
-        return org.objectweb.asm.Type.getMethodType(returnType, paramTypes);
+        return org.objectweb.asm.Type.getMethodType(asmReturnType, asmParameterTypes);
     }
 
     public static String pathToDescriptor(Path path) {
