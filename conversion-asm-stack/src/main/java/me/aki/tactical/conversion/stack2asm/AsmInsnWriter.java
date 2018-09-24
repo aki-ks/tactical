@@ -37,6 +37,7 @@ import me.aki.tactical.stack.insn.InvokeInsn;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
@@ -538,12 +539,22 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitFieldGet(FieldRef fieldRef, boolean isStatic) {
-        super.visitFieldGet(fieldRef, isStatic);
+        int opcode = isStatic ? Opcodes.GETSTATIC : Opcodes.GETFIELD;
+        convertFieldInsnNode(opcode, fieldRef);
     }
 
     @Override
     public void visitFieldSet(FieldRef fieldRef, boolean isStatic) {
-        super.visitFieldSet(fieldRef, isStatic);
+        int opcode = isStatic ? Opcodes.PUTSTATIC : Opcodes.PUTFIELD;
+        convertFieldInsnNode(opcode, fieldRef);
+    }
+
+    private void convertFieldInsnNode(int opcode, FieldRef field) {
+        String owner = field.getOwner().join('/');
+        String name = field.getName();
+        String descriptor = AsmUtil.toDescriptor(field.getType());
+
+        visitConvertedInsn(new FieldInsnNode(opcode, owner, name, descriptor));
     }
 
     @Override
