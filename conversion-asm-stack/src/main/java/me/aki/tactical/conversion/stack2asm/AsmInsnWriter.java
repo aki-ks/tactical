@@ -429,17 +429,31 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitLoad(Type type, Local local) {
-        super.visitLoad(type, local);
+        int opcode = type instanceof RefType ? Opcodes.ALOAD :
+                type instanceof IntType ? Opcodes.ILOAD :
+                type instanceof LongType ? Opcodes.LLOAD :
+                type instanceof FloatType ? Opcodes.FLOAD :
+                type instanceof DoubleType ? Opcodes.DLOAD :
+                assertionError();
+
+        visitConvertedInsn(new VarInsnNode(opcode, ctx.getLocalIndex(local)));
     }
 
     @Override
     public void visitStore(Type type, Local local) {
-        super.visitStore(type, local);
+        int opcode = type instanceof RefType ? Opcodes.ASTORE :
+                type instanceof IntType ? Opcodes.ISTORE :
+                type instanceof LongType ? Opcodes.LSTORE :
+                type instanceof FloatType ? Opcodes.FSTORE :
+                type instanceof DoubleType ? Opcodes.DSTORE :
+                assertionError();
+
+        visitConvertedInsn(new VarInsnNode(opcode, ctx.getLocalIndex(local)));
     }
 
     @Override
     public void visitIncrement(Local local, int value) {
-        super.visitIncrement(local, value);
+        visitConvertedInsn(new IincInsnNode(ctx.getLocalIndex(local), value));
     }
 
     @Override
