@@ -468,7 +468,35 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitPrimitiveCast(PrimitiveType from, PrimitiveType to) {
-        super.visitPrimitiveCast(from, to);
+        int opcode;
+        if (from instanceof IntType) {
+            opcode = to instanceof ByteType ? Opcodes.I2B :
+                    to instanceof CharType ? Opcodes.I2C :
+                    to instanceof ShortType ? Opcodes.I2S :
+                    to instanceof LongType ? Opcodes.I2L :
+                    to instanceof FloatType ? Opcodes.I2F :
+                    to instanceof DoubleType ? Opcodes.I2D :
+                    assertionError();
+        } else if (from instanceof LongType) {
+            opcode = to instanceof IntType ? Opcodes.L2I :
+                    to instanceof FloatType ? Opcodes.L2F :
+                    to instanceof DoubleType ? Opcodes.L2D :
+                    assertionError();
+        } else if (from instanceof FloatType) {
+            opcode = to instanceof IntType ? Opcodes.F2I :
+                    to instanceof LongType ? Opcodes.F2L :
+                    to instanceof DoubleType ? Opcodes.F2D :
+                    assertionError();
+        } else if (from instanceof DoubleType) {
+            opcode = to instanceof IntType ? Opcodes.D2I :
+                    to instanceof LongType ? Opcodes.D2L :
+                    to instanceof FloatType ? Opcodes.D2F :
+                    assertionError();
+        } else {
+            throw new AssertionError();
+        }
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
