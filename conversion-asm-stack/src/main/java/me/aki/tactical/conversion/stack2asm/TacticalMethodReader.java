@@ -12,6 +12,7 @@ import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class TacticalMethodReader {
     private final Method method;
@@ -25,6 +26,8 @@ public class TacticalMethodReader {
         visitAnnotationDefault(mv);
         visitAnnotations(mv);
         visitTypeAnnotations(mv);
+        visitParameterAnnotations(mv);
+        //TODO: visitAttribute
         mv.visitEnd();
     }
 
@@ -96,6 +99,23 @@ public class TacticalMethodReader {
             return TypeReference.newTypeParameterBoundReference(TypeReference.METHOD_TYPE_PARAMETER_BOUND, parameterIndex, boundIndex);
         } else {
             throw new AssertionError();
+        }
+    }
+
+    private void visitParameterAnnotations(MethodVisitor mv) {
+        int parameterIndex = 0;
+        for (List<Annotation> paramAnnos : method.getParameterAnnotations()) {
+            for (Annotation annotation : paramAnnos) {
+                String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
+                boolean isVisible = annotation.isRuntimeVisible();
+
+                AnnotationVisitor av = mv.visitParameterAnnotation(parameterIndex, descriptor, isVisible);
+                if (av != null) {
+                    new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                }
+            }
+
+            parameterIndex++;
         }
     }
 }
