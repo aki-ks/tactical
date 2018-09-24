@@ -528,12 +528,12 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitMonitorEnter() {
-        super.visitMonitorEnter();
+        visitConvertedInsn(new InsnNode(Opcodes.MONITORENTER));
     }
 
     @Override
     public void visitMonitorExit() {
-        super.visitMonitorExit();
+        visitConvertedInsn(new InsnNode(Opcodes.MONITOREXIT));
     }
 
     @Override
