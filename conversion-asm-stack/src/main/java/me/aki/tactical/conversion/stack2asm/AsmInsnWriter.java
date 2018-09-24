@@ -37,11 +37,13 @@ import me.aki.tactical.stack.insn.InvokeInsn;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +51,12 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AsmInsnWriter extends InsnVisitor.Tactical {
+    private final ConversionContext ctx;
     private final List<AbstractInsnNode> convertedInsns = new ArrayList<>();
 
-    public AsmInsnWriter() {
+    public AsmInsnWriter(ConversionContext ctx) {
         super(null);
+        this.ctx = ctx;
     }
 
     private void visitConvertedInsn(AbstractInsnNode node) {
@@ -342,57 +346,85 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitArrayLength() {
-        super.visitArrayLength();
+        visitConvertedInsn(new InsnNode(Opcodes.ARRAYLENGTH));
     }
 
     @Override
     public void visitArrayLoad(Type type) {
-        super.visitArrayLoad(type);
+        int opcode = type instanceof RefType ? Opcodes.AALOAD :
+                type instanceof ByteType ? Opcodes.BALOAD :
+                type instanceof ShortType ? Opcodes.SALOAD :
+                type instanceof CharType ? Opcodes.CALOAD :
+                type instanceof IntType ? Opcodes.IALOAD :
+                type instanceof LongType ? Opcodes.LALOAD :
+                type instanceof FloatType ? Opcodes.FALOAD :
+                type instanceof DoubleType ? Opcodes.DALOAD :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitArrayStore(Type type) {
-        super.visitArrayStore(type);
+        int opcode = type instanceof RefType ? Opcodes.AASTORE :
+                type instanceof ByteType ? Opcodes.BASTORE :
+                type instanceof ShortType ? Opcodes.SASTORE :
+                type instanceof CharType ? Opcodes.CASTORE :
+                type instanceof IntType ? Opcodes.IASTORE :
+                type instanceof LongType ? Opcodes.LASTORE :
+                type instanceof FloatType ? Opcodes.FASTORE :
+                type instanceof DoubleType ? Opcodes.DASTORE :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitSwap() {
         super.visitSwap();
+        //TODO
     }
 
     @Override
     public void visitPop() {
         super.visitPop();
+        //TODO
     }
 
     @Override
     public void visitDup() {
         super.visitDup();
+        //TODO
     }
 
     @Override
     public void visitDupX1() {
         super.visitDupX1();
+        //TODO
     }
 
     @Override
     public void visitDupX2() {
         super.visitDupX2();
+        //TODO
     }
 
     @Override
     public void visitDup2() {
         super.visitDup2();
+        //TODO
     }
 
     @Override
     public void visitDup2X1() {
         super.visitDup2X1();
+        //TODO
     }
 
     @Override
     public void visitDup2X2() {
         super.visitDup2X2();
+        //TODO
     }
 
     @Override
