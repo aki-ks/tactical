@@ -21,6 +21,22 @@ public class InvokeInsn extends AbstractInstruction {
         this.method = method;
     }
 
+    public InvokeType getInvokeType() {
+        return invokeType;
+    }
+
+    public void setInvokeType(InvokeType invokeType) {
+        this.invokeType = invokeType;
+    }
+
+    public InvokableMethodRef getMethod() {
+        return method;
+    }
+
+    public void setMethod(InvokableMethodRef method) {
+        this.method = method;
+    }
+
     @Override
     public int getPushCount() {
         boolean isVoid = !method.getReturnType().isPresent();
