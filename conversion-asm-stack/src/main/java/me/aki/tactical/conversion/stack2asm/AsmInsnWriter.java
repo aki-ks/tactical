@@ -42,6 +42,7 @@ import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -559,7 +560,23 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitInvokeInsn(InvokeInsn.InvokeType invoke, InvokableMethodRef method) {
-        super.visitInvokeInsn(invoke, method);
+        int opcode = getInvokeOpcode(invoke);
+        String owner = method.getOwner().join('/');
+        String name = method.getName();
+        String descriptor = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
+        boolean isInterface = method.isInterface();
+
+        visitConvertedInsn(new MethodInsnNode(opcode, owner, name, descriptor, isInterface));
+    }
+
+    private int getInvokeOpcode(InvokeInsn.InvokeType invokeType) {
+        switch (invokeType) {
+            case VIRTUAL: return Opcodes.INVOKEVIRTUAL;
+            case SPECIAL: return Opcodes.INVOKESPECIAL;
+            case INTERFACE: return Opcodes.INVOKEINTERFACE;
+            case STATIC: return Opcodes.INVOKESTATIC;
+            default: throw new AssertionError();
+        }
     }
 
     @Override
