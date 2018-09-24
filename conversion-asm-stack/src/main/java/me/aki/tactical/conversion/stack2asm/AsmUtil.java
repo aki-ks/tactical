@@ -12,6 +12,7 @@ import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.PrimitiveType;
+import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.TypePath;
@@ -67,6 +68,10 @@ public class AsmUtil {
         }
 
         throw new AssertionError();
+    }
+
+    public static String toInternalName(RefType refType) {
+        return toAsmType(refType).getInternalName();
     }
 
     public static String toDescriptor(Type type) {

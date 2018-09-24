@@ -18,12 +18,16 @@ import me.aki.tactical.core.constant.MethodTypeConstant;
 import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.type.ArrayType;
+import me.aki.tactical.core.type.BooleanType;
+import me.aki.tactical.core.type.ByteType;
+import me.aki.tactical.core.type.CharType;
 import me.aki.tactical.core.type.DoubleType;
 import me.aki.tactical.core.type.FloatType;
 import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
+import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
@@ -36,6 +40,8 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MultiANewArrayInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -310,7 +316,28 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitNewArray(ArrayType type, int initializedDimensions) {
-        super.visitNewArray(type, initializedDimensions);
+        if (initializedDimensions == 1) {
+            Type baseType = type.getBaseType();
+            if (baseType instanceof RefType) {
+                String descriptor = AsmUtil.toInternalName((RefType) baseType);
+                visitConvertedInsn(new TypeInsnNode(Opcodes.ANEWARRAY, descriptor));
+            } else {
+                int operand = baseType instanceof BooleanType ? Opcodes.T_BOOLEAN :
+                        baseType instanceof ByteType ? Opcodes.T_BYTE :
+                        baseType instanceof CharType ? Opcodes.T_CHAR :
+                        baseType instanceof ShortType ? Opcodes.T_SHORT :
+                        baseType instanceof IntType ? Opcodes.T_INT :
+                        baseType instanceof LongType ? Opcodes.T_LONG :
+                        baseType instanceof FloatType ? Opcodes.T_FLOAT :
+                        baseType instanceof DoubleType ? Opcodes.T_DOUBLE :
+                        assertionError();
+
+                visitConvertedInsn(new IntInsnNode(Opcodes.NEWARRAY, operand));
+            }
+        } else {
+            String descriptor = AsmUtil.toDescriptor(type);
+            visitConvertedInsn(new MultiANewArrayInsnNode(descriptor, initializedDimensions));
+        }
     }
 
     @Override
