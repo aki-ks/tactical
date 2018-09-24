@@ -41,6 +41,7 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
@@ -580,7 +581,7 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, MethodRef bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, MethodHandle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments);
     }
 

@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.MethodHandle;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
@@ -318,7 +319,7 @@ public class InsnVisitor<T> {
         }
     }
 
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, MethodRef bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, MethodHandle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         if (iv != null) {
             iv.visitInvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments);
         }

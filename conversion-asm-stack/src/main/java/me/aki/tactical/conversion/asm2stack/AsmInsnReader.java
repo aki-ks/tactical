@@ -803,7 +803,7 @@ public class AsmInsnReader {
 
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
         MethodDescriptor descriptor = AsmUtil.parseMethodDescriptor(insn.desc);
-        MethodRef bootstrapMethod = handleToMethodRef(insn.bsm);
+        MethodHandle.BootstrapMethodHandle bootstrapMethod = (MethodHandle.BootstrapMethodHandle) convertMethodHandle(insn.bsm);
         List<BootstrapConstant> bootstrapArguments = Arrays.stream(insn.bsmArgs)
                 .map(this::convertBootstrapArgument)
                 .collect(Collectors.toList());
@@ -841,12 +841,6 @@ public class AsmInsnReader {
         } else {
             throw new AssertionError();
         }
-    }
-
-    private MethodRef handleToMethodRef(Handle bsm) {
-        Path bsmOwner = AsmUtil.pathFromInternalName(bsm.getOwner());
-        MethodDescriptor bsmDesc = AsmUtil.parseMethodDescriptor(bsm.getDesc());
-        return new MethodRef(bsmOwner, bsm.getName(), bsmDesc.getParameterTypes(), bsmDesc.getReturnType());
     }
 
     private void convertJumpInsnNode(JumpInsnNode insn) {

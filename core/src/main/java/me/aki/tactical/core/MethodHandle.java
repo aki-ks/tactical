@@ -112,13 +112,18 @@ public interface MethodHandle {
         }
     }
 
-    class NewInstanceHandle extends AbstractMethodHandle {
+    /**
+     * Method handle as uses as reference to a bootstrap method by InvokeDynamic instructions.
+     */
+    interface BootstrapMethodHandle {}
+
+    class NewInstanceHandle extends AbstractMethodHandle implements BootstrapMethodHandle {
         public NewInstanceHandle(MethodRef methodRef) {
             super(methodRef);
         }
     }
 
-    class InvokeStaticHandle extends AbstractAmbiguousMethodHandle {
+    class InvokeStaticHandle extends AbstractAmbiguousMethodHandle implements BootstrapMethodHandle {
         public InvokeStaticHandle(MethodRef methodRef, boolean isInterface) {
             super(methodRef, isInterface);
         }
