@@ -523,7 +523,7 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitThrow() {
-        super.visitThrow();
+        visitConvertedInsn(new InsnNode(Opcodes.ATHROW));
     }
 
     @Override
