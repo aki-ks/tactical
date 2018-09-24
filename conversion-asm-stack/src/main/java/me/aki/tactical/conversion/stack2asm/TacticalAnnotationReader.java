@@ -1,6 +1,5 @@
 package me.aki.tactical.conversion.stack2asm;
 
-import me.aki.tactical.core.annotation.AbstractAnnotation;
 import me.aki.tactical.core.annotation.AnnotationAnnotationValue;
 import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.annotation.ArrayAnnotationValue;
@@ -19,15 +18,17 @@ import me.aki.tactical.core.annotation.StringAnnotationValue;
 import me.aki.tactical.core.type.Type;
 import org.objectweb.asm.AnnotationVisitor;
 
-public class TacticalAnnotationReader {
-    private final AbstractAnnotation annotation;
+import java.util.LinkedHashMap;
 
-    public TacticalAnnotationReader(AbstractAnnotation annotation) {
-        this.annotation = annotation;
+public class TacticalAnnotationReader {
+    private final LinkedHashMap<String, AnnotationValue> values;
+
+    public TacticalAnnotationReader(LinkedHashMap<String, AnnotationValue> values) {
+        this.values = values;
     }
 
     public void accept(AnnotationVisitor av) {
-        annotation.getValues().forEach((key, value) -> visitValue(av, key, value));
+        values.forEach((key, value) -> visitValue(av, key, value));
     }
 
     private void visitValue(AnnotationVisitor av, String name, AnnotationValue value) {
