@@ -955,8 +955,8 @@ public class AsmInsnReader {
 
                 switch (tag) {
                     case Opcodes.H_INVOKEVIRTUAL: return new MethodHandle.InvokeVirtualHandle(methodRef);
-                    case Opcodes.H_INVOKESTATIC: return new MethodHandle.InvokeStaticHandle(methodRef);
-                    case Opcodes.H_INVOKESPECIAL: return new MethodHandle.InvokeSpecialHandle(methodRef);
+                    case Opcodes.H_INVOKESTATIC: return new MethodHandle.InvokeStaticHandle(methodRef, handle.isInterface());
+                    case Opcodes.H_INVOKESPECIAL: return new MethodHandle.InvokeSpecialHandle(methodRef, handle.isInterface());
                     case Opcodes.H_NEWINVOKESPECIAL: return new MethodHandle.NewInstanceHandle(methodRef);
                     case Opcodes.H_INVOKEINTERFACE: return new MethodHandle.InvokeInterfaceHandle(methodRef);
                     default: throw new AssertionError();
