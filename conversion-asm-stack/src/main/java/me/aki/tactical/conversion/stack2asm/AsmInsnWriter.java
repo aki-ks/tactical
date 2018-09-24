@@ -458,12 +458,12 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitNew(Path type) {
-        super.visitNew(type);
+        visitConvertedInsn(new TypeInsnNode(Opcodes.NEW, type.join('/')));
     }
 
     @Override
     public void visitInstanceOf(RefType type) {
-        super.visitInstanceOf(type);
+        visitConvertedInsn(new TypeInsnNode(Opcodes.INSTANCEOF, AsmUtil.toInternalName(type)));
     }
 
     @Override
@@ -473,7 +473,7 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitReferenceCast(RefType type) {
-        super.visitReferenceCast(type);
+        visitConvertedInsn(new TypeInsnNode(Opcodes.CHECKCAST, AsmUtil.toInternalName(type)));
     }
 
     @Override
