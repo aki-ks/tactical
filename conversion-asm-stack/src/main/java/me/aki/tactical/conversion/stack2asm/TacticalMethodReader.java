@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Method;
+import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -18,6 +19,7 @@ public class TacticalMethodReader {
     public void accept(MethodVisitor mv) {
         visitParameters(mv);
         visitAnnotationDefault(mv);
+        visitAnnotations(mv);
         mv.visitEnd();
     }
 
@@ -39,5 +41,17 @@ public class TacticalMethodReader {
                 new TacticalAnnotationReader(map);
             }
         });
+    }
+
+    private void visitAnnotations(MethodVisitor mv) {
+        for (Annotation annotation : method.getAnnotations()) {
+            String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
+            boolean isVisible = annotation.isRuntimeVisible();
+
+            AnnotationVisitor av = mv.visitAnnotation(descriptor, isVisible);
+            if (av != null) {
+                new TacticalAnnotationReader(annotation.getValues()).accept(av);
+            }
+        }
     }
 }
