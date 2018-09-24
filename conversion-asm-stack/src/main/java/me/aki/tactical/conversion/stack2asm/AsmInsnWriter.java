@@ -505,8 +505,20 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
     }
 
     @Override
-    public void visitReturn(Optional<Type> type) {
-        super.visitReturn(type);
+    public void visitReturn(Optional<Type> typeOpt) {
+        int opcode;
+        if (typeOpt.isPresent()) {
+            Type type = typeOpt.get();
+            opcode = type instanceof RefType ? Opcodes.ARETURN :
+                    type instanceof IntType ? Opcodes.IRETURN :
+                    type instanceof LongType ? Opcodes.LRETURN :
+                    type instanceof FloatType ? Opcodes.FRETURN :
+                    type instanceof DoubleType ? Opcodes.DRETURN :
+                    assertionError();
+        } else {
+            opcode = Opcodes.RETURN;
+        }
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
