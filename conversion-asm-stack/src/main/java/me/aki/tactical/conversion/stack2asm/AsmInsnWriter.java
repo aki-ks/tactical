@@ -167,77 +167,145 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitNeg(Type type) {
-        super.visitNeg(type);
+        int opcode = type instanceof IntType ? Opcodes.INEG :
+                type instanceof LongType ? Opcodes.LNEG :
+                type instanceof FloatType ? Opcodes.FNEG :
+                type instanceof DoubleType ? Opcodes.DNEG :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitAdd(Type type) {
-        super.visitAdd(type);
+        int opcode = type instanceof IntType ? Opcodes.IADD :
+                type instanceof LongType ? Opcodes.LADD :
+                type instanceof FloatType ? Opcodes.FADD :
+                type instanceof DoubleType ? Opcodes.DADD :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitSub(Type type) {
-        super.visitSub(type);
+        int opcode = type instanceof IntType ? Opcodes.ISUB :
+                type instanceof LongType ? Opcodes.LSUB :
+                type instanceof FloatType ? Opcodes.FSUB :
+                type instanceof DoubleType ? Opcodes.DSUB :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitMul(Type type) {
-        super.visitMul(type);
+        int opcode = type instanceof IntType ? Opcodes.IMUL :
+                type instanceof LongType ? Opcodes.LMUL :
+                type instanceof FloatType ? Opcodes.FMUL :
+                type instanceof DoubleType ? Opcodes.DMUL :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitDiv(Type type) {
-        super.visitDiv(type);
+        int opcode = type instanceof IntType ? Opcodes.IDIV :
+                type instanceof LongType ? Opcodes.LDIV :
+                type instanceof FloatType ? Opcodes.FDIV :
+                type instanceof DoubleType ? Opcodes.DDIV :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitMod(Type type) {
-        super.visitMod(type);
+        int opcode = type instanceof IntType ? Opcodes.IREM :
+                type instanceof LongType ? Opcodes.LREM :
+                type instanceof FloatType ? Opcodes.FREM :
+                type instanceof DoubleType ? Opcodes.DREM :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitAnd(Type type) {
-        super.visitAnd(type);
+        int opcode = type instanceof IntType ? Opcodes.IAND :
+                type instanceof LongType ? Opcodes.LAND :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitOr(Type type) {
-        super.visitOr(type);
+        int opcode = type instanceof IntType ? Opcodes.IOR :
+                type instanceof LongType ? Opcodes.LOR :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitXor(Type type) {
-        super.visitXor(type);
+        int opcode = type instanceof IntType ? Opcodes.IXOR :
+                type instanceof LongType ? Opcodes.LXOR :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitShl(Type type) {
-        super.visitShl(type);
+        int opcode = type instanceof IntType ? Opcodes.ISHL :
+                type instanceof LongType ? Opcodes.LSHL :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitShr(Type type) {
-        super.visitShr(type);
+        int opcode = type instanceof IntType ? Opcodes.ISHR :
+                type instanceof LongType ? Opcodes.LSHR :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitUShr(Type type) {
-        super.visitUShr(type);
+        int opcode = type instanceof IntType ? Opcodes.IUSHR :
+                type instanceof LongType ? Opcodes.LUSHR :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitCmp() {
-        super.visitCmp();
+        visitConvertedInsn(new InsnNode(Opcodes.LCMP));
     }
 
     @Override
     public void visitCmpl(Type type) {
-        super.visitCmpl(type);
+        int opcode = type instanceof FloatType ? Opcodes.FCMPL :
+                type instanceof DoubleType ? Opcodes.DCMPL :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitCmpg(Type type) {
-        super.visitCmpg(type);
+        int opcode = type instanceof FloatType ? Opcodes.FCMPG :
+                type instanceof DoubleType ? Opcodes.DCMPG :
+                assertionError();
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
