@@ -10,18 +10,18 @@ public class InstanceOfInsn extends AbstractInstruction {
     /**
      * Check whether the popped object is an instance of this class.
      */
-    private RefType path;
+    private RefType type;
 
-    public InstanceOfInsn(RefType path) {
-        this.path = path;
+    public InstanceOfInsn(RefType type) {
+        this.type = type;
     }
 
-    public RefType getPath() {
-        return path;
+    public RefType getType() {
+        return type;
     }
 
-    public void setPath(RefType path) {
-        this.path = path;
+    public void setType(RefType type) {
+        this.type = type;
     }
 
     @Override
