@@ -408,49 +408,49 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
     @Override
     public void visitSwap() {
         super.visitSwap();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
     public void visitPop() {
         super.visitPop();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
     public void visitDup() {
         super.visitDup();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
     public void visitDupX1() {
         super.visitDupX1();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
     public void visitDupX2() {
         super.visitDupX2();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
     public void visitDup2() {
         super.visitDup2();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
     public void visitDup2X1() {
         super.visitDup2X1();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
     public void visitDup2X2() {
         super.visitDup2X2();
-        //TODO
+        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
