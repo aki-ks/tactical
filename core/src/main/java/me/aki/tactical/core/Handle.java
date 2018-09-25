@@ -2,8 +2,8 @@ package me.aki.tactical.core;
 
 import java.util.Objects;
 
-public interface MethodHandle {
-    abstract class AbstractFieldHandle implements MethodHandle {
+public interface Handle {
+    abstract class AbstractFieldHandle implements Handle {
         private final FieldRef fieldRef;
 
         public AbstractFieldHandle(FieldRef fieldRef) {
@@ -35,7 +35,7 @@ public interface MethodHandle {
         }
     }
 
-    abstract class AbstractMethodHandle implements MethodHandle {
+    abstract class AbstractMethodHandle implements Handle {
         private final MethodRef methodRef;
 
         public AbstractMethodHandle(MethodRef methodRef) {

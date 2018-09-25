@@ -1,11 +1,9 @@
 package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.conversion.asm2stack.ConversionContext;
-import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.Handle;
 import me.aki.tactical.core.MethodDescriptor;
-import me.aki.tactical.core.MethodHandle;
-import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.Constant;
@@ -307,7 +305,7 @@ public class InsnWriter extends InsnVisitor.Asm {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, MethodHandle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         visitInsn(new InvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments));
     }
 

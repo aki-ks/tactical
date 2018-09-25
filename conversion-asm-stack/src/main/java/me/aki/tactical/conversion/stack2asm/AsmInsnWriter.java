@@ -2,8 +2,8 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.Handle;
 import me.aki.tactical.core.MethodDescriptor;
-import me.aki.tactical.core.MethodHandle;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
@@ -34,14 +34,12 @@ import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.InvokeInsn;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
@@ -123,49 +121,49 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
             visitConvertedInsn(new LdcInsnNode(AsmUtil.methodDescriptorToType(
                     methodConstant.getReturnType(), methodConstant.getArgumentTypes())));
         } else if (constant instanceof MethodHandleConstant) {
-            MethodHandle handle = ((MethodHandleConstant) constant).getHandle();
+            Handle handle = ((MethodHandleConstant) constant).getHandle();
 
             int type;
             String owner;
             String name;
             String desc;
             boolean isInterface;
-            if (handle instanceof MethodHandle.AbstractFieldHandle) {
-                FieldRef field = ((MethodHandle.AbstractFieldHandle) handle).getFieldRef();
+            if (handle instanceof Handle.AbstractFieldHandle) {
+                FieldRef field = ((Handle.AbstractFieldHandle) handle).getFieldRef();
                 owner = field.getOwner().join('/');
                 name = field.getName();
                 desc = AsmUtil.toDescriptor(field.getType());
                 isInterface = false;
 
-                if (handle instanceof MethodHandle.GetFieldHandle) {
+                if (handle instanceof Handle.GetFieldHandle) {
                     type = Opcodes.H_GETFIELD;
-                } else if (handle instanceof MethodHandle.GetStaticHandle) {
+                } else if (handle instanceof Handle.GetStaticHandle) {
                     type = Opcodes.H_GETSTATIC;
-                } else if (handle instanceof MethodHandle.SetFieldHandle) {
+                } else if (handle instanceof Handle.SetFieldHandle) {
                     type = Opcodes.H_PUTFIELD;
-                } else if (handle instanceof MethodHandle.SetStaticHandle) {
+                } else if (handle instanceof Handle.SetStaticHandle) {
                     type = Opcodes.H_PUTSTATIC;
                 } else {
                     throw new AssertionError();
                 }
-            } else if (handle instanceof MethodHandle.AbstractMethodHandle) {
-                MethodRef method = ((MethodHandle.AbstractMethodHandle) handle).getMethodRef();
+            } else if (handle instanceof Handle.AbstractMethodHandle) {
+                MethodRef method = ((Handle.AbstractMethodHandle) handle).getMethodRef();
                 owner = method.getOwner().join('/');
                 name = method.getName();
                 desc = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
-                isInterface = handle instanceof MethodHandle.InvokeInterfaceHandle ||
-                        handle instanceof MethodHandle.AbstractAmbiguousMethodHandle &&
-                                ((MethodHandle.AbstractAmbiguousMethodHandle) handle).isInterface();
+                isInterface = handle instanceof Handle.InvokeInterfaceHandle ||
+                        handle instanceof Handle.AbstractAmbiguousMethodHandle &&
+                                ((Handle.AbstractAmbiguousMethodHandle) handle).isInterface();
 
-                if (handle instanceof MethodHandle.InvokeInterfaceHandle) {
+                if (handle instanceof Handle.InvokeInterfaceHandle) {
                     type = Opcodes.H_INVOKEINTERFACE;
-                } else if (handle instanceof MethodHandle.InvokeSpecialHandle) {
+                } else if (handle instanceof Handle.InvokeSpecialHandle) {
                     type = Opcodes.H_INVOKESPECIAL;
-                } else if (handle instanceof MethodHandle.InvokeStaticHandle) {
+                } else if (handle instanceof Handle.InvokeStaticHandle) {
                     type = Opcodes.H_INVOKESTATIC;
-                } else if (handle instanceof MethodHandle.InvokeVirtualHandle) {
+                } else if (handle instanceof Handle.InvokeVirtualHandle) {
                     type = Opcodes.H_INVOKEVIRTUAL;
-                } else if (handle instanceof MethodHandle.NewInstanceHandle) {
+                } else if (handle instanceof Handle.NewInstanceHandle) {
                     type = Opcodes.H_NEWINVOKESPECIAL;
                 } else {
                     throw new AssertionError();
@@ -174,7 +172,7 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
                 throw new AssertionError();
             }
 
-            visitConvertedInsn(new LdcInsnNode(new Handle(type, owner, name, desc, isInterface)));
+            visitConvertedInsn(new LdcInsnNode(new org.objectweb.asm.Handle(type, owner, name, desc, isInterface)));
         }
     }
 
@@ -581,7 +579,7 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, MethodHandle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments);
     }
 

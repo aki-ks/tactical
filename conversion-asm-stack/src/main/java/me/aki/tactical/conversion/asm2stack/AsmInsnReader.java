@@ -1,11 +1,9 @@
 package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.asm2stack.AsmUtil;
-import me.aki.tactical.conversion.asm2stack.ConversionContext;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
-import me.aki.tactical.core.MethodHandle;
+import me.aki.tactical.core.Handle;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
@@ -36,7 +34,6 @@ import me.aki.tactical.stack.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.InvokeInsn;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -803,7 +800,7 @@ public class AsmInsnReader {
 
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
         MethodDescriptor descriptor = AsmUtil.parseMethodDescriptor(insn.desc);
-        MethodHandle.BootstrapMethodHandle bootstrapMethod = (MethodHandle.BootstrapMethodHandle) convertMethodHandle(insn.bsm);
+        Handle.BootstrapMethodHandle bootstrapMethod = (Handle.BootstrapMethodHandle) convertMethodHandle(insn.bsm);
         List<BootstrapConstant> bootstrapArguments = Arrays.stream(insn.bsmArgs)
                 .map(this::convertBootstrapArgument)
                 .collect(Collectors.toList());
@@ -836,8 +833,8 @@ public class AsmInsnReader {
                 default:
                     throw new AssertionError();
             }
-        } else if (value instanceof Handle) {
-            return new MethodHandleConstant(convertMethodHandle((Handle) value));
+        } else if (value instanceof org.objectweb.asm.Handle) {
+            return new MethodHandleConstant(convertMethodHandle((org.objectweb.asm.Handle) value));
         } else {
             throw new AssertionError();
         }
@@ -914,14 +911,14 @@ public class AsmInsnReader {
                 default:
                     throw new AssertionError();
             }
-        } else if (value instanceof Handle) {
-            return new MethodHandleConstant(convertMethodHandle((Handle) value));
+        } else if (value instanceof org.objectweb.asm.Handle) {
+            return new MethodHandleConstant(convertMethodHandle((org.objectweb.asm.Handle) value));
         } else {
             throw new AssertionError();
         }
     }
 
-    private MethodHandle convertMethodHandle(Handle handle) {
+    private Handle convertMethodHandle(org.objectweb.asm.Handle handle) {
         Path owner = AsmUtil.pathFromInternalName(handle.getOwner());
         int tag = handle.getTag();
         switch (tag) {
@@ -932,10 +929,10 @@ public class AsmInsnReader {
                 FieldRef fieldRef = new FieldRef(owner, handle.getName(), AsmUtil.fromDescriptor(handle.getDesc()));
 
                 switch (tag) {
-                    case Opcodes.H_GETFIELD: return new MethodHandle.GetFieldHandle(fieldRef);
-                    case Opcodes.H_GETSTATIC: return new MethodHandle.GetStaticHandle(fieldRef);
-                    case Opcodes.H_PUTFIELD: return new MethodHandle.SetFieldHandle(fieldRef);
-                    case Opcodes.H_PUTSTATIC: return new MethodHandle.SetStaticHandle(fieldRef);
+                    case Opcodes.H_GETFIELD: return new Handle.GetFieldHandle(fieldRef);
+                    case Opcodes.H_GETSTATIC: return new Handle.GetStaticHandle(fieldRef);
+                    case Opcodes.H_PUTFIELD: return new Handle.SetFieldHandle(fieldRef);
+                    case Opcodes.H_PUTSTATIC: return new Handle.SetStaticHandle(fieldRef);
                     default: throw new AssertionError();
                 }
 
@@ -948,11 +945,11 @@ public class AsmInsnReader {
                 MethodRef methodRef = new MethodRef(owner, handle.getName(), desc.getParameterTypes(), desc.getReturnType());
 
                 switch (tag) {
-                    case Opcodes.H_INVOKEVIRTUAL: return new MethodHandle.InvokeVirtualHandle(methodRef);
-                    case Opcodes.H_INVOKESTATIC: return new MethodHandle.InvokeStaticHandle(methodRef, handle.isInterface());
-                    case Opcodes.H_INVOKESPECIAL: return new MethodHandle.InvokeSpecialHandle(methodRef, handle.isInterface());
-                    case Opcodes.H_NEWINVOKESPECIAL: return new MethodHandle.NewInstanceHandle(methodRef);
-                    case Opcodes.H_INVOKEINTERFACE: return new MethodHandle.InvokeInterfaceHandle(methodRef);
+                    case Opcodes.H_INVOKEVIRTUAL: return new Handle.InvokeVirtualHandle(methodRef);
+                    case Opcodes.H_INVOKESTATIC: return new Handle.InvokeStaticHandle(methodRef, handle.isInterface());
+                    case Opcodes.H_INVOKESPECIAL: return new Handle.InvokeSpecialHandle(methodRef, handle.isInterface());
+                    case Opcodes.H_NEWINVOKESPECIAL: return new Handle.NewInstanceHandle(methodRef);
+                    case Opcodes.H_INVOKEINTERFACE: return new Handle.InvokeInterfaceHandle(methodRef);
                     default: throw new AssertionError();
                 }
 

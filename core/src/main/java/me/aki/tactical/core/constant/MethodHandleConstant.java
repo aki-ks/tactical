@@ -1,7 +1,7 @@
 package me.aki.tactical.core.constant;
 
+import me.aki.tactical.core.Handle;
 import me.aki.tactical.core.Path;
-import me.aki.tactical.core.MethodHandle;
 import me.aki.tactical.core.type.ObjectType;
 
 import java.util.Objects;
@@ -10,13 +10,13 @@ import java.util.Objects;
  * An instance of "java.lang.invoke.MethodHandle".
  */
 public class MethodHandleConstant implements Constant, BootstrapConstant {
-    private final MethodHandle handle;
+    private final Handle handle;
 
-    public MethodHandleConstant(MethodHandle handle) {
+    public MethodHandleConstant(Handle handle) {
         this.handle = handle;
     }
 
-    public MethodHandle getHandle() {
+    public Handle getHandle() {
         return handle;
     }
 
