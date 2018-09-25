@@ -128,8 +128,8 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
             String name;
             String desc;
             boolean isInterface;
-            if (handle instanceof Handle.AbstractFieldHandle) {
-                FieldRef field = ((Handle.AbstractFieldHandle) handle).getFieldRef();
+            if (handle instanceof Handle.FieldHandle) {
+                FieldRef field = ((Handle.FieldHandle) handle).getFieldRef();
                 owner = field.getOwner().join('/');
                 name = field.getName();
                 desc = AsmUtil.toDescriptor(field.getType());
@@ -146,8 +146,8 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
                 } else {
                     throw new AssertionError();
                 }
-            } else if (handle instanceof Handle.AbstractMethodHandle) {
-                MethodRef method = ((Handle.AbstractMethodHandle) handle).getMethodRef();
+            } else if (handle instanceof Handle.MethodHandle) {
+                MethodRef method = ((Handle.MethodHandle) handle).getMethodRef();
                 owner = method.getOwner().join('/');
                 name = method.getName();
                 desc = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());

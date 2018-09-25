@@ -3,7 +3,11 @@ package me.aki.tactical.core;
 import java.util.Objects;
 
 public interface Handle {
-    abstract class AbstractFieldHandle implements Handle {
+    interface FieldHandle extends Handle {
+        FieldRef getFieldRef();
+    }
+
+    abstract class AbstractFieldHandle implements FieldHandle {
         private final FieldRef fieldRef;
 
         public AbstractFieldHandle(FieldRef fieldRef) {
@@ -35,7 +39,16 @@ public interface Handle {
         }
     }
 
-    abstract class AbstractMethodHandle implements Handle {
+    interface MethodHandle extends Handle {
+        MethodRef getMethodRef();
+    }
+
+    /**
+     * Method handle as uses as reference to a bootstrap method by InvokeDynamic instructions.
+     */
+    interface BootstrapMethodHandle extends MethodHandle {}
+
+    abstract class AbstractMethodHandle implements MethodHandle {
         private final MethodRef methodRef;
 
         public AbstractMethodHandle(MethodRef methodRef) {
@@ -111,11 +124,6 @@ public interface Handle {
                     '}';
         }
     }
-
-    /**
-     * Method handle as uses as reference to a bootstrap method by InvokeDynamic instructions.
-     */
-    interface BootstrapMethodHandle {}
 
     class NewInstanceHandle extends AbstractMethodHandle implements BootstrapMethodHandle {
         public NewInstanceHandle(MethodRef methodRef) {
