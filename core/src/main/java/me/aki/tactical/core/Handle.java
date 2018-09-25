@@ -44,7 +44,7 @@ public interface Handle {
     }
 
     /**
-     * Method handle as uses as reference to a bootstrap method by InvokeDynamic instructions.
+     * Method handle as used as reference to a bootstrap method by InvokeDynamic instructions.
      */
     interface BootstrapMethodHandle extends MethodHandle {}
 
