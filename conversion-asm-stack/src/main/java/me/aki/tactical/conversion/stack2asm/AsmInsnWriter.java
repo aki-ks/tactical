@@ -699,6 +699,44 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitSwitch(Map<Integer, Instruction> targetTable, Instruction defaultTarget) {
-        super.visitSwitch(targetTable, defaultTarget);
+        TreeSet<Integer> keySet = new TreeSet<>(targetTable.keySet());
+        if (isTableSwitch(keySet)) {
+            int min = keySet.first();
+            int max = keySet.last();
+            TableSwitchInsnNode node = new TableSwitchInsnNode(min, max, null, new LabelNode[max - min + 1]);
+
+            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x));
+            IntStream.rangeClosed(min, max).forEach(key -> {
+                Instruction target = targetTable.get(key);
+                ctx.registerLabel(target, Cell.of(() -> node.labels.get(key), x -> node.labels.set(key, x)));
+            });
+
+            visitConvertedInsn(node);
+        } else {
+            int[] keys = targetTable.keySet().stream().mapToInt(Integer::intValue).toArray();
+            LabelNode[] labels = new LabelNode[targetTable.size()];
+            LookupSwitchInsnNode node = new LookupSwitchInsnNode(null, keys, labels);
+
+            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x));
+            targetTable.forEach((key, value) -> {
+                int index = node.keys.indexOf(key);
+                ctx.registerLabel(value, Cell.of(() -> node.labels.get(index), x -> node.labels.set(index, x)));
+            });
+
+            visitConvertedInsn(node);
+        }
+    }
+
+    private boolean isTableSwitch(TreeSet<Integer> keys) {
+        Integer prevKey = null;
+
+        for (Integer key : keys) {
+            if (prevKey != null && key != prevKey + 1) {
+                return false;
+            }
+            prevKey = key;
+        }
+
+        return true;
     }
 }
