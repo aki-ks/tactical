@@ -15,7 +15,7 @@ public class InvokableMethodRef extends MethodRef {
      *
      * This flag must also be set for static methods in interfaces.
      */
-    private boolean isInterface;
+    private final boolean isInterface;
 
     public InvokableMethodRef(Path owner, String name, List<Type> arguments, Optional<Type> returnType, boolean isInterface) {
         super(owner, name, arguments, returnType);
@@ -24,10 +24,6 @@ public class InvokableMethodRef extends MethodRef {
 
     public boolean isInterface() {
         return isInterface;
-    }
-
-    public void setInterface(boolean anInterface) {
-        isInterface = anInterface;
     }
 
     @Override

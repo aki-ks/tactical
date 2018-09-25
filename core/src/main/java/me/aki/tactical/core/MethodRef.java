@@ -6,31 +6,34 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Uniquely identify a method in a class.
+ */
 public class MethodRef {
     /**
      * Package and name of class containing the method
      */
-    private Path owner;
+    private final Path owner;
 
     /**
      * Name of the Method
      */
-    private String name;
+    private final String name;
 
     /**
      * Types of the method arguments
      */
-    private List<Type> arguments;
+    private final List<Type> arguments;
 
     /**
      * Return type of the method or empty for "void".
      */
-    private Optional<Type> returnType;
+    private final Optional<Type> returnType;
 
     public MethodRef(Path owner, String name, List<Type> arguments, Optional<Type> returnType) {
         this.owner = owner;
         this.name = name;
-        this.arguments = arguments;
+        this.arguments = List.copyOf(arguments);
         this.returnType = returnType;
     }
 
@@ -38,32 +41,16 @@ public class MethodRef {
         return owner;
     }
 
-    public void setOwner(Path owner) {
-        this.owner = owner;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public List<Type> getArguments() {
         return arguments;
     }
 
-    public void setArguments(List<Type> arguments) {
-        this.arguments = arguments;
-    }
-
     public Optional<Type> getReturnType() {
         return returnType;
-    }
-
-    public void setReturnType(Optional<Type> returnType) {
-        this.returnType = returnType;
     }
 
     @Override
