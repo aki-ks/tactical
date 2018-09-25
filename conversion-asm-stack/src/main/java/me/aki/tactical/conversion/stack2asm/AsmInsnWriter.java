@@ -70,7 +70,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
-import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 public class AsmInsnWriter extends InsnVisitor.Tactical {
