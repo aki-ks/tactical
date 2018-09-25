@@ -2,6 +2,7 @@ package me.aki.tactical.stack.insn;
 
 import me.aki.tactical.core.util.Cell;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,14 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
     }
 
     @Override
-    public List<Cell<Instruction>> getInstructionCells() {
+    public List<Instruction> getBranchTargets() {
+        List<Instruction> instruction = new ArrayList<>(branchTable.values());
+        instruction.add(getDefaultLocation());
+        return instruction;
+    }
+
+    @Override
+    public List<Cell<Instruction>> getBranchTargetCells() {
         List<Cell<Instruction>> cells = getBranchTableCells();
         cells.add(getDefaultLocationCell());
         return cells;

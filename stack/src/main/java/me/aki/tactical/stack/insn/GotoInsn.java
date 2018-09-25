@@ -45,7 +45,12 @@ public class GotoInsn extends AbstractInstruction implements BranchInsn {
     }
 
     @Override
-    public List<Cell<Instruction>> getInstructionCells() {
+    public List<Instruction> getBranchTargets() {
+        return List.of(getTarget());
+    }
+
+    @Override
+    public List<Cell<Instruction>> getBranchTargetCells() {
         return List.of(getTargetCell());
     }
 }

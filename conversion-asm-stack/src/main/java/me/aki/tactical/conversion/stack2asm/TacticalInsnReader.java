@@ -53,9 +53,9 @@ import me.aki.tactical.stack.insn.UShrInsn;
 import me.aki.tactical.stack.insn.XorInsn;
 
 public class TacticalInsnReader {
-    private final InsnVisitor.Tactical iv;
+    private final InsnVisitor<Instruction> iv;
 
-    public TacticalInsnReader(InsnVisitor.Tactical iv) {
+    public TacticalInsnReader(InsnVisitor<Instruction> iv) {
         this.iv = iv;
     }
 

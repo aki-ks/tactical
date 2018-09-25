@@ -9,9 +9,16 @@ import java.util.List;
  */
 public interface BranchInsn extends Instruction {
     /**
-     * Get references to all instructions referenced by this branch instruction.
+     * Get all instructions to which this instruction may branch.
      *
-     * @return references to all referenced instructions
+     * @return code locations where this instruction might branch.
      */
-    List<Cell<Instruction>> getInstructionCells();
+    List<Instruction> getBranchTargets();
+
+    /**
+     * Get cells of all instructions to which this instruction might branch.
+     *
+     * @return references to branch targets
+     */
+    List<Cell<Instruction>> getBranchTargetCells();
 }
