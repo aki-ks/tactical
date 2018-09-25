@@ -28,7 +28,7 @@ import java.util.Optional;
  */
 public class InsnVisitor<T> {
     public static class Asm extends InsnVisitor<LabelNode> {
-        public Asm(InsnVisitor iv) {
+        public Asm(InsnVisitor<LabelNode> iv) {
             super(iv);
         }
     }
@@ -39,7 +39,7 @@ public class InsnVisitor<T> {
         }
     }
 
-    private InsnVisitor iv;
+    private InsnVisitor<T> iv;
 
     public InsnVisitor(InsnVisitor<T> iv) {
         this.iv = iv;
