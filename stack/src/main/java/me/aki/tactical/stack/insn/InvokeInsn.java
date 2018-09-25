@@ -1,6 +1,6 @@
 package me.aki.tactical.stack.insn;
 
-import me.aki.tactical.stack.InvokableMethodRef;
+import me.aki.tactical.core.InvokableMethodRef;
 
 /**
  * Invoke a method and push the result (unless it's a void).

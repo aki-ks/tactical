@@ -12,7 +12,7 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
-import me.aki.tactical.stack.InvokableMethodRef;
+import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.AddInsn;
 import me.aki.tactical.stack.insn.AndInsn;

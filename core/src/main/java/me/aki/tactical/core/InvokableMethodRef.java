@@ -1,13 +1,14 @@
-package me.aki.tactical.stack;
+package me.aki.tactical.core;
 
-import me.aki.tactical.core.MethodRef;
-import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.Type;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A {@link MethodRef} that also stores whether the method is declared within an interface.
+ */
 public class InvokableMethodRef extends MethodRef {
     /**
      * Is this Method declared within an interface.

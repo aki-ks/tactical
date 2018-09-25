@@ -10,7 +10,7 @@ import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.stack.InvokableMethodRef;
+import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
