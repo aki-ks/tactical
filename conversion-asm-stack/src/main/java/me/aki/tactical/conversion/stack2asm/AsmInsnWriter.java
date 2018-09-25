@@ -135,58 +135,61 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
                     methodConstant.getReturnType(), methodConstant.getArgumentTypes())));
         } else if (constant instanceof MethodHandleConstant) {
             Handle handle = ((MethodHandleConstant) constant).getHandle();
+            visitConvertedInsn(new LdcInsnNode(convertHandle(handle)));
+        }
+    }
 
-            int type;
-            String owner;
-            String name;
-            String desc;
-            boolean isInterface;
-            if (handle instanceof FieldHandle) {
-                FieldRef field = ((FieldHandle) handle).getFieldRef();
-                owner = field.getOwner().join('/');
-                name = field.getName();
-                desc = AsmUtil.toDescriptor(field.getType());
-                isInterface = false;
+    private org.objectweb.asm.Handle convertHandle(Handle handle) {
+        int type;
+        String owner;
+        String name;
+        String desc;
+        boolean isInterface;
+        if (handle instanceof FieldHandle) {
+            FieldRef field = ((FieldHandle) handle).getFieldRef();
+            owner = field.getOwner().join('/');
+            name = field.getName();
+            desc = AsmUtil.toDescriptor(field.getType());
+            isInterface = false;
 
-                if (handle instanceof GetFieldHandle) {
-                    type = Opcodes.H_GETFIELD;
-                } else if (handle instanceof GetStaticHandle) {
-                    type = Opcodes.H_GETSTATIC;
-                } else if (handle instanceof SetFieldHandle) {
-                    type = Opcodes.H_PUTFIELD;
-                } else if (handle instanceof SetStaticHandle) {
-                    type = Opcodes.H_PUTSTATIC;
-                } else {
-                    throw new AssertionError();
-                }
-            } else if (handle instanceof MethodHandle) {
-                MethodRef method = ((MethodHandle) handle).getMethodRef();
-                owner = method.getOwner().join('/');
-                name = method.getName();
-                desc = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
-                isInterface = handle instanceof InvokeInterfaceHandle ||
-                        handle instanceof AbstractAmbiguousMethodHandle &&
-                                ((AbstractAmbiguousMethodHandle) handle).isInterface();
-
-                if (handle instanceof InvokeInterfaceHandle) {
-                    type = Opcodes.H_INVOKEINTERFACE;
-                } else if (handle instanceof InvokeSpecialHandle) {
-                    type = Opcodes.H_INVOKESPECIAL;
-                } else if (handle instanceof InvokeStaticHandle) {
-                    type = Opcodes.H_INVOKESTATIC;
-                } else if (handle instanceof InvokeVirtualHandle) {
-                    type = Opcodes.H_INVOKEVIRTUAL;
-                } else if (handle instanceof NewInstanceHandle) {
-                    type = Opcodes.H_NEWINVOKESPECIAL;
-                } else {
-                    throw new AssertionError();
-                }
+            if (handle instanceof GetFieldHandle) {
+                type = Opcodes.H_GETFIELD;
+            } else if (handle instanceof GetStaticHandle) {
+                type = Opcodes.H_GETSTATIC;
+            } else if (handle instanceof SetFieldHandle) {
+                type = Opcodes.H_PUTFIELD;
+            } else if (handle instanceof SetStaticHandle) {
+                type = Opcodes.H_PUTSTATIC;
             } else {
                 throw new AssertionError();
             }
+        } else if (handle instanceof MethodHandle) {
+            MethodRef method = ((MethodHandle) handle).getMethodRef();
+            owner = method.getOwner().join('/');
+            name = method.getName();
+            desc = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
+            isInterface = handle instanceof InvokeInterfaceHandle ||
+                    handle instanceof AbstractAmbiguousMethodHandle &&
+                            ((AbstractAmbiguousMethodHandle) handle).getMethodRef().isInterface();
 
-            visitConvertedInsn(new LdcInsnNode(new org.objectweb.asm.Handle(type, owner, name, desc, isInterface)));
+            if (handle instanceof InvokeInterfaceHandle) {
+                type = Opcodes.H_INVOKEINTERFACE;
+            } else if (handle instanceof InvokeSpecialHandle) {
+                type = Opcodes.H_INVOKESPECIAL;
+            } else if (handle instanceof InvokeStaticHandle) {
+                type = Opcodes.H_INVOKESTATIC;
+            } else if (handle instanceof InvokeVirtualHandle) {
+                type = Opcodes.H_INVOKEVIRTUAL;
+            } else if (handle instanceof NewInstanceHandle) {
+                type = Opcodes.H_NEWINVOKESPECIAL;
+            } else {
+                throw new AssertionError();
+            }
+        } else {
+            throw new AssertionError();
         }
+
+        return new org.objectweb.asm.Handle(type, owner, name, desc, isInterface);
     }
 
     @Override
