@@ -1,6 +1,6 @@
 package me.aki.tactical.stack.insn;
 
-import me.aki.tactical.core.Handle;
+import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.constant.BootstrapConstant;
 
@@ -41,14 +41,14 @@ public class InvokeDynamicInsn extends AbstractInstruction {
      * It is either a static method returning a {@link CallSite} or
      * a constructor of a class that extends {@link CallSite}.
      */
-    private Handle.BootstrapMethodHandle bootstrapMethod;
+    private BootstrapMethodHandle bootstrapMethod;
 
     /**
      * Additional arguments passed to the bootstrap method.
      */
     private List<BootstrapConstant> bootstrapArguments;
 
-    public InvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public InvokeDynamicInsn(String name, MethodDescriptor descriptor, BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         this.name = name;
         this.descriptor = descriptor;
         this.bootstrapMethod = bootstrapMethod;
@@ -71,11 +71,11 @@ public class InvokeDynamicInsn extends AbstractInstruction {
         this.descriptor = descriptor;
     }
 
-    public Handle.BootstrapMethodHandle getBootstrapMethod() {
+    public BootstrapMethodHandle getBootstrapMethod() {
         return bootstrapMethod;
     }
 
-    public void setBootstrapMethod(Handle.BootstrapMethodHandle bootstrapMethod) {
+    public void setBootstrapMethod(BootstrapMethodHandle bootstrapMethod) {
         this.bootstrapMethod = bootstrapMethod;
     }
 

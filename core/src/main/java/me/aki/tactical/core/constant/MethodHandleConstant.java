@@ -1,6 +1,6 @@
 package me.aki.tactical.core.constant;
 
-import me.aki.tactical.core.Handle;
+import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 

@@ -2,7 +2,12 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
-import me.aki.tactical.core.Handle;
+import me.aki.tactical.core.handle.AbstractAmbiguousMethodHandle;
+import me.aki.tactical.core.handle.BootstrapMethodHandle;
+import me.aki.tactical.core.handle.FieldHandle;
+import me.aki.tactical.core.handle.GetFieldHandle;
+import me.aki.tactical.core.handle.GetStaticHandle;
+import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
@@ -17,6 +22,14 @@ import me.aki.tactical.core.constant.MethodHandleConstant;
 import me.aki.tactical.core.constant.MethodTypeConstant;
 import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.StringConstant;
+import me.aki.tactical.core.handle.InvokeInterfaceHandle;
+import me.aki.tactical.core.handle.InvokeSpecialHandle;
+import me.aki.tactical.core.handle.InvokeStaticHandle;
+import me.aki.tactical.core.handle.InvokeVirtualHandle;
+import me.aki.tactical.core.handle.MethodHandle;
+import me.aki.tactical.core.handle.NewInstanceHandle;
+import me.aki.tactical.core.handle.SetFieldHandle;
+import me.aki.tactical.core.handle.SetStaticHandle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.BooleanType;
 import me.aki.tactical.core.type.ByteType;
@@ -128,42 +141,42 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
             String name;
             String desc;
             boolean isInterface;
-            if (handle instanceof Handle.FieldHandle) {
-                FieldRef field = ((Handle.FieldHandle) handle).getFieldRef();
+            if (handle instanceof FieldHandle) {
+                FieldRef field = ((FieldHandle) handle).getFieldRef();
                 owner = field.getOwner().join('/');
                 name = field.getName();
                 desc = AsmUtil.toDescriptor(field.getType());
                 isInterface = false;
 
-                if (handle instanceof Handle.GetFieldHandle) {
+                if (handle instanceof GetFieldHandle) {
                     type = Opcodes.H_GETFIELD;
-                } else if (handle instanceof Handle.GetStaticHandle) {
+                } else if (handle instanceof GetStaticHandle) {
                     type = Opcodes.H_GETSTATIC;
-                } else if (handle instanceof Handle.SetFieldHandle) {
+                } else if (handle instanceof SetFieldHandle) {
                     type = Opcodes.H_PUTFIELD;
-                } else if (handle instanceof Handle.SetStaticHandle) {
+                } else if (handle instanceof SetStaticHandle) {
                     type = Opcodes.H_PUTSTATIC;
                 } else {
                     throw new AssertionError();
                 }
-            } else if (handle instanceof Handle.MethodHandle) {
-                MethodRef method = ((Handle.MethodHandle) handle).getMethodRef();
+            } else if (handle instanceof MethodHandle) {
+                MethodRef method = ((MethodHandle) handle).getMethodRef();
                 owner = method.getOwner().join('/');
                 name = method.getName();
                 desc = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
-                isInterface = handle instanceof Handle.InvokeInterfaceHandle ||
-                        handle instanceof Handle.AbstractAmbiguousMethodHandle &&
-                                ((Handle.AbstractAmbiguousMethodHandle) handle).isInterface();
+                isInterface = handle instanceof InvokeInterfaceHandle ||
+                        handle instanceof AbstractAmbiguousMethodHandle &&
+                                ((AbstractAmbiguousMethodHandle) handle).isInterface();
 
-                if (handle instanceof Handle.InvokeInterfaceHandle) {
+                if (handle instanceof InvokeInterfaceHandle) {
                     type = Opcodes.H_INVOKEINTERFACE;
-                } else if (handle instanceof Handle.InvokeSpecialHandle) {
+                } else if (handle instanceof InvokeSpecialHandle) {
                     type = Opcodes.H_INVOKESPECIAL;
-                } else if (handle instanceof Handle.InvokeStaticHandle) {
+                } else if (handle instanceof InvokeStaticHandle) {
                     type = Opcodes.H_INVOKESTATIC;
-                } else if (handle instanceof Handle.InvokeVirtualHandle) {
+                } else if (handle instanceof InvokeVirtualHandle) {
                     type = Opcodes.H_INVOKEVIRTUAL;
-                } else if (handle instanceof Handle.NewInstanceHandle) {
+                } else if (handle instanceof NewInstanceHandle) {
                     type = Opcodes.H_NEWINVOKESPECIAL;
                 } else {
                     throw new AssertionError();
@@ -579,7 +592,7 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle.BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments);
     }
 

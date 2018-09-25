@@ -3,7 +3,10 @@ package me.aki.tactical.conversion.asm2stack;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
-import me.aki.tactical.core.Handle;
+import me.aki.tactical.core.handle.BootstrapMethodHandle;
+import me.aki.tactical.core.handle.GetFieldHandle;
+import me.aki.tactical.core.handle.GetStaticHandle;
+import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
@@ -17,6 +20,13 @@ import me.aki.tactical.core.constant.MethodHandleConstant;
 import me.aki.tactical.core.constant.MethodTypeConstant;
 import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.StringConstant;
+import me.aki.tactical.core.handle.InvokeInterfaceHandle;
+import me.aki.tactical.core.handle.InvokeSpecialHandle;
+import me.aki.tactical.core.handle.InvokeStaticHandle;
+import me.aki.tactical.core.handle.InvokeVirtualHandle;
+import me.aki.tactical.core.handle.NewInstanceHandle;
+import me.aki.tactical.core.handle.SetFieldHandle;
+import me.aki.tactical.core.handle.SetStaticHandle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.BooleanType;
 import me.aki.tactical.core.type.ByteType;
@@ -800,7 +810,7 @@ public class AsmInsnReader {
 
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
         MethodDescriptor descriptor = AsmUtil.parseMethodDescriptor(insn.desc);
-        Handle.BootstrapMethodHandle bootstrapMethod = (Handle.BootstrapMethodHandle) convertMethodHandle(insn.bsm);
+        BootstrapMethodHandle bootstrapMethod = (BootstrapMethodHandle) convertMethodHandle(insn.bsm);
         List<BootstrapConstant> bootstrapArguments = Arrays.stream(insn.bsmArgs)
                 .map(this::convertBootstrapArgument)
                 .collect(Collectors.toList());
@@ -929,10 +939,10 @@ public class AsmInsnReader {
                 FieldRef fieldRef = new FieldRef(owner, handle.getName(), AsmUtil.fromDescriptor(handle.getDesc()));
 
                 switch (tag) {
-                    case Opcodes.H_GETFIELD: return new Handle.GetFieldHandle(fieldRef);
-                    case Opcodes.H_GETSTATIC: return new Handle.GetStaticHandle(fieldRef);
-                    case Opcodes.H_PUTFIELD: return new Handle.SetFieldHandle(fieldRef);
-                    case Opcodes.H_PUTSTATIC: return new Handle.SetStaticHandle(fieldRef);
+                    case Opcodes.H_GETFIELD: return new GetFieldHandle(fieldRef);
+                    case Opcodes.H_GETSTATIC: return new GetStaticHandle(fieldRef);
+                    case Opcodes.H_PUTFIELD: return new SetFieldHandle(fieldRef);
+                    case Opcodes.H_PUTSTATIC: return new SetStaticHandle(fieldRef);
                     default: throw new AssertionError();
                 }
 
@@ -945,11 +955,11 @@ public class AsmInsnReader {
                 MethodRef methodRef = new MethodRef(owner, handle.getName(), desc.getParameterTypes(), desc.getReturnType());
 
                 switch (tag) {
-                    case Opcodes.H_INVOKEVIRTUAL: return new Handle.InvokeVirtualHandle(methodRef);
-                    case Opcodes.H_INVOKESTATIC: return new Handle.InvokeStaticHandle(methodRef, handle.isInterface());
-                    case Opcodes.H_INVOKESPECIAL: return new Handle.InvokeSpecialHandle(methodRef, handle.isInterface());
-                    case Opcodes.H_NEWINVOKESPECIAL: return new Handle.NewInstanceHandle(methodRef);
-                    case Opcodes.H_INVOKEINTERFACE: return new Handle.InvokeInterfaceHandle(methodRef);
+                    case Opcodes.H_INVOKEVIRTUAL: return new InvokeVirtualHandle(methodRef);
+                    case Opcodes.H_INVOKESTATIC: return new InvokeStaticHandle(methodRef, handle.isInterface());
+                    case Opcodes.H_INVOKESPECIAL: return new InvokeSpecialHandle(methodRef, handle.isInterface());
+                    case Opcodes.H_NEWINVOKESPECIAL: return new NewInstanceHandle(methodRef);
+                    case Opcodes.H_INVOKEINTERFACE: return new InvokeInterfaceHandle(methodRef);
                     default: throw new AssertionError();
                 }
 
