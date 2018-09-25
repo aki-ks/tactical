@@ -53,6 +53,7 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
@@ -596,7 +597,38 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
-        super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments);
+        String asmDescriptor = AsmUtil.methodDescriptorToString(descriptor);
+        org.objectweb.asm.Handle asmBootstrapHandle = convertHandle(bootstrapMethod);
+        Object[] asmBootstrapArguments = bootstrapArguments.stream()
+                .map(this::convertBootstrapConstant)
+                .toArray();
+
+        visitConvertedInsn(new InvokeDynamicInsnNode(name, asmDescriptor, asmBootstrapHandle, asmBootstrapArguments));
+    }
+
+    private Object convertBootstrapConstant(BootstrapConstant constant) {
+        if (constant instanceof IntConstant) {
+            return ((IntConstant) constant).getValue();
+        } else if (constant instanceof LongConstant) {
+            return ((LongConstant) constant).getValue();
+        } else if (constant instanceof FloatConstant) {
+            return ((FloatConstant) constant).getValue();
+        } else if (constant instanceof DoubleConstant) {
+            return ((DoubleConstant) constant).getValue();
+        } else if (constant instanceof StringConstant) {
+            return ((StringConstant) constant).getValue();
+        } else if (constant instanceof ClassConstant) {
+            RefType refType = ((ClassConstant) constant).getValue();
+            return AsmUtil.toAsmType(refType);
+        } else if (constant instanceof MethodHandleConstant) {
+            Handle handle = ((MethodHandleConstant) constant).getHandle();
+            return convertHandle(handle);
+        } else if (constant instanceof MethodTypeConstant) {
+            MethodTypeConstant methodType = (MethodTypeConstant) constant;
+            return AsmUtil.methodDescriptorToType(methodType.getReturnType(), methodType.getArgumentTypes());
+        } else {
+            throw new AssertionError();
+        }
     }
 
     @Override
