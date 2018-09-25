@@ -43,6 +43,7 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.InvokableMethodRef;
+import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
@@ -54,9 +55,13 @@ import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.LookupSwitchInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
@@ -64,6 +69,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
 public class AsmInsnWriter extends InsnVisitor.Tactical {
     private final ConversionContext ctx;
@@ -633,12 +641,60 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitGoto(Instruction target) {
-        super.visitGoto(target);
+        convertJumpInsnNode(target, Opcodes.GOTO);
     }
 
     @Override
     public void visitIf(IfInsn.Condition condition, Instruction target) {
-        super.visitIf(condition, target);
+        convertJumpInsnNode(target, getIfOpcode(condition));
+    }
+
+    private void convertJumpInsnNode(Instruction target, int aGoto) {
+        JumpInsnNode node = new JumpInsnNode(aGoto, null);
+        ctx.registerLabel(target, Cell.of(() -> node.label, x -> node.label = x));
+        visitConvertedInsn(node);
+    }
+
+    private int getIfOpcode(IfInsn.Condition condition) {
+        if (condition instanceof IfInsn.IntCondition) {
+            IfInsn.IntCondition intCondition = (IfInsn.IntCondition) condition;
+            IfInsn.IntCompareValue compareValue = intCondition.getCompareValue();
+            IfInsn.IntComparison comparison = intCondition.getComparison();
+
+            if (compareValue instanceof IfInsn.ZeroValue) {
+                return comparison instanceof IfInsn.EQ ? Opcodes.IFEQ :
+                        comparison instanceof IfInsn.NE ? Opcodes.IFNE :
+                        comparison instanceof IfInsn.GE ? Opcodes.IFGE :
+                        comparison instanceof IfInsn.GT ? Opcodes.IFGT :
+                        comparison instanceof IfInsn.LE ? Opcodes.IFLE :
+                        comparison instanceof IfInsn.LT ? Opcodes.IFLT :
+                        assertionError();
+            } else if (compareValue instanceof IfInsn.StackValue) {
+                return comparison instanceof IfInsn.EQ ? Opcodes.IF_ICMPEQ :
+                        comparison instanceof IfInsn.NE ? Opcodes.IF_ICMPNE :
+                        comparison instanceof IfInsn.GE ? Opcodes.IF_ICMPGE :
+                        comparison instanceof IfInsn.GT ? Opcodes.IF_ICMPGT :
+                        comparison instanceof IfInsn.LE ? Opcodes.IF_ICMPLE :
+                        comparison instanceof IfInsn.LT ? Opcodes.IF_ICMPLT :
+                        assertionError();
+            }
+        } else if (condition instanceof IfInsn.ReferenceCondition) {
+            IfInsn.ReferenceCondition refCondition = (IfInsn.ReferenceCondition) condition;
+            IfInsn.ReferenceCompareValue compareValue = refCondition.getCompareValue();
+            IfInsn.ReferenceComparison comparison = refCondition.getComparison();
+
+            if (compareValue instanceof IfInsn.NullValue) {
+                return comparison instanceof IfInsn.EQ ? Opcodes.IFNULL:
+                        comparison instanceof IfInsn.NE ? Opcodes.IFNONNULL:
+                        assertionError();
+            } else if (compareValue instanceof IfInsn.StackValue) {
+                return comparison instanceof IfInsn.EQ ? Opcodes.IF_ACMPEQ:
+                        comparison instanceof IfInsn.NE ? Opcodes.IF_ACMPNE:
+                        assertionError();
+            }
+        }
+
+        throw new AssertionError();
     }
 
     @Override

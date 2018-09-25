@@ -243,11 +243,11 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
         }
     }
 
-    public static  interface Comparison {
+    public static interface Comparison {
         public Comparison negate();
     }
 
-    public static  interface IntComparison extends Comparison {
+    public static interface IntComparison extends Comparison {
         @Override
         public IntComparison negate();
     }
