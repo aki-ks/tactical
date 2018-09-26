@@ -196,8 +196,16 @@ public class TacticalMethodReader {
             this.convertedInsns = convertedInsns;
         }
 
+        /**
+         * Get a {@link LabelNode} that targets the {@link AbstractInsnNode} corresponding
+         * to a certain {@link Instruction}. If there is no such {@link LabelNode} it will be
+         * created and inserted into the instruction list of this method.
+         *
+         * @param insn whose corresponding label we want
+         * @return a {@link LabelNode} corresponding to the request instruction
+         */
         public LabelNode getLabel(Instruction insn) {
-            labels.computeIfAbsent(insn, x -> {
+            return labels.computeIfAbsent(insn, x -> {
                 List<AbstractInsnNode> asmInsns = convertedInsns.get(insn);
                 if (asmInsns == null || asmInsns.isEmpty()) {
                     throw new IllegalStateException();
