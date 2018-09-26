@@ -228,6 +228,10 @@ public class BodyConverter {
 
     private void convertLocalVariables() {
         for (LocalVariableNode asmVar : mn.localVariables) {
+            if (isRangeEmpty(asmVar.start, asmVar.end)) {
+                continue;
+            }
+
             StackBody.LocalVariable localVar = new StackBody.LocalVariable(asmVar.name,
                     AsmUtil.fromDescriptor(asmVar.desc), Optional.ofNullable(asmVar.signature),
                     null, null, ctx.getLocal(asmVar.index));
