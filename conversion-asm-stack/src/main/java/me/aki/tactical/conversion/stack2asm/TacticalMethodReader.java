@@ -17,6 +17,7 @@ import org.objectweb.asm.TypeReference;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LineNumberNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -155,7 +156,12 @@ public class TacticalMethodReader {
                 });
             }
 
-            resolveLabels(convertedInsns, insnList, ctx);
+            LabelResolver labelResolver = new LabelResolver(insnList, convertedInsns);
+
+            // Resolve all labels used within instructions
+            resolveLabels(ctx, labelResolver);
+
+            insertLineNumberNodes(body.getLineNumbers(), insnList, labelResolver);
 
             mv.visitCode();
             insnList.accept(mv);
@@ -163,14 +169,42 @@ public class TacticalMethodReader {
         });
     }
 
-    private void resolveLabels(Map<Instruction, List<AbstractInsnNode>> convertedInsns, InsnList insnList, ConversionContext ctx) {
+    private void insertLineNumberNodes(List<StackBody.LineNumber> lineNumbers, InsnList insnList, LabelResolver labelResolver) {
+        for (StackBody.LineNumber lineNumber : lineNumbers) {
+            LabelNode labelNode = labelResolver.getLabel(lineNumber.getInstruction());
+            LineNumberNode lineNumberNode = new LineNumberNode(lineNumber.getLine(), labelNode);
+            insnList.insert(labelNode, lineNumberNode);
+        }
+    }
+
+    private void resolveLabels(ConversionContext ctx, LabelResolver labelResolver) {
         ctx.getConvertedLabels().forEach((insn, labelCells) -> {
-            AbstractInsnNode asmInsn = convertedInsns.get(insn).get(0);
-            LabelNode labelNode = new LabelNode(new Label());
-
-            insnList.insertBefore(asmInsn, labelNode);
-
+            LabelNode labelNode = labelResolver.getLabel(insn);
             labelCells.forEach(cell -> cell.set(labelNode));
         });
+    }
+
+    private static class LabelResolver {
+        private final InsnList insnList;
+        private final Map<Instruction, List<AbstractInsnNode>> convertedInsns;
+        private final Map<Instruction, LabelNode> labels = new HashMap<>();
+
+        LabelResolver(InsnList insnList, Map<Instruction, List<AbstractInsnNode>> convertedInsns) {
+            this.insnList = insnList;
+            this.convertedInsns = convertedInsns;
+        }
+
+        public LabelNode getLabel(Instruction insn) {
+            labels.computeIfAbsent(insn, x -> {
+                List<AbstractInsnNode> asmInsns = convertedInsns.get(insn);
+                if (asmInsns == null || asmInsns.isEmpty()) {
+                    throw new IllegalStateException();
+                }
+
+                LabelNode labelNode = new LabelNode(new Label());
+                insnList.insertBefore(asmInsns.get(0), labelNode);
+                return labelNode;
+            });
+        }
     }
 }
