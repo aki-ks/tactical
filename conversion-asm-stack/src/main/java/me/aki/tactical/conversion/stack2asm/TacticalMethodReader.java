@@ -1,18 +1,28 @@
 package me.aki.tactical.conversion.stack2asm;
 
+import me.aki.tactical.conversion.stack2asm.analysis.Analysis;
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
+import me.aki.tactical.stack.StackBody;
+import me.aki.tactical.stack.insn.Instruction;
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.TypeReference;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LabelNode;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TacticalMethodReader {
     private final Method method;
@@ -28,6 +38,7 @@ public class TacticalMethodReader {
         visitTypeAnnotations(mv);
         visitParameterAnnotations(mv);
         //TODO: visitAttribute
+        visitBody(mv);
         mv.visitEnd();
     }
 
@@ -117,5 +128,49 @@ public class TacticalMethodReader {
 
             parameterIndex++;
         }
+    }
+
+    private void visitBody(MethodVisitor mv) {
+        method.getBody().map(body -> (StackBody) body).ifPresent(body -> {
+            Map<Instruction, List<AbstractInsnNode>> convertedInsns = new HashMap<>();
+            InsnList insnList = new InsnList();
+
+            Analysis analysis = new Analysis(body);
+            analysis.analyze();
+
+            ConversionContext ctx = new ConversionContext(body);
+            AsmInsnWriter insnWriter = new AsmInsnWriter(ctx);
+            TacticalInsnReader insnReader = new TacticalInsnReader(insnWriter);
+
+
+            for (Instruction instruction : body.getInstructions()) {
+                analysis.getStackState(instruction).ifPresent(stackFrame -> {
+                    insnWriter.setStackFrame(stackFrame);
+                    insnReader.accept(instruction);
+
+                    List<AbstractInsnNode> asmInsns = insnWriter.getConvertedInsns();
+                    asmInsns.forEach(insnList::add);
+                    convertedInsns.put(instruction, new ArrayList<>(asmInsns));
+                    asmInsns.clear();
+                });
+            }
+
+            resolveLabels(convertedInsns, insnList, ctx);
+
+            mv.visitCode();
+            insnList.accept(mv);
+            mv.visitMaxs(0, 0);
+        });
+    }
+
+    private void resolveLabels(Map<Instruction, List<AbstractInsnNode>> convertedInsns, InsnList insnList, ConversionContext ctx) {
+        ctx.getConvertedLabels().forEach((insn, labelCells) -> {
+            AbstractInsnNode asmInsn = convertedInsns.get(insn).get(0);
+            LabelNode labelNode = new LabelNode(new Label());
+
+            insnList.insertBefore(asmInsn, labelNode);
+
+            labelCells.forEach(cell -> cell.set(labelNode));
+        });
     }
 }
