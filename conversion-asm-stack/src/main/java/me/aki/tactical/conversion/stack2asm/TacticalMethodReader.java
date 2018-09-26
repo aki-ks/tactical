@@ -207,6 +207,9 @@ public class TacticalMethodReader {
             LabelNode end = labelResolver.getBackwardLabel(local.getEnd());
             int index = getLocalIndex(body, local.getLocal());
 
+            if (mn.localVariables == null) {
+                mn.localVariables = new ArrayList<>();
+            }
             mn.localVariables.add(new LocalVariableNode(name, descriptor, signature, start, end, index));
         }
     }
