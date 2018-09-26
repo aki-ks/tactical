@@ -556,7 +556,17 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
         }
 
         if (opcode == null) {
-            throw new AsmInsnReader.StackTypeException();
+            Local local0 = getTempLocal(0);
+            Local local1 = getTempLocal(1);
+
+            visitStore(peeked[0].toType(), local0);
+            visitStore(peeked[1].toType(), local1);
+
+            visitLoad(peeked[1].toType(), local1);
+            visitLoad(peeked[0].toType(), local0);
+
+            visitLoad(peeked[1].toType(), local1);
+            visitLoad(peeked[0].toType(), local0);
         } else {
             visitConvertedInsn(new InsnNode(opcode));
         }
