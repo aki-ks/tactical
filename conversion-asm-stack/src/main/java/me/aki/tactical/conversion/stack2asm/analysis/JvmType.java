@@ -48,4 +48,8 @@ public enum JvmType {
     public boolean is64bit() {
         return is64bit;
     }
+
+    public boolean is32bit() {
+        return !is64bit;
+    }
 }

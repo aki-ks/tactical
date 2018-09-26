@@ -1,5 +1,8 @@
 package me.aki.tactical.conversion.stack2asm;
 
+import me.aki.tactical.conversion.asm2stack.AsmInsnReader;
+import me.aki.tactical.conversion.stack2asm.analysis.JvmType;
+import me.aki.tactical.conversion.stack2asm.analysis.Stack;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.handle.AbstractAmbiguousMethodHandle;
@@ -66,6 +69,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,6 +80,11 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
     private final ConversionContext ctx;
     private final List<AbstractInsnNode> convertedInsns = new ArrayList<>();
 
+    /**
+     * The state of the stack before the next visited instruction
+     */
+    private Stack stackFrame;
+
     public AsmInsnWriter(ConversionContext ctx) {
         super(null);
         this.ctx = ctx;
@@ -83,6 +92,14 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     private void visitConvertedInsn(AbstractInsnNode node) {
         convertedInsns.add(node);
+    }
+
+    public List<AbstractInsnNode> getConvertedInsns() {
+        return convertedInsns;
+    }
+
+    public void setStackFrame(Stack stackFrame) {
+        this.stackFrame = stackFrame;
     }
 
     private <T> T assertionError() {
@@ -406,50 +423,155 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     @Override
     public void visitSwap() {
-        super.visitSwap();
-        throw new RuntimeException("Not yet implemented");
+        JvmType[] peeked = this.stackFrame.peek(2);
+        Integer opcode = null;
+        if (peeked[0].is32bit()) {
+            if (peeked[1].is32bit()) {
+                opcode = Opcodes.SWAP;
+            }
+        }
+
+        if (opcode == null) {
+            throw new AsmInsnReader.StackTypeException();
+        } else {
+            visitConvertedInsn(new InsnNode(opcode));
+        }
     }
 
     @Override
     public void visitPop() {
-        super.visitPop();
-        throw new RuntimeException("Not yet implemented");
+        int opcode;
+        if (this.stackFrame.peek().is32bit()) {
+            opcode = Opcodes.POP;
+        } else {
+            opcode = Opcodes.POP2;
+        }
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitDup() {
-        super.visitDup();
-        throw new RuntimeException("Not yet implemented");
+        int opcode;
+        if (this.stackFrame.peek().is32bit()) {
+            opcode = Opcodes.DUP;
+        } else {
+            opcode = Opcodes.DUP2;
+        }
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitDupX1() {
-        super.visitDupX1();
-        throw new RuntimeException("Not yet implemented");
+        JvmType[] peeked = this.stackFrame.peek(2);
+        int opcode;
+        if (peeked[0].is32bit()) {
+            if (peeked[1].is32bit()) {
+                // DUP2_X1 Form 1
+                opcode = Opcodes.DUP_X1;
+            } else {
+                // DUP_X2 Form 2
+                opcode = Opcodes.DUP_X2;
+            }
+        } else {
+            if (peeked[1].is32bit()) {
+                // DUP2_X1 Form 2
+                opcode = Opcodes.DUP2_X1;
+            } else {
+                // DUP2_X2 Form 4
+                opcode = Opcodes.DUP2_X2;
+            }
+        }
+
+        visitConvertedInsn(new InsnNode(opcode));
     }
 
     @Override
     public void visitDupX2() {
-        super.visitDupX2();
-        throw new RuntimeException("Not yet implemented");
+        JvmType[] peeked = this.stackFrame.peek(3);
+        Integer opcode = null;
+        if (peeked[0].is32bit()) {
+            if (peeked[1].is32bit()) {
+                if (peeked[2].is32bit()) {
+                    // DUP_X2 Form 1
+                    opcode = Opcodes.DUP_X2;
+                }
+            }
+        } else {
+            if (peeked[1].is32bit()) {
+                if (peeked[2].is32bit()) {
+                    // DUP2_X2 Form 2
+                    opcode = Opcodes.DUP2_X2;
+                }
+            }
+        }
+
+        if (opcode == null) {
+            throw new AsmInsnReader.StackTypeException();
+        } else {
+            visitConvertedInsn(new InsnNode(opcode));
+        }
     }
 
     @Override
     public void visitDup2() {
-        super.visitDup2();
-        throw new RuntimeException("Not yet implemented");
+        JvmType[] peeked = this.stackFrame.peek(2);
+        Integer opcode = null;
+        if (peeked[0].is32bit() && peeked[1].is32bit()) {
+            // DUP2 Form 1
+            opcode = Opcodes.DUP2;
+        }
+
+        if (opcode == null) {
+            throw new AsmInsnReader.StackTypeException();
+        } else {
+            visitConvertedInsn(new InsnNode(opcode));
+        }
     }
 
     @Override
     public void visitDup2X1() {
-        super.visitDup2X1();
-        throw new RuntimeException("Not yet implemented");
+        JvmType[] peeked = this.stackFrame.peek(3);
+        Integer opcode = null;
+        if (peeked[0].is32bit()) {
+            if (peeked[1].is32bit()) {
+                if (peeked[2].is32bit()) {
+                    // DUP2_X1 Form 1
+                    opcode = Opcodes.DUP2_X1;
+                } else {
+                    // DUP2_X2 Form 3
+                    opcode = Opcodes.DUP2_X2;
+                }
+            }
+        }
+
+        if (opcode == null) {
+            throw new AsmInsnReader.StackTypeException();
+        } else {
+            visitConvertedInsn(new InsnNode(opcode));
+        }
     }
 
     @Override
     public void visitDup2X2() {
-        super.visitDup2X2();
-        throw new RuntimeException("Not yet implemented");
+        JvmType[] peeked = this.stackFrame.peek(4);
+        Integer opcode = null;
+        if (peeked[0].is32bit()) {
+            if (peeked[1].is32bit()) {
+                if (peeked[2].is32bit()) {
+                    if (peeked[3].is32bit()) {
+                        opcode = Opcodes.DUP2_X2;
+                    }
+                }
+            }
+        }
+
+        if (opcode == null) {
+            throw new AsmInsnReader.StackTypeException();
+        } else {
+            visitConvertedInsn(new InsnNode(opcode));
+        }
     }
 
     @Override

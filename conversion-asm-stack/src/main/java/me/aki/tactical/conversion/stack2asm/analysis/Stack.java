@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.stack2asm.analysis;
 
 import me.aki.tactical.conversion.asm2stack.AsmInsnReader;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -76,6 +77,47 @@ public class Stack {
      */
     public JvmType peek() {
         return this.head.orElseThrow(StackUnderflowException::new).type;
+    }
+
+    /**
+     * Copy the n must upper values into an array.
+     * The most upper value will be at index zero.
+     *
+     * @param ammount of values to peek
+     * @return an array of peeked values
+     */
+    public JvmType[] peek(int ammount) {
+        JvmType[] array = new JvmType[ammount];
+        Optional<Node> nodeOpt = this.head;
+        for (int i = 0; i < ammount; i++) {
+            Node node = nodeOpt.orElseThrow(StackUnderflowException::new);
+            array[i] = node.type;
+            nodeOpt = node.tail;
+        }
+        return array;
+    }
+
+    /**
+     * Iterator that peeks values starting from the most upper value.
+     *
+     * @return iterator over the stack
+     */
+    public Iterator<JvmType> peekIterator() {
+        return new Iterator<>() {
+            private Optional<Node> nodeOpt = Stack.this.head;
+
+            @Override
+            public boolean hasNext() {
+                return nodeOpt.isPresent();
+            }
+
+            @Override
+            public JvmType next() {
+                Node node = nodeOpt.orElseThrow(StackUnderflowException::new);
+                this.nodeOpt = node.tail;
+                return node.type;
+            }
+        };
     }
 
     /**
