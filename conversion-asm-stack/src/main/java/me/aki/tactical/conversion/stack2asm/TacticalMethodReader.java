@@ -5,6 +5,7 @@ import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
+import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.stack.Local;
@@ -19,6 +20,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LocalVariableAnnotationNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -28,6 +30,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TacticalMethodReader {
     private final Method method;
@@ -147,6 +150,7 @@ public class TacticalMethodReader {
             insertLineNumberNodes(body.getLineNumbers(), mn.instructions, labelResolver);
 
             convertLocalVariables(body, analysis, labelResolver, mn);
+            convertLocalVariableAnnotations(body, analysis, labelResolver, mn);
 
             mn.accept(mv);
         });
@@ -204,6 +208,73 @@ public class TacticalMethodReader {
             int index = getLocalIndex(body, local.getLocal());
 
             mn.localVariables.add(new LocalVariableNode(name, descriptor, signature, start, end, index));
+        }
+    }
+
+    private void convertLocalVariableAnnotations(StackBody body, Analysis analysis, LabelResolver labelResolver, MethodNode mn) {
+        for (StackBody.LocalVariableAnnotation localAnnotation : body.getLocalVariableAnnotations()) {
+            List<StackBody.LocalVariableAnnotation.Location> locations = localAnnotation.getLocations().stream()
+                    .filter(location -> !isRangeEmpty(body, analysis, location.getStart(), location.getEnd()))
+                    .collect(Collectors.toList());
+
+            if (locations.isEmpty()) {
+                continue;
+            }
+
+            LocalVariableTypeAnnotation typeAnnotation = localAnnotation.getAnnotation();
+            Annotation annotation = typeAnnotation.getAnnotation();
+            String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
+
+            int typeRef = convertLocalTargetType(typeAnnotation.getTargetType()).getValue();
+            TypePath typePath = AsmUtil.toAsmTypePath(typeAnnotation.getTypePath());
+
+            LabelNode[] start = locations.stream()
+                    .map(location -> labelResolver.getForwardLabel(location.getStart()))
+                    .toArray(LabelNode[]::new);
+
+            LabelNode[] end = locations.stream()
+                    .map(location -> labelResolver.getBackwardLabel(location.getStart()))
+                    .toArray(LabelNode[]::new);
+
+            int[] index = locations.stream()
+                    .mapToInt(location -> getLocalIndex(body, location.getLocal()))
+                    .toArray();
+
+            getLocalVariableAnnotationList(mn, annotation.isRuntimeVisible())
+                    .add(new LocalVariableAnnotationNode(typeRef, typePath, start, end, index, descriptor));
+        }
+    }
+
+    /**
+     * Get (and initialize if necessary) the list for visible or invisible local type annotations.
+     *
+     * @param mn method node containing the annotation list
+     * @param isVisible do we want the list for visible or invisible annotations
+     * @return the list of visible or invisible local variable type annotations
+     */
+    private List<LocalVariableAnnotationNode> getLocalVariableAnnotationList(MethodNode mn, boolean isVisible) {
+        List<LocalVariableAnnotationNode> annotationList;
+        if (isVisible) {
+            if (mn.visibleLocalVariableAnnotations == null) {
+                mn.visibleLocalVariableAnnotations = new ArrayList<>();
+            }
+            annotationList = mn.visibleLocalVariableAnnotations;
+        } else {
+            if (mn.invisibleLocalVariableAnnotations == null) {
+                mn.invisibleLocalVariableAnnotations = new ArrayList<>();
+            }
+            annotationList = mn.invisibleLocalVariableAnnotations;
+        }
+        return annotationList;
+    }
+
+    private TypeReference convertLocalTargetType(TargetType.LocalTargetType targetType) {
+        if (targetType instanceof TargetType.LocalVariable) {
+            return TypeReference.newTypeReference(TypeReference.LOCAL_VARIABLE);
+        } else if (targetType instanceof TargetType.ResourceVariable) {
+            return TypeReference.newTypeReference(TypeReference.RESOURCE_VARIABLE);
+        } else {
+            throw new AssertionError();
         }
     }
 
