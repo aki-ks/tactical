@@ -7,6 +7,7 @@ import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
+import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.insn.Instruction;
 import org.objectweb.asm.AnnotationVisitor;
@@ -18,9 +19,12 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,24 +137,24 @@ public class TacticalMethodReader {
 
     private void visitBody(MethodVisitor mv) {
         method.getBody().map(body -> (StackBody) body).ifPresent(body -> {
-            InsnList insnList = new InsnList();
+            MethodNode mn = new MethodNode();
 
-            LabelResolver labelResolver = convertInstructions(body, insnList);
+            Analysis analysis = new Analysis(body);
+            analysis.analyze();
 
-            insertLineNumberNodes(body.getLineNumbers(), insnList, labelResolver);
+            LabelResolver labelResolver = convertInstructions(body, analysis, mn.instructions);
 
-            mv.visitCode();
-            insnList.accept(mv);
-            mv.visitMaxs(0, 0);
+            insertLineNumberNodes(body.getLineNumbers(), mn.instructions, labelResolver);
+
+            convertLocalVariables(body, analysis, labelResolver, mn);
+
+            mn.accept(mv);
         });
     }
 
-    private LabelResolver convertInstructions(StackBody body, InsnList insnList) {
+    private LabelResolver convertInstructions(StackBody body, Analysis analysis, InsnList insnList) {
         Map<Instruction, List<AbstractInsnNode>> convertedInsns = new HashMap<>();
         ConversionContext ctx = new ConversionContext(body);
-
-        Analysis analysis = new Analysis(body);
-        analysis.analyze();
 
         AsmInsnWriter insnWriter = new AsmInsnWriter(ctx);
         TacticalInsnReader insnReader = new TacticalInsnReader(insnWriter);
@@ -171,7 +175,7 @@ public class TacticalMethodReader {
 
         // Resolve all labels used within instructions
         ctx.getConvertedLabels().forEach((insn, labelCells) -> {
-            LabelNode labelNode = labelResolver.getLabel(insn);
+            LabelNode labelNode = labelResolver.getForwardLabel(insn);
             labelCells.forEach(cell -> cell.set(labelNode));
         });
 
@@ -180,16 +184,79 @@ public class TacticalMethodReader {
 
     private void insertLineNumberNodes(List<StackBody.LineNumber> lineNumbers, InsnList insnList, LabelResolver labelResolver) {
         for (StackBody.LineNumber lineNumber : lineNumbers) {
-            LabelNode labelNode = labelResolver.getLabel(lineNumber.getInstruction());
+            LabelNode labelNode = labelResolver.getForwardLabel(lineNumber.getInstruction());
             LineNumberNode lineNumberNode = new LineNumberNode(lineNumber.getLine(), labelNode);
             insnList.insert(labelNode, lineNumberNode);
         }
     }
 
+    private void convertLocalVariables(StackBody body, Analysis analysis, LabelResolver labelResolver, MethodNode mn) {
+        for (StackBody.LocalVariable local : body.getLocalVariables()) {
+            if (isRangeEmpty(body, analysis, local.getStart(), local.getEnd())) {
+                continue;
+            }
+
+            String name = local.getName();
+            String descriptor = AsmUtil.toDescriptor(local.getType());
+            String signature = local.getSignature().orElse(null);
+            LabelNode start = labelResolver.getForwardLabel(local.getStart());
+            LabelNode end = labelResolver.getBackwardLabel(local.getEnd());
+            int index = getLocalIndex(body, local.getLocal());
+
+            mn.localVariables.add(new LocalVariableNode(name, descriptor, signature, start, end, index));
+        }
+    }
+
+    /**
+     * Get the index of a local.
+     *
+     * @param body that contains the local
+     * @param local local whose index we want
+     * @return index of the local
+     */
+    private int getLocalIndex(StackBody body, Local local) {
+        int index = body.getLocals().indexOf(local);
+        if (index < 0) {
+            throw new IllegalStateException("Local is not contained within the body");
+        }
+        return index;
+    }
+
+    /**
+     * Check whether a range of instructions is only dead code.
+     *
+     * @param stackBody body containing the instructions
+     * @param analysis cfg analysis of all instructions within the method
+     * @param start first instruction of the instruction range
+     * @param end last instruction of the instruction range
+     * @return contains the instruction range only dead code
+     */
+    private boolean isRangeEmpty(StackBody stackBody, Analysis analysis, Instruction start, Instruction end) {
+        int startIndex = stackBody.getInstructions().indexOf(start);
+        Iterator<Instruction> iter = stackBody.getInstructions().listIterator(startIndex);
+
+        while (iter.hasNext()) {
+            Instruction instruction = iter.next();
+
+            if (analysis.getStackState(instruction).isPresent()) {
+                return false;
+            }
+
+            if (instruction == end) {
+                return false;
+            }
+        }
+
+        // The "start" instruction is not succeeded by the "end" instruction
+        throw new IllegalStateException("Illegal instruction range");
+    }
+
     private static class LabelResolver {
         private final InsnList insnList;
         private final Map<Instruction, List<AbstractInsnNode>> convertedInsns;
-        private final Map<Instruction, LabelNode> labels = new HashMap<>();
+
+        private final Map<Instruction, LabelNode> forwardLabels = new HashMap<>();
+        private final Map<Instruction, LabelNode> backwardLabels = new HashMap<>();
 
         LabelResolver(InsnList insnList, Map<Instruction, List<AbstractInsnNode>> convertedInsns) {
             this.insnList = insnList;
@@ -204,17 +271,38 @@ public class TacticalMethodReader {
          * @param insn whose corresponding label we want
          * @return a {@link LabelNode} corresponding to the request instruction
          */
-        public LabelNode getLabel(Instruction insn) {
-            return labels.computeIfAbsent(insn, x -> {
-                List<AbstractInsnNode> asmInsns = convertedInsns.get(insn);
-                if (asmInsns == null || asmInsns.isEmpty()) {
-                    throw new IllegalStateException();
-                }
-
+        public LabelNode getForwardLabel(Instruction insn) {
+            return forwardLabels.computeIfAbsent(insn, x -> {
                 LabelNode labelNode = new LabelNode(new Label());
+                List<AbstractInsnNode> asmInsns = getAsmInsns(insn);
                 insnList.insertBefore(asmInsns.get(0), labelNode);
                 return labelNode;
             });
+        }
+
+        /**
+         * Similar to {@link LabelResolver#getForwardLabel(Instruction)} but the returned
+         * {@link LabelNode} succeeds the request instruction instead of preceding it.
+         *
+         * @param insn whose label do we want
+         * @return {@link LabelNode} inserted after the corresponding instruction.
+         */
+        public LabelNode getBackwardLabel(Instruction insn) {
+            return backwardLabels.computeIfAbsent(insn, x -> {
+                LabelNode labelNode = new LabelNode(new Label());
+                List<AbstractInsnNode> asmInsns = getAsmInsns(insn);
+                AbstractInsnNode lastAsmInsn = asmInsns.get(asmInsns.size() - 1);
+                insnList.insert(lastAsmInsn, labelNode);
+                return labelNode;
+            });
+        }
+
+        private List<AbstractInsnNode> getAsmInsns(Instruction insn) {
+            List<AbstractInsnNode> asmInsns = convertedInsns.get(insn);
+            if (asmInsns == null || asmInsns.isEmpty()) {
+                throw new IllegalStateException();
+            }
+            return asmInsns;
         }
     }
 }
