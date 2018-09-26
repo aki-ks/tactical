@@ -81,10 +81,10 @@ import java.util.stream.Collectors;
  * In such a case, this utility visits a <tt>DUP</tt> insn instead.
  */
 public class AsmInsnReader {
-    private final InsnVisitor.Asm iv;
+    private final InsnVisitor<LabelNode> iv;
     private final ConversionContext ctx;
 
-    public AsmInsnReader(InsnVisitor.Asm iv, ConversionContext ctx) {
+    public AsmInsnReader(InsnVisitor<LabelNode> iv, ConversionContext ctx) {
         this.iv = iv;
         this.ctx = ctx;
     }

@@ -27,18 +27,6 @@ import java.util.Optional;
  * @param <T> Type of instruction references
  */
 public class InsnVisitor<T> {
-    public static class Asm extends InsnVisitor<LabelNode> {
-        public Asm(InsnVisitor<LabelNode> iv) {
-            super(iv);
-        }
-    }
-
-    public static class Tactical extends InsnVisitor<Instruction> {
-        public Tactical(InsnVisitor<Instruction> iv) {
-            super(iv);
-        }
-    }
-
     private InsnVisitor<T> iv;
 
     public InsnVisitor(InsnVisitor<T> iv) {

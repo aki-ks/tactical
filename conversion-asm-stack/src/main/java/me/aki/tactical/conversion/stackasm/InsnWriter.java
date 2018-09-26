@@ -72,7 +72,7 @@ import java.util.Optional;
 /**
  * Instruction visitor that collects all events represented as {@link Instruction}.
  */
-public class InsnWriter extends InsnVisitor.Asm {
+public class InsnWriter extends InsnVisitor<LabelNode> {
     private final ConversionContext ctx;
     private List<Instruction> instructions = new ArrayList<>();
 

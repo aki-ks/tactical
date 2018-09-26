@@ -1,6 +1,5 @@
 package me.aki.tactical.conversion.stack2asm;
 
-import me.aki.tactical.conversion.asm2stack.AsmInsnReader;
 import me.aki.tactical.conversion.stack2asm.analysis.JvmType;
 import me.aki.tactical.conversion.stack2asm.analysis.Stack;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
@@ -75,7 +74,7 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
 
-public class AsmInsnWriter extends InsnVisitor.Tactical {
+public class AsmInsnWriter extends InsnVisitor<Instruction> {
     private final ConversionContext ctx;
     private final List<AbstractInsnNode> convertedInsns = new ArrayList<>();
 
