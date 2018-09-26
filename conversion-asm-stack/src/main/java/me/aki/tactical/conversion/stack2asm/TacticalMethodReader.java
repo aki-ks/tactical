@@ -133,33 +133,9 @@ public class TacticalMethodReader {
 
     private void visitBody(MethodVisitor mv) {
         method.getBody().map(body -> (StackBody) body).ifPresent(body -> {
-            Map<Instruction, List<AbstractInsnNode>> convertedInsns = new HashMap<>();
             InsnList insnList = new InsnList();
 
-            Analysis analysis = new Analysis(body);
-            analysis.analyze();
-
-            ConversionContext ctx = new ConversionContext(body);
-            AsmInsnWriter insnWriter = new AsmInsnWriter(ctx);
-            TacticalInsnReader insnReader = new TacticalInsnReader(insnWriter);
-
-
-            for (Instruction instruction : body.getInstructions()) {
-                analysis.getStackState(instruction).ifPresent(stackFrame -> {
-                    insnWriter.setStackFrame(stackFrame);
-                    insnReader.accept(instruction);
-
-                    List<AbstractInsnNode> asmInsns = insnWriter.getConvertedInsns();
-                    asmInsns.forEach(insnList::add);
-                    convertedInsns.put(instruction, new ArrayList<>(asmInsns));
-                    asmInsns.clear();
-                });
-            }
-
-            LabelResolver labelResolver = new LabelResolver(insnList, convertedInsns);
-
-            // Resolve all labels used within instructions
-            resolveLabels(ctx, labelResolver);
+            LabelResolver labelResolver = convertInstructions(body, insnList);
 
             insertLineNumberNodes(body.getLineNumbers(), insnList, labelResolver);
 
@@ -169,19 +145,45 @@ public class TacticalMethodReader {
         });
     }
 
+    private LabelResolver convertInstructions(StackBody body, InsnList insnList) {
+        Map<Instruction, List<AbstractInsnNode>> convertedInsns = new HashMap<>();
+        ConversionContext ctx = new ConversionContext(body);
+
+        Analysis analysis = new Analysis(body);
+        analysis.analyze();
+
+        AsmInsnWriter insnWriter = new AsmInsnWriter(ctx);
+        TacticalInsnReader insnReader = new TacticalInsnReader(insnWriter);
+
+        for (Instruction instruction : body.getInstructions()) {
+            analysis.getStackState(instruction).ifPresent(stackFrame -> {
+                insnWriter.setStackFrame(stackFrame);
+                insnReader.accept(instruction);
+
+                List<AbstractInsnNode> asmInsns = insnWriter.getConvertedInsns();
+                asmInsns.forEach(insnList::add);
+                convertedInsns.put(instruction, new ArrayList<>(asmInsns));
+                asmInsns.clear();
+            });
+        }
+
+        LabelResolver labelResolver = new LabelResolver(insnList, convertedInsns);
+
+        // Resolve all labels used within instructions
+        ctx.getConvertedLabels().forEach((insn, labelCells) -> {
+            LabelNode labelNode = labelResolver.getLabel(insn);
+            labelCells.forEach(cell -> cell.set(labelNode));
+        });
+
+        return labelResolver;
+    }
+
     private void insertLineNumberNodes(List<StackBody.LineNumber> lineNumbers, InsnList insnList, LabelResolver labelResolver) {
         for (StackBody.LineNumber lineNumber : lineNumbers) {
             LabelNode labelNode = labelResolver.getLabel(lineNumber.getInstruction());
             LineNumberNode lineNumberNode = new LineNumberNode(lineNumber.getLine(), labelNode);
             insnList.insert(labelNode, lineNumberNode);
         }
-    }
-
-    private void resolveLabels(ConversionContext ctx, LabelResolver labelResolver) {
-        ctx.getConvertedLabels().forEach((insn, labelCells) -> {
-            LabelNode labelNode = labelResolver.getLabel(insn);
-            labelCells.forEach(cell -> cell.set(labelNode));
-        });
     }
 
     private static class LabelResolver {
