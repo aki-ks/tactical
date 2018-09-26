@@ -69,7 +69,6 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -84,6 +83,11 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
      * The state of the stack before the next visited instruction
      */
     private Stack stackFrame;
+
+    /**
+     * A list of locals used to convert dup instructions that cannot be represented as one opcode.
+     */
+    private List<Local> tempLocalIndices = new ArrayList<>();
 
     public AsmInsnWriter(ConversionContext ctx) {
         super(null);
@@ -100,6 +104,15 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
 
     public void setStackFrame(Stack stackFrame) {
         this.stackFrame = stackFrame;
+    }
+
+    private Local getTempLocal(int i) {
+        while (i <= tempLocalIndices.size()) {
+            Local tempLocal = new Local();
+            tempLocalIndices.add(tempLocal);
+        }
+
+        return tempLocalIndices.get(i);
     }
 
     private <T> T assertionError() {
@@ -432,7 +445,14 @@ public class AsmInsnWriter extends InsnVisitor.Tactical {
         }
 
         if (opcode == null) {
-            throw new AsmInsnReader.StackTypeException();
+            Local local0 = getTempLocal(0);
+            Local local1 = getTempLocal(1);
+            
+            visitStore(peeked[0].toType(), local0);
+            visitStore(peeked[1].toType(), local1);
+
+            visitLoad(peeked[0].toType(), local0);
+            visitLoad(peeked[1].toType(), local1);
         } else {
             visitConvertedInsn(new InsnNode(opcode));
         }
