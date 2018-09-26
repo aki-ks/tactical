@@ -312,7 +312,7 @@ public class InsnWriter extends InsnVisitor.Asm {
     @Override
     public void visitGoto(LabelNode target) {
         GotoInsn insn = new GotoInsn(null);
-        ctx.registerInsnCell(target, insn.getTargetCell());
+        ctx.registerForwardInsnCell(target, insn.getTargetCell());
 
         visitInsn(insn);
     }
@@ -320,7 +320,7 @@ public class InsnWriter extends InsnVisitor.Asm {
     @Override
     public void visitIf(IfInsn.Condition condition, LabelNode target) {
         IfInsn insn = new IfInsn(condition, null);
-        ctx.registerInsnCell(target, insn.getTargetCell());
+        ctx.registerForwardInsnCell(target, insn.getTargetCell());
 
         visitInsn(insn);
     }
@@ -330,10 +330,10 @@ public class InsnWriter extends InsnVisitor.Asm {
         Map<Integer, Instruction> table = new HashMap<>();
         SwitchInsn insn = new SwitchInsn(table, null);
 
-        ctx.registerInsnCell(defaultTarget, insn.getDefaultLocationCell());
+        ctx.registerForwardInsnCell(defaultTarget, insn.getDefaultLocationCell());
         targetTable.forEach((key, label) -> {
             table.put(key, null);
-            ctx.registerInsnCell(label, Cell.ofMap(key, table));
+            ctx.registerForwardInsnCell(label, Cell.ofMap(key, table));
         });
 
         visitInsn(insn);

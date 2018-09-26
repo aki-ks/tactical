@@ -11,7 +11,6 @@ import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.core.typeannotation.TypePath;
-import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.TryCatchBlock;
@@ -186,7 +185,7 @@ public class BodyConverter {
     private void convertLineNumber(LineNumberNode insn) {
         StackBody.LineNumber line = new StackBody.LineNumber(insn.line, null);
         this.body.getLineNumbers().add(line);
-        this.ctx.registerInsnCell(insn.start, line.getInstructionCell());
+        this.ctx.registerForwardInsnCell(insn.start, line.getInstructionCell());
     }
 
     private void convertTryCatchBlocks() {
@@ -200,9 +199,9 @@ public class BodyConverter {
             TryCatchBlock tryCatchBlock = new TryCatchBlock(null, null, null, exceptionType);
             this.body.getTryCatchBlocks().add(tryCatchBlock);
 
-            this.ctx.registerInsnCell(block.start, tryCatchBlock.getFirstCell());
-            this.ctx.registerInsnCell(block.end, tryCatchBlock.getLastCell());
-            this.ctx.registerInsnCell(block.handler, tryCatchBlock.getHandlerCell());
+            this.ctx.registerForwardInsnCell(block.start, tryCatchBlock.getFirstCell());
+            this.ctx.registerBackwardInsnCell(block.end, tryCatchBlock.getLastCell());
+            this.ctx.registerForwardInsnCell(block.handler, tryCatchBlock.getHandlerCell());
 
             if (block.visibleTypeAnnotations != null) {
                 for (TypeAnnotationNode anno : block.visibleTypeAnnotations) {
@@ -234,8 +233,8 @@ public class BodyConverter {
                     null, null, ctx.getLocal(asmVar.index));
             this.body.getLocalVariables().add(localVar);
 
-            this.ctx.registerInsnCell(asmVar.start, localVar.getStartCell());
-            this.ctx.registerInsnCell(asmVar.end, localVar.getEndCell());
+            this.ctx.registerForwardInsnCell(asmVar.start, localVar.getStartCell());
+            this.ctx.registerBackwardInsnCell(asmVar.end, localVar.getEndCell());
         }
     }
 
@@ -280,8 +279,8 @@ public class BodyConverter {
                 StackBody.LocalVariableAnnotation.Location location = new StackBody.LocalVariableAnnotation.Location(null, null, ctx.getLocal(index));
                 locations.add(location);
 
-                this.ctx.registerInsnCell(start, location.getStartCell());
-                this.ctx.registerInsnCell(end, location.getEndCell());
+                this.ctx.registerForwardInsnCell(start, location.getStartCell());
+                this.ctx.registerBackwardInsnCell(end, location.getEndCell());
             }
         }
 
@@ -308,24 +307,30 @@ public class BodyConverter {
     }
 
     private void updateInsnCells() {
-        ctx.getLabelCells().forEach((label, insnCells) -> {
-            List<Instruction> insns;
+        ctx.getForwardLabelCells().forEach((label, insnCells) -> {
+            List<Instruction> insns = findConvertedInsn(label, true);
+            Instruction firstInsn = insns.get(0);
 
-            AbstractInsnNode node = label;
-            while (true) {
-                insns = convertedInsns.get(node);
-                if (insns != null && !insns.isEmpty()) {
-                    break;
-                }
-
-                if ((node = node.getNext()) == null) {
-                    throw new RuntimeException("Label could not be resolved");
-                }
-            }
-
-            for (Cell<Instruction> cell : insnCells) {
-                cell.set(insns.get(0));
-            }
+            insnCells.forEach(cell -> cell.set(firstInsn));
         });
+
+        ctx.getBackwardLabelCells().forEach((label, insnCells) -> {
+            List<Instruction> insns = findConvertedInsn(label, false);
+            Instruction lastInsn = insns.get(insns.size() - 1);
+
+            insnCells.forEach(cell -> cell.set(lastInsn));
+        });
+    }
+
+    private List<Instruction> findConvertedInsn(LabelNode label, boolean walkForward) {
+        AbstractInsnNode node = label;
+        while ((node = (walkForward ? node.getNext() : node.getPrevious())) != null) {
+            List<Instruction> insns = convertedInsns.get(node);
+            if (insns != null && !insns.isEmpty()) {
+                return insns;
+            }
+        }
+
+        throw new RuntimeException("Label could not be resolved");
     }
 }

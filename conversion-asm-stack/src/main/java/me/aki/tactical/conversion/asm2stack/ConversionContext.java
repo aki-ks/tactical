@@ -12,22 +12,40 @@ import java.util.Map;
 
 public class ConversionContext {
     private List<Local> locals = new ArrayList<>();
-    private Map<LabelNode, List<Cell<Instruction>>> labelCells = new HashMap<>();
+
+    /**
+     * Instruction cells that should be assigned to the converted instruction that
+     * <b>succeeds</b> the corresponding {@link LabelNode}.
+     */
+    private Map<LabelNode, List<Cell<Instruction>>> forwardLabelCells = new HashMap<>();
+
+    /**
+     * Instruction cells that should be assigned to the converted instruction that
+     * <b>precedes</b> the corresponding {@link LabelNode}.
+     */
+    private Map<LabelNode, List<Cell<Instruction>>> backwardLabelCells = new HashMap<>();
 
     public Local getLocal(int index) {
         return this.locals.get(index);
     }
 
-    public void registerInsnCell(LabelNode label, Cell<Instruction> insnCell) {
-        List<Cell<Instruction>> cells = this.labelCells.computeIfAbsent(label, x -> new ArrayList<>());
-        cells.add(insnCell);
+    public void registerForwardInsnCell(LabelNode label, Cell<Instruction> insnCell) {
+        this.forwardLabelCells.computeIfAbsent(label, x -> new ArrayList<>()).add(insnCell);
+    }
+
+    public void registerBackwardInsnCell(LabelNode label, Cell<Instruction> insnCell) {
+        this.backwardLabelCells.computeIfAbsent(label, x -> new ArrayList<>()).add(insnCell);
     }
 
     public List<Local> getLocals() {
         return locals;
     }
 
-    public Map<LabelNode, List<Cell<Instruction>>> getLabelCells() {
-        return labelCells;
+    public Map<LabelNode, List<Cell<Instruction>>> getForwardLabelCells() {
+        return forwardLabelCells;
+    }
+
+    public Map<LabelNode, List<Cell<Instruction>>> getBackwardLabelCells() {
+        return backwardLabelCells;
     }
 }
