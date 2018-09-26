@@ -37,6 +37,11 @@ public interface TargetType {
         int SORT_METHOD_REFERENCE_TYPE_PARAMETER = MethodReferenceTypeParameter.SORT;
     }
 
+    interface LocalTargetType extends TargetType {
+        int SORT_LOCAL_VARIABLE = LocalVariable.SORT;
+        int SORT_RESOURCE_VARIABLE = ResourceVariable.SORT;
+    }
+
     /**
      * Annotate a bound of a type parameter declaration.
      *
@@ -776,6 +781,66 @@ public interface TargetType {
             return MethodReferenceTypeParameter.class.getSimpleName() + '{' +
                     "typeParameter=" + getTypeParameter() +
                     '}';
+        }
+    }
+
+    /**
+     * Annotation the type of a regular local variable.
+     *
+     * Example:
+     * <pre><code>@MyAnno String s = null;</code></pre>
+     */
+    final class LocalVariable implements LocalTargetType {
+        public static final int SORT = 17;
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof LocalVariable;
+        }
+
+        @Override
+        public int hashCode() {
+            return getSort();
+        }
+
+        @Override
+        public String toString() {
+            return LocalVariable.class.getSimpleName() + "{}";
+        }
+    }
+
+    /**
+     * Annotate the type of the local variable within a try-with-resource statement.
+     *
+     * Example:
+     * <pre><code>try (@MyAnno BufferedReader br = ...) { ... }</code></pre>
+     */
+    final class ResourceVariable implements LocalTargetType {
+        public static final int SORT = 18;
+
+        @Override
+        public int getSort() {
+            return SORT;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof ResourceVariable;
+        }
+
+        @Override
+        public int hashCode() {
+            return getSort();
+        }
+
+        @Override
+        public String toString() {
+            return ResourceVariable.class.getSimpleName() + "{}";
         }
     }
 }

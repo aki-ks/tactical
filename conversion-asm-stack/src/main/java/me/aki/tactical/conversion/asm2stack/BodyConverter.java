@@ -259,13 +259,27 @@ public class BodyConverter {
             return;
         }
 
+        TargetType.LocalTargetType targetType = convertLocalTargetType(new TypeReference(varAnno.typeRef));
         TypePath typePath = AsmUtil.fromAsmTypePath(varAnno.typePath);
 
         Annotation annotation = new Annotation(AsmUtil.pathFromInternalName(varAnno.desc), visible);
         varAnno.accept(new AnnotationConvertVisitor(null, annotation));
 
-        LocalVariableTypeAnnotation typeAnno = new LocalVariableTypeAnnotation(typePath, annotation);
+        LocalVariableTypeAnnotation typeAnno = new LocalVariableTypeAnnotation(typePath, annotation, targetType);
         body.getLocalVariableAnnotations().add(new StackBody.LocalVariableAnnotation(typeAnno, locations));
+    }
+
+    private TargetType.LocalTargetType convertLocalTargetType(TypeReference tref) {
+        switch (tref.getSort()) {
+            case TypeReference.LOCAL_VARIABLE:
+                return new TargetType.LocalVariable();
+
+            case TypeReference.RESOURCE_VARIABLE:
+                return new TargetType.ResourceVariable();
+
+            default:
+                throw new AssertionError();
+        }
     }
 
     private List<StackBody.LocalVariableAnnotation.Location> convertLocalVariableAnnotationLocations(LocalVariableAnnotationNode varAnno) {
