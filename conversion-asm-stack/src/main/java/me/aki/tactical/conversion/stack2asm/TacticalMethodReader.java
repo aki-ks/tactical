@@ -5,6 +5,7 @@ import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
+import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
@@ -25,6 +26,7 @@ import org.objectweb.asm.tree.LocalVariableAnnotationNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.TypeAnnotationNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -297,11 +299,46 @@ public class TacticalMethodReader {
             String type = block.getExceptionType().map(path -> path.join('/')).orElse(null);
 
             TryCatchBlockNode node = new TryCatchBlockNode(start, end, handler, type);
+            convertTryCatchBlockAnnotations(block, node);
 
             if (mn.tryCatchBlocks == null) {
                 mn.tryCatchBlocks = new ArrayList<>();
             }
             mn.tryCatchBlocks.add(node);
+        }
+    }
+
+    private void convertTryCatchBlockAnnotations(TryCatchBlock block, TryCatchBlockNode node) {
+        for (ExceptionTypeAnnotation typeAnnotation : block.getTypeAnnotations()) {
+            Annotation annotation = typeAnnotation.getAnnotation();
+            int typeRef = TypeReference.newTypeReference(TypeReference.EXCEPTION_PARAMETER).getValue();
+            TypePath typePath = AsmUtil.toAsmTypePath(typeAnnotation.getTypePath());
+            String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
+
+            getTryCatchBlockAnnotationList(node, annotation.isRuntimeVisible())
+                    .add(new TypeAnnotationNode(typeRef, typePath, descriptor));
+        }
+    }
+
+    /**
+     * Get (and initialize if necessary) the list of visible or invisible try/catch type annotations.
+     *
+     * @param node try/catch block containing the annotation list
+     * @param isVisible request the list of visible or invisible annotations
+     * @return the requested list of type annotations
+     */
+    private List<TypeAnnotationNode> getTryCatchBlockAnnotationList(TryCatchBlockNode node, boolean isVisible) {
+        List<LocalVariableAnnotationNode> annotationList;
+        if (isVisible) {
+            if (node.visibleTypeAnnotations == null) {
+                node.visibleTypeAnnotations = new ArrayList<>();
+            }
+            return node.visibleTypeAnnotations;
+        } else {
+            if (node.invisibleTypeAnnotations == null) {
+                node.invisibleTypeAnnotations = new ArrayList<>();
+            }
+            return node.invisibleTypeAnnotations;
         }
     }
 
