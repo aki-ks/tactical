@@ -10,9 +10,11 @@ Building a referenced based intermediation for java bytecode is the main objecti
 * [ ] build basic reference based intermediation
 * [X] conversion: bytecode ([asm](https://asm.ow2.io/)) <-> stack
 * [ ] conversion: stack <-> reference
+* [ ] implement the whole [jvm classfile format](https://docs.oracle.com/javase/specs/jvms/se10/html/index.html)
+  * [X] for the stack intermediation (jvm 10)
+  * [ ] for the reference based intermediation
 
 ## Future Goals
-* [ ] implement the whole [jvm classfile format](https://docs.oracle.com/javase/specs/jvms/se10/html/index.html)
 * [ ] support dalvik bytecode (android apps)
   * [ ] build dalvik intermediation
   * [ ] conversion: dex (bytecode) <-> dalvik (intermediation)
