@@ -315,8 +315,9 @@ public class TacticalMethodReader {
             TypePath typePath = AsmUtil.toAsmTypePath(typeAnnotation.getTypePath());
             String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
 
-            getTryCatchBlockAnnotationList(node, annotation.isRuntimeVisible())
-                    .add(new TypeAnnotationNode(typeRef, typePath, descriptor));
+            TypeAnnotationNode annotationNode = new TypeAnnotationNode(typeRef, typePath, descriptor);
+            new TacticalAnnotationReader(annotation.getValues()).accept(annotationNode);
+            getTryCatchBlockAnnotationList(node, annotation.isRuntimeVisible()).add(annotationNode);
         }
     }
 
