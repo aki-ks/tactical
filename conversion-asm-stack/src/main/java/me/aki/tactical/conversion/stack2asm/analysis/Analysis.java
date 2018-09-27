@@ -140,20 +140,28 @@ public class Analysis {
 
                 instruction = iter.next();
 
-                if (stackMap.containsKey(instruction)) {
-                    // The code starting from this instruction has already been visited
-                    break;
+                Stack.Immutable currentFrame = stackEmulator.getStack().immutableCopy();
+                Stack.Immutable expectedFrame = stackMap.get(instruction);
+                if (expectedFrame != null) {
+                    // The code starting from here on has already been visited.
+                    // The stack must have the same state as during the last visit.
+                    if (expectedFrame.isEqual(currentFrame)) {
+                        break;
+                    } else {
+                        throw new IllegalStateException("Different stack states");
+                    }
                 }
 
                 // store the stack state before the instruction was evaluated
-                stackMap.put(instruction, stackEmulator.getStack().immutableCopy());
+                stackMap.put(instruction, currentFrame);
 
                 // evaluate the stack changes done by this instruction
                 insnReader.accept(instruction);
 
                 if (instruction instanceof BranchInsn) {
+                    currentFrame = stackEmulator.getStack().immutableCopy();
                     for (Instruction branchTarget : ((BranchInsn) instruction).getBranchTargets()) {
-                        worklist.add(new Workable(branchTarget, stackEmulator.getStack().immutableCopy()));
+                        worklist.add(new Workable(branchTarget, currentFrame));
                     }
                 }
             } while (instruction.continuesExecution());
