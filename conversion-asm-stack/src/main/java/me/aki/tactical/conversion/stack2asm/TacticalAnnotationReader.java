@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.stack2asm;
 
+import me.aki.tactical.core.annotation.AbstractAnnotation;
 import me.aki.tactical.core.annotation.AnnotationAnnotationValue;
 import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.annotation.ArrayAnnotationValue;
@@ -22,6 +23,10 @@ import java.util.LinkedHashMap;
 
 public class TacticalAnnotationReader {
     private final LinkedHashMap<String, AnnotationValue> values;
+
+    public TacticalAnnotationReader(AbstractAnnotation annotation) {
+        this(annotation.getValues());
+    }
 
     public TacticalAnnotationReader(LinkedHashMap<String, AnnotationValue> values) {
         this.values = values;

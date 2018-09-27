@@ -29,7 +29,7 @@ public class TacticalFieldReader {
 
             AnnotationVisitor av = fv.visitAnnotation(descriptor, isVisible);
             if (av != null) {
-                new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                new TacticalAnnotationReader(annotation).accept(av);
             }
         }
     }
@@ -45,7 +45,7 @@ public class TacticalFieldReader {
 
             AnnotationVisitor av = fv.visitTypeAnnotation(typeRef, typePath, descriptor, isVisible);
             if (av != null) {
-                new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                new TacticalAnnotationReader(annotation).accept(av);
             }
         }
     }

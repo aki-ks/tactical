@@ -81,7 +81,7 @@ public class TacticalMethodReader {
 
             AnnotationVisitor av = mv.visitAnnotation(descriptor, isVisible);
             if (av != null) {
-                new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                new TacticalAnnotationReader(annotation).accept(av);
             }
         }
     }
@@ -97,7 +97,7 @@ public class TacticalMethodReader {
 
             AnnotationVisitor av = cv.visitTypeAnnotation(typeRef, typePath, descriptor, isVisible);
             if (av != null) {
-                new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                new TacticalAnnotationReader(annotation).accept(av);
             }
         }
     }
@@ -134,7 +134,7 @@ public class TacticalMethodReader {
 
                 AnnotationVisitor av = mv.visitParameterAnnotation(parameterIndex, descriptor, isVisible);
                 if (av != null) {
-                    new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                    new TacticalAnnotationReader(annotation).accept(av);
                 }
             }
 
@@ -249,8 +249,9 @@ public class TacticalMethodReader {
                     .mapToInt(location -> getLocalIndex(body, location.getLocal()))
                     .toArray();
 
-            getLocalVariableAnnotationList(mn, annotation.isRuntimeVisible())
-                    .add(new LocalVariableAnnotationNode(typeRef, typePath, start, end, index, descriptor));
+            LocalVariableAnnotationNode annotationNode = new LocalVariableAnnotationNode(typeRef, typePath, start, end, index, descriptor);
+            new TacticalAnnotationReader(annotation).accept(annotationNode);
+            getLocalVariableAnnotationList(mn, annotation.isRuntimeVisible()).add(annotationNode);
         }
     }
 
@@ -316,7 +317,7 @@ public class TacticalMethodReader {
             String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
 
             TypeAnnotationNode annotationNode = new TypeAnnotationNode(typeRef, typePath, descriptor);
-            new TacticalAnnotationReader(annotation.getValues()).accept(annotationNode);
+            new TacticalAnnotationReader(annotation).accept(annotationNode);
             getTryCatchBlockAnnotationList(node, annotation.isRuntimeVisible()).add(annotationNode);
         }
     }

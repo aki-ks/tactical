@@ -105,7 +105,7 @@ public class TacticalClassReader {
 
             AnnotationVisitor av = cv.visitAnnotation(descriptor, isVisible);
             if (av != null) {
-                new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                new TacticalAnnotationReader(annotation).accept(av);
             }
         }
     }
@@ -121,7 +121,7 @@ public class TacticalClassReader {
 
             AnnotationVisitor av = cv.visitTypeAnnotation(typeRef, typePath, descriptor, isVisible);
             if (av != null) {
-                new TacticalAnnotationReader(annotation.getValues()).accept(av);
+                new TacticalAnnotationReader(annotation).accept(av);
             }
         }
     }
