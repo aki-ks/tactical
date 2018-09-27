@@ -6,6 +6,7 @@ import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
 import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
+import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
@@ -175,6 +176,7 @@ public class TacticalMethodReader {
                 insnReader.accept(instruction);
 
                 List<AbstractInsnNode> asmInsns = insnWriter.getConvertedInsns();
+                convertInsnAnnotation(instruction.getTypeAnnotations(), asmInsns.get(0));
                 asmInsns.forEach(insnList::add);
                 convertedInsns.put(instruction, new ArrayList<>(asmInsns));
                 asmInsns.clear();
@@ -191,6 +193,74 @@ public class TacticalMethodReader {
 
         return labelResolver;
     }
+
+    private void convertInsnAnnotation(List<InsnTypeAnnotation> typeAnnotations, AbstractInsnNode insn) {
+        for (InsnTypeAnnotation typeAnnotation : typeAnnotations) {
+            Annotation annotation = typeAnnotation.getAnnotation();
+            int typeRef = convertInsnTargetType(typeAnnotation.getTargetType()).getValue();
+            TypePath typePath = AsmUtil.toAsmTypePath(typeAnnotation.getTypePath());
+            String descriptor = AsmUtil.pathToDescriptor(annotation.getType());
+
+            TypeAnnotationNode annotationNode = new TypeAnnotationNode(typeRef, typePath, descriptor);
+            new TacticalAnnotationReader(annotation).accept(annotationNode);
+            getInsnTypeAnnotationList(insn, annotation.isRuntimeVisible()).add(annotationNode);
+        }
+    }
+
+    private TypeReference convertInsnTargetType(TargetType.InsnTargetType targetType) {
+        if (targetType instanceof TargetType.InstanceOf) {
+            return TypeReference.newTypeReference(TypeReference.INSTANCEOF);
+        } else if (targetType instanceof TargetType.New) {
+            return TypeReference.newTypeReference(TypeReference.NEW);
+        } else if (targetType instanceof TargetType.ConstructorReference) {
+            return TypeReference.newTypeReference(TypeReference.CONSTRUCTOR_REFERENCE);
+        } else if (targetType instanceof TargetType.MethodReference) {
+            return TypeReference.newTypeReference(TypeReference.METHOD_REFERENCE);
+        } else if (targetType instanceof TargetType.Cast) {
+            int intersection = ((TargetType.Cast) targetType).getIntersection();
+            return TypeReference.newTypeArgumentReference(TypeReference.CAST, intersection);
+        } else if (targetType instanceof TargetType.AbstractTypeParameterInsnTargetType) {
+            int sort;
+            if (targetType instanceof TargetType.ConstructorInvokeTypeParameter) {
+                sort = TypeReference.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT;
+            } else if (targetType instanceof TargetType.MethodInvokeTypeParameter) {
+                sort = TypeReference.METHOD_INVOCATION_TYPE_ARGUMENT;
+            } else if (targetType instanceof TargetType.ConstructorReferenceTypeParameter) {
+                sort = TypeReference.CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT;
+            } else if (targetType instanceof TargetType.MethodReferenceTypeParameter) {
+                sort = TypeReference.METHOD_REFERENCE_TYPE_ARGUMENT;
+            } else {
+                throw new AssertionError();
+            }
+
+            int typeParameterIndex = ((TargetType.AbstractTypeParameterInsnTargetType) targetType).getTypeParameter();
+            return TypeReference.newTypeArgumentReference(sort, typeParameterIndex);
+        } else {
+            throw new AssertionError();
+        }
+    }
+
+    /**
+     * Get (and initialize if necessary) the list for visible or invisible instruction type annotations.
+     *
+     * @param insn instruction containing the annotation list
+     * @param isVisible request the list of visible or invisible annotations
+     * @return the requested list of type annotations
+     */
+    private List<TypeAnnotationNode> getInsnTypeAnnotationList(AbstractInsnNode insn, boolean isVisible) {
+        if (isVisible) {
+            if (insn.visibleTypeAnnotations == null) {
+                insn.visibleTypeAnnotations = new ArrayList<>();
+            }
+            return insn.visibleTypeAnnotations;
+        } else {
+            if (insn.invisibleTypeAnnotations == null) {
+                insn.invisibleTypeAnnotations = new ArrayList<>();
+            }
+            return insn.invisibleTypeAnnotations;
+        }
+    }
+
 
     private void insertLineNumberNodes(List<StackBody.LineNumber> lineNumbers, InsnList insnList, LabelResolver labelResolver) {
         for (StackBody.LineNumber lineNumber : lineNumbers) {
