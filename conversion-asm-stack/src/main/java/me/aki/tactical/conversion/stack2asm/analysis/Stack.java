@@ -1,8 +1,7 @@
 package me.aki.tactical.conversion.stack2asm.analysis;
 
-import me.aki.tactical.conversion.asm2stack.AsmInsnReader;
-
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -11,15 +10,89 @@ import java.util.Optional;
  * Its implemented as immutable single linked list allows constant time copies.
  */
 public class Stack {
+    public static class Mutable extends Stack {
+        public Mutable() {}
+
+        public Mutable(Optional<Node> head, int size) {
+            super(head, size);
+        }
+
+        /**
+         * Push a type onto the stack
+         *
+         * @param type
+         */
+        public void push(JvmType type) {
+            this.head = Optional.of(new Node(type, this.head));
+            this.size += 1;
+        }
+
+        /**
+         * Get and remove the upper type on the stack.
+         *
+         * @return removed upper type
+         * @throws StackUnderflowException the stack was empty
+         */
+        public JvmType pop() {
+            Node head = this.head.orElseThrow(StackUnderflowException::new);
+            this.head = head.tail;
+            this.size -= 1;
+            return head.type;
+        }
+
+        /**
+         * Require that a certain type is on top of the stack and drop it.
+         *
+         * @param type that must be on top of the stack
+         * @throws StackUnderflowException the stack was empty
+         * @throws IllegalStateException the requirement does not match
+         */
+        public void popRequire(JvmType type) {
+            JvmType actual = pop();
+            if (type != actual) {
+                throw new StackStateException(type, actual);
+            }
+        }
+
+        /**
+         * Clone the state of another stack into this stack.
+         *
+         * @param other stack to be loaded
+         */
+        public void loadFrom(Stack other) {
+            this.head = other.head;
+            this.size = other.size;
+        }
+
+        /**
+         * Delete all types on the stack
+         */
+        public void clear() {
+            this.size = 0;
+            this.head = Optional.empty();
+        }
+    }
+
+    /**
+     * A immutable snapshot of a stack state
+     */
+    public static class Immutable extends Stack {
+        public Immutable() {}
+
+        public Immutable(Optional<Node> head, int size) {
+            super(head, size);
+        }
+    }
+
     /**
      * The most upper value of the stack.
      */
-    private Optional<Node> head;
+    protected Optional<Node> head;
 
     /**
-     * ammount of values on the stack
+     * amount of values on the stack
      */
-    private int size;
+    protected int size;
 
     /**
      * Create an empty stack
@@ -30,43 +103,7 @@ public class Stack {
 
     private Stack(Optional<Node> head, int size) {
         this.head = head;
-    }
-
-    /**
-     * Push a type onto the stack
-     *
-     * @param type
-     */
-    public void push(JvmType type) {
-        this.head = Optional.of(new Node(type, this.head));
-        this.size += 1;
-    }
-
-    /**
-     * Get and remove the upper type on the stack.
-     *
-     * @return removed upper type
-     * @throws StackUnderflowException the stack was empty
-     */
-    public JvmType pop() {
-        Node head = this.head.orElseThrow(StackUnderflowException::new);
-        this.head = head.tail;
-        this.size -= 1;
-        return head.type;
-    }
-
-    /**
-     * Require that a certain type is on top of the stack and drop it.
-     *
-     * @param type that must be on top of the stack
-     * @throws StackUnderflowException the stack was empty
-     * @throws IllegalStateException the requirement does not match
-     */
-    public void popRequire(JvmType type) {
-        JvmType actual = pop();
-        if (type != actual) {
-            throw new StackStateException(type, actual);
-        }
+        this.size = size;
     }
 
     /**
@@ -130,22 +167,22 @@ public class Stack {
     }
 
     /**
-     * Create a constant time copy of this stack.
+     * Create a constant time immutable copy of this stack.
      *
      * @return copy of this stack
      */
-    public Stack copy() {
-        return new Stack(this.head, this.size);
+    public Stack.Immutable immutableCopy() {
+        return this instanceof Stack.Immutable ? (Stack.Immutable) this :
+                new Stack.Immutable(this.head, this.size);
     }
 
     /**
-     * Clone the state of another stack into this stack.
+     * Create a constant time mutable copy of this stack.
      *
-     * @param other stack to be loaded
+     * @return copy of this stack
      */
-    public void loadFrom(Stack other) {
-        this.head = other.head;
-        this.size = other.size;
+    public Stack.Mutable mutableCopy() {
+        return new Stack.Mutable(this.head, this.size);
     }
 
     /**
@@ -156,6 +193,11 @@ public class Stack {
      */
     public int getSize() {
         return size;
+    }
+
+    public boolean isEqual(Stack stack) {
+        return size == stack.size &&
+                Objects.equals(head, stack.head);
     }
 
     public JvmType[] toArray() {
@@ -172,14 +214,6 @@ public class Stack {
         return array;
     }
 
-    /**
-     * Delete all types on the stack
-     */
-    public void clear() {
-        this.size = 0;
-        this.head = Optional.empty();
-    }
-
     public static class Node {
         private final JvmType type;
         private final Optional<Node> tail;
@@ -187,6 +221,19 @@ public class Stack {
         public Node(JvmType type, Optional<Node> tail) {
             this.type = type;
             this.tail = tail;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Node)) return false;
+            Node that = (Node) o;
+            return Objects.equals(type, that.type) &&
+                    Objects.equals(tail, that.tail);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, tail);
         }
     }
 

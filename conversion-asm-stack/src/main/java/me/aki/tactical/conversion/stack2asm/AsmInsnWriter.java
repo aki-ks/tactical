@@ -81,7 +81,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
     /**
      * The state of the stack before the next visited instruction
      */
-    private Stack stackFrame;
+    private Stack.Immutable stackFrame;
 
     /**
      * A list of locals used to convert dup instructions that cannot be represented as one opcode.
@@ -101,7 +101,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
         return convertedInsns;
     }
 
-    public void setStackFrame(Stack stackFrame) {
+    public void setStackFrame(Stack.Immutable stackFrame) {
         this.stackFrame = stackFrame;
     }
 

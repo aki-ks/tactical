@@ -22,18 +22,18 @@ import java.util.Map;
 import java.util.Optional;
 
 public class StackEmulatingInsnVisitor<T> extends InsnVisitor<T> {
-    private Stack stack;
+    private Stack.Mutable stack;
 
-    public StackEmulatingInsnVisitor(InsnVisitor<T> iv, Stack stack) {
+    public StackEmulatingInsnVisitor(InsnVisitor<T> iv, Stack.Mutable stack) {
         super(iv);
         this.stack = stack;
     }
 
-    public Stack getStack() {
+    public Stack.Mutable getStack() {
         return stack;
     }
 
-    public void setStack(Stack stack) {
+    public void setStack(Stack.Mutable stack) {
         this.stack = stack;
     }
 
