@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.stack2asm;
 
+import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
@@ -18,7 +19,7 @@ public class TacticalFieldReader {
     public void accept(FieldVisitor fv) {
         visitAnnotations(fv);
         visitTypeAnnotations(fv);
-        //TODO: visitAttributes(fv);
+        visitAttributes(fv);
         fv.visitEnd();
     }
 
@@ -47,6 +48,12 @@ public class TacticalFieldReader {
             if (av != null) {
                 new TacticalAnnotationReader(annotation).accept(av);
             }
+        }
+    }
+
+    private void visitAttributes(FieldVisitor fv) {
+        for (Attribute attribute : field.getAttributes()) {
+            fv.visitAttribute(new CustomAttribute(attribute.getName(), attribute.getData()));
         }
     }
 }

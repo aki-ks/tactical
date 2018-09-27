@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stack2asm.analysis.Analysis;
 import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.annotation.AnnotationValue;
@@ -50,7 +51,7 @@ public class TacticalMethodReader {
         visitAnnotations(mv);
         visitTypeAnnotations(mv);
         visitParameterAnnotations(mv);
-        //TODO: visitAttribute
+        visitAttributes(mv);
         visitBody(mv);
         mv.visitEnd();
     }
@@ -140,6 +141,12 @@ public class TacticalMethodReader {
             }
 
             parameterIndex++;
+        }
+    }
+
+    private void visitAttributes(MethodVisitor mv) {
+        for (Attribute attribute : method.getAttributes()) {
+            mv.visitAttribute(new CustomAttribute(attribute.getName(), attribute.getData()));
         }
     }
 

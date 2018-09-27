@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Method;
@@ -40,7 +41,7 @@ public class TacticalClassReader {
         visitOuterClass(cv);
         visitAnnotations(cv);
         visitTypeAnnotations(cv);
-        //TODO: visitAttributes(cv);
+        visitAttributes(cv);
         visitInnerClasses(cv);
         visitFields(cv);
         visitMethods(cv);
@@ -141,6 +142,12 @@ public class TacticalClassReader {
             return TypeReference.newTypeParameterBoundReference(TypeReference.CLASS_TYPE_PARAMETER_BOUND, parameterIndex, boundIndex);
         } else {
             throw new AssertionError();
+        }
+    }
+
+    private void visitAttributes(ClassVisitor cv) {
+        for (Attribute attribute : classfile.getAttributes()) {
+            cv.visitAttribute(new CustomAttribute(attribute.getName(), attribute.getData()));
         }
     }
 
