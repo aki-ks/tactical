@@ -119,9 +119,8 @@ public class MethodConvertVisitor extends JSRInlinerAdapter {
     }
 
     @Override
-    public void visitAttribute(Attribute attribute) {
-        super.visitAttribute(attribute);
-        throw new RuntimeException("Not yet implemented");
+    public void visitAttribute(org.objectweb.asm.Attribute attribute) {
+        method.getAttributes().add(new me.aki.tactical.core.Attribute(attribute.type, AsmUtil.getAttributeData(attribute)));
     }
 
     @Override

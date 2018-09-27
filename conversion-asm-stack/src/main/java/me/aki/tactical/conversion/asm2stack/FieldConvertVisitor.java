@@ -1,10 +1,10 @@
 package me.aki.tactical.conversion.asm2stack;
 
+import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
@@ -43,8 +43,7 @@ public class FieldConvertVisitor extends FieldVisitor {
     }
 
     @Override
-    public void visitAttribute(Attribute attribute) {
-        super.visitAttribute(attribute);
-        throw new RuntimeException("Not yet implemented");
+    public void visitAttribute(org.objectweb.asm.Attribute attribute) {
+        field.getAttributes().add(new Attribute(attribute.type, AsmUtil.getAttributeData(attribute)));
     }
 }

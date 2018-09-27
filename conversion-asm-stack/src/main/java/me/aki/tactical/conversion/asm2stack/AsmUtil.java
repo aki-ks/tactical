@@ -15,7 +15,9 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.TypePath;
+import org.objectweb.asm.Attribute;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +25,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AsmUtil {
+    private static Field attributeDataField;
+
+    public static byte[] getAttributeData(Attribute attribute) {
+        try {
+            if (attributeDataField == null) {
+                attributeDataField = Attribute.class.getDeclaredField("content");
+                attributeDataField.setAccessible(true);
+            }
+
+            return (byte[]) attributeDataField.get(attribute);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Could not get the data of an Attribute");
+        }
+    }
+
     public static Optional<Type> fromAsmReturnType(org.objectweb.asm.Type type) {
         return type.getSort() == org.objectweb.asm.Type.VOID ?
                 Optional.empty() : Optional.of(fromAsmType(type));
