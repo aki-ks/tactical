@@ -10,6 +10,7 @@ import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.StackBody;
+import me.aki.tactical.stack.TryCatchBlock;
 import me.aki.tactical.stack.insn.Instruction;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Label;
@@ -23,6 +24,7 @@ import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableAnnotationNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,6 +154,8 @@ public class TacticalMethodReader {
             convertLocalVariables(body, analysis, labelResolver, mn);
             convertLocalVariableAnnotations(body, analysis, labelResolver, mn);
 
+            convertTryCatchBlocks(body, analysis, labelResolver, mn);
+
             mn.accept(mv);
         });
     }
@@ -278,6 +282,26 @@ public class TacticalMethodReader {
             return TypeReference.newTypeReference(TypeReference.RESOURCE_VARIABLE);
         } else {
             throw new AssertionError();
+        }
+    }
+
+    private void convertTryCatchBlocks(StackBody body, Analysis analysis, LabelResolver labelResolver, MethodNode mn) {
+        for (TryCatchBlock block : body.getTryCatchBlocks()) {
+            if (isRangeEmpty(body, analysis, block.getFirst(), block.getLast())) {
+                continue;
+            }
+
+            LabelNode start = labelResolver.getForwardLabel(block.getFirst());
+            LabelNode end = labelResolver.getForwardLabel(block.getLast());
+            LabelNode handler = labelResolver.getForwardLabel(block.getHandler());
+            String type = block.getExceptionType().map(path -> path.join('/')).orElse(null);
+
+            TryCatchBlockNode node = new TryCatchBlockNode(start, end, handler, type);
+
+            if (mn.tryCatchBlocks == null) {
+                mn.tryCatchBlocks = new ArrayList<>();
+            }
+            mn.tryCatchBlocks.add(node);
         }
     }
 
