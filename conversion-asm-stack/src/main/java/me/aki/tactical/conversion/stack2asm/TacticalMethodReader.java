@@ -446,11 +446,12 @@ public class TacticalMethodReader {
             Instruction instruction = iter.next();
 
             if (analysis.getStackState(instruction).isPresent()) {
+                // This instruction is no dead code
                 return false;
             }
 
             if (instruction == end) {
-                return false;
+                return true;
             }
         }
 
