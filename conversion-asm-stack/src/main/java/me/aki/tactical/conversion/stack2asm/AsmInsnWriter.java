@@ -6,7 +6,6 @@ import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.AbstractAmbiguousMethodHandle;
-import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.handle.FieldHandle;
 import me.aki.tactical.core.handle.GetFieldHandle;
 import me.aki.tactical.core.handle.GetStaticHandle;
@@ -795,7 +794,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         String asmDescriptor = AsmUtil.methodDescriptorToString(descriptor);
         org.objectweb.asm.Handle asmBootstrapHandle = convertHandle(bootstrapMethod);
         Object[] asmBootstrapArguments = bootstrapArguments.stream()

@@ -1,8 +1,8 @@
 package me.aki.tactical.stack.insn;
 
-import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.constant.BootstrapConstant;
+import me.aki.tactical.core.handle.Handle;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
@@ -10,7 +10,7 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 
 /**
- * Invoke a method that is not statically known.
+ * Invoke a dynamically computed method.
  *
  * The first time that the invokedynamic instruction is executed a bootstrap method is invoked.
  * This bootstrap method returns a {@link CallSite} that is cached by the JVM and
@@ -37,18 +37,15 @@ public class InvokeDynamicInsn extends AbstractInstruction {
 
     /**
      * The Bootstrap method invoked by the jvm to resolve the {@link CallSite}.
-     *
-     * It is either a static method returning a {@link CallSite} or
-     * a constructor of a class that extends {@link CallSite}.
      */
-    private BootstrapMethodHandle bootstrapMethod;
+    private Handle bootstrapMethod;
 
     /**
      * Additional arguments passed to the bootstrap method.
      */
     private List<BootstrapConstant> bootstrapArguments;
 
-    public InvokeDynamicInsn(String name, MethodDescriptor descriptor, BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public InvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         this.name = name;
         this.descriptor = descriptor;
         this.bootstrapMethod = bootstrapMethod;
@@ -71,11 +68,11 @@ public class InvokeDynamicInsn extends AbstractInstruction {
         this.descriptor = descriptor;
     }
 
-    public BootstrapMethodHandle getBootstrapMethod() {
+    public Handle getBootstrapMethod() {
         return bootstrapMethod;
     }
 
-    public void setBootstrapMethod(BootstrapMethodHandle bootstrapMethod) {
+    public void setBootstrapMethod(Handle bootstrapMethod) {
         this.bootstrapMethod = bootstrapMethod;
     }
 

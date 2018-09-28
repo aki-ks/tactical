@@ -7,7 +7,7 @@ import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.PushableConstant;
-import me.aki.tactical.core.handle.BootstrapMethodHandle;
+import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -453,7 +453,7 @@ public class StackEmulatingInsnVisitor<T> extends InsnVisitor<T> {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, BootstrapMethodHandle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         // pop arguments in reverse order
         List<Type> paramTypes = descriptor.getParameterTypes();
         ListIterator<Type> iter = paramTypes.listIterator(paramTypes.size());

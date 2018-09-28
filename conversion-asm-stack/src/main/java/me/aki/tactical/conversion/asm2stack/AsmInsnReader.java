@@ -4,7 +4,6 @@ import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.constant.PushableConstant;
-import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.handle.GetFieldHandle;
 import me.aki.tactical.core.handle.GetStaticHandle;
 import me.aki.tactical.core.handle.Handle;
@@ -810,7 +809,7 @@ public class AsmInsnReader {
 
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
         MethodDescriptor descriptor = AsmUtil.parseMethodDescriptor(insn.desc);
-        BootstrapMethodHandle bootstrapMethod = (BootstrapMethodHandle) convertMethodHandle(insn.bsm);
+        Handle bootstrapMethod = convertMethodHandle(insn.bsm);
         List<BootstrapConstant> bootstrapArguments = Arrays.stream(insn.bsmArgs)
                 .map(this::convertBootstrapArgument)
                 .collect(Collectors.toList());
