@@ -90,6 +90,13 @@ public class ClassConvertVisitor extends ClassVisitor {
     }
 
     @Override
+    public void visitNestHostExperimental(String nestHost) {
+        super.visitNestHostExperimental(nestHost);
+
+        this.classfile.setNestHost(Optional.of(AsmUtil.pathFromInternalName(nestHost)));
+    }
+
+    @Override
     public void visitOuterClass(String owner, String name, String descriptor) {
         super.visitOuterClass(owner, name, descriptor);
         Path ownerPath = AsmUtil.pathFromInternalName(owner);
@@ -140,7 +147,16 @@ public class ClassConvertVisitor extends ClassVisitor {
 
     @Override
     public void visitAttribute(org.objectweb.asm.Attribute attribute) {
-        classfile.getAttributes().add(new Attribute(attribute.type, AsmUtil.getAttributeData(attribute)));
+        super.visitAttribute(attribute);
+
+        this.classfile.getAttributes().add(new Attribute(attribute.type, AsmUtil.getAttributeData(attribute)));
+    }
+
+    @Override
+    public void visitNestMemberExperimental(String nestMember) {
+        super.visitNestMemberExperimental(nestMember);
+
+        this.classfile.getNestMembers().add(AsmUtil.pathFromInternalName(nestMember));
     }
 
     @Override
