@@ -3,6 +3,7 @@ package me.aki.tactical.conversion.asm2stack;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.handle.GetFieldHandle;
 import me.aki.tactical.core.handle.GetStaticHandle;
@@ -11,7 +12,6 @@ import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.ClassConstant;
-import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
@@ -896,7 +896,7 @@ public class AsmInsnReader {
         iv.visitPush(convertLdcValue(insn.cst));
     }
 
-    private Constant convertLdcValue(Object value) {
+    private PushableConstant convertLdcValue(Object value) {
         if (value instanceof Integer) {
             return new IntConstant((Integer) value);
         } else if (value instanceof Long) {

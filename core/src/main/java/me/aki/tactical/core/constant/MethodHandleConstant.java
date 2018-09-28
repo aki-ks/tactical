@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * An instance of "java.lang.invoke.MethodHandle".
  */
-public class MethodHandleConstant implements Constant, BootstrapConstant {
+public class MethodHandleConstant implements BootstrapConstant, PushableConstant, Constant {
     private final Handle handle;
 
     public MethodHandleConstant(Handle handle) {

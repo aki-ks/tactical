@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * An instance of "java.lang.String".
  */
-public class StringConstant implements FieldConstant, BootstrapConstant {
+public class StringConstant implements FieldConstant, BootstrapConstant, PushableConstant, Constant {
     private final String value;
 
     public StringConstant(String value) {

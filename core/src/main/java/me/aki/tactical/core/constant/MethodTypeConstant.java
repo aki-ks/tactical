@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * An instance of "java.lang.invoke.MethodType".
  */
-public class MethodTypeConstant implements BootstrapConstant {
+public class MethodTypeConstant implements BootstrapConstant, PushableConstant, Constant {
     /**
      * Immutable list of argument types
      */

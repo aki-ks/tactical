@@ -1,22 +1,22 @@
 package me.aki.tactical.stack.insn;
 
-import me.aki.tactical.core.constant.Constant;
+import me.aki.tactical.core.constant.PushableConstant;
 
 /**
  * Push a constant value onto the stack.
  */
 public class PushInsn extends AbstractInstruction {
-    private Constant constant;
+    private PushableConstant constant;
 
-    public PushInsn(Constant constant) {
+    public PushInsn(PushableConstant constant) {
         this.constant = constant;
     }
 
-    public Constant getConstant() {
+    public PushableConstant getConstant() {
         return constant;
     }
 
-    public void setConstant(Constant constant) {
+    public void setConstant(PushableConstant constant) {
         this.constant = constant;
     }
 

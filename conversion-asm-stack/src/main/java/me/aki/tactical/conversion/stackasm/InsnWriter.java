@@ -2,11 +2,11 @@ package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.conversion.asm2stack.ConversionContext;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
-import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -95,7 +95,7 @@ public class InsnWriter extends InsnVisitor<LabelNode> {
     }
 
     @Override
-    public void visitPush(Constant constant) {
+    public void visitPush(PushableConstant constant) {
         visitInsn(new PushInsn(constant));
     }
 

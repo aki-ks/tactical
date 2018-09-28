@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 
 import java.util.Objects;
 
-public class DoubleConstant implements FieldConstant, BootstrapConstant {
+public class DoubleConstant implements FieldConstant, BootstrapConstant, PushableConstant, Constant {
     private final double value;
 
     public DoubleConstant(double value) {

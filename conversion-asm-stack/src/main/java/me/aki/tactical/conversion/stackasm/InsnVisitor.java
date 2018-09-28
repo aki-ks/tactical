@@ -2,10 +2,10 @@ package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
-import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -13,9 +13,7 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
-import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.InvokeInsn;
-import org.objectweb.asm.tree.LabelNode;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +31,7 @@ public class InsnVisitor<T> {
         this.iv = iv;
     }
 
-    public void visitPush(Constant constant) {
+    public void visitPush(PushableConstant constant) {
         if (iv != null) {
             iv.visitPush(constant);
         }

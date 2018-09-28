@@ -4,6 +4,7 @@ import me.aki.tactical.conversion.stack2asm.analysis.JvmType;
 import me.aki.tactical.conversion.stack2asm.analysis.Stack;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.AbstractAmbiguousMethodHandle;
 import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.handle.FieldHandle;
@@ -15,7 +16,6 @@ import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.ClassConstant;
-import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
@@ -119,7 +119,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
     }
 
     @Override
-    public void visitPush(Constant constant) {
+    public void visitPush(PushableConstant constant) {
         if (constant instanceof IntConstant) {
             int value = ((IntConstant) constant).getValue();
             if (value >= -1 && value <= 5) {

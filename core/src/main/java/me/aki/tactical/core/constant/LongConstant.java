@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 
 import java.util.Objects;
 
-public class LongConstant implements FieldConstant, BootstrapConstant {
+public class LongConstant implements FieldConstant, BootstrapConstant, PushableConstant, Constant {
     private final long value;
 
     public LongConstant(long value) {

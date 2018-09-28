@@ -6,7 +6,7 @@ import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
-import me.aki.tactical.core.constant.Constant;
+import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.BootstrapMethodHandle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
@@ -38,7 +38,7 @@ public class StackEmulatingInsnVisitor<T> extends InsnVisitor<T> {
     }
 
     @Override
-    public void visitPush(Constant constant) {
+    public void visitPush(PushableConstant constant) {
         this.stack.push(JvmType.from(constant.getType()));
 
         super.visitPush(constant);
