@@ -50,7 +50,7 @@ public class AsmUtil {
             }
         } else if (type instanceof ObjectType) {
             Path name = ((ObjectType) type).getName();
-            return org.objectweb.asm.Type.getObjectType(name.join('/'));
+            return org.objectweb.asm.Type.getObjectType(AsmUtil.toInternalName(name));
         } else if (type instanceof ArrayType) {
             ArrayType array = (ArrayType) type;
             int dimensions = array.getDimensions();
@@ -106,7 +106,7 @@ public class AsmUtil {
     }
 
     public static String pathToDescriptor(Path path) {
-        return "L" + path.join('/') + ";";
+        return 'L' + toInternalName(path) + ';';
     }
 
     public static org.objectweb.asm.TypePath toAsmTypePath(TypePath typePath) {

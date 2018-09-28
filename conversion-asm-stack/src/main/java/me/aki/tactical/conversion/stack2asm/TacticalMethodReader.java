@@ -374,7 +374,7 @@ public class TacticalMethodReader {
             LabelNode start = labelResolver.getForwardLabel(block.getFirst());
             LabelNode end = labelResolver.getForwardLabel(block.getLast());
             LabelNode handler = labelResolver.getForwardLabel(block.getHandler());
-            String type = block.getExceptionType().map(path -> path.join('/')).orElse(null);
+            String type = block.getExceptionType().map(AsmUtil::toInternalName).orElse(null);
 
             TryCatchBlockNode node = new TryCatchBlockNode(start, end, handler, type);
             convertTryCatchBlockAnnotations(block, node);

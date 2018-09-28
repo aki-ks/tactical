@@ -54,12 +54,12 @@ public class TacticalClassReader {
     private void visit(ClassVisitor cv) {
         int version = convertVersion(classfile.getVersion());
         int access = AccessConverter.classfile.toBitMap(classfile.getAccessFlags());
-        String name = classfile.getName().join('/');
+        String name = AsmUtil.toInternalName(classfile.getName());
         String signature = classfile.getSignature().orElse(null);
         String superName = classfile.getSupertype() == null ? null :
-                classfile.getSupertype().join('/');
+                AsmUtil.toInternalName(classfile.getSupertype());
         String[] interfaces = classfile.getInterfaces().stream()
-                .map(iface -> iface.join('/'))
+                .map(AsmUtil::toInternalName)
                 .toArray(String[]::new);
 
         cv.visit(version, access, name, signature, superName, interfaces);
@@ -98,7 +98,7 @@ public class TacticalClassReader {
 
     private void visitOuterClass(ClassVisitor cv) {
         classfile.getEnclosingMethod().ifPresent(enclosingMethod -> {
-            String owner = enclosingMethod.getOwner().join('/');
+            String owner = AsmUtil.toInternalName(enclosingMethod.getOwner());
             String name = enclosingMethod.getName().orElse(null);
             String descriptor = enclosingMethod.getDescriptor()
                     .map(AsmUtil::methodDescriptorToString).orElse(null);
@@ -167,8 +167,8 @@ public class TacticalClassReader {
 
     private void visitInnerClasses(ClassVisitor cv) {
         for (Classfile.InnerClass innerClass : classfile.getInnerClasses()) {
-            String name = innerClass.getName().join('/');
-            String outerName = innerClass.getOuterName().map(n -> n.join('/')).orElse(null);
+            String name = AsmUtil.toInternalName(innerClass.getName());
+            String outerName = innerClass.getOuterName().map(AsmUtil::toInternalName).orElse(null);
             String innerName = innerClass.getInnerName().orElse(null);
             int access = AccessConverter.innerClass.toBitMap(innerClass.getFlags());
 
@@ -214,7 +214,7 @@ public class TacticalClassReader {
             String descriptor = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getParameterTypes());
             String signature = method.getSignature().orElse(name);
             String[] exceptions = method.getExceptions().stream()
-                    .map(path -> path.join('/'))
+                    .map(AsmUtil::toInternalName)
                     .toArray(String[]::new);
 
             MethodVisitor mv = cv.visitMethod(access, name, descriptor, signature, exceptions);

@@ -188,7 +188,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
         boolean isInterface;
         if (handle instanceof FieldHandle) {
             FieldRef field = ((FieldHandle) handle).getFieldRef();
-            owner = field.getOwner().join('/');
+            owner = AsmUtil.toInternalName(field.getOwner());
             name = field.getName();
             desc = AsmUtil.toDescriptor(field.getType());
             isInterface = false;
@@ -206,7 +206,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
             }
         } else if (handle instanceof MethodHandle) {
             MethodRef method = ((MethodHandle) handle).getMethodRef();
-            owner = method.getOwner().join('/');
+            owner = AsmUtil.toInternalName(method.getOwner());
             name = method.getName();
             desc = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
             isInterface = handle instanceof InvokeInterfaceHandle ||
@@ -690,7 +690,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
 
     @Override
     public void visitNew(Path type) {
-        visitConvertedInsn(new TypeInsnNode(Opcodes.NEW, type.join('/')));
+        visitConvertedInsn(new TypeInsnNode(Opcodes.NEW, AsmUtil.toInternalName(type)));
     }
 
     @Override
@@ -781,7 +781,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
     }
 
     private void convertFieldInsnNode(int opcode, FieldRef field) {
-        String owner = field.getOwner().join('/');
+        String owner = AsmUtil.toInternalName(field.getOwner());
         String name = field.getName();
         String descriptor = AsmUtil.toDescriptor(field.getType());
 
@@ -791,7 +791,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
     @Override
     public void visitInvokeInsn(InvokeInsn.InvokeType invoke, InvokableMethodRef method) {
         int opcode = getInvokeOpcode(invoke);
-        String owner = method.getOwner().join('/');
+        String owner = AsmUtil.toInternalName(method.getOwner());
         String name = method.getName();
         String descriptor = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
         boolean isInterface = method.isInterface();

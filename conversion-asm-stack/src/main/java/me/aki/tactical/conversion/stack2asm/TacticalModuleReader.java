@@ -24,13 +24,13 @@ public class TacticalModuleReader {
 
     private void visitMainClass(ModuleVisitor mv) {
         module.getMainClass()
-                .map(main -> main.join('/'))
+                .map(AsmUtil::toInternalName)
                 .ifPresent(mv::visitMainClass);
     }
 
     private void visitPackages(ModuleVisitor mv) {
         module.getPackages().stream()
-                .map(pkg -> pkg.join('/'))
+                .map(AsmUtil::toInternalName)
                 .forEach(mv::visitPackage);
     }
 
@@ -46,7 +46,7 @@ public class TacticalModuleReader {
 
     private void visitExports(ModuleVisitor mv) {
         for (Module.Export export : module.getExports()) {
-            String pkg = export.getName().join('/');
+            String pkg = AsmUtil.toInternalName(export.getName());
             int access = AccessConverter.moduleExport.toBitMap(export.getFlags());
             String[] modules = export.getModules().stream()
                     .map(module -> module.join('.'))
@@ -58,7 +58,7 @@ public class TacticalModuleReader {
 
     private void visitOpens(ModuleVisitor mv) {
         for (Module.Open open : module.getOpens()) {
-            String pkg = open.getName().join('/');
+            String pkg = AsmUtil.toInternalName(open.getName());
             int access = AccessConverter.moduleOpen.toBitMap(open.getFlags());
             String[] modules = open.getModules().stream()
                     .map(module -> module.join('.'))
@@ -70,15 +70,15 @@ public class TacticalModuleReader {
 
     private void visitUses(ModuleVisitor mv) {
         module.getUses().stream()
-                .map(path -> path.join('/'))
+                .map(AsmUtil::toInternalName)
                 .forEach(mv::visitUse);
     }
 
     private void visitProvides(ModuleVisitor mv) {
         for (Module.Provide provide : module.getProvides()) {
-            String service = provide.getService().join('/');
+            String service = AsmUtil.toInternalName(provide.getService());
             String[] providers = provide.getProviders().stream()
-                    .map(path -> path.join('/'))
+                    .map(AsmUtil::toInternalName)
                     .toArray(String[]::new);
 
             mv.visitProvide(service, providers);
