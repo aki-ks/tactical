@@ -10,8 +10,8 @@ Building a referenced based intermediation for java bytecode is the main objecti
 * [ ] build basic reference based intermediation
 * [X] conversion: bytecode ([asm](https://asm.ow2.io/)) <-> stack
 * [ ] conversion: stack <-> reference
-* [ ] implement the whole [jvm classfile format](https://docs.oracle.com/javase/specs/jvms/se10/html/index.html)
-  * [X] for the stack intermediation (jvm 10)
+* [ ] implement the whole [jvm classfile format](https://docs.oracle.com/javase/specs/jvms/se11/html/index.html)
+  * [X] for the stack intermediation (jvm 11)
   * [ ] for the reference based intermediation
 
 ## Future Goals
