@@ -5,6 +5,7 @@ import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Method;
+import me.aki.tactical.core.Path;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FieldConstant;
@@ -38,10 +39,12 @@ public class TacticalClassReader {
         visit(cv);
         visitSource(cv);
         visitModule(cv);
+        visitNestHost(cv);
         visitOuterClass(cv);
         visitAnnotations(cv);
         visitTypeAnnotations(cv);
         visitAttributes(cv);
+        visitNestMembers(cv);
         visitInnerClasses(cv);
         visitFields(cv);
         visitMethods(cv);
@@ -86,6 +89,11 @@ public class TacticalClassReader {
                 new TacticalModuleReader(module).accept(mv);
             }
         });
+    }
+
+    private void visitNestHost(ClassVisitor cv) {
+        classfile.getNestHost().ifPresent(nestHost ->
+            cv.visitNestHostExperimental(AsmUtil.toInternalName(nestHost)));
     }
 
     private void visitOuterClass(ClassVisitor cv) {
@@ -149,6 +157,12 @@ public class TacticalClassReader {
         for (Attribute attribute : classfile.getAttributes()) {
             cv.visitAttribute(new CustomAttribute(attribute.getName(), attribute.getData()));
         }
+    }
+
+    private void visitNestMembers(ClassVisitor cv) {
+        classfile.getNestMembers().stream()
+                .map(AsmUtil::toInternalName)
+                .forEach(cv::visitNestMemberExperimental);
     }
 
     private void visitInnerClasses(ClassVisitor cv) {

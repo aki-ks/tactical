@@ -70,6 +70,10 @@ public class AsmUtil {
         throw new AssertionError();
     }
 
+    public static String toInternalName(Path path) {
+        return path.join('/');
+    }
+
     public static String toInternalName(RefType refType) {
         return toAsmType(refType).getInternalName();
     }
