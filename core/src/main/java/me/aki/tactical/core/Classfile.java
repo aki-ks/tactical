@@ -67,6 +67,21 @@ public class Classfile {
     private Optional<EnclosingMethod> enclosingMethod = Optional.empty();
 
     /**
+     * Name of another class in the same package that nests this class.
+     *
+     * This class has access to all private members of the nesting class.
+     */
+    private Optional<Path> nestHost = Optional.empty();
+
+    /**
+     * Names of all classes that are nested within this class.
+     *
+     * The {@link Classfile#nestHost} of all nested classes must be
+     * set to the {@link Classfile#name} of this class.
+     */
+    private List<Path> nestMembers = new ArrayList<>();
+
+    /**
      * Module definition if the classfile is a "module-info".
      */
     private Optional<Module> module = Optional.empty();
@@ -176,6 +191,22 @@ public class Classfile {
 
     public void setEnclosingMethod(Optional<EnclosingMethod> enclosingMethod) {
         this.enclosingMethod = enclosingMethod;
+    }
+
+    public Optional<Path> getNestHost() {
+        return nestHost;
+    }
+
+    public void setNestHost(Optional<Path> nestHost) {
+        this.nestHost = nestHost;
+    }
+
+    public List<Path> getNestMembers() {
+        return nestMembers;
+    }
+
+    public void setNestMembers(List<Path> nestMembers) {
+        this.nestMembers = nestMembers;
     }
 
     public Optional<Module> getModule() {
