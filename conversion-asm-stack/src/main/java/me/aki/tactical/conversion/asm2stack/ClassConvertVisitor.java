@@ -40,7 +40,7 @@ public class ClassConvertVisitor extends ClassVisitor {
     private Classfile classfile;
 
     public ClassConvertVisitor() {
-        super(Opcodes.ASM6);
+        super(Opcodes.ASM7_EXPERIMENTAL);
     }
 
     public Classfile getClassfile() {
