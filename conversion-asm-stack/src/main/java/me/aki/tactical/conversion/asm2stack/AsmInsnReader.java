@@ -3,6 +3,7 @@ package me.aki.tactical.conversion.asm2stack;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.constant.DynamicConstant;
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.GetFieldHandle;
 import me.aki.tactical.core.handle.GetStaticHandle;
@@ -43,6 +44,7 @@ import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.InvokeInsn;
+import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -922,6 +924,16 @@ public class AsmInsnReader {
             }
         } else if (value instanceof org.objectweb.asm.Handle) {
             return new MethodHandleConstant(convertMethodHandle((org.objectweb.asm.Handle) value));
+        } else if (value instanceof ConstantDynamic) {
+            ConstantDynamic constantDynamic = (ConstantDynamic) value;
+            String name = constantDynamic.getName();
+            Type type = AsmUtil.fromDescriptor(constantDynamic.getDescriptor());
+            Handle bootstrapMethod = convertMethodHandle(constantDynamic.getBootstrapMethod());
+            List<BootstrapConstant> bootstrapArguments = Arrays.stream(constantDynamic.getBootstrapMethodArguments())
+                    .map(this::convertBootstrapArgument)
+                    .collect(Collectors.toList());
+
+            return new DynamicConstant(name, type, bootstrapMethod, bootstrapArguments);
         } else {
             throw new AssertionError();
         }
