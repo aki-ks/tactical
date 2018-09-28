@@ -4,6 +4,7 @@ import me.aki.tactical.conversion.stack2asm.analysis.JvmType;
 import me.aki.tactical.conversion.stack2asm.analysis.Stack;
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.constant.DynamicConstant;
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.handle.AbstractAmbiguousMethodHandle;
 import me.aki.tactical.core.handle.FieldHandle;
@@ -49,6 +50,7 @@ import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.InvokeInsn;
+import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -172,6 +174,9 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
         } else if (constant instanceof MethodHandleConstant) {
             Handle handle = ((MethodHandleConstant) constant).getHandle();
             visitConvertedInsn(new LdcInsnNode(convertHandle(handle)));
+        } else if (constant instanceof DynamicConstant) {
+            ConstantDynamic dynamicConstant = convertDynamicConstant((DynamicConstant) constant);
+            visitConvertedInsn(new LdcInsnNode(dynamicConstant));
         }
     }
 
@@ -226,6 +231,17 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
         }
 
         return new org.objectweb.asm.Handle(type, owner, name, desc, isInterface);
+    }
+
+    private ConstantDynamic convertDynamicConstant(DynamicConstant constant) {
+        String name = constant.getName();
+        String descriptor = AsmUtil.toDescriptor(constant.getType());
+        org.objectweb.asm.Handle bootstrapMethod = convertHandle(constant.getBootstrapMethod());
+        Object[] bootstrapMethodArguments = constant.getBootstrapArguments().stream()
+                .map(this::convertBootstrapConstant)
+                .toArray();
+
+        return new ConstantDynamic(name, descriptor, bootstrapMethod, bootstrapMethodArguments);
     }
 
     @Override
