@@ -53,6 +53,10 @@ public class MethodRef {
         return returnType;
     }
 
+    public MethodDescriptor getDescriptor() {
+        return new MethodDescriptor(arguments, returnType);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

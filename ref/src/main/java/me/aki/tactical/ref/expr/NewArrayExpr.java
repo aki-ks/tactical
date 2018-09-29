@@ -47,7 +47,7 @@ public class NewArrayExpr implements Expression {
 
     public List<Cell<Expression>> getDimensionSizeCells() {
         return IntStream.range(0, dimensionSizes.size())
-                .mapToObj(index -> Cell.of(() -> dimensionSizes.get(index), x -> dimensionSizes.set(index, x)))
+                .mapToObj(index -> Cell.ofList(dimensionSizes, index))
                 .collect(Collectors.toUnmodifiableList());
     }
 

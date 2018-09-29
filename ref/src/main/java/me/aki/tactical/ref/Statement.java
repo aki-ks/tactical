@@ -1,4 +1,4 @@
 package me.aki.tactical.ref;
 
-public interface Statement {
+public interface Statement extends Referencing {
 }

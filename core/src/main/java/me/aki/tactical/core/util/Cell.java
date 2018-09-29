@@ -1,5 +1,6 @@
 package me.aki.tactical.core.util;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -29,6 +30,10 @@ public interface Cell<T> {
 
     public static <T> Cell<T> ofArray(T[] array, int index) {
         return Cell.of(() -> array[index], newValue -> array[index] = newValue);
+    }
+
+    public static <T> Cell<T> ofList(List<T> list, int index) {
+        return Cell.of(() -> list.get(index), newValue -> list.set(index, newValue));
     }
 
     public static <T, K> Cell<T> ofMap(K key, Map<K, T> map) {
