@@ -42,6 +42,7 @@ import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
+import me.aki.tactical.stack.invoke.DynamicInvoke;
 import me.aki.tactical.stack.invoke.InterfaceInvoke;
 import me.aki.tactical.stack.invoke.Invoke;
 import me.aki.tactical.stack.invoke.SpecialInvoke;
@@ -824,7 +825,6 @@ public class AsmInsnReader {
         iv.visitInvokeInsn(invoke);
     }
 
-
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
         MethodDescriptor descriptor = AsmUtil.parseMethodDescriptor(insn.desc);
         Handle bootstrapMethod = convertMethodHandle(insn.bsm);
@@ -832,7 +832,7 @@ public class AsmInsnReader {
                 .map(this::convertBootstrapArgument)
                 .collect(Collectors.toList());
 
-        iv.visitInvokeDynamicInsn(insn.name, descriptor, bootstrapMethod, bootstrapArguments);
+        iv.visitInvokeInsn(new DynamicInvoke(insn.name, descriptor, bootstrapMethod, bootstrapArguments));
     }
 
     private BootstrapConstant convertBootstrapArgument(Object value) {

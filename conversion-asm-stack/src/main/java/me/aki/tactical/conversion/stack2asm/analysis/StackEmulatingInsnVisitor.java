@@ -2,11 +2,8 @@ package me.aki.tactical.conversion.stack2asm.analysis;
 
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
-import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
-import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.PushableConstant;
-import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -439,7 +436,7 @@ public class StackEmulatingInsnVisitor<T> extends InsnVisitor<T> {
     @Override
     public void visitInvokeInsn(Invoke invoke) {
         // pop arguments in reverse order
-        List<Type> arguments = invoke.getMethod().getArguments();
+        List<Type> arguments = invoke.getDescriptor().getParameterTypes();
         ListIterator<Type> iter = arguments.listIterator(arguments.size());
         while (iter.hasPrevious()) {
             this.stack.popRequire(JvmType.from(iter.previous()));
@@ -450,18 +447,6 @@ public class StackEmulatingInsnVisitor<T> extends InsnVisitor<T> {
         }
 
         super.visitInvokeInsn(invoke);
-    }
-
-    @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
-        // pop arguments in reverse order
-        List<Type> paramTypes = descriptor.getParameterTypes();
-        ListIterator<Type> iter = paramTypes.listIterator(paramTypes.size());
-        while (iter.hasPrevious()) {
-            this.stack.popRequire(JvmType.from(iter.previous()));
-        }
-
-        super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments);
     }
 
     @Override

@@ -3,10 +3,7 @@ package me.aki.tactical.conversion.stackasm;
 import me.aki.tactical.conversion.asm2stack.ConversionContext;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.constant.PushableConstant;
-import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
-import me.aki.tactical.core.constant.BootstrapConstant;
-import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -35,7 +32,6 @@ import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.IncrementInsn;
 import me.aki.tactical.stack.insn.InstanceOfInsn;
 import me.aki.tactical.stack.insn.Instruction;
-import me.aki.tactical.stack.insn.InvokeDynamicInsn;
 import me.aki.tactical.stack.insn.InvokeInsn;
 import me.aki.tactical.stack.insn.LoadInsn;
 import me.aki.tactical.stack.insn.ModInsn;
@@ -302,11 +298,6 @@ public class InsnWriter extends InsnVisitor<LabelNode> {
     @Override
     public void visitInvokeInsn(Invoke invoke) {
         visitInsn(new InvokeInsn(invoke));
-    }
-
-    @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
-        visitInsn(new InvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments));
     }
 
     @Override

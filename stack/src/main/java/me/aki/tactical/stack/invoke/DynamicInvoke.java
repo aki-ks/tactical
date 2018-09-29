@@ -1,4 +1,4 @@
-package me.aki.tactical.stack.insn;
+package me.aki.tactical.stack.invoke;
 
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.constant.BootstrapConstant;
@@ -20,7 +20,7 @@ import java.util.List;
  * {@link MethodType} will be passed to bootstrap methods.
  * Some of these parameters might be caught in a varargs parameter.
  */
-public class InvokeDynamicInsn extends AbstractInstruction {
+public class DynamicInvoke implements Invoke {
     /**
      * The {@link String} parameter that is passed to the bootstrap method.
      *
@@ -45,7 +45,7 @@ public class InvokeDynamicInsn extends AbstractInstruction {
      */
     private List<BootstrapConstant> bootstrapArguments;
 
-    public InvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
+    public DynamicInvoke(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
         this.name = name;
         this.descriptor = descriptor;
         this.bootstrapMethod = bootstrapMethod;
@@ -60,6 +60,7 @@ public class InvokeDynamicInsn extends AbstractInstruction {
         this.name = name;
     }
 
+    @Override
     public MethodDescriptor getDescriptor() {
         return descriptor;
     }
@@ -82,15 +83,5 @@ public class InvokeDynamicInsn extends AbstractInstruction {
 
     public void setBootstrapArguments(List<BootstrapConstant> bootstrapArguments) {
         this.bootstrapArguments = bootstrapArguments;
-    }
-
-    @Override
-    public int getPushCount() {
-        return descriptor.getReturnType().isPresent() ? 1 : 0;
-    }
-
-    @Override
-    public int getPopCount() {
-        return descriptor.getParameterTypes().size();
     }
 }

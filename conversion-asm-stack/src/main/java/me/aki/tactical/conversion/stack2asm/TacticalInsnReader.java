@@ -26,7 +26,6 @@ import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.IncrementInsn;
 import me.aki.tactical.stack.insn.InstanceOfInsn;
 import me.aki.tactical.stack.insn.Instruction;
-import me.aki.tactical.stack.insn.InvokeDynamicInsn;
 import me.aki.tactical.stack.insn.InvokeInsn;
 import me.aki.tactical.stack.insn.LoadInsn;
 import me.aki.tactical.stack.insn.ModInsn;
@@ -136,10 +135,6 @@ public class TacticalInsnReader {
             iv.visitIncrement(incInsn.getLocal(), incInsn.getValue());
         } else if (instruction instanceof InstanceOfInsn) {
             iv.visitInstanceOf(((InstanceOfInsn) instruction).getType());
-        } else if (instruction instanceof InvokeDynamicInsn) {
-            InvokeDynamicInsn invokeInsn = (InvokeDynamicInsn) instruction;
-            iv.visitInvokeDynamicInsn(invokeInsn.getName(), invokeInsn.getDescriptor(),
-                    invokeInsn.getBootstrapMethod(), invokeInsn.getBootstrapArguments());
         } else if (instruction instanceof InvokeInsn) {
             iv.visitInvokeInsn(((InvokeInsn) instruction).getInvoke());
         } else if (instruction instanceof LoadInsn) {

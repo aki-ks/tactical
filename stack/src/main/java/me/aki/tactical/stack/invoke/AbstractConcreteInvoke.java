@@ -23,4 +23,9 @@ public class AbstractConcreteInvoke implements Invoke {
     public void setMethod(MethodRef method) {
         this.method = method;
     }
+
+    @Override
+    public MethodDescriptor getDescriptor() {
+        return method.getDescriptor();
+    }
 }

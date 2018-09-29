@@ -1,7 +1,7 @@
 package me.aki.tactical.stack.invoke;
 
-import me.aki.tactical.core.MethodRef;
+import me.aki.tactical.core.MethodDescriptor;
 
 public interface Invoke {
-    MethodRef getMethod();
+    MethodDescriptor getDescriptor();
 }

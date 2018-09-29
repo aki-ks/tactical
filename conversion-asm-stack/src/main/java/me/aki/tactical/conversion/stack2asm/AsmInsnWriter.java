@@ -11,7 +11,6 @@ import me.aki.tactical.core.handle.FieldHandle;
 import me.aki.tactical.core.handle.GetFieldHandle;
 import me.aki.tactical.core.handle.GetStaticHandle;
 import me.aki.tactical.core.handle.Handle;
-import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
@@ -48,6 +47,8 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
+import me.aki.tactical.stack.invoke.AbstractConcreteInvoke;
+import me.aki.tactical.stack.invoke.DynamicInvoke;
 import me.aki.tactical.stack.invoke.InterfaceInvoke;
 import me.aki.tactical.stack.invoke.Invoke;
 import me.aki.tactical.stack.invoke.SpecialInvoke;
@@ -793,42 +794,44 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
 
     @Override
     public void visitInvokeInsn(Invoke invoke) {
-        int opcode;
-        boolean isInterface;
+        if (invoke instanceof AbstractConcreteInvoke) {
+            MethodRef method = ((AbstractConcreteInvoke) invoke).getMethod();
+            String owner = AsmUtil.toInternalName(method.getOwner());
+            String name = method.getName();
+            String descriptor = AsmUtil.methodDescriptorToString(method.getDescriptor());
 
-        MethodRef method = invoke.getMethod();
-        String owner = AsmUtil.toInternalName(method.getOwner());
-        String name = method.getName();
-        String descriptor = AsmUtil.methodDescriptorToString(method.getDescriptor());
+            int opcode;
+            boolean isInterface;
+            if (invoke instanceof StaticInvoke) {
+                opcode = Opcodes.INVOKESTATIC;
+                isInterface = ((StaticInvoke) invoke).isInterface();
+            } else if (invoke instanceof VirtualInvoke) {
+                opcode = Opcodes.INVOKEVIRTUAL;
+                isInterface = false;
+            } else if (invoke instanceof SpecialInvoke) {
+                opcode = Opcodes.INVOKESPECIAL;
+                isInterface = ((SpecialInvoke) invoke).isInterface();
+            } else if (invoke instanceof InterfaceInvoke) {
+                opcode = Opcodes.INVOKEINTERFACE;
+                isInterface = true;
+            } else {
+                throw new AssertionError();
+            }
 
-        if (invoke instanceof StaticInvoke) {
-            opcode = Opcodes.INVOKESTATIC;
-            isInterface = ((StaticInvoke) invoke).isInterface();
-        } else if (invoke instanceof VirtualInvoke) {
-            opcode = Opcodes.INVOKEVIRTUAL;
-            isInterface = false;
-        } else if (invoke instanceof SpecialInvoke) {
-            opcode = Opcodes.INVOKESPECIAL;
-            isInterface = ((SpecialInvoke) invoke).isInterface();
-        } else if (invoke instanceof InterfaceInvoke) {
-            opcode = Opcodes.INVOKEINTERFACE;
-            isInterface = true;
+            visitConvertedInsn(new MethodInsnNode(opcode, owner, name, descriptor, isInterface));
+        } else if (invoke instanceof DynamicInvoke) {
+            DynamicInvoke dynamicInvoke = (DynamicInvoke) invoke;
+            String name = dynamicInvoke.getName();
+            String descriptor = AsmUtil.methodDescriptorToString(dynamicInvoke.getDescriptor());
+            org.objectweb.asm.Handle asmBootstrapHandle = convertHandle(dynamicInvoke.getBootstrapMethod());
+            Object[] asmBootstrapArguments = dynamicInvoke.getBootstrapArguments().stream()
+                    .map(this::convertBootstrapConstant)
+                    .toArray();
+
+            visitConvertedInsn(new InvokeDynamicInsnNode(name, descriptor, asmBootstrapHandle, asmBootstrapArguments));
         } else {
             throw new AssertionError();
         }
-
-        visitConvertedInsn(new MethodInsnNode(opcode, owner, name, descriptor, isInterface));
-    }
-
-    @Override
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
-        String asmDescriptor = AsmUtil.methodDescriptorToString(descriptor);
-        org.objectweb.asm.Handle asmBootstrapHandle = convertHandle(bootstrapMethod);
-        Object[] asmBootstrapArguments = bootstrapArguments.stream()
-                .map(this::convertBootstrapConstant)
-                .toArray();
-
-        visitConvertedInsn(new InvokeDynamicInsnNode(name, asmDescriptor, asmBootstrapHandle, asmBootstrapArguments));
     }
 
     private Object convertBootstrapConstant(BootstrapConstant constant) {

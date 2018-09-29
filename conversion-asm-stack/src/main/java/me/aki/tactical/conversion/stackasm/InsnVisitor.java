@@ -1,11 +1,8 @@
 package me.aki.tactical.conversion.stackasm;
 
 import me.aki.tactical.core.FieldRef;
-import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.Path;
-import me.aki.tactical.core.constant.BootstrapConstant;
-import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -14,7 +11,6 @@ import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.invoke.Invoke;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -300,12 +296,6 @@ public class InsnVisitor<T> {
     public void visitInvokeInsn(Invoke invoke) {
         if (iv != null) {
             iv.visitInvokeInsn(invoke);
-        }
-    }
-
-    public void visitInvokeDynamicInsn(String name, MethodDescriptor descriptor, Handle bootstrapMethod, List<BootstrapConstant> bootstrapArguments) {
-        if (iv != null) {
-            iv.visitInvokeDynamicInsn(name, descriptor, bootstrapMethod, bootstrapArguments);
         }
     }
 

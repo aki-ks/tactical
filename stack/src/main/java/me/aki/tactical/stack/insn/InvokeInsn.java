@@ -23,13 +23,13 @@ public class InvokeInsn extends AbstractInstruction {
 
     @Override
     public int getPushCount() {
-        return invoke.getMethod().getReturnType().isPresent() ? 1 : 0;
+        return invoke.getDescriptor().getReturnType().isPresent() ? 1 : 0;
     }
 
     @Override
     public int getPopCount() {
         int instance = invoke instanceof AbstractInstanceInvoke ? 1 : 0;
-        int args = invoke.getMethod().getArguments().size();
+        int args = invoke.getDescriptor().getParameterTypes().size();
         return instance + args;
     }
 }
