@@ -215,7 +215,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
             desc = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
             isInterface = handle instanceof InvokeInterfaceHandle ||
                     handle instanceof AbstractAmbiguousMethodHandle &&
-                            ((AbstractAmbiguousMethodHandle) handle).getMethodRef().isInterface();
+                            ((AbstractAmbiguousMethodHandle) handle).isInterface();
 
             if (handle instanceof InvokeInterfaceHandle) {
                 type = Opcodes.H_INVOKEINTERFACE;
