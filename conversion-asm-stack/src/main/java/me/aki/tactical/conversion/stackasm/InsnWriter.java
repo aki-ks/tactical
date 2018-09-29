@@ -12,7 +12,6 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
-import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.AddInsn;
 import me.aki.tactical.stack.insn.AndInsn;
@@ -61,6 +60,7 @@ import me.aki.tactical.stack.insn.SwitchInsn;
 import me.aki.tactical.stack.insn.ThrowInsn;
 import me.aki.tactical.stack.insn.UShrInsn;
 import me.aki.tactical.stack.insn.XorInsn;
+import me.aki.tactical.stack.invoke.Invoke;
 import org.objectweb.asm.tree.LabelNode;
 
 import java.util.ArrayList;
@@ -300,8 +300,8 @@ public class InsnWriter extends InsnVisitor<LabelNode> {
     }
 
     @Override
-    public void visitInvokeInsn(InvokeInsn.InvokeType invoke, InvokableMethodRef method) {
-        visitInsn(new InvokeInsn(invoke, method));
+    public void visitInvokeInsn(Invoke invoke) {
+        visitInsn(new InvokeInsn(invoke));
     }
 
     @Override

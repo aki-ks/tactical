@@ -2,7 +2,6 @@ package me.aki.tactical.conversion.stack2asm.analysis;
 
 import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.core.FieldRef;
-import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
@@ -14,7 +13,8 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
-import me.aki.tactical.stack.insn.InvokeInsn;
+import me.aki.tactical.stack.invoke.AbstractInstanceInvoke;
+import me.aki.tactical.stack.invoke.Invoke;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -437,19 +437,19 @@ public class StackEmulatingInsnVisitor<T> extends InsnVisitor<T> {
     }
 
     @Override
-    public void visitInvokeInsn(InvokeInsn.InvokeType invoke, InvokableMethodRef method) {
+    public void visitInvokeInsn(Invoke invoke) {
         // pop arguments in reverse order
-        List<Type> arguments = method.getArguments();
+        List<Type> arguments = invoke.getMethod().getArguments();
         ListIterator<Type> iter = arguments.listIterator(arguments.size());
         while (iter.hasPrevious()) {
             this.stack.popRequire(JvmType.from(iter.previous()));
         }
 
-        if (invoke != InvokeInsn.InvokeType.STATIC) {
+        if (invoke instanceof AbstractInstanceInvoke) {
             this.stack.popRequire(JvmType.REFERENCE); // instance of class containing the method
         }
 
-        super.visitInvokeInsn(invoke, method);
+        super.visitInvokeInsn(invoke);
     }
 
     @Override

@@ -10,10 +10,9 @@ import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
-import me.aki.tactical.stack.insn.InvokeInsn;
+import me.aki.tactical.stack.invoke.Invoke;
 
 import java.util.List;
 import java.util.Map;
@@ -298,9 +297,9 @@ public class InsnVisitor<T> {
         }
     }
 
-    public void visitInvokeInsn(InvokeInsn.InvokeType invoke, InvokableMethodRef method) {
+    public void visitInvokeInsn(Invoke invoke) {
         if (iv != null) {
-            iv.visitInvokeInsn(invoke, method);
+            iv.visitInvokeInsn(invoke);
         }
     }
 

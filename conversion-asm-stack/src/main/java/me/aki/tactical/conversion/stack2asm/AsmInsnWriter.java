@@ -44,12 +44,15 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
-import me.aki.tactical.stack.insn.InvokeInsn;
+import me.aki.tactical.stack.invoke.InterfaceInvoke;
+import me.aki.tactical.stack.invoke.Invoke;
+import me.aki.tactical.stack.invoke.SpecialInvoke;
+import me.aki.tactical.stack.invoke.StaticInvoke;
+import me.aki.tactical.stack.invoke.VirtualInvoke;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -789,24 +792,32 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
     }
 
     @Override
-    public void visitInvokeInsn(InvokeInsn.InvokeType invoke, InvokableMethodRef method) {
-        int opcode = getInvokeOpcode(invoke);
+    public void visitInvokeInsn(Invoke invoke) {
+        int opcode;
+        boolean isInterface;
+
+        MethodRef method = invoke.getMethod();
         String owner = AsmUtil.toInternalName(method.getOwner());
         String name = method.getName();
-        String descriptor = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getArguments());
-        boolean isInterface = method.isInterface();
+        String descriptor = AsmUtil.methodDescriptorToString(method.getDescriptor());
+
+        if (invoke instanceof StaticInvoke) {
+            opcode = Opcodes.INVOKESTATIC;
+            isInterface = ((StaticInvoke) invoke).isInterface();
+        } else if (invoke instanceof VirtualInvoke) {
+            opcode = Opcodes.INVOKEVIRTUAL;
+            isInterface = false;
+        } else if (invoke instanceof SpecialInvoke) {
+            opcode = Opcodes.INVOKESPECIAL;
+            isInterface = ((SpecialInvoke) invoke).isInterface();
+        } else if (invoke instanceof InterfaceInvoke) {
+            opcode = Opcodes.INVOKEINTERFACE;
+            isInterface = true;
+        } else {
+            throw new AssertionError();
+        }
 
         visitConvertedInsn(new MethodInsnNode(opcode, owner, name, descriptor, isInterface));
-    }
-
-    private int getInvokeOpcode(InvokeInsn.InvokeType invokeType) {
-        switch (invokeType) {
-            case VIRTUAL: return Opcodes.INVOKEVIRTUAL;
-            case SPECIAL: return Opcodes.INVOKESPECIAL;
-            case INTERFACE: return Opcodes.INVOKEINTERFACE;
-            case STATIC: return Opcodes.INVOKESTATIC;
-            default: throw new AssertionError();
-        }
     }
 
     @Override

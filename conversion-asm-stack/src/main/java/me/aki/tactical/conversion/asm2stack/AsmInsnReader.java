@@ -40,10 +40,13 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.InvokableMethodRef;
 import me.aki.tactical.stack.Local;
 import me.aki.tactical.stack.insn.IfInsn;
-import me.aki.tactical.stack.insn.InvokeInsn;
+import me.aki.tactical.stack.invoke.InterfaceInvoke;
+import me.aki.tactical.stack.invoke.Invoke;
+import me.aki.tactical.stack.invoke.SpecialInvoke;
+import me.aki.tactical.stack.invoke.StaticInvoke;
+import me.aki.tactical.stack.invoke.VirtualInvoke;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -794,20 +797,33 @@ public class AsmInsnReader {
     private void convertMethodInsnNode(MethodInsnNode insn) {
         Path owner = AsmUtil.pathFromInternalName(insn.owner);
         MethodDescriptor desc = AsmUtil.parseMethodDescriptor(insn.desc);
-        InvokableMethodRef methodRef = new InvokableMethodRef(owner, insn.name, desc.getParameterTypes(), desc.getReturnType(), insn.itf);
+        MethodRef method = new MethodRef(owner, insn.name, desc.getParameterTypes(), desc.getReturnType());
 
-        iv.visitInvokeInsn(getInvokeType(insn.getOpcode()), methodRef);
-    }
+        Invoke invoke;
+        switch (insn.getOpcode()) {
+            case Opcodes.INVOKEVIRTUAL:
+                invoke = new VirtualInvoke(method);
+                break;
 
-    private InvokeInsn.InvokeType getInvokeType(int opcode) {
-        switch (opcode) {
-            case Opcodes.INVOKEVIRTUAL: return InvokeInsn.InvokeType.VIRTUAL;
-            case Opcodes.INVOKESPECIAL: return InvokeInsn.InvokeType.SPECIAL;
-            case Opcodes.INVOKESTATIC: return InvokeInsn.InvokeType.STATIC;
-            case Opcodes.INVOKEINTERFACE: return InvokeInsn.InvokeType.INTERFACE;
-            default: throw new AssertionError();
+            case Opcodes.INVOKESPECIAL:
+                invoke = new SpecialInvoke(method, insn.itf);
+                break;
+
+            case Opcodes.INVOKESTATIC:
+                invoke = new StaticInvoke(method, insn.itf);
+                break;
+
+            case Opcodes.INVOKEINTERFACE:
+                invoke = new InterfaceInvoke(method);
+                break;
+
+            default:
+                throw new AssertionError();
         }
+
+        iv.visitInvokeInsn(invoke);
     }
+
 
     private void convertInvokeDynamicInsnNode(InvokeDynamicInsnNode insn) {
         MethodDescriptor descriptor = AsmUtil.parseMethodDescriptor(insn.desc);

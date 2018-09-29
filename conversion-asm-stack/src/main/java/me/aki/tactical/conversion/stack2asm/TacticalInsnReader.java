@@ -141,8 +141,7 @@ public class TacticalInsnReader {
             iv.visitInvokeDynamicInsn(invokeInsn.getName(), invokeInsn.getDescriptor(),
                     invokeInsn.getBootstrapMethod(), invokeInsn.getBootstrapArguments());
         } else if (instruction instanceof InvokeInsn) {
-            InvokeInsn invokeInsn = (InvokeInsn) instruction;
-            iv.visitInvokeInsn(invokeInsn.getInvokeType(), invokeInsn.getMethod());
+            iv.visitInvokeInsn(((InvokeInsn) instruction).getInvoke());
         } else if (instruction instanceof LoadInsn) {
             LoadInsn loadInsn = (LoadInsn) instruction;
             iv.visitLoad(loadInsn.getType(), loadInsn.getLocal());
