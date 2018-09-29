@@ -14,6 +14,9 @@ lazy val core = project in file ("core")
 lazy val stack = (project in file ("stack"))
   .dependsOn(core)
 
+lazy val ref = (project in file ("ref"))
+  .dependsOn(core)
+
 lazy val asmStackConversion = (project in file("conversion-asm-stack"))
   .dependsOn(stack)
   .settings(
