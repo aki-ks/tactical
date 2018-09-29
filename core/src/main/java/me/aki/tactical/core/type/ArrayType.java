@@ -29,6 +29,16 @@ public class ArrayType implements RefType {
         return baseType;
     }
 
+    /**
+     * Get this array type with the dimension count reduced by one.
+     * If this is a one dimensional array, the base type is returned.
+     *
+     * @return this array with reduced dimension count
+     */
+    public Type getLowerType() {
+        return dimensions == 1 ? baseType : new ArrayType(baseType, dimensions - 1);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
