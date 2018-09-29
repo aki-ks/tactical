@@ -324,7 +324,7 @@ public class InsnWriter extends InsnVisitor<LabelNode> {
         ctx.registerForwardInsnCell(defaultTarget, insn.getDefaultLocationCell());
         targetTable.forEach((key, label) -> {
             table.put(key, null);
-            ctx.registerForwardInsnCell(label, Cell.ofMap(key, table));
+            ctx.registerForwardInsnCell(label, Cell.ofMap(key, table, Instruction.class));
         });
 
         visitInsn(insn);

@@ -36,7 +36,7 @@ public class ArrayBoxExpr implements Variable {
     }
 
     public Cell<Expression> getArrayCell() {
-        return Cell.of(this::getArray, this::setArray);
+        return Cell.of(this::getArray, this::setArray, Expression.class);
     }
 
     public Expression getIndex() {
@@ -48,7 +48,7 @@ public class ArrayBoxExpr implements Variable {
     }
 
     public Cell<Expression> getIndexCell() {
-        return Cell.of(this::getIndex, this::setIndex);
+        return Cell.of(this::getIndex, this::setIndex, Expression.class);
     }
 
     @Override

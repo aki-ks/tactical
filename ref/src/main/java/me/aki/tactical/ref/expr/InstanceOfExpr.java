@@ -44,7 +44,7 @@ public class InstanceOfExpr implements Expression {
     }
 
     public Cell<Expression> getValueCell() {
-        return Cell.of(this::getValue, this::setValue);
+        return Cell.of(this::getValue, this::setValue, Expression.class);
     }
 
     @Override

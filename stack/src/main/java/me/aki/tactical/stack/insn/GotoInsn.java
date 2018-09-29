@@ -26,7 +26,7 @@ public class GotoInsn extends AbstractInstruction implements BranchInsn {
     }
 
     public Cell<Instruction> getTargetCell() {
-        return Cell.of(this::getTarget, this::setTarget);
+        return Cell.of(this::getTarget, this::setTarget, Instruction.class);
     }
 
     @Override

@@ -44,7 +44,7 @@ public class InstanceFieldExpr implements Variable {
     }
 
     public Cell<Expression> getInstanceCell() {
-        return Cell.of(this::getInstance, this::setInstance);
+        return Cell.of(this::getInstance, this::setInstance, Expression.class);
     }
 
     @Override

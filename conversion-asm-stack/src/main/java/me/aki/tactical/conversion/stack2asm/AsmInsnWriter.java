@@ -871,7 +871,7 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
 
     private void convertJumpInsnNode(Instruction target, int aGoto) {
         JumpInsnNode node = new JumpInsnNode(aGoto, null);
-        ctx.registerLabel(target, Cell.of(() -> node.label, x -> node.label = x));
+        ctx.registerLabel(target, Cell.of(() -> node.label, x -> node.label = x, LabelNode.class));
         visitConvertedInsn(node);
     }
 
@@ -925,10 +925,10 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
             int max = keySet.last();
             TableSwitchInsnNode node = new TableSwitchInsnNode(min, max, null, new LabelNode[max - min + 1]);
 
-            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x));
+            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x, LabelNode.class));
             IntStream.rangeClosed(min, max).forEach(key -> {
                 Instruction target = targetTable.get(key);
-                ctx.registerLabel(target, Cell.of(() -> node.labels.get(key), x -> node.labels.set(key, x)));
+                ctx.registerLabel(target, Cell.of(() -> node.labels.get(key), x -> node.labels.set(key, x), LabelNode.class));
             });
 
             visitConvertedInsn(node);
@@ -937,10 +937,10 @@ public class AsmInsnWriter extends InsnVisitor<Instruction> {
             LabelNode[] labels = new LabelNode[targetTable.size()];
             LookupSwitchInsnNode node = new LookupSwitchInsnNode(null, keys, labels);
 
-            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x));
+            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x, LabelNode.class));
             targetTable.forEach((key, value) -> {
                 int index = node.keys.indexOf(key);
-                ctx.registerLabel(value, Cell.of(() -> node.labels.get(index), x -> node.labels.set(index, x)));
+                ctx.registerLabel(value, Cell.of(() -> node.labels.get(index), x -> node.labels.set(index, x), LabelNode.class));
             });
 
             visitConvertedInsn(node);

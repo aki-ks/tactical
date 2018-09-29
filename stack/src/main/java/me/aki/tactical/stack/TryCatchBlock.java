@@ -55,7 +55,7 @@ public class TryCatchBlock {
     }
 
     public Cell<Instruction> getFirstCell() {
-        return Cell.of(this::getFirst, this::setFirst);
+        return Cell.of(this::getFirst, this::setFirst, Instruction.class);
     }
 
     public Instruction getLast() {
@@ -67,7 +67,7 @@ public class TryCatchBlock {
     }
 
     public Cell<Instruction> getLastCell() {
-        return Cell.of(this::getLast, this::setLast);
+        return Cell.of(this::getLast, this::setLast, Instruction.class);
     }
 
     public Instruction getHandler() {
@@ -79,7 +79,7 @@ public class TryCatchBlock {
     }
 
     public Cell<Instruction> getHandlerCell() {
-        return Cell.of(this::getHandler, this::setHandler);
+        return Cell.of(this::getHandler, this::setHandler, Instruction.class);
     }
 
     public Optional<Path> getExceptionType() {

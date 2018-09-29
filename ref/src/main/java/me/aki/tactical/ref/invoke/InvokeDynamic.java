@@ -94,7 +94,7 @@ public class InvokeDynamic implements Invoke {
 
     public List<Cell<Expression>> getArgumentCells() {
         return IntStream.range(0, arguments.size())
-                .mapToObj(index -> Cell.ofList(arguments, index))
+                .mapToObj(index -> Cell.ofList(arguments, index, Expression.class))
                 .collect(Collectors.toUnmodifiableList());
     }
 

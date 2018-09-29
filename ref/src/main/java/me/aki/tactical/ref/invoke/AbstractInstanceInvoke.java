@@ -28,7 +28,7 @@ public class AbstractInstanceInvoke extends AbstractConcreteInvoke {
     }
 
     public Cell<Expression> getInstanceExpression() {
-        return Cell.of(this::getInstance, this::setInstance);
+        return Cell.of(this::getInstance, this::setInstance, Expression.class);
     }
 
     @Override

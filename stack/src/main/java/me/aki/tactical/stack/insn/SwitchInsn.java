@@ -40,7 +40,7 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
 
     public List<Cell<Instruction>> getBranchTableCells() {
         return branchTable.entrySet().stream()
-                .map(e -> Cell.ofMap(e.getKey(), branchTable))
+                .map(e -> Cell.ofMap(e.getKey(), branchTable, Instruction.class))
                 .collect(Collectors.toList());
     }
 
@@ -53,7 +53,7 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
     }
 
     public Cell<Instruction> getDefaultLocationCell() {
-        return Cell.of(this::getDefaultLocation, this::setDefaultLocation);
+        return Cell.of(this::getDefaultLocation, this::setDefaultLocation, Instruction.class);
     }
 
     @Override

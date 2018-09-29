@@ -201,7 +201,7 @@ public class StackBody implements Body {
         }
 
         public Cell<Instruction> getStartCell() {
-            return Cell.of(this::getStart, this::setStart);
+            return Cell.of(this::getStart, this::setStart, Instruction.class);
         }
 
         public Instruction getEnd() {
@@ -213,7 +213,7 @@ public class StackBody implements Body {
         }
 
         public Cell<Instruction> getEndCell() {
-            return Cell.of(this::getEnd, this::setEnd);
+            return Cell.of(this::getEnd, this::setEnd, Instruction.class);
         }
 
         public Local getLocal() {
@@ -291,7 +291,7 @@ public class StackBody implements Body {
             }
 
             public Cell<Instruction> getStartCell() {
-                return Cell.of(this::getStart, this::setStart);
+                return Cell.of(this::getStart, this::setStart, Instruction.class);
             }
 
             public Instruction getEnd() {
@@ -303,7 +303,7 @@ public class StackBody implements Body {
             }
 
             public Cell<Instruction> getEndCell() {
-                return Cell.of(this::getEnd, this::setEnd);
+                return Cell.of(this::getEnd, this::setEnd, Instruction.class);
             }
 
             public Local getLocal() {
@@ -352,7 +352,7 @@ public class StackBody implements Body {
         }
 
         public Cell<Instruction> getInstructionCell() {
-            return Cell.of(this::getInstruction, this::setInstruction);
+            return Cell.of(this::getInstruction, this::setInstruction, Instruction.class);
         }
     }
 }

@@ -35,7 +35,7 @@ public class AssignStatement implements Statement {
     }
 
     public Cell<Variable> getVariableCell() {
-        return Cell.of(this::getVariable, this::setVariable);
+        return Cell.of(this::getVariable, this::setVariable, Variable.class);
     }
 
     public Expression getValue() {
@@ -47,11 +47,11 @@ public class AssignStatement implements Statement {
     }
 
     public Cell<Expression> getValueCell() {
-        return Cell.of(this::getValue, this::setValue);
+        return Cell.of(this::getValue, this::setValue, Expression.class);
     }
 
     @Override
     public List<Cell<Expression>> getReferencedValues() {
-        return List.of(getVariableCell(), getValueCell());
+        return List.of(getVariableCell().cast(), getValueCell());
     }
 }

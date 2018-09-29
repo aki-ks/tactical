@@ -29,7 +29,7 @@ public class ArrayLengthExpr implements Expression {
     }
 
     public Cell<Expression> getArrayCell() {
-        return Cell.of(this::getArray, this::setArray);
+        return Cell.of(this::getArray, this::setArray, Expression.class);
     }
 
     @Override

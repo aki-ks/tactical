@@ -26,7 +26,7 @@ public abstract class AbstractBinaryExpr implements Expression {
     }
 
     public Cell<Expression> getValue1Cell() {
-        return Cell.of(this::getValue1, this::setValue1);
+        return Cell.of(this::getValue1, this::setValue1, Expression.class);
     }
 
     public Expression getValue2() {
@@ -38,7 +38,7 @@ public abstract class AbstractBinaryExpr implements Expression {
     }
 
     public Cell<Expression> getValue2Cell() {
-        return Cell.of(this::getValue2, this::setValue2);
+        return Cell.of(this::getValue2, this::setValue2, Expression.class);
     }
 
     @Override
