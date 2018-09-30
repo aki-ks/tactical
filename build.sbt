@@ -17,10 +17,13 @@ lazy val stack = (project in file ("stack"))
 lazy val ref = (project in file ("ref"))
   .dependsOn(core)
 
-lazy val asmStackConversion = (project in file("conversion-asm-stack"))
+lazy val asmStackConversion = (project in file ("conversion-asm-stack"))
   .dependsOn(stack)
   .settings(
     libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
     libraryDependencies += "org.ow2.asm" % "asm-tree" % asmVersion,
     libraryDependencies += "org.ow2.asm" % "asm-commons" % asmVersion
   )
+
+lazy val refStackConversion = (project in file ("conversion-stack-ref"))
+  .dependsOn(stack, ref)
