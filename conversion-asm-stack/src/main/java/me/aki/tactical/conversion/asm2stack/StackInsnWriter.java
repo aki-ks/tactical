@@ -9,7 +9,7 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.AddInsn;
 import me.aki.tactical.stack.insn.AndInsn;
 import me.aki.tactical.stack.insn.ArrayLengthInsn;
@@ -231,17 +231,17 @@ public class StackInsnWriter extends StackInsnVisitor<LabelNode> {
     }
 
     @Override
-    public void visitLoad(Type type, Local local) {
+    public void visitLoad(Type type, StackLocal local) {
         visitInsn(new LoadInsn(type, local));
     }
 
     @Override
-    public void visitStore(Type type, Local local) {
+    public void visitStore(Type type, StackLocal local) {
         visitInsn(new StoreInsn(type, local));
     }
 
     @Override
-    public void visitIncrement(Local local, int value) {
+    public void visitIncrement(StackLocal local, int value) {
         visitInsn(new IncrementInsn(local, value));
     }
 

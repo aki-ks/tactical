@@ -6,15 +6,15 @@ import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 
 /**
  * Store the upper value of the stack in a local.
  */
 public class StoreInsn extends AbstractTypeInsn {
-    private Local local;
+    private StackLocal local;
 
-    public StoreInsn(Type type, Local local) {
+    public StoreInsn(Type type, StackLocal local) {
         super(type);
         this.local = local;
     }
@@ -26,11 +26,11 @@ public class StoreInsn extends AbstractTypeInsn {
                 type instanceof FloatType || type instanceof DoubleType;
     }
 
-    public Local getLocal() {
+    public StackLocal getLocal() {
         return local;
     }
 
-    public void setLocal(Local local) {
+    public void setLocal(StackLocal local) {
         this.local = local;
     }
 

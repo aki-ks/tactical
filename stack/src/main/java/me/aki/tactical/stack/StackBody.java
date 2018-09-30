@@ -17,21 +17,21 @@ public class StackBody implements Body {
      *
      * This includes also e.g. the "this", parameter and catch-block local.
      */
-    private List<Local> locals = new ArrayList<>();
+    private List<StackLocal> locals = new ArrayList<>();
 
     /**
      * Local that initially contains the "this" value for non-static method.
      *
      * Note that other values can be assigned to this local with a {@link StoreInsn}.
      */
-    private Optional<Local> thisLocal = Optional.empty();
+    private Optional<StackLocal> thisLocal = Optional.empty();
 
     /**
      * Locals that initially contain the parameter values.
      *
      * Note that other values can be assigned to these local with a {@link StoreInsn}.
      */
-    private List<Local> parameterLocals = new ArrayList<>();
+    private List<StackLocal> parameterLocals = new ArrayList<>();
 
     /**
      * The instructions of this method
@@ -58,27 +58,27 @@ public class StackBody implements Body {
      */
     private List<LineNumber> lineNumbers = new ArrayList<>();
 
-    public List<Local> getLocals() {
+    public List<StackLocal> getLocals() {
         return locals;
     }
 
-    public void setLocals(List<Local> locals) {
+    public void setLocals(List<StackLocal> locals) {
         this.locals = locals;
     }
 
-    public Optional<Local> getThisLocal() {
+    public Optional<StackLocal> getThisLocal() {
         return thisLocal;
     }
 
-    public void setThisLocal(Optional<Local> thisLocal) {
+    public void setThisLocal(Optional<StackLocal> thisLocal) {
         this.thisLocal = thisLocal;
     }
 
-    public List<Local> getParameterLocals() {
+    public List<StackLocal> getParameterLocals() {
         return parameterLocals;
     }
 
-    public void setParameterLocals(List<Local> parameterLocals) {
+    public void setParameterLocals(List<StackLocal> parameterLocals) {
         this.parameterLocals = parameterLocals;
     }
 
@@ -156,10 +156,10 @@ public class StackBody implements Body {
         /**
          * Local that corresponds to the local variable in source.
          */
-        private Local local;
+        private StackLocal local;
 
         public LocalVariable(String name, Type type, Optional<String> signature, Instruction start,
-                             Instruction end, Local local) {
+                             Instruction end, StackLocal local) {
             this.name = name;
             this.type = type;
             this.signature = signature;
@@ -216,11 +216,11 @@ public class StackBody implements Body {
             return Cell.of(this::getEnd, this::setEnd, Instruction.class);
         }
 
-        public Local getLocal() {
+        public StackLocal getLocal() {
             return local;
         }
 
-        public void setLocal(Local local) {
+        public void setLocal(StackLocal local) {
             this.local = local;
         }
     }
@@ -274,9 +274,9 @@ public class StackBody implements Body {
             /**
              * Local that corresponds to the local variable within the range of instruction.
              */
-            private Local local;
+            private StackLocal local;
 
-            public Location(Instruction start, Instruction end, Local local) {
+            public Location(Instruction start, Instruction end, StackLocal local) {
                 this.start = start;
                 this.end = end;
                 this.local = local;
@@ -306,11 +306,11 @@ public class StackBody implements Body {
                 return Cell.of(this::getEnd, this::setEnd, Instruction.class);
             }
 
-            public Local getLocal() {
+            public StackLocal getLocal() {
                 return local;
             }
 
-            public void setLocal(Local local) {
+            public void setLocal(StackLocal local) {
                 this.local = local;
             }
         }

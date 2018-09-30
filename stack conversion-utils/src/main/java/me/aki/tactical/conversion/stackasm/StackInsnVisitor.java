@@ -7,7 +7,7 @@ import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.invoke.Invoke;
 
@@ -205,19 +205,19 @@ public class StackInsnVisitor<T> {
 
     // LOCAL RELATED INSTRUCTIONS
 
-    public void visitLoad(Type type, Local local) {
+    public void visitLoad(Type type, StackLocal local) {
         if (iv != null) {
             iv.visitLoad(type, local);
         }
     }
 
-    public void visitStore(Type type, Local local) {
+    public void visitStore(Type type, StackLocal local) {
         if (iv != null) {
             iv.visitStore(type, local);
         }
     }
 
-    public void visitIncrement(Local local, int value) {
+    public void visitIncrement(StackLocal local, int value) {
         if (iv != null) {
             iv.visitIncrement(local, value);
         }

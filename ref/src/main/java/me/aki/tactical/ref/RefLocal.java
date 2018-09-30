@@ -5,13 +5,13 @@ import me.aki.tactical.core.util.Cell;
 
 import java.util.List;
 
-public class Local implements Variable {
+public class RefLocal implements Variable {
     /**
      * Type of this Local
      */
     private Type type;
 
-    public Local(Type type) {
+    public RefLocal(Type type) {
         this.type = type;
     }
 

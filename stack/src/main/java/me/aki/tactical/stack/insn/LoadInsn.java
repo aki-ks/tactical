@@ -6,7 +6,7 @@ import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 
 /**
  * Push a value from a local onto the stack.
@@ -15,9 +15,9 @@ public class LoadInsn extends AbstractTypeInsn {
     /**
      * Local whose value will be pushed onto the stack
      */
-    private Local local;
+    private StackLocal local;
 
-    public LoadInsn(Type type, Local local) {
+    public LoadInsn(Type type, StackLocal local) {
         super(type);
         this.local = local;
     }
@@ -29,11 +29,11 @@ public class LoadInsn extends AbstractTypeInsn {
                 type instanceof FloatType || type instanceof DoubleType;
     }
 
-    public Local getLocal() {
+    public StackLocal getLocal() {
         return local;
     }
 
-    public void setLocal(Local local) {
+    public void setLocal(StackLocal local) {
         this.local = local;
     }
 

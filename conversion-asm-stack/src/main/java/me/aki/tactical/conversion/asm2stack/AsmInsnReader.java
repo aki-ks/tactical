@@ -40,7 +40,7 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.invoke.DynamicInvoke;
 import me.aki.tactical.stack.invoke.InterfaceInvoke;
@@ -94,7 +94,7 @@ public class AsmInsnReader {
         this.ctx = ctx;
     }
 
-    private Local getLocal(int var) {
+    private StackLocal getLocal(int var) {
         return ctx.getLocal(var);
     }
 

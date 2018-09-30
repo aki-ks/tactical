@@ -1,7 +1,7 @@
 package me.aki.tactical.conversion.asm2stack;
 
 import me.aki.tactical.core.util.Cell;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.Instruction;
 import org.objectweb.asm.tree.LabelNode;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ConversionContext {
-    private List<Local> locals = new ArrayList<>();
+    private List<StackLocal> locals = new ArrayList<>();
 
     /**
      * Instruction cells that should be assigned to the converted instruction that
@@ -25,7 +25,7 @@ public class ConversionContext {
      */
     private Map<LabelNode, List<Cell<Instruction>>> backwardLabelCells = new HashMap<>();
 
-    public Local getLocal(int index) {
+    public StackLocal getLocal(int index) {
         return this.locals.get(index);
     }
 
@@ -37,7 +37,7 @@ public class ConversionContext {
         this.backwardLabelCells.computeIfAbsent(label, x -> new ArrayList<>()).add(insnCell);
     }
 
-    public List<Local> getLocals() {
+    public List<StackLocal> getLocals() {
         return locals;
     }
 

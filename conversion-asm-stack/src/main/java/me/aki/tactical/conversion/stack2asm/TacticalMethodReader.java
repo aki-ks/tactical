@@ -12,7 +12,7 @@ import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.TryCatchBlock;
 import me.aki.tactical.stack.insn.Instruction;
@@ -429,7 +429,7 @@ public class TacticalMethodReader {
      * @param local local whose index we want
      * @return index of the local
      */
-    private int getLocalIndex(StackBody body, Local local) {
+    private int getLocalIndex(StackBody body, StackLocal local) {
         int index = body.getLocals().indexOf(local);
         if (index < 0) {
             throw new IllegalStateException("Local is not contained within the body");

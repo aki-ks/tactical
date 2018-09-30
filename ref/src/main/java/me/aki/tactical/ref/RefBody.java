@@ -13,21 +13,21 @@ public class RefBody {
     /**
      * All locals of this method.
      */
-    private List<Local> locals = new ArrayList<>();
+    private List<RefLocal> locals = new ArrayList<>();
 
     /**
      * Local that initially contains the "this" value for non-static method.
      *
      * Note that other values can be assigned to these local with a {@link AssignStatement}.
      */
-    private Optional<Local> thisLocal = Optional.empty();
+    private Optional<RefLocal> thisLocal = Optional.empty();
 
     /**
      * Locals that initially contain the parameter values.
      *
      * Note that other values can be assigned to these local with a {@link AssignStatement}.
      */
-    private List<Local> argumentLocals = new ArrayList<>();
+    private List<RefLocal> argumentLocals = new ArrayList<>();
 
     /**
      * The instructions of this method.
@@ -54,27 +54,27 @@ public class RefBody {
      */
     private List<LineNumber> lineNumbers = new ArrayList<>();
 
-    public List<Local> getLocals() {
+    public List<RefLocal> getLocals() {
         return locals;
     }
 
-    public void setLocals(List<Local> locals) {
+    public void setLocals(List<RefLocal> locals) {
         this.locals = locals;
     }
 
-    public Optional<Local> getThisLocal() {
+    public Optional<RefLocal> getThisLocal() {
         return thisLocal;
     }
 
-    public void setThisLocal(Optional<Local> thisLocal) {
+    public void setThisLocal(Optional<RefLocal> thisLocal) {
         this.thisLocal = thisLocal;
     }
 
-    public List<Local> getArgumentLocals() {
+    public List<RefLocal> getArgumentLocals() {
         return argumentLocals;
     }
 
-    public void setArgumentLocals(List<Local> argumentLocals) {
+    public void setArgumentLocals(List<RefLocal> argumentLocals) {
         this.argumentLocals = argumentLocals;
     }
 
@@ -152,10 +152,10 @@ public class RefBody {
         /**
          * Local that corresponds to the local variable in source.
          */
-        private Local local;
+        private RefLocal local;
 
         public LocalVariable(String name, Type type, Optional<String> signature, Statement start,
-                             Statement end, Local local) {
+                             Statement end, RefLocal local) {
             this.name = name;
             this.type = type;
             this.signature = signature;
@@ -212,11 +212,11 @@ public class RefBody {
             return Cell.of(this::getEnd, this::setEnd, Statement.class);
         }
 
-        public Local getLocal() {
+        public RefLocal getLocal() {
             return local;
         }
 
-        public void setLocal(Local local) {
+        public void setLocal(RefLocal local) {
             this.local = local;
         }
     }
@@ -273,9 +273,9 @@ public class RefBody {
             /**
              * Local that corresponds to the local variable within the range of instruction.
              */
-            private Local local;
+            private RefLocal local;
 
-            public Location(Statement start, Statement end, Local local) {
+            public Location(Statement start, Statement end, RefLocal local) {
                 this.start = start;
                 this.end = end;
                 this.local = local;
@@ -305,11 +305,11 @@ public class RefBody {
                 return Cell.of(this::getEnd, this::setEnd, Statement.class);
             }
 
-            public Local getLocal() {
+            public RefLocal getLocal() {
                 return local;
             }
 
-            public void setLocal(Local local) {
+            public void setLocal(RefLocal local) {
                 this.local = local;
             }
         }

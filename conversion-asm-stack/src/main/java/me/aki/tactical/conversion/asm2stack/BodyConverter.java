@@ -10,7 +10,7 @@ import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.core.typeannotation.TypePath;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.TryCatchBlock;
 import me.aki.tactical.stack.insn.Instruction;
@@ -57,7 +57,7 @@ public class BodyConverter {
 
     private void initLocals() {
         for (int i = 0; i < mn.maxLocals; i++) {
-            ctx.getLocals().add(new Local());
+            ctx.getLocals().add(new StackLocal());
         }
 
         int localIndex = 0;

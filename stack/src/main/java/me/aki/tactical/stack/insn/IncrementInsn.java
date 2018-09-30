@@ -1,6 +1,6 @@
 package me.aki.tactical.stack.insn;
 
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 
 /**
  * Increment a local containing an int by a statically known value.
@@ -9,23 +9,23 @@ public class IncrementInsn extends AbstractInstruction {
     /**
      * Local whose value will be incremented
      */
-    private Local local;
+    private StackLocal local;
 
     /**
      * Value by which the local will be in-/decremented.
      */
     private int value;
 
-    public IncrementInsn(Local local, int value) {
+    public IncrementInsn(StackLocal local, int value) {
         this.local = local;
         this.value = value;
     }
 
-    public Local getLocal() {
+    public StackLocal getLocal() {
         return local;
     }
 
-    public void setLocal(Local local) {
+    public void setLocal(StackLocal local) {
         this.local = local;
     }
 

@@ -44,7 +44,7 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.invoke.AbstractConcreteInvoke;
@@ -91,7 +91,7 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
     /**
      * A list of locals used to convert dup instructions that cannot be represented as one opcode.
      */
-    private List<Local> tempLocalIndices = new ArrayList<>();
+    private List<StackLocal> tempLocalIndices = new ArrayList<>();
 
     public AsmInsnWriter(ConversionContext ctx) {
         super(null);
@@ -110,9 +110,9 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         this.stackFrame = stackFrame;
     }
 
-    private Local getTempLocal(int i) {
+    private StackLocal getTempLocal(int i) {
         while (i <= tempLocalIndices.size()) {
-            Local tempLocal = new Local();
+            StackLocal tempLocal = new StackLocal();
             tempLocalIndices.add(tempLocal);
         }
 
@@ -463,8 +463,8 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         }
 
         if (opcode == null) {
-            Local local0 = getTempLocal(0);
-            Local local1 = getTempLocal(1);
+            StackLocal local0 = getTempLocal(0);
+            StackLocal local1 = getTempLocal(1);
 
             visitStore(peeked[0].toType(), local0);
             visitStore(peeked[1].toType(), local1);
@@ -546,9 +546,9 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         }
 
         if (opcode == null) {
-            Local local0 = getTempLocal(0);
-            Local local1 = getTempLocal(1);
-            Local local2 = getTempLocal(2);
+            StackLocal local0 = getTempLocal(0);
+            StackLocal local1 = getTempLocal(1);
+            StackLocal local2 = getTempLocal(2);
 
             visitStore(peeked[0].toType(), local0);
             visitStore(peeked[1].toType(), local1);
@@ -574,8 +574,8 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         }
 
         if (opcode == null) {
-            Local local0 = getTempLocal(0);
-            Local local1 = getTempLocal(1);
+            StackLocal local0 = getTempLocal(0);
+            StackLocal local1 = getTempLocal(1);
 
             visitStore(peeked[0].toType(), local0);
             visitStore(peeked[1].toType(), local1);
@@ -607,9 +607,9 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         }
 
         if (opcode == null) {
-            Local local0 = getTempLocal(0);
-            Local local1 = getTempLocal(1);
-            Local local2 = getTempLocal(2);
+            StackLocal local0 = getTempLocal(0);
+            StackLocal local1 = getTempLocal(1);
+            StackLocal local2 = getTempLocal(2);
 
             visitStore(peeked[0].toType(), local0);
             visitStore(peeked[1].toType(), local1);
@@ -641,10 +641,10 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         }
 
         if (opcode == null) {
-            Local local0 = getTempLocal(0);
-            Local local1 = getTempLocal(1);
-            Local local2 = getTempLocal(2);
-            Local local3 = getTempLocal(3);
+            StackLocal local0 = getTempLocal(0);
+            StackLocal local1 = getTempLocal(1);
+            StackLocal local2 = getTempLocal(2);
+            StackLocal local3 = getTempLocal(3);
 
             visitStore(peeked[0].toType(), local0);
             visitStore(peeked[1].toType(), local1);
@@ -664,7 +664,7 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
     }
 
     @Override
-    public void visitLoad(Type type, Local local) {
+    public void visitLoad(Type type, StackLocal local) {
         int opcode = type instanceof RefType ? Opcodes.ALOAD :
                 type instanceof IntType ? Opcodes.ILOAD :
                 type instanceof LongType ? Opcodes.LLOAD :
@@ -676,7 +676,7 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
     }
 
     @Override
-    public void visitStore(Type type, Local local) {
+    public void visitStore(Type type, StackLocal local) {
         int opcode = type instanceof RefType ? Opcodes.ASTORE :
                 type instanceof IntType ? Opcodes.ISTORE :
                 type instanceof LongType ? Opcodes.LSTORE :
@@ -688,7 +688,7 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
     }
 
     @Override
-    public void visitIncrement(Local local, int value) {
+    public void visitIncrement(StackLocal local, int value) {
         visitConvertedInsn(new IincInsnNode(ctx.getLocalIndex(local), value));
     }
 

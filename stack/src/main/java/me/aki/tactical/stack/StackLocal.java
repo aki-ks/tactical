@@ -1,4 +1,4 @@
 package me.aki.tactical.stack;
 
-public class Local {
+public class StackLocal {
 }

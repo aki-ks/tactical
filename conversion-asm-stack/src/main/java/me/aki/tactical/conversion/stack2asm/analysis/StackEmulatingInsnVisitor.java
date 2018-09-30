@@ -8,7 +8,7 @@ import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.stack.Local;
+import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.invoke.AbstractInstanceInvoke;
 import me.aki.tactical.stack.invoke.Invoke;
@@ -328,21 +328,21 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     }
 
     @Override
-    public void visitLoad(Type type, Local local) {
+    public void visitLoad(Type type, StackLocal local) {
         this.stack.push(JvmType.from(type)); // value from local
 
         super.visitLoad(type, local);
     }
 
     @Override
-    public void visitStore(Type type, Local local) {
+    public void visitStore(Type type, StackLocal local) {
         this.stack.popRequire(JvmType.from(type)); // value to be stored in local
 
         super.visitStore(type, local);
     }
 
     @Override
-    public void visitIncrement(Local local, int value) {
+    public void visitIncrement(StackLocal local, int value) {
         // no stack change
 
         super.visitIncrement(local, value);

@@ -34,9 +34,9 @@ public class TryCatchBlock {
     private Optional<Path> exception;
 
     /**
-     * Caught exceptions get stored in this {@link Local}.
+     * Caught exceptions get stored in this {@link RefLocal}.
      */
-    private Local exceptionLocal;
+    private RefLocal exceptionLocal;
 
     /**
      * Type annotations of the exception type.
@@ -44,7 +44,7 @@ public class TryCatchBlock {
     private List<ExceptionTypeAnnotation> typeAnnotations = new ArrayList<>();
 
     public TryCatchBlock(Statement first, Statement last, Statement handler,
-                         Optional<Path> exception, Local exceptionLocal) {
+                         Optional<Path> exception, RefLocal exceptionLocal) {
         this.first = first;
         this.last = last;
         this.handler = handler;
@@ -96,16 +96,16 @@ public class TryCatchBlock {
         this.exception = exception;
     }
 
-    public Local getExceptionLocal() {
+    public RefLocal getExceptionLocal() {
         return exceptionLocal;
     }
 
-    public void setExceptionLocal(Local exceptionLocal) {
+    public void setExceptionLocal(RefLocal exceptionLocal) {
         this.exceptionLocal = exceptionLocal;
     }
 
-    public Cell<Local> getExceptionLocalCell() {
-        return Cell.of(this::getExceptionLocal, this::setExceptionLocal, Local.class);
+    public Cell<RefLocal> getExceptionLocalCell() {
+        return Cell.of(this::getExceptionLocal, this::setExceptionLocal, RefLocal.class);
     }
 
     public List<ExceptionTypeAnnotation> getTypeAnnotations() {
