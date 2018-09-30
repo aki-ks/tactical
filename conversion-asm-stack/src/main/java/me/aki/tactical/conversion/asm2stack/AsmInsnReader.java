@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.stackasm.InsnVisitor;
+import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.constant.DynamicConstant;
@@ -77,7 +77,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Utility that calls events of {@link InsnVisitor} based on asm {@link AbstractInsnNode}.
+ * Utility that calls events of {@link StackInsnVisitor} based on asm {@link AbstractInsnNode}.
  *
  * This visitor abstracts away the existence of computational types 2.
  *
@@ -86,10 +86,10 @@ import java.util.stream.Collectors;
  * In such a case, this utility visits a <tt>DUP</tt> insn instead.
  */
 public class AsmInsnReader {
-    private final InsnVisitor<LabelNode> iv;
+    private final StackInsnVisitor<LabelNode> iv;
     private final ConversionContext ctx;
 
-    public AsmInsnReader(InsnVisitor<LabelNode> iv, ConversionContext ctx) {
+    public AsmInsnReader(StackInsnVisitor<LabelNode> iv, ConversionContext ctx) {
         this.iv = iv;
         this.ctx = ctx;
     }

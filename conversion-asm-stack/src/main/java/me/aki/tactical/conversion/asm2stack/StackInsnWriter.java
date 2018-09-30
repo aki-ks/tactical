@@ -1,6 +1,6 @@
-package me.aki.tactical.conversion.stackasm;
+package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.asm2stack.ConversionContext;
+import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.Path;
@@ -68,11 +68,11 @@ import java.util.Optional;
 /**
  * Instruction visitor that collects all events represented as {@link Instruction}.
  */
-public class InsnWriter extends InsnVisitor<LabelNode> {
+public class StackInsnWriter extends StackInsnVisitor<LabelNode> {
     private final ConversionContext ctx;
     private List<Instruction> instructions = new ArrayList<>();
 
-    public InsnWriter(ConversionContext ctx) {
+    public StackInsnWriter(ConversionContext ctx) {
         super(null);
         this.ctx = ctx;
     }

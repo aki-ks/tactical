@@ -2,7 +2,7 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stack2asm.analysis.JvmType;
 import me.aki.tactical.conversion.stack2asm.analysis.Stack;
-import me.aki.tactical.conversion.stackasm.InsnVisitor;
+import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.constant.DynamicConstant;
 import me.aki.tactical.core.constant.PushableConstant;
@@ -79,7 +79,7 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
 
-public class AsmInsnWriter extends InsnVisitor<Instruction> {
+public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
     private final ConversionContext ctx;
     private final List<AbstractInsnNode> convertedInsns = new ArrayList<>();
 

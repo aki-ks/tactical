@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.stack2asm;
 
 import me.aki.tactical.conversion.stack2asm.analysis.Analysis;
 import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.conversion.stackasm.StackInsnReader;
 import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
@@ -175,7 +176,7 @@ public class TacticalMethodReader {
         ConversionContext ctx = new ConversionContext(body);
 
         AsmInsnWriter insnWriter = new AsmInsnWriter(ctx);
-        TacticalInsnReader insnReader = new TacticalInsnReader(insnWriter);
+        StackInsnReader insnReader = new StackInsnReader(insnWriter);
 
         for (Instruction instruction : body.getInstructions()) {
             analysis.getStackState(instruction).ifPresent(stackFrame -> {

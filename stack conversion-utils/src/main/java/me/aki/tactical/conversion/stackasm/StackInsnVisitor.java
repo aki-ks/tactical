@@ -19,10 +19,10 @@ import java.util.Optional;
  *
  * @param <T> Type of instruction references
  */
-public class InsnVisitor<T> {
-    private InsnVisitor<T> iv;
+public class StackInsnVisitor<T> {
+    private StackInsnVisitor<T> iv;
 
-    public InsnVisitor(InsnVisitor<T> iv) {
+    public StackInsnVisitor(StackInsnVisitor<T> iv) {
         this.iv = iv;
     }
 

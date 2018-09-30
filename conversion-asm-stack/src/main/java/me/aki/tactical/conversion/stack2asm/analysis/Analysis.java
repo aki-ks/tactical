@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.stack2asm.analysis;
 
-import me.aki.tactical.conversion.stack2asm.TacticalInsnReader;
+import me.aki.tactical.conversion.stackasm.StackInsnReader;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.TryCatchBlock;
 import me.aki.tactical.stack.insn.BranchInsn;
@@ -119,8 +119,8 @@ public class Analysis {
 
         Deque<Workable> worklist = new ArrayDeque<>(List.of(workable));
 
-        StackEmulatingInsnVisitor<Instruction> stackEmulator = new StackEmulatingInsnVisitor<>(null, new Stack.Mutable());
-        TacticalInsnReader insnReader = new TacticalInsnReader(stackEmulator);
+        StackEmulatingInsnVisitor stackEmulator = new StackEmulatingInsnVisitor(null, new Stack.Mutable());
+        StackInsnReader insnReader = new StackInsnReader(stackEmulator);
 
         while (!worklist.isEmpty()) {
             Workable work = worklist.poll();

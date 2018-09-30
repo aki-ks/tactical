@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.stack2asm.analysis;
 
-import me.aki.tactical.conversion.stackasm.InsnVisitor;
+import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.PushableConstant;
@@ -18,10 +18,10 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 
-public class StackEmulatingInsnVisitor<T> extends InsnVisitor<T> {
+public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     private Stack.Mutable stack;
 
-    public StackEmulatingInsnVisitor(InsnVisitor<T> iv, Stack.Mutable stack) {
+    public StackEmulatingInsnVisitor(StackInsnVisitor<T> iv, Stack.Mutable stack) {
         super(iv);
         this.stack = stack;
     }

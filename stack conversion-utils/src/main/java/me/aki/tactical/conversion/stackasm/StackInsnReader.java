@@ -1,6 +1,5 @@
-package me.aki.tactical.conversion.stack2asm;
+package me.aki.tactical.conversion.stackasm;
 
-import me.aki.tactical.conversion.stackasm.InsnVisitor;
 import me.aki.tactical.stack.insn.AbstractBinaryMathInsn;
 import me.aki.tactical.stack.insn.AbstractFieldInsn;
 import me.aki.tactical.stack.insn.AddInsn;
@@ -51,10 +50,10 @@ import me.aki.tactical.stack.insn.ThrowInsn;
 import me.aki.tactical.stack.insn.UShrInsn;
 import me.aki.tactical.stack.insn.XorInsn;
 
-public class TacticalInsnReader {
-    private final InsnVisitor<Instruction> iv;
+public class StackInsnReader {
+    private final StackInsnVisitor<Instruction> iv;
 
-    public TacticalInsnReader(InsnVisitor<Instruction> iv) {
+    public StackInsnReader(StackInsnVisitor<Instruction> iv) {
         this.iv = iv;
     }
 
