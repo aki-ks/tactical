@@ -1,4 +1,4 @@
-package me.aki.tactical.conversion.stack2asm.analysis;
+package me.aki.tactical.conversion.stackasm.analysis;
 
 import me.aki.tactical.core.type.DoubleType;
 import me.aki.tactical.core.type.FloatType;

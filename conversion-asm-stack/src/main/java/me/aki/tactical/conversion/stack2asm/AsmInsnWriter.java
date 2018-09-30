@@ -1,7 +1,7 @@
 package me.aki.tactical.conversion.stack2asm;
 
-import me.aki.tactical.conversion.stack2asm.analysis.JvmType;
-import me.aki.tactical.conversion.stack2asm.analysis.Stack;
+import me.aki.tactical.conversion.stackasm.analysis.JvmType;
+import me.aki.tactical.conversion.stackasm.analysis.Stack;
 import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.constant.DynamicConstant;
@@ -86,7 +86,7 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
     /**
      * The state of the stack before the next visited instruction
      */
-    private Stack.Immutable stackFrame;
+    private Stack.Immutable<JvmType> stackFrame;
 
     /**
      * A list of locals used to convert dup instructions that cannot be represented as one opcode.
@@ -106,7 +106,7 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         return convertedInsns;
     }
 
-    public void setStackFrame(Stack.Immutable stackFrame) {
+    public void setStackFrame(Stack.Immutable<JvmType> stackFrame) {
         this.stackFrame = stackFrame;
     }
 

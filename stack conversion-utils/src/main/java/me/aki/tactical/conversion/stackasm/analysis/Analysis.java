@@ -1,4 +1,4 @@
-package me.aki.tactical.conversion.stack2asm.analysis;
+package me.aki.tactical.conversion.stackasm.analysis;
 
 import me.aki.tactical.conversion.stackasm.StackInsnReader;
 import me.aki.tactical.stack.StackBody;
@@ -29,7 +29,7 @@ public class Analysis {
     /**
      * Map instructions to the state of the stack before that instruction is executed.
      */
-    private final Map<Instruction, Stack.Immutable> stackMap = new HashMap<>();
+    private final Map<Instruction, Stack.Immutable<JvmType>> stackMap = new HashMap<>();
 
     /**
      * Was the analysis already started
@@ -46,7 +46,7 @@ public class Analysis {
      * @param instruction whose stack state is requested
      * @return state of the stack or empty for unreachable instructions.
      */
-    public Optional<Stack.Immutable> getStackState(Instruction instruction) {
+    public Optional<Stack.Immutable<JvmType>> getStackState(Instruction instruction) {
         requireAnalysis();
         return Optional.ofNullable(stackMap.get(instruction));
     }
@@ -63,7 +63,7 @@ public class Analysis {
         }
         didAnalyse = true;
 
-        startAnalysingFrom(new Workable(body.getInstructions().get(0), new Stack.Immutable()));
+        startAnalysingFrom(new Workable(body.getInstructions().get(0), new Stack.Immutable<>()));
 
         Set<TryCatchBlock> notYetConvertedBlocks = new HashSet<>(body.getTryCatchBlocks());
         List<TryCatchBlock> blocksToConvert;
@@ -73,7 +73,7 @@ public class Analysis {
                 .collect(Collectors.toList());
 
             for (TryCatchBlock block : blocksToConvert) {
-                Stack.Mutable stack = new Stack.Mutable();
+                Stack.Mutable<JvmType> stack = new Stack.Mutable<>();
                 stack.push(JvmType.REFERENCE); // put the caught exception on the stack
                 startAnalysingFrom(new Workable(block.getHandler(), stack.immutableCopy()));
             }
@@ -119,7 +119,7 @@ public class Analysis {
 
         Deque<Workable> worklist = new ArrayDeque<>(List.of(workable));
 
-        StackEmulatingInsnVisitor stackEmulator = new StackEmulatingInsnVisitor(null, new Stack.Mutable());
+        StackEmulatingInsnVisitor<Instruction> stackEmulator = new StackEmulatingInsnVisitor<>(null, new Stack.Mutable<>());
         StackInsnReader insnReader = new StackInsnReader(stackEmulator);
 
         while (!worklist.isEmpty()) {
@@ -140,8 +140,8 @@ public class Analysis {
 
                 instruction = iter.next();
 
-                Stack.Immutable currentFrame = stackEmulator.getStack().immutableCopy();
-                Stack.Immutable expectedFrame = stackMap.get(instruction);
+                Stack.Immutable<JvmType> currentFrame = stackEmulator.getStack().immutableCopy();
+                Stack.Immutable<JvmType> expectedFrame = stackMap.get(instruction);
                 if (expectedFrame != null) {
                     // The code starting from here on has already been visited.
                     // The stack must have the same state as during the last visit.
@@ -170,9 +170,9 @@ public class Analysis {
 
     class Workable {
         private Instruction firstInsn;
-        private Stack.Immutable stackState;
+        private Stack.Immutable<JvmType> stackState;
 
-        public Workable(Instruction firstInsn, Stack.Immutable stackState) {
+        public Workable(Instruction firstInsn, Stack.Immutable<JvmType> stackState) {
             this.stackState = stackState;
             this.firstInsn = firstInsn;
         }

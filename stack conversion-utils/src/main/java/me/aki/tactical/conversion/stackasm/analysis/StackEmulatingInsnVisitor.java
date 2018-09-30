@@ -1,4 +1,4 @@
-package me.aki.tactical.conversion.stack2asm.analysis;
+package me.aki.tactical.conversion.stackasm.analysis;
 
 import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
 import me.aki.tactical.core.FieldRef;
@@ -19,24 +19,46 @@ import java.util.Map;
 import java.util.Optional;
 
 public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
-    private Stack.Mutable stack;
+    private Stack.Mutable<JvmType> stack;
 
-    public StackEmulatingInsnVisitor(StackInsnVisitor<T> iv, Stack.Mutable stack) {
+    public StackEmulatingInsnVisitor(StackInsnVisitor<T> iv, Stack.Mutable<JvmType> stack) {
         super(iv);
         this.stack = stack;
     }
 
-    public Stack.Mutable getStack() {
+    public Stack.Mutable<JvmType> getStack() {
         return stack;
     }
 
-    public void setStack(Stack.Mutable stack) {
+    public void setStack(Stack.Mutable<JvmType> stack) {
         this.stack = stack;
+    }
+
+    private void push(JvmType type) {
+        this.stack.push(type);
+    }
+
+    private JvmType pop() {
+        return this.stack.pop();
+    }
+
+    /**
+     * Require that a certain value is on top of the stack and drop it.
+     *
+     * @param type that must be on top of the stack
+     * @throws Stack.StackUnderflowException the stack was empty
+     * @throws IllegalStateException the requirement does not match
+     */
+    private void popRequire(JvmType type) {
+        JvmType actual = pop();
+        if (type != actual) {
+            throw new RuntimeException("Wrong value on Stack: expeced: " + type + ", got: " + actual);
+        }
     }
 
     @Override
     public void visitPush(PushableConstant constant) {
-        this.stack.push(JvmType.from(constant.getType()));
+        push(JvmType.from(constant.getType()));
 
         super.visitPush(constant);
     }
@@ -44,8 +66,8 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitNeg(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // value to be negated
-        this.stack.push(jvmType); // negated value
+        popRequire(jvmType); // value to be negated
+        push(jvmType); // negated value
 
         super.visitNeg(type);
     }
@@ -53,9 +75,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitAdd(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitAdd(type);
     }
@@ -63,9 +85,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitSub(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitSub(type);
     }
@@ -73,9 +95,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitMul(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitMul(type);
     }
@@ -83,9 +105,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitDiv(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitDiv(type);
     }
@@ -93,9 +115,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitMod(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitMod(type);
     }
@@ -103,9 +125,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitAnd(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitAnd(type);
     }
@@ -113,9 +135,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitOr(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitOr(type);
     }
@@ -123,9 +145,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitXor(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitXor(type);
     }
@@ -133,9 +155,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitShl(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(JvmType.INT); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(JvmType.INT); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitShl(type);
     }
@@ -143,9 +165,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitShr(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(JvmType.INT); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(JvmType.INT); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitShr(type);
     }
@@ -153,18 +175,18 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitUShr(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(JvmType.INT); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(jvmType); //result
+        popRequire(JvmType.INT); // operand 2
+        popRequire(jvmType); // operand 1
+        push(jvmType); //result
 
         super.visitUShr(type);
     }
 
     @Override
     public void visitCmp() {
-        this.stack.popRequire(JvmType.LONG); // operand 2
-        this.stack.popRequire(JvmType.LONG); // operand 1
-        this.stack.push(JvmType.INT); //result
+        popRequire(JvmType.LONG); // operand 2
+        popRequire(JvmType.LONG); // operand 1
+        push(JvmType.INT); //result
 
         super.visitCmp();
     }
@@ -172,9 +194,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitCmpl(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(JvmType.INT); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(JvmType.INT); //result
 
         super.visitCmpl(type);
     }
@@ -182,9 +204,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitCmpg(Type type) {
         JvmType jvmType = JvmType.from(type);
-        this.stack.popRequire(jvmType); // operand 2
-        this.stack.popRequire(jvmType); // operand 1
-        this.stack.push(JvmType.INT); //result
+        popRequire(jvmType); // operand 2
+        popRequire(jvmType); // operand 1
+        push(JvmType.INT); //result
 
         super.visitCmpg(type);
     }
@@ -192,151 +214,151 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitNewArray(ArrayType type, int initializedDimensions) {
         for (int i = 0; i < initializedDimensions; i++) {
-            this.stack.popRequire(JvmType.INT); // size of a dimension
+            popRequire(JvmType.INT); // size of a dimension
         }
-        this.stack.push(JvmType.REFERENCE); // the created array
+        push(JvmType.REFERENCE); // the created array
 
         super.visitNewArray(type, initializedDimensions);
     }
 
     @Override
     public void visitArrayLength() {
-        this.stack.popRequire(JvmType.REFERENCE); // an array
-        this.stack.push(JvmType.INT); // length of array
+        popRequire(JvmType.REFERENCE); // an array
+        push(JvmType.INT); // length of array
 
         super.visitArrayLength();
     }
 
     @Override
     public void visitArrayLoad(Type type) {
-        this.stack.popRequire(JvmType.INT); // index
-        this.stack.popRequire(JvmType.REFERENCE); // the array
-        this.stack.push(JvmType.from(type)); // an element from the array
+        popRequire(JvmType.INT); // index
+        popRequire(JvmType.REFERENCE); // the array
+        push(JvmType.from(type)); // an element from the array
 
         super.visitArrayLoad(type);
     }
 
     @Override
     public void visitArrayStore(Type type) {
-        this.stack.popRequire(JvmType.from(type)); // element to be stored
-        this.stack.popRequire(JvmType.INT); // index
-        this.stack.popRequire(JvmType.REFERENCE); // the array
+        popRequire(JvmType.from(type)); // element to be stored
+        popRequire(JvmType.INT); // index
+        popRequire(JvmType.REFERENCE); // the array
 
         super.visitArrayStore(type);
     }
 
     @Override
     public void visitSwap() {
-        JvmType value1 = this.stack.pop();
-        JvmType value2 = this.stack.pop();
-        this.stack.push(value1);
-        this.stack.push(value2);
+        JvmType value1 = pop();
+        JvmType value2 = pop();
+        push(value1);
+        push(value2);
 
         super.visitSwap();
     }
 
     @Override
     public void visitPop() {
-        this.stack.pop();
+        pop();
 
         super.visitPop();
     }
 
     @Override
     public void visitDup() {
-        JvmType value = this.stack.pop();
-        this.stack.push(value);
-        this.stack.push(value);
+        JvmType value = pop();
+        push(value);
+        push(value);
 
         super.visitDup();
     }
 
     @Override
     public void visitDupX1() {
-        JvmType value1 = this.stack.pop();
-        JvmType value2 = this.stack.pop();
+        JvmType value1 = pop();
+        JvmType value2 = pop();
 
-        this.stack.push(value1);
+        push(value1);
 
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value2);
+        push(value1);
 
         super.visitDupX1();
     }
 
     @Override
     public void visitDupX2() {
-        JvmType value1 = this.stack.pop();
-        JvmType value2 = this.stack.pop();
-        JvmType value3 = this.stack.pop();
+        JvmType value1 = pop();
+        JvmType value2 = pop();
+        JvmType value3 = pop();
 
-        this.stack.push(value1);
+        push(value1);
 
-        this.stack.push(value3);
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value3);
+        push(value2);
+        push(value1);
 
         super.visitDupX2();
     }
 
     @Override
     public void visitDup2() {
-        JvmType value1 = this.stack.pop();
-        JvmType value2 = this.stack.pop();
+        JvmType value1 = pop();
+        JvmType value2 = pop();
 
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value2);
+        push(value1);
 
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value2);
+        push(value1);
 
         super.visitDup2();
     }
 
     @Override
     public void visitDup2X1() {
-        JvmType value1 = this.stack.pop();
-        JvmType value2 = this.stack.pop();
-        JvmType value3 = this.stack.pop();
+        JvmType value1 = pop();
+        JvmType value2 = pop();
+        JvmType value3 = pop();
 
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value2);
+        push(value1);
 
-        this.stack.push(value3);
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value3);
+        push(value2);
+        push(value1);
 
         super.visitDup2X1();
     }
 
     @Override
     public void visitDup2X2() {
-        JvmType value1 = this.stack.pop();
-        JvmType value2 = this.stack.pop();
-        JvmType value3 = this.stack.pop();
-        JvmType value4 = this.stack.pop();
+        JvmType value1 = pop();
+        JvmType value2 = pop();
+        JvmType value3 = pop();
+        JvmType value4 = pop();
 
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value2);
+        push(value1);
 
-        this.stack.push(value4);
-        this.stack.push(value3);
-        this.stack.push(value2);
-        this.stack.push(value1);
+        push(value4);
+        push(value3);
+        push(value2);
+        push(value1);
 
         super.visitDup2X2();
     }
 
     @Override
     public void visitLoad(Type type, StackLocal local) {
-        this.stack.push(JvmType.from(type)); // value from local
+        push(JvmType.from(type)); // value from local
 
         super.visitLoad(type, local);
     }
 
     @Override
     public void visitStore(Type type, StackLocal local) {
-        this.stack.popRequire(JvmType.from(type)); // value to be stored in local
+        popRequire(JvmType.from(type)); // value to be stored in local
 
         super.visitStore(type, local);
     }
@@ -350,31 +372,31 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
 
     @Override
     public void visitNew(Path type) {
-        this.stack.push(JvmType.REFERENCE); // not yet initialized object
+        push(JvmType.REFERENCE); // not yet initialized object
 
         super.visitNew(type);
     }
 
     @Override
     public void visitInstanceOf(RefType type) {
-        this.stack.popRequire(JvmType.REFERENCE); // object to be checked
-        this.stack.push(JvmType.INT); // result (0 or 1)
+        popRequire(JvmType.REFERENCE); // object to be checked
+        push(JvmType.INT); // result (0 or 1)
 
         super.visitInstanceOf(type);
     }
 
     @Override
     public void visitPrimitiveCast(PrimitiveType from, PrimitiveType to) {
-        this.stack.popRequire(JvmType.from(from)); // value to be casted
-        this.stack.push(JvmType.from(to)); // casted value
+        popRequire(JvmType.from(from)); // value to be casted
+        push(JvmType.from(to)); // casted value
 
         super.visitPrimitiveCast(from, to);
     }
 
     @Override
     public void visitReferenceCast(RefType type) {
-        this.stack.popRequire(JvmType.REFERENCE); // value to be casted
-        this.stack.push(JvmType.REFERENCE); // the casted value
+        popRequire(JvmType.REFERENCE); // value to be casted
+        push(JvmType.REFERENCE); // the casted value
 
         super.visitReferenceCast(type);
     }
@@ -382,33 +404,33 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitReturn(Optional<Type> type) {
         type.map(JvmType::from)
-                .ifPresent(this.stack::popRequire); // value to be returned
+                .ifPresent(this::popRequire); // value to be returned
 
         super.visitReturn(type);
     }
 
     @Override
     public void visitThrow() {
-        this.stack.popRequire(JvmType.REFERENCE); // exception to be thrown
+        popRequire(JvmType.REFERENCE); // exception to be thrown
 
         // Clear the stack and push the exception.
         // This prepares the stack for a possible jump to an exception handler.
         this.stack.clear();
-        this.stack.push(JvmType.REFERENCE);
+        push(JvmType.REFERENCE);
 
         super.visitThrow();
     }
 
     @Override
     public void visitMonitorEnter() {
-        this.stack.popRequire(JvmType.REFERENCE); // value to gain lock on
+        popRequire(JvmType.REFERENCE); // value to gain lock on
 
         super.visitMonitorEnter();
     }
 
     @Override
     public void visitMonitorExit() {
-        this.stack.popRequire(JvmType.REFERENCE); // value to release lock from
+        popRequire(JvmType.REFERENCE); // value to release lock from
 
         super.visitMonitorExit();
     }
@@ -416,18 +438,18 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     @Override
     public void visitFieldGet(FieldRef fieldRef, boolean isStatic) {
         if (!isStatic) {
-            this.stack.popRequire(JvmType.REFERENCE); // instance of class containing the field
+            popRequire(JvmType.REFERENCE); // instance of class containing the field
         }
-        this.stack.push(JvmType.from(fieldRef.getType())); // value of the field
+        push(JvmType.from(fieldRef.getType())); // value of the field
 
         super.visitFieldGet(fieldRef, isStatic);
     }
 
     @Override
     public void visitFieldSet(FieldRef fieldRef, boolean isStatic) {
-        this.stack.popRequire(JvmType.from(fieldRef.getType())); // value to store in field
+        popRequire(JvmType.from(fieldRef.getType())); // value to store in field
         if (!isStatic) {
-            this.stack.popRequire(JvmType.REFERENCE); // instance of class containing the field
+            popRequire(JvmType.REFERENCE); // instance of class containing the field
         }
 
         super.visitFieldSet(fieldRef, isStatic);
@@ -439,11 +461,11 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
         List<Type> arguments = invoke.getDescriptor().getParameterTypes();
         ListIterator<Type> iter = arguments.listIterator(arguments.size());
         while (iter.hasPrevious()) {
-            this.stack.popRequire(JvmType.from(iter.previous()));
+            popRequire(JvmType.from(iter.previous()));
         }
 
         if (invoke instanceof AbstractInstanceInvoke) {
-            this.stack.popRequire(JvmType.REFERENCE); // instance of class containing the method
+            popRequire(JvmType.REFERENCE); // instance of class containing the method
         }
 
         super.visitInvokeInsn(invoke);
@@ -460,16 +482,16 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
     public void visitIf(IfInsn.Condition condition, T target) {
         JvmType type = condition instanceof IfInsn.IntCondition ? JvmType.INT : JvmType.REFERENCE;
         if (condition.getCompareValue() instanceof IfInsn.StackValue) {
-            this.stack.popRequire(type); // other value from stack to compare against
+            popRequire(type); // other value from stack to compare against
         }
-        this.stack.popRequire(type); // value to be compared
+        popRequire(type); // value to be compared
 
         super.visitIf(condition, target);
     }
 
     @Override
     public void visitSwitch(Map<Integer, T> targetTable, T defaultTarget) {
-        this.stack.popRequire(JvmType.INT); // value to be compared against the table
+        popRequire(JvmType.INT); // value to be compared against the table
 
         super.visitSwitch(targetTable, defaultTarget);
     }

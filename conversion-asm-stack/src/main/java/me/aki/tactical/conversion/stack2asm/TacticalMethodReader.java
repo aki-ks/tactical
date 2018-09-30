@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.stack2asm;
 
-import me.aki.tactical.conversion.stack2asm.analysis.Analysis;
+import me.aki.tactical.conversion.stackasm.analysis.Analysis;
 import me.aki.tactical.conversion.stackasm.AccessConverter;
 import me.aki.tactical.conversion.stackasm.StackInsnReader;
 import me.aki.tactical.core.Attribute;
