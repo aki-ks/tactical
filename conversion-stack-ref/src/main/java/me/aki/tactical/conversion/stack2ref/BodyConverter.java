@@ -146,7 +146,7 @@ public class BodyConverter {
         Instruction firstInstruction = instructions.get(0);
         worklist.add(new CfgNode(firstInstruction, new Stack.Immutable<>()));
 
-        // Add the handlers of all reachable try/catch blocks to the worklist.
+        // Convert all try/catch blocks and add their handlers to the worklist.
         this.stackBody.getTryCatchBlocks().forEach(stackTryCatchBlock -> {
             if (isRangeEmpty(stackTryCatchBlock.getFirst(), stackTryCatchBlock.getLast())) {
                 return;
@@ -159,6 +159,12 @@ public class BodyConverter {
             Stack.Mutable<StackValue> stack = new Stack.Mutable<>();
             stack.push(new StackValue(stackTryCatchBlock.getHandler(), caughtExceptionLocal));
             worklist.add(new CfgNode(stackTryCatchBlock.getHandler(), stack.immutableCopy()));
+
+            TryCatchBlock refTryCatchBlock = new TryCatchBlock(null, null, null, exception, caughtExceptionLocal);
+            registerInsnReference(stackTryCatchBlock.getFirst(), refTryCatchBlock.getFirstCell());
+            registerInsnReference(stackTryCatchBlock.getLast(), refTryCatchBlock.getLastCell());
+            registerInsnReference(stackTryCatchBlock.getHandler(), refTryCatchBlock.getHandlerCell());
+            this.refBody.getTryCatchBlocks().add(refTryCatchBlock);
         });
 
         while (!worklist.isEmpty()) {
@@ -169,11 +175,11 @@ public class BodyConverter {
             Iterator<Instruction> insnIter = instructions.listIterator(startIndex);
             Instruction instruction;
             do {
-                if (!insnIter.hasNext()) {
+                if (insnIter.hasNext()) {
+                    instruction = insnIter.next();
+                } else {
                     throw new IllegalStateException("Unexpected end of method");
                 }
-
-                instruction = insnIter.next();
 
                 convertInstruction(instruction);
 
@@ -188,7 +194,6 @@ public class BodyConverter {
                 }
             } while (instruction.continuesExecution());
         }
-
     }
 
     private class CfgNode {
