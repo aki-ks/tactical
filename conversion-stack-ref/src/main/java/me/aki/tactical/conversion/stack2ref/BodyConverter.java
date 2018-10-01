@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.stack2ref;
 
 import me.aki.tactical.conversion.stackasm.StackInsnReader;
+import me.aki.tactical.conversion.stackasm.analysis.Analysis;
 import me.aki.tactical.conversion.stackasm.analysis.Stack;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
@@ -9,6 +10,7 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
+import me.aki.tactical.ref.TryCatchBlock;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.BranchInsn;
@@ -21,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 public class BodyConverter {
     private final StackBody stackBody;
     private final RefBody refBody;
+    private Analysis analysis;
 
     /**
      * Map locals in stack representation to the corresponding ref locals.
@@ -112,6 +116,9 @@ public class BodyConverter {
     }
 
     public void convert() {
+        this.analysis = new Analysis(this.stackBody);
+        this.analysis.analyze();
+
         convertLocals();
 
         convertInsns();
@@ -139,13 +146,19 @@ public class BodyConverter {
         Instruction firstInstruction = instructions.get(0);
         worklist.add(new CfgNode(firstInstruction, new Stack.Immutable<>()));
 
-        this.stackBody.getTryCatchBlocks().forEach(tryCatchBlock -> {
-            Stack.Mutable<StackValue> stack = new Stack.Mutable<>();
-            ObjectType exceptionType = new ObjectType(tryCatchBlock.getExceptionType().orElse(Path.THROWABLE));
+        // Add the handlers of all reachable try/catch blocks to the worklist.
+        this.stackBody.getTryCatchBlocks().forEach(stackTryCatchBlock -> {
+            if (isRangeEmpty(stackTryCatchBlock.getFirst(), stackTryCatchBlock.getLast())) {
+                return;
+            }
+
+            Optional<Path> exception = stackTryCatchBlock.getExceptionType();
+            ObjectType exceptionType = new ObjectType(exception.orElse(Path.THROWABLE));
             RefLocal caughtExceptionLocal = newLocal(exceptionType);
 
-            stack.push(new StackValue(tryCatchBlock.getHandler(), caughtExceptionLocal));
-            worklist.add(new CfgNode(tryCatchBlock.getHandler(), stack.immutableCopy()));
+            Stack.Mutable<StackValue> stack = new Stack.Mutable<>();
+            stack.push(new StackValue(stackTryCatchBlock.getHandler(), caughtExceptionLocal));
+            worklist.add(new CfgNode(stackTryCatchBlock.getHandler(), stack.immutableCopy()));
         });
 
         while (!worklist.isEmpty()) {
@@ -234,5 +247,33 @@ public class BodyConverter {
 
         writer.setInstruction(instruction);
         reader.accept(instruction);
+    }
+
+    /**
+     * Check whether a range of instructions consists only out of dead code.
+     *
+     * @param start first instruction of the instruction range
+     * @param end last instruction of the instruction range
+     * @return contains the instruction range only dead code
+     */
+    private boolean isRangeEmpty(Instruction start, Instruction end) {
+        List<Instruction> instructions = this.stackBody.getInstructions();
+        int startIndex = instructions.indexOf(start);
+        Iterator<Instruction> insnIter = instructions.listIterator(startIndex);
+
+        while (insnIter.hasNext()) {
+            Instruction instruction = insnIter.next();
+
+            if (analysis.getStackState(instruction).isPresent()) {
+                // This instruction is no dead code
+                return false;
+            }
+
+            if (instruction == end) {
+                return true;
+            }
+        }
+
+        throw new RuntimeException("Illegal instruction range");
     }
 }
