@@ -9,9 +9,10 @@ import java.util.stream.Collectors;
  * Immutable name of a class and its package.
  */
 public class Path {
-    public final static Path OBJECT = Path.of("java", "lang", "Object");
-    public final static Path STRING = Path.of("java", "lang", "String");
-    public final static Path CLASS = Path.of("java", "lang", "Class");
+    public static final Path OBJECT = Path.of("java", "lang", "Object");
+    public static final Path STRING = Path.of("java", "lang", "String");
+    public static final Path CLASS = Path.of("java", "lang", "Class");
+    public static final Path THROWABLE = Path.of("java", "lang", "Throwable");
 
     /**
      * Packages of the class stored in an immutable list.
