@@ -704,6 +704,15 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
     @Override
     public void visitGoto(Instruction target) {
+        convertOrElseMerge(List.of(), () -> {
+            GotoStmt stmt = new GotoStmt(null);
+
+            converter.registerInsnReference(target, stmt.getTargetCell());
+
+            converter.addStatement(instruction, stmt);
+            return Optional.empty();
+        });
+
         super.visitGoto(target);
     }
 
