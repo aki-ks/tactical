@@ -1,6 +1,7 @@
 package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.type.IntType;
+import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
@@ -13,25 +14,25 @@ import java.util.List;
  */
 public class InstanceOfExpr implements Expression {
     /**
-     * Check whether the value is an instance of this type
+     * Check whether the value is an instance of this type.
      */
-    private Type checkType;
+    private RefType checkType;
 
     /**
-     * Value whose type is checked
+     * Value whose type is checked.
      */
     private Expression value;
 
-    public InstanceOfExpr(Type checkType, Expression value) {
+    public InstanceOfExpr(RefType checkType, Expression value) {
         this.checkType = checkType;
         this.value = value;
     }
 
-    public Type getCheckType() {
+    public RefType getCheckType() {
         return checkType;
     }
 
-    public void setCheckType(Type checkType) {
+    public void setCheckType(RefType checkType) {
         this.checkType = checkType;
     }
 
