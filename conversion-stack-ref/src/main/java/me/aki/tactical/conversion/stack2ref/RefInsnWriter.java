@@ -5,6 +5,7 @@ import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.IntConstant;
+import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
@@ -13,6 +14,13 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefLocal;
+import me.aki.tactical.ref.condition.Condition;
+import me.aki.tactical.ref.condition.Equal;
+import me.aki.tactical.ref.condition.GreaterEqual;
+import me.aki.tactical.ref.condition.GreaterThan;
+import me.aki.tactical.ref.condition.LessEqual;
+import me.aki.tactical.ref.condition.LessThan;
+import me.aki.tactical.ref.condition.NonEqual;
 import me.aki.tactical.ref.expr.AbstractBinaryExpr;
 import me.aki.tactical.ref.expr.AddExpr;
 import me.aki.tactical.ref.expr.AndExpr;
@@ -44,6 +52,7 @@ import me.aki.tactical.ref.invoke.AbstractInvoke;
 import me.aki.tactical.ref.invoke.InvokeStatic;
 import me.aki.tactical.ref.stmt.AssignStatement;
 import me.aki.tactical.ref.stmt.GotoStmt;
+import me.aki.tactical.ref.stmt.IfStmt;
 import me.aki.tactical.ref.stmt.InvokeStmt;
 import me.aki.tactical.ref.stmt.MonitorEnterStmt;
 import me.aki.tactical.ref.stmt.MonitorExitStmt;
@@ -717,8 +726,61 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
     }
 
     @Override
-    public void visitIf(IfInsn.Condition condition, Instruction target) {
-        super.visitIf(condition, target);
+    public void visitIf(IfInsn.Condition stackCondition, Instruction target) {
+        Optional<StackValue> value2Opt = stackCondition.getCompareValue() instanceof IfInsn.StackValue ?
+                Optional.of(converter.pop()) : Optional.empty();
+
+        StackValue value1 = converter.pop();
+
+        List<StackValue> allPops = new ArrayList<>();
+        allPops.add(value1);
+        value2Opt.ifPresent(allPops::add);
+
+        convertOrElseMerge(allPops, () -> {
+            Expression value2 = convertIfCompareValue(stackCondition, value2Opt);
+            Condition condition = convertCondition(stackCondition.getComparison(), value1.getValue(), value2);
+
+            value1.addReference(condition.getValue1Cell());
+            value2Opt.ifPresent(value -> value.addReference(condition.getValue2Cell()));
+
+            IfStmt stmt = new IfStmt(condition, null);
+            converter.registerInsnReference(target, stmt.getTargetCell());
+            converter.addStatement(instruction, stmt);
+            return Optional.empty();
+        });
+
+        super.visitIf(stackCondition, target);
+    }
+
+    private Expression convertIfCompareValue(IfInsn.Condition stackCondition, Optional<StackValue> value2Opt) {
+        IfInsn.CompareValue compareValue = stackCondition.getCompareValue();
+        if (compareValue instanceof IfInsn.StackValue) {
+            return value2Opt.get().getValue();
+        } else if (compareValue instanceof IfInsn.NullValue) {
+            return new ConstantExpr(NullConstant.getInstance());
+        } else if (compareValue instanceof IfInsn.ZeroValue) {
+            return new ConstantExpr(new IntConstant(0));
+        } else {
+            throw new AssertionError();
+        }
+    }
+
+    private Condition convertCondition(IfInsn.Comparison comparison, Expression value1, Expression value2)  {
+        if (comparison instanceof IfInsn.EQ) {
+            return new Equal(value1, value2);
+        } else if (comparison instanceof IfInsn.NE) {
+            return new NonEqual(value1, value2);
+        } else if (comparison instanceof IfInsn.LE) {
+            return new LessEqual(value1, value2);
+        } else if (comparison instanceof IfInsn.LT) {
+            return new LessThan(value1, value2);
+        } else if (comparison instanceof IfInsn.GE) {
+            return new GreaterEqual(value1, value2);
+        } else if (comparison instanceof IfInsn.GT) {
+            return new GreaterThan(value1, value2);
+        } else {
+            throw new AssertionError();
+        }
     }
 
     @Override
