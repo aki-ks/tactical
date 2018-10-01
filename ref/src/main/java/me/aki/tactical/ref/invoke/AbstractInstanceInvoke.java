@@ -27,14 +27,14 @@ public class AbstractInstanceInvoke extends AbstractConcreteInvoke {
         this.instance = instance;
     }
 
-    public Cell<Expression> getInstanceExpression() {
+    public Cell<Expression> getInstanceCell() {
         return Cell.of(this::getInstance, this::setInstance, Expression.class);
     }
 
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         List<Cell<Expression>> cells = new ArrayList<>();
-        cells.add(getInstanceExpression());
+        cells.add(getInstanceCell());
         cells.addAll(getArgumentCells());
         return Collections.unmodifiableList(cells);
     }
