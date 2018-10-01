@@ -11,6 +11,7 @@ import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
+import me.aki.tactical.ref.stmt.AssignStatement;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.BranchInsn;
@@ -162,11 +163,7 @@ public class BodyConverter {
             stack.push(new StackValue(stackTryCatchBlock.getHandler(), caughtExceptionLocal));
             worklist.add(new CfgNode(stackTryCatchBlock.getHandler(), stack.immutableCopy()));
 
-            TryCatchBlock refTryCatchBlock = new TryCatchBlock(null, null, null, exception, caughtExceptionLocal);
-            registerInsnReference(stackTryCatchBlock.getFirst(), refTryCatchBlock.getFirstCell());
-            registerInsnReference(stackTryCatchBlock.getLast(), refTryCatchBlock.getLastCell());
-            registerInsnReference(stackTryCatchBlock.getHandler(), refTryCatchBlock.getHandlerCell());
-            this.refBody.getTryCatchBlocks().add(refTryCatchBlock);
+            convertTryCatchBlock(stackTryCatchBlock, caughtExceptionLocal);
         });
 
         while (!worklist.isEmpty()) {
@@ -196,6 +193,24 @@ public class BodyConverter {
                 }
             } while (instruction.continuesExecution());
         }
+    }
+
+    /**
+     * Convert a stack try/catch block to a ref try/catch block.
+     *
+     * @param stackTryCatchBlock try/catch block to be converted
+     * @param caughtExceptionLocal local that contains exceptions caught by the try/catch block
+     */
+    private void convertTryCatchBlock(me.aki.tactical.stack.TryCatchBlock stackTryCatchBlock, RefLocal caughtExceptionLocal) {
+        Optional<Path> exception = stackTryCatchBlock.getExceptionType();
+        TryCatchBlock refTryCatchBlock = new TryCatchBlock(null, null, null, exception, caughtExceptionLocal);
+        refTryCatchBlock.getTypeAnnotations().addAll(stackTryCatchBlock.getTypeAnnotations());
+
+        registerInsnReference(stackTryCatchBlock.getFirst(), refTryCatchBlock.getFirstCell());
+        registerInsnReference(stackTryCatchBlock.getLast(), refTryCatchBlock.getLastCell());
+        registerInsnReference(stackTryCatchBlock.getHandler(), refTryCatchBlock.getHandlerCell());
+
+        this.refBody.getTryCatchBlocks().add(refTryCatchBlock);
     }
 
     private class CfgNode {
@@ -293,6 +308,12 @@ public class BodyConverter {
 
     /**
      * Find the converted {@link Statement} that corresponds to an {@link Instruction}.
+     *
+     * If the instruction converted to an expression, that expression will be stored in a local
+     * and the {@link AssignStatement} is returned.
+     *
+     * If the instruction is neither a statement nor an expression, than the statement
+     * corresponding to the next instruction is returned.
      *
      * @param instruction whose correspondent statement we want.
      * @return statement that corresponding to the instruction
