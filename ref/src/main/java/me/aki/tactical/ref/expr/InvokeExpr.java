@@ -3,7 +3,7 @@ package me.aki.tactical.ref.expr;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
-import me.aki.tactical.ref.invoke.Invoke;
+import me.aki.tactical.ref.invoke.AbstractInvoke;
 import me.aki.tactical.ref.stmt.InvokeStmt;
 
 import java.util.List;
@@ -17,17 +17,17 @@ public class InvokeExpr implements Expression {
     /**
      * Invocation whose result in captured
      */
-    private Invoke invocation;
+    private AbstractInvoke invocation;
 
-    public InvokeExpr(Invoke invocation) {
+    public InvokeExpr(AbstractInvoke invocation) {
         this.invocation = invocation;
     }
 
-    public Invoke getInvocation() {
+    public AbstractInvoke getInvocation() {
         return invocation;
     }
 
-    public void setInvocation(Invoke invocation) {
+    public void setInvocation(AbstractInvoke invocation) {
         this.invocation = invocation;
     }
 
