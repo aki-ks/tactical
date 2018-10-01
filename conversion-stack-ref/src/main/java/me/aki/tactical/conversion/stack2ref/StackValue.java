@@ -72,11 +72,13 @@ public class StackValue {
      *
      * @param converter
      * @param local
+     * @return statement that stores the value in the local
      */
-    public void storeInLocal(BodyConverter converter, RefLocal local) {
+    public AssignStatement storeInLocal(BodyConverter converter, RefLocal local) {
         if (this.assignStatement.isPresent()) {
             AssignStatement assignStatement = this.assignStatement.get();
             assignStatement.setVariable(local);
+            return assignStatement;
         } else {
             AssignStatement assignment = new AssignStatement(local, this.value);
             this.assignStatement = Optional.of(assignment);
@@ -84,6 +86,8 @@ public class StackValue {
             converter.getConvertedStatements()
                     .computeIfAbsent(this.instruction, x -> new ArrayList<>())
                     .add(assignment);
+
+            return assignment;
         }
     }
 }

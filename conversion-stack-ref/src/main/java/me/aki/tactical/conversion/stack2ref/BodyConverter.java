@@ -122,6 +122,8 @@ public class BodyConverter {
         convertLocals();
 
         convertInsns();
+
+        resolveInsnsRefs();
     }
 
     private void convertLocals() {
@@ -216,7 +218,7 @@ public class BodyConverter {
     /**
      * Store what branches have already been visited.
      */
-    class VisitRecord {
+    private class VisitRecord {
         /**
          * Map an instruction to all instruction that branch to it and have already been visited.
          */
@@ -280,5 +282,57 @@ public class BodyConverter {
         }
 
         throw new RuntimeException("Illegal instruction range");
+    }
+
+    private void resolveInsnsRefs() {
+        this.instructionReferences.forEach((insn, stmtCells) -> {
+            Statement stmt = getCorrespondingStmt(insn);
+            stmtCells.forEach(cell -> cell.set(stmt));
+        });
+    }
+
+    /**
+     * Find the converted {@link Statement} that corresponds to an {@link Instruction}.
+     *
+     * @param instruction whose correspondent statement we want.
+     * @return statement that corresponding to the instruction
+     */
+    private Statement getCorrespondingStmt(Instruction instruction) {
+        Optional<Statement> correspondingLocalOpt = getCorrespondingStmtOpt(instruction);
+        if (correspondingLocalOpt.isPresent()) {
+            return correspondingLocalOpt.get();
+        }
+
+        List<Instruction> instructions = this.stackBody.getInstructions();
+        int startIndex = instructions.indexOf(instruction);
+        Iterator<Instruction> insnIter = instructions.listIterator(startIndex + 1);
+        while (insnIter.hasNext()) {
+            correspondingLocalOpt = getCorrespondingStmtOpt(insnIter.next());
+            if (correspondingLocalOpt.isPresent()) {
+                return correspondingLocalOpt.get();
+            }
+        }
+
+        // Should not be reachable for valid bytecode
+        throw new AssertionError();
+    }
+
+    private Optional<Statement> getCorrespondingStmtOpt(Instruction instruction) {
+        List<Statement> convertedStatements = this.convertedStatements.get(instruction);
+        if (convertedStatements != null && !convertedStatements.isEmpty()) {
+            // The instruction did convert into a statement,
+            return Optional.of(convertedStatements.get(0));
+        } else {
+            StackDelta delta = this.stackDeltaMap.get(instruction);
+
+            if (delta != null && delta.getPush().isPresent()) {
+                StackValue push = delta.getPush().get();
+                return Optional.of(push.storeInLocal(this, newLocal()));
+            } else {
+                // This instruction converts neither to a statement, not does it push a value.
+                // Therefore there cannot be a corresponding stmt.
+                return Optional.empty();
+            }
+        }
     }
 }
