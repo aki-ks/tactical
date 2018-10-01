@@ -14,6 +14,7 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefLocal;
+import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.condition.Condition;
 import me.aki.tactical.ref.condition.Equal;
 import me.aki.tactical.ref.condition.GreaterEqual;
@@ -57,6 +58,7 @@ import me.aki.tactical.ref.stmt.InvokeStmt;
 import me.aki.tactical.ref.stmt.MonitorEnterStmt;
 import me.aki.tactical.ref.stmt.MonitorExitStmt;
 import me.aki.tactical.ref.stmt.ReturnStmt;
+import me.aki.tactical.ref.stmt.SwitchStmt;
 import me.aki.tactical.ref.stmt.ThrowStmt;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.IfInsn;
@@ -67,6 +69,7 @@ import me.aki.tactical.stack.invoke.SpecialInvoke;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -785,6 +788,25 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
     @Override
     public void visitSwitch(Map<Integer, Instruction> targetTable, Instruction defaultTarget) {
+        StackValue value = converter.pop();
+
+        convertOrElseMerge(List.of(value), () -> {
+            LinkedHashMap<Integer, Statement> refBranchTable = new LinkedHashMap<>();
+            for (Integer key : targetTable.keySet()) {
+                refBranchTable.put(key, null);
+            }
+
+            SwitchStmt stmt = new SwitchStmt(value.getValue(), refBranchTable, null);
+
+            converter.registerInsnReference(defaultTarget, stmt.getDefaultTargetCell());
+            for (Integer key : targetTable.keySet()) {
+                converter.registerInsnReference(targetTable.get(key), Cell.ofMap(key, refBranchTable, Statement.class));
+            }
+
+            converter.addStatement(instruction, stmt);
+            return Optional.empty();
+        });
+
         super.visitSwitch(targetTable, defaultTarget);
     }
 }
