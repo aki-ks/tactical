@@ -577,11 +577,54 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
     @Override
     public void visitFieldGet(FieldRef fieldRef, boolean isStatic) {
+        if (isStatic) {
+            convertOrElseMerge(List.of(), () -> {
+                StaticFieldExpr expr = new StaticFieldExpr(fieldRef);
+                return Optional.of(new StackValue(instruction, expr));
+            });
+        } else {
+            StackValue instance = converter.pop();
+            convertOrElseMerge(List.of(instance), () -> {
+                InstanceFieldExpr expr = new InstanceFieldExpr(fieldRef, instance.getValue());
+
+                instance.addReference(expr.getInstanceCell());
+
+                return Optional.of(new StackValue(instruction, expr));
+            });
+        }
+
         super.visitFieldGet(fieldRef, isStatic);
     }
 
     @Override
     public void visitFieldSet(FieldRef fieldRef, boolean isStatic) {
+        StackValue value = converter.pop();
+
+        if (isStatic) {
+            convertOrElseMerge(List.of(value), () -> {
+                StaticFieldExpr expr = new StaticFieldExpr(fieldRef);
+                AssignStatement stmt = new AssignStatement(expr, value.getValue());
+
+                value.addReference(stmt.getValueCell());
+
+                converter.addStatement(instruction, stmt);
+                return Optional.empty();
+            });
+        } else {
+            StackValue instance = converter.pop();
+
+            convertOrElseMerge(List.of(value, instance), () -> {
+                InstanceFieldExpr expr = new InstanceFieldExpr(fieldRef, instance.getValue());
+                AssignStatement stmt = new AssignStatement(expr, value.getValue());
+
+                instance.addReference(expr.getInstanceCell());
+                value.addReference(stmt.getValueCell());
+
+                converter.addStatement(instruction, stmt);
+                return Optional.empty();
+            });
+        }
+
         super.visitFieldSet(fieldRef, isStatic);
     }
 
