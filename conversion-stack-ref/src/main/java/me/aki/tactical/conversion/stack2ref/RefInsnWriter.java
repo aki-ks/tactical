@@ -630,7 +630,76 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
     @Override
     public void visitInvokeInsn(Invoke stackInvoke) {
+        MethodDescriptor descriptor = stackInvoke.getDescriptor();
+
+        List<StackValue> argumentValues = descriptor.getParameterTypes().stream()
+                .map(x -> converter.pop())
+                .collect(Collectors.toList());
+        Collections.reverse(argumentValues);
+
+        Optional<StackValue> instanceOpt = stackInvoke instanceof me.aki.tactical.stack.invoke.AbstractInstanceInvoke ?
+                Optional.of(converter.pop()) : Optional.empty();
+
+        List<StackValue> allPops = new ArrayList<>(argumentValues);
+        instanceOpt.ifPresent(allPops::add);
+        convertOrElseMerge(allPops, () -> {
+            AbstractInvoke refInvoke = convertAbstractInvoke(stackInvoke, argumentValues, instanceOpt);
+
+            if (refInvoke instanceof me.aki.tactical.ref.invoke.AbstractInstanceInvoke) {
+                Cell<Expression> instanceCell = ((AbstractInstanceInvoke) refInvoke).getInstanceCell();
+                instanceOpt.get().addReference(instanceCell);
+            }
+
+            Iterator<StackValue> argIter = argumentValues.iterator();
+            Iterator<Cell<Expression>> cellIter = refInvoke.getArgumentCells().iterator();
+            while(argIter.hasNext()) {
+                argIter.next().addReference(cellIter.next());
+            }
+
+            if (descriptor.getReturnType().isPresent()) {
+                RefLocal local = converter.newLocal();
+                AssignStatement stmt = new AssignStatement(local, new InvokeExpr(refInvoke));
+                converter.addStatement(instruction, stmt);
+                return Optional.of(new StackValue(instruction, local));
+            } else {
+                InvokeStmt stmt = new InvokeStmt(refInvoke);
+                converter.addStatement(instruction, stmt);
+                return Optional.empty();
+            }
+        });
+
         super.visitInvokeInsn(stackInvoke);
+    }
+
+    private AbstractInvoke convertAbstractInvoke(Invoke stackInvoke, List<StackValue> argumentValues, Optional<StackValue> instanceOpt) {
+        List<Expression> arguments = argumentValues.stream()
+                .map(StackValue::getValue)
+                .collect(Collectors.toList());
+
+        if (stackInvoke instanceof me.aki.tactical.stack.invoke.AbstractInstanceInvoke) {
+            if (stackInvoke instanceof me.aki.tactical.stack.invoke.InterfaceInvoke) {
+                me.aki.tactical.stack.invoke.InterfaceInvoke interfaceInvoke = (me.aki.tactical.stack.invoke.InterfaceInvoke) stackInvoke;
+                return new me.aki.tactical.ref.invoke.InvokeInterface(interfaceInvoke.getMethod(), instanceOpt.get().getValue(), arguments);
+            } else if (stackInvoke instanceof me.aki.tactical.stack.invoke.VirtualInvoke) {
+                me.aki.tactical.stack.invoke.VirtualInvoke virtualInvoke = (me.aki.tactical.stack.invoke.VirtualInvoke) stackInvoke;
+                return new me.aki.tactical.ref.invoke.InvokeVirtual(virtualInvoke.getMethod(), instanceOpt.get().getValue(), arguments);
+            } else if (stackInvoke instanceof SpecialInvoke) {
+                SpecialInvoke specialInvoke = (SpecialInvoke) stackInvoke;
+                return new me.aki.tactical.ref.invoke.InvokeSpecial(specialInvoke.getMethod(), instanceOpt.get().getValue(), arguments, specialInvoke.isInterface());
+            } else {
+                throw new AssertionError();
+            }
+        } else if (stackInvoke instanceof me.aki.tactical.stack.invoke.StaticInvoke) {
+            me.aki.tactical.stack.invoke.StaticInvoke staticInvoke = (me.aki.tactical.stack.invoke.StaticInvoke) stackInvoke;
+            return new InvokeStatic(staticInvoke.getMethod(), arguments, staticInvoke.isInterface());
+        } else if (stackInvoke instanceof me.aki.tactical.stack.invoke.DynamicInvoke) {
+            me.aki.tactical.stack.invoke.DynamicInvoke dynamicInvoke = (me.aki.tactical.stack.invoke.DynamicInvoke) stackInvoke;
+            return new me.aki.tactical.ref.invoke.InvokeDynamic(
+                    dynamicInvoke.getName(), dynamicInvoke.getDescriptor(), dynamicInvoke.getBootstrapMethod(),
+                    dynamicInvoke.getBootstrapArguments(), arguments);
+        } else {
+            throw new AssertionError();
+        }
     }
 
     @Override
