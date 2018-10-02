@@ -125,6 +125,8 @@ public class BodyConverter {
         convertInsns();
 
         resolveInsnsRefs();
+
+        convertLocalVariables();
     }
 
     private void convertLocals() {
@@ -218,7 +220,6 @@ public class BodyConverter {
          * First instruction of this cfg block.
          */
         private Instruction instruction;
-
         /**
          * Values on the stack
          */
@@ -354,6 +355,19 @@ public class BodyConverter {
                 // Therefore there cannot be a corresponding stmt.
                 return Optional.empty();
             }
+        }
+    }
+
+    private void convertLocalVariables() {
+        for (StackBody.LocalVariable stackLocalVariable : stackBody.getLocalVariables()) {
+            String name = stackLocalVariable.getName();
+            Type type = stackLocalVariable.getType();
+            Optional<String> signature = stackLocalVariable.getSignature();
+            Statement start = getCorrespondingStmt(stackLocalVariable.getStart());
+            Statement end = getCorrespondingStmt(stackLocalVariable.getEnd());
+            RefLocal local = getLocal(stackLocalVariable.getLocal());
+
+            refBody.getLocalVariables().add(new RefBody.LocalVariable(name, type, signature, start, end, local));
         }
     }
 }
