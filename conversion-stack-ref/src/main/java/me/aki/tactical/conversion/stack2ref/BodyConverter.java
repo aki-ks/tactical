@@ -360,6 +360,10 @@ public class BodyConverter {
 
     private void convertLocalVariables() {
         for (StackBody.LocalVariable stackLocalVariable : stackBody.getLocalVariables()) {
+            if (isRangeEmpty(stackLocalVariable.getStart(), stackLocalVariable.getEnd())) {
+                continue;
+            }
+
             String name = stackLocalVariable.getName();
             Type type = stackLocalVariable.getType();
             Optional<String> signature = stackLocalVariable.getSignature();
