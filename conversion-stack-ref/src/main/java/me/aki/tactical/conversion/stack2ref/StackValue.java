@@ -51,7 +51,7 @@ public class StackValue {
     /**
      * Change the expression and thereby update all references to it.
      *
-     * @param value
+     * @param value the new expression
      */
     public void setValue(Expression value) {
         this.value = value;
@@ -70,11 +70,13 @@ public class StackValue {
      * Create a {@link AssignStatement} that stores the expression in a local.
      * All references to the expression will get replaced against the local.
      *
-     * @param converter
-     * @param local
+     * @param converter that currently converts the instructions
+     * @param local that will get assigned to that statement
      * @return statement that stores the value in the local
      */
     public AssignStatement storeInLocal(BodyConverter converter, RefLocal local) {
+        this.setValue(local);
+
         if (this.assignStatement.isPresent()) {
             AssignStatement assignStatement = this.assignStatement.get();
             assignStatement.setVariable(local);
