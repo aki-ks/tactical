@@ -6,6 +6,7 @@ import me.aki.tactical.conversion.stackasm.analysis.Stack;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
@@ -127,6 +128,7 @@ public class BodyConverter {
         resolveInsnsRefs();
 
         convertLocalVariables();
+        convertLocalVariableAnnotations();
     }
 
     private void convertLocals() {
@@ -372,6 +374,23 @@ public class BodyConverter {
             RefLocal local = getLocal(stackLocalVariable.getLocal());
 
             refBody.getLocalVariables().add(new RefBody.LocalVariable(name, type, signature, start, end, local));
+        }
+    }
+
+    private void convertLocalVariableAnnotations() {
+        for (StackBody.LocalVariableAnnotation localVarAnno : stackBody.getLocalVariableAnnotations()) {
+            LocalVariableTypeAnnotation annotation = localVarAnno.getAnnotation();
+            List<RefBody.LocalVariableAnnotation.Location> locations = localVarAnno.getLocations().stream()
+                    .filter(location -> !isRangeEmpty(location.getStart(), location.getEnd()))
+                    .map(location -> new RefBody.LocalVariableAnnotation.Location(
+                            getCorrespondingStmt(location.getStart()),
+                            getCorrespondingStmt(location.getEnd()),
+                            getLocal(location.getLocal())))
+                    .collect(Collectors.toList());
+
+            if (!locations.isEmpty()) {
+                refBody.getLocalVariableAnnotations().add(new RefBody.LocalVariableAnnotation(annotation, locations));
+            }
         }
     }
 }
