@@ -30,7 +30,7 @@ public class RefBody {
     private List<RefLocal> argumentLocals = new ArrayList<>();
 
     /**
-     * The instructions of this method.
+     * The statements of this method.
      */
     private List<Statement> statements = new ArrayList<>();
 
@@ -138,13 +138,13 @@ public class RefBody {
         private Optional<String> signature;
 
         /**
-         * First instruction in the range of instructions within this
+         * First statement in the range of statements within this
          * local variable existed in source.
          */
         private Statement start;
 
         /**
-         * Last instruction in the range of instructions within this
+         * Last statement in the range of statements within this
          * local variable existed in source.
          */
         private Statement end;
@@ -257,21 +257,21 @@ public class RefBody {
         }
 
         /**
-         * A range of instructions where a local correlates to a local variable in source.
+         * A range of statements where a local correlates to a local variable in source.
          */
         public static class Location {
             /**
-             * First instruction of the code range.
+             * First statement of the code range.
              */
             private Statement start;
 
             /**
-             * Last instruction of the code range.
+             * Last statement of the code range.
              */
             private Statement end;
 
             /**
-             * Local that corresponds to the local variable within the range of instruction.
+             * Local that corresponds to the local variable within the range of statement.
              */
             private RefLocal local;
 
@@ -316,7 +316,7 @@ public class RefBody {
     }
 
     /**
-     * Debug information that relates instructions and their line number in sourcecode.
+     * Debug information that relates statements and their line number in sourcecode.
      */
     public static class LineNumber {
         /**
@@ -325,13 +325,13 @@ public class RefBody {
         private int line;
 
         /**
-         * First instruction from that line in the sourcecode.
+         * First statement from that line in the sourcecode.
          */
-        private Statement instruction;
+        private Statement statement;
 
-        public LineNumber(int line, Statement instruction) {
+        public LineNumber(int line, Statement statement) {
             this.line = line;
-            this.instruction = instruction;
+            this.statement = statement;
         }
 
         public int getLine() {
@@ -343,11 +343,11 @@ public class RefBody {
         }
 
         public Statement getStatement() {
-            return instruction;
+            return statement;
         }
 
-        public void setStatement(Statement instruction) {
-            this.instruction = instruction;
+        public void setStatement(Statement statement) {
+            this.statement = statement;
         }
 
         public Cell<Statement> getStatementCell() {
