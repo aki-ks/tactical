@@ -129,6 +129,7 @@ public class BodyConverter {
 
         convertLocalVariables();
         convertLocalVariableAnnotations();
+        convertLineNumbers();
     }
 
     private void convertLocals() {
@@ -289,7 +290,7 @@ public class BodyConverter {
         while (insnIter.hasNext()) {
             Instruction instruction = insnIter.next();
 
-            if (analysis.getStackState(instruction).isPresent()) {
+            if (!isDeadCode(instruction)) {
                 // This instruction is no dead code
                 return false;
             }
@@ -300,6 +301,16 @@ public class BodyConverter {
         }
 
         throw new RuntimeException("Illegal instruction range");
+    }
+
+    /**
+     * Check whether an instruction can be reached.
+     *
+     * @param instruction that gets checked
+     * @return is the instruction non-reachable
+     */
+    private boolean isDeadCode(Instruction instruction) {
+        return !analysis.getStackState(instruction).isPresent();
     }
 
     private void resolveInsnsRefs() {
@@ -392,5 +403,13 @@ public class BodyConverter {
                 refBody.getLocalVariableAnnotations().add(new RefBody.LocalVariableAnnotation(annotation, locations));
             }
         }
+    }
+
+    private void convertLineNumbers() {
+        stackBody.getLineNumbers().stream()
+                .filter(line -> !isDeadCode(line.getInstruction()))
+                .map(line -> new RefBody.LineNumber(line.getLine(),
+                        getCorrespondingStmt(line.getInstruction())))
+                .forEach(refBody.getLineNumbers()::add);
     }
 }
