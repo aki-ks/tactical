@@ -40,4 +40,9 @@ public class GotoStmt implements BranchStmt {
     public List<Cell<Statement>> getBranchTargets() {
         return List.of(getTargetCell());
     }
+
+    @Override
+    public boolean continuesExecution() {
+        return false;
+    }
 }

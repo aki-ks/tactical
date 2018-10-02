@@ -85,4 +85,9 @@ public class SwitchStmt implements BranchStmt {
         cells.add(getDefaultTargetCell());
         return Collections.unmodifiableList(cells);
     }
+
+    @Override
+    public boolean continuesExecution() {
+        return false;
+    }
 }

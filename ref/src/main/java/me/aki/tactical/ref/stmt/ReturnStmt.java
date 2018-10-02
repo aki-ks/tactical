@@ -37,4 +37,9 @@ public class ReturnStmt implements Statement {
     public List<Cell<Expression>> getReferencedValues() {
         return getValueCell().map(List::of).orElse(List.of());
     }
+
+    @Override
+    public boolean continuesExecution() {
+        return false;
+    }
 }

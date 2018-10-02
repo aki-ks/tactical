@@ -9,4 +9,9 @@ public class ThrowStmt extends AbstractUnaryStmt {
     public ThrowStmt(Expression value) {
         super(value);
     }
+
+    @Override
+    public boolean continuesExecution() {
+        return false;
+    }
 }
