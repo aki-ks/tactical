@@ -65,9 +65,9 @@ public class CfgGraph {
     /**
      * Get the node that contains a certain statement.
      *
-     * If the statement is dead code, <tt>null</tt> gets returned.
+     * If the statement is dead code, <tt>null</tt> is returned.
      *
-     * @param statement whose cfg is supported
+     * @param statement whose cfg node is requested
      * @return node containing the statement or <tt>null</tt>.
      */
     public Node getNode(Statement statement) {
@@ -76,17 +76,17 @@ public class CfgGraph {
 
     public static class Node {
         /**
-         * All statements that of this node.
+         * All statements of this node.
          */
         private List<Statement> statements = new ArrayList<>();
 
         /**
          * Nodes that might branch to this node.
          */
-        private Set<Node> preceedingNodes = new HashSet<>();
+        private Set<Node> precedingNodes = new HashSet<>();
 
         /**
-         * Nodes that might be branched to after this node.
+         * Nodes that the jvm might execute after this node.
          */
         private Set<Node> succeedingNodes = new HashSet<>();
 
@@ -94,8 +94,8 @@ public class CfgGraph {
             return statements;
         }
 
-        public Set<Node> getPreceedingNodes() {
-            return preceedingNodes;
+        public Set<Node> getPrecedingNodes() {
+            return precedingNodes;
         }
 
         public Set<Node> getSucceedingNodes() {
@@ -147,7 +147,7 @@ public class CfgGraph {
                     Node nextNode = nodeByStatement.get(statement);
                     if (nextNode != null && nextNode != currentNode) {
                         // we're visiting the first instruction of the next block.
-                        nextNode.preceedingNodes.add(currentNode);
+                        nextNode.precedingNodes.add(currentNode);
                         currentNode.succeedingNodes.add(nextNode);
                         break;
                     }
@@ -178,7 +178,7 @@ public class CfgGraph {
                 }
 
                 node.succeedingNodes.add(targetNode);
-                targetNode.preceedingNodes.add(node);
+                targetNode.precedingNodes.add(node);
             }
         }
 
@@ -207,8 +207,9 @@ public class CfgGraph {
                 return node;
             } else {
                 Node newHead = new Node();
-                newHead.succeedingNodes.add(node);
-                node.preceedingNodes.add(newHead);
+                newHead.precedingNodes = node.precedingNodes;
+                newHead.succeedingNodes = new HashSet<>(Set.of(node));
+                node.precedingNodes = new HashSet<>(Set.of(newHead));
 
                 Iterator<Statement> iterator = node.getStatements().iterator();
                 while (true) {
