@@ -37,7 +37,12 @@ public class GotoStmt implements BranchStmt {
     }
 
     @Override
-    public List<Cell<Statement>> getBranchTargets() {
+    public List<Statement> getBranchTargets() {
+        return List.of(getTarget());
+    }
+
+    @Override
+    public List<Cell<Statement>> getBranchTargetsCells() {
         return List.of(getTargetCell());
     }
 

@@ -79,7 +79,15 @@ public class SwitchStmt implements BranchStmt {
     }
 
     @Override
-    public List<Cell<Statement>> getBranchTargets() {
+    public List<Statement> getBranchTargets() {
+        List<Statement> targets = new ArrayList<>();
+        targets.addAll(getBranchTable().values());
+        targets.add(getDefaultTarget());
+        return Collections.unmodifiableList(targets);
+    }
+
+    @Override
+    public List<Cell<Statement>> getBranchTargetsCells() {
         List<Cell<Statement>> cells = new ArrayList<>();
         cells.addAll(getBranchTableCells());
         cells.add(getDefaultTargetCell());
