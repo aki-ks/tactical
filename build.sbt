@@ -9,6 +9,8 @@ ThisBuild / autoScalaLibrary := false // do not use scala runtime dependency
 
 val asmVersion = "6.2.1"
 
+// INTERMEDIATIONS
+
 lazy val core = project in file ("core")
 
 lazy val stack = (project in file ("stack"))
@@ -16,6 +18,12 @@ lazy val stack = (project in file ("stack"))
 
 lazy val ref = (project in file ("ref"))
   .dependsOn(core)
+
+// TEXTIFIER & PARSER
+lazy val coreTextifier = (project in file ("textify-core"))
+  .dependsOn(core)
+
+// CONVERSION
 
 lazy val asmStackConversion = (project in file ("conversion-asm-stack"))
   .dependsOn(stack, stackConversionUtils)

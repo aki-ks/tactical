@@ -13,12 +13,16 @@ Building a referenced based intermediation for java bytecode is the main objecti
 * [ ] implement the whole [jvm classfile format](https://docs.oracle.com/javase/specs/jvms/se11/html/index.html)
   * [X] for the stack intermediation (jvm 11)
   * [X] for the reference based intermediation
+* [ ] Turn this project into a disassambler generating human editable textfiles
+  * [ ] Textifier for core
+  * [ ] Textifier for stack
+  * [ ] Textifier for ref
+  * [ ] Parser for core
+  * [ ] Parser for stack
+  * [ ] Parser for ref
 
 ## Future Goals
 * [ ] support dalvik bytecode (android apps)
   * [ ] build dalvik intermediation
   * [ ] conversion: dex (bytecode) <-> dalvik (intermediation)
   * [ ] conversion: dalvik <-> reference
-* [ ] Turn this project into a disassambler generating human editable textfiles
-  * [ ] implement textifier
-  * [ ] implement parser
