@@ -1,5 +1,6 @@
 package me.aki.tactical.ref;
 
+import me.aki.tactical.core.Body;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class RefBody {
+public class RefBody implements Body {
     /**
      * All locals of this method.
      */
