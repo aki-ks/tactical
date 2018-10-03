@@ -247,12 +247,16 @@ public class BodyConverter {
     }
 
     private void convertLocalVariableAnnotations() {
-        for (LocalVariableAnnotationNode varAnno : mn.visibleLocalVariableAnnotations) {
-            convertLocalVariableAnnotation(varAnno, true);
+        if (mn.visibleLocalVariableAnnotations != null) {
+            for (LocalVariableAnnotationNode varAnno : mn.visibleLocalVariableAnnotations) {
+                convertLocalVariableAnnotation(varAnno, true);
+            }
         }
 
-        for (LocalVariableAnnotationNode varAnno : mn.visibleLocalVariableAnnotations) {
-            convertLocalVariableAnnotation(varAnno, false);
+        if (mn.invisibleLocalVariableAnnotations != null) {
+            for (LocalVariableAnnotationNode varAnno : mn.invisibleLocalVariableAnnotations) {
+                convertLocalVariableAnnotation(varAnno, false);
+            }
         }
     }
 
