@@ -3,6 +3,8 @@ package me.aki.tactical.ref;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.InsertList;
+import me.aki.tactical.core.util.LinkedInsertList;
 import me.aki.tactical.ref.stmt.AssignStatement;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public class RefBody {
     /**
      * The statements of this method.
      */
-    private List<Statement> statements = new ArrayList<>();
+    private InsertList<Statement> statements = new LinkedInsertList<>();
 
     /**
      * The try-catch-blocks of this method.
@@ -78,11 +80,11 @@ public class RefBody {
         this.argumentLocals = argumentLocals;
     }
 
-    public List<Statement> getStatements() {
+    public InsertList<Statement> getStatements() {
         return statements;
     }
 
-    public void setStatements(List<Statement> statements) {
+    public void setStatements(InsertList<Statement> statements) {
         this.statements = statements;
     }
 
