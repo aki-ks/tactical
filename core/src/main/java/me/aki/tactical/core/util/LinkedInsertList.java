@@ -273,32 +273,23 @@ public class LinkedInsertList<T> extends AbstractList<T> implements InsertList<T
 
     @Override
     public Iterator<T> iterator() {
-        return new Iterator<>() {
-            private Node node = first;
+        return new Iter(first);
+    }
 
-            @Override
-            public boolean hasNext() {
-                return node != null;
-            }
-
-            @Override
-            public T next() {
-                T element = node.element;
-                node = node.next;
-                return element;
-            }
-        };
+    @Override
+    public Iterator<T> iterator(T element) {
+        return new Iter(nodeByElement(element));
     }
 
     @Override
     public ListIterator<T> listIterator() {
-        return new LinkedInsertListIterator(0, first);
+        return new ListIter(0, first);
     }
 
     @Override
     public ListIterator<T> listIterator(int index) {
         Node node = index == size() ? null : nodeByIndex(index);
-        return new LinkedInsertListIterator(index, node);
+        return new ListIter(index, node);
     }
 
     private class Node {
@@ -405,12 +396,32 @@ public class LinkedInsertList<T> extends AbstractList<T> implements InsertList<T
         }
     }
 
-    private class LinkedInsertListIterator implements ListIterator<T> {
+    private class Iter implements Iterator<T> {
+        private Node node;
+
+        public Iter(Node node) {
+            this.node = node;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return node != null;
+        }
+
+        @Override
+        public T next() {
+            T element = node.element;
+            node = node.next;
+            return element;
+        }
+    }
+
+    private class ListIter implements ListIterator<T> {
         private int nextIndex;
         private Node next;
         private Node lastReturned;
 
-        private LinkedInsertListIterator(int index, Node node) {
+        private ListIter(int index, Node node) {
             this.nextIndex = index;
             this.next = node;
         }

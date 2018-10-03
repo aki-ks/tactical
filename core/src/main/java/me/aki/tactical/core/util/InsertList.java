@@ -1,6 +1,7 @@
 package me.aki.tactical.core.util;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -70,4 +71,12 @@ public interface InsertList<T> extends List<T> {
      * @param elements to be inserted
      */
     void insertBefore(T location, Collection<T> elements);
+
+    /**
+     * Iterator that starts with at a certain element.
+     *
+     * @param element start iterating from this element (inclusive)
+     * @return iterator that starts at a certain element
+     */
+    Iterator<T> iterator(T element);
 }
