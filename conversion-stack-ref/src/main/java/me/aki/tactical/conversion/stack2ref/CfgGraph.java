@@ -90,6 +90,16 @@ public class CfgGraph {
          */
         private Set<Node> succeedingNodes = new HashSet<>();
 
+        /**
+         * All nodes of the cfg that can be reached only by going to succeeding nodes.
+         */
+        private Set<Node> forwardReachable;
+
+        /**
+         * All nodes of the cfg that can be reached only by going to preceding nodes.
+         */
+        private Set<Node> backwardReachable;
+
         public List<Statement> getStatements() {
             return statements;
         }
@@ -100,6 +110,39 @@ public class CfgGraph {
 
         public Set<Node> getSucceedingNodes() {
             return succeedingNodes;
+        }
+
+        public Set<Node> getForwardReachable() {
+            if (forwardReachable == null) {
+                Set<Node> forwardReachable = new HashSet<>();
+                addReachableRecursive(this, true, forwardReachable);
+                this.forwardReachable = forwardReachable;
+            }
+
+            return forwardReachable;
+        }
+
+        public Set<Node> getBackwardReachable() {
+            if (backwardReachable == null) {
+                Set<Node> backwardReachable = new HashSet<>();
+                addReachableRecursive(this, false, backwardReachable);
+                this.backwardReachable = backwardReachable;
+            }
+
+            return backwardReachable;
+        }
+
+        private void addReachableRecursive(Node node, boolean forward, Set<Node> reachable) {
+            for (Node next : forward ? node.getSucceedingNodes() : node.getPrecedingNodes()) {
+                if (reachable.add(node)) {
+                    Set<Node> computed = forward ? next.getForwardReachable() : next.getBackwardReachable();
+                    if (computed == null) {
+                        addReachableRecursive(next, forward, reachable);
+                    } else {
+                        reachable.addAll(computed);
+                    }
+                }
+            }
         }
     }
 
