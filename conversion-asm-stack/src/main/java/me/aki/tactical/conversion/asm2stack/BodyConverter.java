@@ -16,6 +16,7 @@ import me.aki.tactical.stack.TryCatchBlock;
 import me.aki.tactical.stack.insn.Instruction;
 import org.objectweb.asm.TypeReference;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
@@ -108,6 +109,10 @@ public class BodyConverter {
 
             if (insn instanceof LineNumberNode) {
                 convertLineNumber((LineNumberNode) insn);
+                continue;
+            }
+
+            if (insn instanceof LabelNode || insn instanceof FrameNode) {
                 continue;
             }
 
