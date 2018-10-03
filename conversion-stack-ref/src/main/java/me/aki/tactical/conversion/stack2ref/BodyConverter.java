@@ -8,6 +8,7 @@ import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
@@ -150,7 +151,7 @@ public class BodyConverter {
         Queue<CfgNode> worklist = new ArrayDeque<>();
 
         // Add the first instruction to the work list
-        List<Instruction> instructions = this.stackBody.getInstructions();
+        InsertList<Instruction> instructions = this.stackBody.getInstructions();
         Instruction firstInstruction = instructions.get(0);
         worklist.add(new CfgNode(firstInstruction, new Stack.Immutable<>()));
 
@@ -175,8 +176,7 @@ public class BodyConverter {
             CfgNode node = worklist.poll();
             this.stack.loadFrom(node.stack);
 
-            int startIndex = instructions.indexOf(node.instruction);
-            Iterator<Instruction> insnIter = instructions.listIterator(startIndex);
+            Iterator<Instruction> insnIter = instructions.iterator(node.instruction);
             Instruction instruction;
             do {
                 if (insnIter.hasNext()) {
@@ -283,9 +283,7 @@ public class BodyConverter {
      * @return contains the instruction range only dead code
      */
     private boolean isRangeEmpty(Instruction start, Instruction end) {
-        List<Instruction> instructions = this.stackBody.getInstructions();
-        int startIndex = instructions.indexOf(start);
-        Iterator<Instruction> insnIter = instructions.listIterator(startIndex);
+        Iterator<Instruction> insnIter = this.stackBody.getInstructions().iterator(start);
 
         while (insnIter.hasNext()) {
             Instruction instruction = insnIter.next();
@@ -333,16 +331,9 @@ public class BodyConverter {
      * @return statement that corresponding to the instruction
      */
     private Statement getCorrespondingStmt(Instruction instruction) {
-        Optional<Statement> correspondingLocalOpt = getCorrespondingStmtOpt(instruction);
-        if (correspondingLocalOpt.isPresent()) {
-            return correspondingLocalOpt.get();
-        }
-
-        List<Instruction> instructions = this.stackBody.getInstructions();
-        int startIndex = instructions.indexOf(instruction);
-        Iterator<Instruction> insnIter = instructions.listIterator(startIndex + 1);
+        Iterator<Instruction> insnIter = this.stackBody.getInstructions().iterator(instruction);
         while (insnIter.hasNext()) {
-            correspondingLocalOpt = getCorrespondingStmtOpt(insnIter.next());
+            Optional<Statement> correspondingLocalOpt = getCorrespondingStmtOpt(insnIter.next());
             if (correspondingLocalOpt.isPresent()) {
                 return correspondingLocalOpt.get();
             }

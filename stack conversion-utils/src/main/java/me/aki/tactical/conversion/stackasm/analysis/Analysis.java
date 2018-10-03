@@ -89,8 +89,7 @@ public class Analysis {
      * @return does the try/catch block protect any reachable instructions.
      */
     private boolean capturesReachableCode(TryCatchBlock block) {
-        int startIndex = body.getInstructions().indexOf(block.getFirst());
-        Iterator<Instruction> iter = body.getInstructions().listIterator(startIndex);
+        Iterator<Instruction> iter = body.getInstructions().iterator(block.getFirst());
         while (iter.hasNext()) {
             Instruction instruction = iter.next();
 
@@ -115,8 +114,6 @@ public class Analysis {
      * @param workable start point of execution
      */
     private void startAnalysingFrom(Workable workable) {
-        List<Instruction> instructions = body.getInstructions();
-
         Deque<Workable> worklist = new ArrayDeque<>(List.of(workable));
 
         StackEmulatingInsnVisitor<Instruction> stackEmulator = new StackEmulatingInsnVisitor<>(null, new Stack.Mutable<>());
@@ -126,19 +123,14 @@ public class Analysis {
             Workable work = worklist.poll();
             stackEmulator.getStack().loadFrom(work.stackState);
 
-            int startIndex = instructions.indexOf(work.firstInsn);
-            if (startIndex < 0) {
-                throw new IllegalStateException();
-            }
-
-            Iterator<Instruction> iter = instructions.listIterator(startIndex);
+            Iterator<Instruction> iterator = body.getInstructions().iterator(work.firstInsn);
             Instruction instruction;
             do {
-                if (!iter.hasNext()) {
+                if (!iterator.hasNext()) {
                     throw new IllegalStateException("Illegal end of method");
                 }
 
-                instruction = iter.next();
+                instruction = iterator.next();
 
                 Stack.Immutable<JvmType> currentFrame = stackEmulator.getStack().immutableCopy();
                 Stack.Immutable<JvmType> expectedFrame = stackMap.get(instruction);

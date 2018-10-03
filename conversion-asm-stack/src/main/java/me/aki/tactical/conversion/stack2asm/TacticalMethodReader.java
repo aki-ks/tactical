@@ -447,9 +447,7 @@ public class TacticalMethodReader {
      * @return contains the instruction range only dead code
      */
     private boolean isRangeEmpty(StackBody stackBody, Analysis analysis, Instruction start, Instruction end) {
-        int startIndex = stackBody.getInstructions().indexOf(start);
-        Iterator<Instruction> iter = stackBody.getInstructions().listIterator(startIndex);
-
+        Iterator<Instruction> iter = stackBody.getInstructions().iterator(start);
         while (iter.hasNext()) {
             Instruction instruction = iter.next();
 
