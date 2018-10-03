@@ -19,7 +19,7 @@ public class StackValue {
      */
     private Instruction instruction;
 
-    private Optional<AssignStatement> assignStatement;
+    private Optional<AssignStatement> assignStatement = Optional.empty();
 
     /**
      * The actual value.
