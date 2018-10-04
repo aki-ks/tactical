@@ -4,6 +4,14 @@ import me.aki.tactical.core.annotation.AbstractAnnotation;
 import me.aki.tactical.core.annotation.Annotation;
 
 public class AnnotationTextifier implements Textifier<Annotation> {
+    private final static AnnotationTextifier INSTANCE = new AnnotationTextifier();
+
+    public static AnnotationTextifier getInstance() {
+        return INSTANCE;
+    }
+
+    private AnnotationTextifier() {}
+
     @Override
     public void textify(Printer printer, Annotation annotation) {
         printer.addText("@");
