@@ -55,7 +55,17 @@ public class Printer {
      * @param text to be appended
      */
     public void addText(String text) {
-        add(new BasicText(text));
+        add(new TextToken(text));
+    }
+
+    /**
+     * Append an escaped string.
+     *
+     * @param text that will be appended
+     * @param quote string is quote by this character
+     */
+    public void addEscaped(String text, char quote) {
+        add(new EscapedToken(text, quote));
     }
 
     /**
@@ -64,7 +74,7 @@ public class Printer {
      * @param text to be appended
      */
     public void addLiteral(String text) {
-        add(new Literal(text));
+        add(new LiteralToken(text));
     }
 
     /**
@@ -129,10 +139,10 @@ public class Printer {
         void append(StringBuilder builder);
     }
 
-    private class BasicText implements Token {
+    private class TextToken implements Token {
         private String text;
 
-        public BasicText(String text) {
+        public TextToken(String text) {
             this.text = text;
         }
 
@@ -142,16 +152,31 @@ public class Printer {
         }
     }
 
-    private class Literal implements Token {
+    private class LiteralToken implements Token {
         private String text;
 
-        public Literal(String text) {
+        public LiteralToken(String text) {
             this.text = text;
         }
 
         @Override
         public void append(StringBuilder builder) {
             EscapeUtil.printMaybeEscapedString(builder, text);
+        }
+    }
+
+    private class EscapedToken implements Token {
+        private String text;
+        private char quote;
+
+        public EscapedToken(String text, char quote) {
+            this.text = text;
+            this.quote = quote;
+        }
+
+        @Override
+        public void append(StringBuilder builder) {
+            EscapeUtil.printEscapedString(builder, text, quote);
         }
     }
 
