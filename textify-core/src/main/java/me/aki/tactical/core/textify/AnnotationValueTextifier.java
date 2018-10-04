@@ -90,12 +90,7 @@ public class AnnotationValueTextifier implements Textifier<AnnotationValue> {
         printer.addText("@");
         printer.addPath(value.getType());
         printer.addText("(");
-        TextUtil.joined(value.getValues().entrySet(),
-                entry -> {
-                    printer.addLiteral(entry.getKey());
-                    printer.addText(" = ");
-                    getInstance().textify(printer, entry.getValue());
-                }, () -> printer.addText(", "));
+        AnnotationTextifier.appendValues(printer, value);
         printer.addText(")");
     };
 
