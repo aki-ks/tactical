@@ -161,7 +161,7 @@ public class Printer {
 
         @Override
         public void append(StringBuilder builder) {
-            EscapeUtil.printMaybeEscapedString(builder, text);
+            TextUtil.printMaybeEscapedString(builder, text);
         }
     }
 
@@ -176,7 +176,7 @@ public class Printer {
 
         @Override
         public void append(StringBuilder builder) {
-            EscapeUtil.printEscapedString(builder, text, quote);
+            TextUtil.printEscapedString(builder, text, quote);
         }
     }
 
@@ -190,10 +190,10 @@ public class Printer {
         @Override
         public void append(StringBuilder builder) {
             for (String pkg : path.getPackage()) {
-                EscapeUtil.printMaybeEscapedString(builder, pkg);
+                TextUtil.printMaybeEscapedString(builder, pkg);
                 builder.append('.');
             }
-            EscapeUtil.printMaybeEscapedString(builder, path.getName());
+            TextUtil.printMaybeEscapedString(builder, path.getName());
         }
     }
 }

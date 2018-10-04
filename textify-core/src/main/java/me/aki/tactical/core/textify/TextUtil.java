@@ -1,9 +1,11 @@
 package me.aki.tactical.core.textify;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Consumer;
 
-public class EscapeUtil {
+public class TextUtil {
     private final static Set<String> KEYWORDS = new HashSet<>(Set.of(
             "package",
             "public", "private", "protected", "final", "static", "synthetic", "deprecated",
@@ -103,6 +105,17 @@ public class EscapeUtil {
                     }
                 }
                 return;
+        }
+    }
+
+    public static <T> void joined(Iterable<T> iterable, Consumer<T> appendElement, Runnable appendSeperator) {
+        Iterator<T> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            appendElement.accept(iterator.next());
+
+            if (iterator.hasNext()) {
+                appendSeperator.run();
+            }
         }
     }
 }
