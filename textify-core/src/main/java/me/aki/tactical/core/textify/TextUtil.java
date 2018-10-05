@@ -8,8 +8,9 @@ import java.util.function.Consumer;
 public class TextUtil {
     private final static Set<String> KEYWORDS = new HashSet<>(Set.of(
             "package",
-            "public", "private", "protected", "final", "static", "synthetic", "deprecated",
+            "public", "private", "protected", "final", "static", "synthetic", "deprecated", "open", "mandated", "transitive", "static-phase",
             "class", "interface", "enum", "module",
+            "inner", "enclosing", "nest",
             "boolean", "byte", "short", "char", "int", "long", "float", "double", "null",
             "goto", "return", "throw", "monitor", "new", "length", "instanceof", "try", "catch",
             "version", "main", "requires", "export", "opens", "uses", "provides", "with", "to"
