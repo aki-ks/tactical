@@ -252,17 +252,7 @@ public class ClassTextifier implements Textifier<Classfile> {
 
                 enclosingMethod.getDescriptor().ifPresent(descriptor -> {
                     printer.addText("descriptor = (");
-
-                    TextUtil.joined(descriptor.getParameterTypes(),
-                            type -> TypeTextifier.getInstance().textify(printer, type),
-                            () -> printer.addText(", "));
-
-                    printer.addText(") ");
-
-                    descriptor.getReturnType().ifPresentOrElse(
-                            type -> TypeTextifier.getInstance().textify(printer, type),
-                            () -> printer.addText("void"));
-
+                    MethodDescriptorTextifier.getInstance().textify(printer, descriptor);
                     printer.addText(";");
                     printer.newLine();
                 });
