@@ -22,7 +22,8 @@ public class ClassTextifier implements Textifier<Classfile> {
         appendDebug(printer, classfile.getSourceDebug());
 
         appendAnnotations(printer, classfile.getAnnotations());
-        appentTypeAnnotations(printer, classfile.getTypeAnnotations());
+        appendTypeAnnotations(printer, classfile.getTypeAnnotations());
+
         appendDescriptor(printer, classfile);
         printer.increaseIndent();
 
@@ -72,7 +73,7 @@ public class ClassTextifier implements Textifier<Classfile> {
         }
     }
 
-    private void appentTypeAnnotations(Printer printer, List<ClassTypeAnnotation> typeAnnotations) {
+    private void appendTypeAnnotations(Printer printer, List<ClassTypeAnnotation> typeAnnotations) {
         for (ClassTypeAnnotation typeAnnotation : typeAnnotations) {
             printer.addText("#[path = ");
             TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
@@ -81,6 +82,7 @@ public class ClassTextifier implements Textifier<Classfile> {
             printer.addText(", annotation = ");
             AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
             printer.addText("]");
+            printer.newLine();
         }
     }
 
