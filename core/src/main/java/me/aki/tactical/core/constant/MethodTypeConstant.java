@@ -1,5 +1,6 @@
 package me.aki.tactical.core.constant;
 
+import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
@@ -33,6 +34,10 @@ public class MethodTypeConstant implements BootstrapConstant, PushableConstant, 
 
     public Optional<Type> getReturnType() {
         return returnType;
+    }
+
+    public MethodDescriptor toDescriptor() {
+        return new MethodDescriptor(argumentTypes, returnType);
     }
 
     @Override
