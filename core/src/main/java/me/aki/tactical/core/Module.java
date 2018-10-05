@@ -387,14 +387,6 @@ public class Module {
      * Implementation of a service interface
      */
     public static class Provide {
-        @Override
-        public String toString() {
-            return Provide.class.getSimpleName() + '{' +
-                    "service=" + service +
-                    ", providers=" + providers +
-                    '}';
-        }
-
         /**
          * Name of the implemented service interface.
          */
@@ -440,5 +432,12 @@ public class Module {
             return Objects.hash(service, providers);
         }
 
+        @Override
+        public String toString() {
+            return Provide.class.getSimpleName() + '{' +
+                    "service=" + service +
+                    ", providers=" + providers +
+                    '}';
+        }
     }
 }
