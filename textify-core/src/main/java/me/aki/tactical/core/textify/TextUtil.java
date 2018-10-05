@@ -8,10 +8,10 @@ import java.util.function.Consumer;
 public class TextUtil {
     private final static Set<String> KEYWORDS = new HashSet<>(Set.of(
             "package",
-            "public", "private", "protected", "final", "static", "synthetic", "deprecated", "open", "mandated", "transitive", "static-phase",
+            "public", "private", "protected", "final", "static", "volatile", "transitive", "synthetic", "deprecated", "open", "mandated", "static-phase",
             "class", "interface", "enum", "module",
             "inner", "enclosing", "nest",
-            "boolean", "byte", "short", "char", "int", "long", "float", "double", "null",
+            "boolean", "byte", "short", "char", "int", "long", "float", "double", "void", "null",
             "goto", "return", "throw", "monitor", "new", "length", "instanceof", "try", "catch",
             "version", "main", "requires", "export", "opens", "uses", "provides", "with", "to"
     ));
@@ -118,5 +118,9 @@ public class TextUtil {
                 appendSeperator.run();
             }
         }
+    }
+
+    public static <T> T assertionError() {
+        throw new AssertionError();
     }
 }
