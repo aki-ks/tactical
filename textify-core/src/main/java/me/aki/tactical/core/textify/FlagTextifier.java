@@ -48,6 +48,12 @@ public class FlagTextifier<F extends Enum<F>> implements Textifier<Set<F>> {
             Map.entry(Method.Flag.SYNTHETIC, "synthetic")
     ));
 
+    public static final FlagTextifier<Method.Parameter.Flag> METHOD_PARAMETER = new FlagTextifier<>(Map.of(
+            Method.Parameter.Flag.FINAL, "final",
+            Method.Parameter.Flag.SYNTHETIC, "synthetic",
+            Method.Parameter.Flag.MANDATED, "mandated"
+    ));
+
     public static final FlagTextifier<Classfile.InnerClass.Flag> INNER_CLASS = new FlagTextifier<>(Map.of(
             Classfile.InnerClass.Flag.PUBLIC, "public",
             Classfile.InnerClass.Flag.PRIVATE, "private",

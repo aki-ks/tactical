@@ -24,6 +24,7 @@ public class MethodTextifier implements Textifier<Method> {
         appendAnnotations(printer, method.getAnnotations());
         appendTypeAnnotations(printer, method.getTypeAnnotations());
         appendAttributes(printer, method.getAttributes());
+        appendParameterInfos(printer, method.getParameterInfo());
 
         FlagTextifier.METHOD.textify(printer, method.getAccessFlags());
         method.getReturnType().ifPresentOrElse(
@@ -92,6 +93,21 @@ public class MethodTextifier implements Textifier<Method> {
         for (Attribute attribute : attributes) {
             AttributeTextifier.getInstance().textify(printer, attribute);
             printer.newLine();
+        }
+    }
+
+    private void appendParameterInfos(Printer printer, List<Method.Parameter> parameterInfos) {
+        if (!parameterInfos.isEmpty()) {
+            printer.addText("parameters { ");
+
+            TextUtil.joined(parameterInfos,
+                parameter -> {
+                    FlagTextifier.METHOD_PARAMETER.textify(printer, parameter.getFlags());
+                    parameter.getName().ifPresent(name -> printer.addEscaped(name, '"'));
+                },
+                () -> printer.addText(", "));
+
+            printer.addText(" }");
         }
     }
 
