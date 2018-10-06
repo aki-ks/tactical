@@ -8,11 +8,23 @@ import java.util.function.Consumer;
 public class TextUtil {
     private final static Set<String> KEYWORDS = new HashSet<>(Set.of(
             "package",
-            "public", "private", "protected", "final", "static", "volatile", "transitive", "synthetic", "deprecated", "open", "mandated", "static-phase",
+
+            // class/field/method flag keywords
+            "public", "private", "protected", "final", "static", "throws", "synchronized", "bridge",
+            "varargs", "strict", "native", "volatile", "transitive", "synthetic", "deprecated",
+            "open", "mandated", "static-phase",
+
+            // class keywords
             "class", "interface", "enum", "module",
             "inner", "enclosing", "nest",
+
+            // type keywords
             "boolean", "byte", "short", "char", "int", "long", "float", "double", "void", "null",
+
+            // insn keywords
             "goto", "return", "throw", "monitor", "new", "length", "instanceof", "try", "catch",
+
+            // module keywords
             "version", "main", "requires", "export", "opens", "uses", "provides", "with", "to"
     ));
 

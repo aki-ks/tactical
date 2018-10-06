@@ -2,6 +2,7 @@ package me.aki.tactical.core.textify;
 
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
+import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Module;
 
 import java.util.Map;
@@ -30,6 +31,21 @@ public class FlagTextifier<F extends Enum<F>> implements Textifier<Set<F>> {
             Field.Flag.TRANSIENT, "transient",
             Field.Flag.SYNTHETIC, "synthetic",
             Field.Flag.ENUM, "enum"
+    ));
+
+    public static final FlagTextifier<Method.Flag> METHOD = new FlagTextifier<>(Map.ofEntries(
+            Map.entry(Method.Flag.PUBLIC, "public"),
+            Map.entry(Method.Flag.PRIVATE, "private"),
+            Map.entry(Method.Flag.PROTECTED, "protected"),
+            Map.entry(Method.Flag.STATIC, "static"),
+            Map.entry(Method.Flag.FINAL, "final"),
+            Map.entry(Method.Flag.SYNCHRONIZED, "synchronized"),
+            Map.entry(Method.Flag.BRIDGE, "bridge"),
+            Map.entry(Method.Flag.VARARGS, "varargs"),
+            Map.entry(Method.Flag.NATIVE, "native"),
+            Map.entry(Method.Flag.ABSTRACT, "abstract"),
+            Map.entry(Method.Flag.STRICT, "strict"),
+            Map.entry(Method.Flag.SYNTHETIC, "synthetic")
     ));
 
     public static final FlagTextifier<Classfile.InnerClass.Flag> INNER_CLASS = new FlagTextifier<>(Map.of(
