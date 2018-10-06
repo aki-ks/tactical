@@ -25,6 +25,7 @@ public class MethodTextifier implements Textifier<Method> {
         appendTypeAnnotations(printer, method.getTypeAnnotations());
         appendAttributes(printer, method.getAttributes());
         appendParameterInfos(printer, method.getParameterInfo());
+        appendParameterAnnotations(printer, method.getParameterAnnotations());
 
         FlagTextifier.METHOD.textify(printer, method.getAccessFlags());
         method.getReturnType().ifPresentOrElse(
@@ -107,6 +108,28 @@ public class MethodTextifier implements Textifier<Method> {
                 },
                 () -> printer.addText(", "));
 
+            printer.addText(" }");
+        }
+    }
+
+    private void appendParameterAnnotations(Printer printer, List<List<Annotation>> allParameterAnnotations) {
+        if (!allParameterAnnotations.isEmpty()) {
+            printer.addText("parameter annotations { ");
+            TextUtil.joined(allParameterAnnotations,
+                    paramList -> appendAnnotationList(printer, paramList),
+                    () -> printer.addText(", "));
+            printer.addText(" }");
+        }
+    }
+
+    private void appendAnnotationList(Printer printer, List<Annotation> parameterList) {
+        if (parameterList.isEmpty()) {
+            printer.addText("{}");
+        } else {
+            printer.addText("{ ");
+            TextUtil.joined(parameterList,
+                    annotation -> AnnotationTextifier.getInstance().textify(printer, annotation),
+                    () -> printer.addText(", "));
             printer.addText(" }");
         }
     }
