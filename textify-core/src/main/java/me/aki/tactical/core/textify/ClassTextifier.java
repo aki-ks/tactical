@@ -1,5 +1,6 @@
 package me.aki.tactical.core.textify;
 
+import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Method;
@@ -23,6 +24,7 @@ public class ClassTextifier implements Textifier<Classfile> {
 
         appendAnnotations(printer, classfile.getAnnotations());
         appendTypeAnnotations(printer, classfile.getTypeAnnotations());
+        appendAttributes(printer, classfile.getAttributes());
 
         appendDescriptor(printer, classfile);
         printer.increaseIndent();
@@ -83,6 +85,12 @@ public class ClassTextifier implements Textifier<Classfile> {
             AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
             printer.addText("]");
             printer.newLine();
+        }
+    }
+
+    private void appendAttributes(Printer printer, List<Attribute> attributes) {
+        for (Attribute attribute : attributes) {
+            AttributeTextifier.getInstance().textify(printer, attribute);
         }
     }
 

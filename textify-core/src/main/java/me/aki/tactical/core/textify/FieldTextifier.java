@@ -1,5 +1,6 @@
 package me.aki.tactical.core.textify;
 
+import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
@@ -18,9 +19,10 @@ public class FieldTextifier implements Textifier<Field> {
 
     @Override
     public void textify(Printer printer, Field field) {
+        appendSignature(printer, field.getSignature());
         appendAnnotations(printer, field.getAnnotations());
         appendTypeAnnotations(printer, field.getTypeAnnotations());
-        appendSignature(printer, field.getSignature());
+        appendAttributes(printer, field.getAttributes());
 
         FlagTextifier.FIELD.textify(printer, field.getAccessFlags());
         TypeTextifier.getInstance().textify(printer, field.getType());
@@ -33,6 +35,15 @@ public class FieldTextifier implements Textifier<Field> {
         });
 
         printer.addText(";");
+    }
+
+    private void appendSignature(Printer printer, Optional<String> signatureOpt) {
+        signatureOpt.ifPresent(signature -> {
+            printer.addText("signature ");
+            printer.addEscaped(signature, '"');
+            printer.addText(";");
+            printer.newLine();
+        });
     }
 
     private void appendAnnotations(Printer printer, List<Annotation> annotations) {
@@ -53,12 +64,9 @@ public class FieldTextifier implements Textifier<Field> {
         }
     }
 
-    private void appendSignature(Printer printer, Optional<String> signatureOpt) {
-        signatureOpt.ifPresent(signature -> {
-            printer.addText("signature ");
-            printer.addEscaped(signature, '"');
-            printer.addText(";");
-            printer.newLine();
-        });
+    private void appendAttributes(Printer printer, List<Attribute> attributes) {
+        for (Attribute attribute : attributes) {
+            AttributeTextifier.getInstance().textify(printer, attribute);
+        }
     }
 }
