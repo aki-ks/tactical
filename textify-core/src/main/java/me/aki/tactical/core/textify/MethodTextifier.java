@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class MethodTextifier implements Textifier<Method> {
-    private static final MethodTextifier INSTANCE = new MethodTextifier();
+    private final AbstractBodyTextifier bodyTextifier;
 
-    public static MethodTextifier getInstance() {
-        return INSTANCE;
+    public MethodTextifier(AbstractBodyTextifier bodyTextifier) {
+        this.bodyTextifier = bodyTextifier;
     }
-
-    private MethodTextifier() {}
 
     @Override
     public void textify(Printer printer, Method method) {
@@ -34,7 +32,7 @@ public class MethodTextifier implements Textifier<Method> {
         printer.addText(" ");
         printer.addLiteral(method.getName());
         printer.addText("(");
-        appendArguments(printer, method);
+        bodyTextifier.textifyParameterList(printer, method);
         printer.addText(")");
 
         List<Path> exceptions = method.getExceptions();
@@ -52,6 +50,8 @@ public class MethodTextifier implements Textifier<Method> {
             printer.addText(" {");
             printer.newLine();
             printer.increaseIndent();
+
+            bodyTextifier.textify(printer, body);
 
             printer.decreaseIndent();
             printer.addText("}");
@@ -132,11 +132,5 @@ public class MethodTextifier implements Textifier<Method> {
                     () -> printer.addText(", "));
             printer.addText(" }");
         }
-    }
-
-    private void appendArguments(Printer printer, Method method) {
-        TextUtil.joined(method.getParameterTypes(),
-                type -> TypeTextifier.getInstance().textify(printer, type),
-                () -> printer.addText(", "));
     }
 }
