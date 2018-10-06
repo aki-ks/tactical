@@ -19,7 +19,7 @@ import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.LongConstant;
-import me.aki.tactical.core.constant.MethodHandleConstant;
+import me.aki.tactical.core.constant.HandleConstant;
 import me.aki.tactical.core.constant.MethodTypeConstant;
 import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.StringConstant;
@@ -175,8 +175,8 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
             MethodTypeConstant methodConstant = (MethodTypeConstant) constant;
             visitConvertedInsn(new LdcInsnNode(AsmUtil.methodDescriptorToType(
                     methodConstant.getReturnType(), methodConstant.getArgumentTypes())));
-        } else if (constant instanceof MethodHandleConstant) {
-            Handle handle = ((MethodHandleConstant) constant).getHandle();
+        } else if (constant instanceof HandleConstant) {
+            Handle handle = ((HandleConstant) constant).getHandle();
             visitConvertedInsn(new LdcInsnNode(convertHandle(handle)));
         } else if (constant instanceof DynamicConstant) {
             ConstantDynamic dynamicConstant = convertDynamicConstant((DynamicConstant) constant);
@@ -848,8 +848,8 @@ public class AsmInsnWriter extends StackInsnVisitor<Instruction> {
         } else if (constant instanceof ClassConstant) {
             RefType refType = ((ClassConstant) constant).getValue();
             return AsmUtil.toAsmType(refType);
-        } else if (constant instanceof MethodHandleConstant) {
-            Handle handle = ((MethodHandleConstant) constant).getHandle();
+        } else if (constant instanceof HandleConstant) {
+            Handle handle = ((HandleConstant) constant).getHandle();
             return convertHandle(handle);
         } else if (constant instanceof MethodTypeConstant) {
             MethodTypeConstant methodType = (MethodTypeConstant) constant;

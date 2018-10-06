@@ -9,10 +9,10 @@ import java.util.Objects;
 /**
  * An instance of "java.lang.invoke.MethodHandle".
  */
-public class MethodHandleConstant implements BootstrapConstant, PushableConstant, Constant {
+public class HandleConstant implements BootstrapConstant, PushableConstant, Constant {
     private final Handle handle;
 
-    public MethodHandleConstant(Handle handle) {
+    public HandleConstant(Handle handle) {
         this.handle = handle;
     }
 
@@ -24,7 +24,7 @@ public class MethodHandleConstant implements BootstrapConstant, PushableConstant
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MethodHandleConstant that = (MethodHandleConstant) o;
+        HandleConstant that = (HandleConstant) o;
         return Objects.equals(handle, that.handle);
     }
 
@@ -35,7 +35,7 @@ public class MethodHandleConstant implements BootstrapConstant, PushableConstant
 
     @Override
     public String toString() {
-        return MethodHandleConstant.class.getSimpleName() + '{' +
+        return HandleConstant.class.getSimpleName() + '{' +
                 "handle=" + handle +
                 '}';
     }

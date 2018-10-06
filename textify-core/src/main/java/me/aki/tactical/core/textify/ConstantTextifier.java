@@ -8,7 +8,7 @@ import me.aki.tactical.core.constant.FieldConstant;
 import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.LongConstant;
-import me.aki.tactical.core.constant.MethodHandleConstant;
+import me.aki.tactical.core.constant.HandleConstant;
 import me.aki.tactical.core.constant.MethodTypeConstant;
 import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.PushableConstant;
@@ -35,7 +35,7 @@ public class ConstantTextifier {
         printer.addText(" }");
     };
 
-    public static final Textifier<MethodHandleConstant> HANDLE = (printer, constant) -> {
+    public static final Textifier<HandleConstant> HANDLE = (printer, constant) -> {
         printer.addText("handle { ");
         HandleTextifier.getInstance().textify(printer, constant.getHandle());
         printer.addText(" }");
@@ -56,8 +56,8 @@ public class ConstantTextifier {
             CLASS.textify(printer, (ClassConstant) constant);
         } else if (constant instanceof MethodTypeConstant) {
             METHOD_TYPE.textify(printer, (MethodTypeConstant) constant);
-        } else if (constant instanceof MethodHandleConstant) {
-            HANDLE.textify(printer, (MethodHandleConstant) constant);
+        } else if (constant instanceof HandleConstant) {
+            HANDLE.textify(printer, (HandleConstant) constant);
         } else {
             throw new AssertionError();
         }
@@ -116,8 +116,8 @@ public class ConstantTextifier {
             CLASS.textify(printer, (ClassConstant) constant);
         } else if (constant instanceof MethodTypeConstant) {
             METHOD_TYPE.textify(printer, (MethodTypeConstant) constant);
-        } else if (constant instanceof MethodHandleConstant) {
-            HANDLE.textify(printer, (MethodHandleConstant) constant);
+        } else if (constant instanceof HandleConstant) {
+            HANDLE.textify(printer, (HandleConstant) constant);
         } else if (constant instanceof DynamicConstant) {
             DYNAMIC.textify(printer, (DynamicConstant) constant);
         } else {

@@ -16,7 +16,7 @@ import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.LongConstant;
-import me.aki.tactical.core.constant.MethodHandleConstant;
+import me.aki.tactical.core.constant.HandleConstant;
 import me.aki.tactical.core.constant.MethodTypeConstant;
 import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.StringConstant;
@@ -861,7 +861,7 @@ public class AsmInsnReader {
                     throw new AssertionError();
             }
         } else if (value instanceof org.objectweb.asm.Handle) {
-            return new MethodHandleConstant(convertMethodHandle((org.objectweb.asm.Handle) value));
+            return new HandleConstant(convertMethodHandle((org.objectweb.asm.Handle) value));
         } else {
             throw new AssertionError();
         }
@@ -939,7 +939,7 @@ public class AsmInsnReader {
                     throw new AssertionError();
             }
         } else if (value instanceof org.objectweb.asm.Handle) {
-            return new MethodHandleConstant(convertMethodHandle((org.objectweb.asm.Handle) value));
+            return new HandleConstant(convertMethodHandle((org.objectweb.asm.Handle) value));
         } else if (value instanceof ConstantDynamic) {
             ConstantDynamic constantDynamic = (ConstantDynamic) value;
             String name = constantDynamic.getName();
