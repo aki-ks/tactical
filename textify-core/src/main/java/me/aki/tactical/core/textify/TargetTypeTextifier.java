@@ -22,7 +22,7 @@ public class TargetTypeTextifier {
             printer.addText("return");
 
     private static final Textifier<TargetType.MethodReceiver> METHOD_RECEIVER = (printer, target) ->
-            printer.addText("receiver ");
+            printer.addText("receiver");
 
     private static final Textifier<TargetType.MethodParameter> METHOD_PARAMETER = (printer, target) ->
             printer.addText("parameter " + target.getParameter());
