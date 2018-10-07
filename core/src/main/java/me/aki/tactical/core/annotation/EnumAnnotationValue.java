@@ -2,6 +2,8 @@ package me.aki.tactical.core.annotation;
 
 import me.aki.tactical.core.Path;
 
+import java.util.Objects;
+
 /**
  * Representation of an enum constant (e.g. {@code RetentionPolicy.RUNTIME}).
  */
@@ -35,5 +37,27 @@ public class EnumAnnotationValue implements AnnotationValue {
 
     public void setType(Path type) {
         this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EnumAnnotationValue that = (EnumAnnotationValue) o;
+        return Objects.equals(type, that.type) &&
+                Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, name);
+    }
+
+    @Override
+    public String toString() {
+        return EnumAnnotationValue.class.getSimpleName() + '{' +
+                "type=" + type +
+                ", name='" + name + '\'' +
+                '}';
     }
 }
