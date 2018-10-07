@@ -47,7 +47,8 @@ class CommonTest extends FlatSpec with Matchers with PropertyChecks {
     StringLiteral.parse('"' + "\\t\\n" + '"') shouldEqual "\t\n"
 
     forAll { string: String =>
-      StringLiteral.parse('"' + string + '"') shouldEqual string
+      val escapedString = string.replace("\"", "\\\"")
+      StringLiteral.parse('"' + escapedString + '"') shouldEqual string
     }
   }
 }
