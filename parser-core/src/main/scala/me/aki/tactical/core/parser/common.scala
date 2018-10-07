@@ -64,5 +64,7 @@ object Literal extends Parser[String] {
     "`" ~/ escapableChar.rep(min = 0).map(_.mkString) ~/ "`"
   }
 
-  override val parser: P[String] = escapedString | regularString
+  override val parser: P[String] = P {
+    escapedString | regularString
+  } opaque "<literal>"
 }

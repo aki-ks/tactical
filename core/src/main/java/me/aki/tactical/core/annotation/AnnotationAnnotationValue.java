@@ -2,6 +2,7 @@ package me.aki.tactical.core.annotation;
 
 import me.aki.tactical.core.Path;
 
+import java.util.LinkedHashMap;
 import java.util.Objects;
 
 /**
@@ -10,6 +11,10 @@ import java.util.Objects;
 public class AnnotationAnnotationValue extends AbstractAnnotation implements AnnotationValue {
     public AnnotationAnnotationValue(Path type) {
         super(type);
+    }
+
+    public AnnotationAnnotationValue(Path type, LinkedHashMap<String, AnnotationValue> values) {
+        super(type, values);
     }
 
     @Override

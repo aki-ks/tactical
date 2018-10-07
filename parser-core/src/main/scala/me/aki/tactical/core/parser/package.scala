@@ -9,6 +9,20 @@ package object parser {
     def parse(string: String): T = parser().parse(string).get.value
   }
 
+  val boolean = P {
+    val trueParser = "true".!.map(_ => true)
+    val falseParser = "false".!.map(_ => false)
+
+    trueParser | falseParser
+  }
+
+  private val digit = CharIn('0' to '9').rep(min = 1)
+  val integerNumber = P { "-".? ~ digit }
+  val floatingNumber = P {
+    val num = ("." ~ digit) | (digit ~ ("." ~ digit.?).?)
+    "-".? ~ num ~ (("e" | "E") ~ integerNumber).?
+  }
+
   /** A parser that maps a string to a value */
   class StringParser[T](string: String, value: => T) extends Parser[T] {
     override def parser(): P[T] = P { string } map (_ => value)

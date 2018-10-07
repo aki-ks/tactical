@@ -13,10 +13,16 @@ public class AbstractAnnotation {
     /**
      * Values of all methods of the annotation.
      */
-    private LinkedHashMap<String, AnnotationValue> values = new LinkedHashMap<>();
+    private LinkedHashMap<String, AnnotationValue> values;
 
     public AbstractAnnotation(Path type) {
         this.type = type;
+        this.values = new LinkedHashMap<>();
+    }
+
+    public AbstractAnnotation(Path type, LinkedHashMap<String, AnnotationValue> values) {
+        this.type = type;
+        this.values = values;
     }
 
     public Path getType() {
