@@ -16,11 +16,11 @@ public class TypePathTextifier implements Textifier<TypePath> {
 
     public final static Textifier<TypePath.Kind> KIND = (printer, kind) -> {
         if (kind instanceof TypePath.Kind.Array) {
-            printer.addText("array");
+            printer.addText("[]");
         } else if (kind instanceof Classfile.InnerClass) {
-            printer.addText("inner");
+            printer.addText(".");
         } else if (kind instanceof TypePath.Kind.WildcardBound) {
-            printer.addText("wildcard");
+            printer.addText("?");
         } else if (kind instanceof TypePath.Kind.TypeArgument) {
             int argument = ((TypePath.Kind.TypeArgument) kind).getTypeArgumentIndex();
             printer.addText("<" + argument + ">");
@@ -39,7 +39,7 @@ public class TypePathTextifier implements Textifier<TypePath> {
             printer.addText("{ ");
             TextUtil.joined(paths,
                     kind -> KIND.textify(printer, kind),
-                    () -> printer.addText(", "));
+                    () -> printer.addText(" "));
             printer.addText(" }");
         }
     }
