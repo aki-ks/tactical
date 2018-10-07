@@ -10,25 +10,25 @@ object WS extends Parser[Unit] {
 }
 
 /** Parse one character wrapped by apostrophes */
-object CharLiteral extends Parser[String] {
-  val escapedChar: P[String] = P {
+object CharLiteral extends Parser[Char] {
+  val escapedChar: P[Char] = P {
     val hexDigit = P { CharIn('0' to '9', 'a' to 'f', 'A' to 'F') }.!
 
     "\\" ~ {
-      "t".!.map(_ => "\t") |
-        "b".!.map(_ => "\b") |
-        "n".!.map(_ => "\n") |
-        "r".!.map(_ => "\r") |
-        "f".!.map(_ => "\f") |
-        "\\".!.map(_ => "\\") |
+      "t".!.map(_ => '\t') |
+        "b".!.map(_ => '\b') |
+        "n".!.map(_ => '\n') |
+        "r".!.map(_ => '\r') |
+        "f".!.map(_ => '\f') |
+        "\\".!.map(_ => '\\') |
         ("u" ~ (hexDigit ~ hexDigit ~ hexDigit ~ hexDigit).!).map {
-          digits => Integer.parseInt(digits, 16).toChar.toString
+          digits => Integer.parseInt(digits, 16).toChar
         }
     }
   }
 
-  val parser: P[String] = P {
-    "'" ~ (escapedChar | AnyChar.!) ~ "'"
+  val parser: P[Char] = P {
+    "'" ~ (escapedChar | AnyChar.!.map(_.head)) ~ "'"
   }
 }
 
