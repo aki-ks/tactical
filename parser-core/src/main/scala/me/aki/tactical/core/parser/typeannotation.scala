@@ -2,9 +2,8 @@ package me.aki.tactical.core.parser
 
 import scala.collection.JavaConverters._
 import fastparse.all._
-import me.aki.tactical.core.typeannotation.TargetType
+import me.aki.tactical.core.typeannotation._
 import me.aki.tactical.core.typeannotation.TargetType._
-import me.aki.tactical.core.typeannotation.TypePath
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 
 object TypePathKindParser extends Parser[Kind] {
@@ -68,4 +67,13 @@ object InsnTargetTypeParser extends Parser[InsnTargetType] {
 
 object LocalTargetTypeParser extends Parser[LocalTargetType] {
   val parser = ???
+}
+
+object ClassTypeAnnotationParser extends Parser[ClassTypeAnnotation] {
+  val parser: P[ClassTypeAnnotation] = for {
+    (typePath, target, annotation) ← "#" ~ WS.? ~ "[" ~ WS.? ~
+      "path" ~ WS.? ~ "=" ~ WS.? ~ TypePathParser ~ WS.? ~ "," ~ WS.? ~
+      "target" ~ WS.? ~ "=" ~ WS.? ~ ClassTargetTypeParser ~ WS.? ~ "," ~ WS.? ~
+      "annotation" ~ WS.? ~ "=" ~ WS.? ~ AnnotationParser ~ WS.? ~ "]"
+  } yield new ClassTypeAnnotation(typePath, annotation, target)
 }

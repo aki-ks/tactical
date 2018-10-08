@@ -1,9 +1,12 @@
 package me.aki.tactical.core.parser.test
 
+import me.aki.tactical.core.Path
+import me.aki.tactical.core.annotation.Annotation
+
 import scala.collection.JavaConverters._
 import me.aki.tactical.core.parser._
+import me.aki.tactical.core.typeannotation._
 import me.aki.tactical.core.typeannotation.TargetType._
-import me.aki.tactical.core.typeannotation.TypePath
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
@@ -58,6 +61,14 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
 
     forAll { (parameter: Int, bound: Int) =>
       ClassTargetTypeParser.parse(s"type parameter bound $parameter $bound") shouldEqual new TypeParameterBound(parameter, bound)
+    }
+  }
+
+  "The ClassTypeAnnotationParser" should "parse classfile type annotations" in {
+    ClassTypeAnnotationParser.parse("#[path = { ? <1> }, target = extends, annotation = @java.lang.Override[visible = true]()]") shouldEqual {
+      val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
+      val annotation = new Annotation(Path.of("java", "lang", "Object"), true)
+      new ClassTypeAnnotation(typePath, annotation, new Extends())
     }
   }
 }
