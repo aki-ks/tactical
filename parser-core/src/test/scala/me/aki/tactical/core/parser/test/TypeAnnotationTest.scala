@@ -44,4 +44,20 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
       MethodTargetTypeParser.parse(s"type parameter bound $parameter $bound") shouldEqual new TypeParameterBound(parameter, bound)
     }
   }
+
+  "The ClassTargetTypeParser" should "parse all kinds of ClassTargetTypeParser" in {
+    ClassTargetTypeParser.parse("extends") shouldEqual new Extends()
+
+    forAll { interface: Int =>
+      ClassTargetTypeParser.parse(s"implements $interface") shouldEqual new Implements(interface)
+    }
+
+    forAll { parameter: Int =>
+      ClassTargetTypeParser.parse(s"type parameter $parameter") shouldEqual new TypeParameter(parameter)
+    }
+
+    forAll { (parameter: Int, bound: Int) =>
+      ClassTargetTypeParser.parse(s"type parameter bound $parameter $bound") shouldEqual new TypeParameterBound(parameter, bound)
+    }
+  }
 }

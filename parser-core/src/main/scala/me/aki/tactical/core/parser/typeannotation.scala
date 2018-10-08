@@ -38,6 +38,8 @@ object TargetTypeParsers {
   val typeParameterBound =
     for ((param, bound) ← "type" ~ WS ~ "parameter" ~ WS ~ "bound" ~ WS ~ integerNumber.! ~ WS ~ integerNumber.!)
       yield new TypeParameterBound(param.toInt, bound.toInt)
+  val `extends` = for (_ ← "extends".!) yield new Extends()
+  val `implementes` = for (i ← "implements" ~ WS ~ integerNumber.!) yield new Implements(i.toInt)
 }
 
 object MethodTargetTypeParser extends Parser[MethodTargetType] {
@@ -51,14 +53,19 @@ object MethodTargetTypeParser extends Parser[MethodTargetType] {
   }
 }
 
-object ClassTargetType extends Parser[ClassTargetType] {
+object ClassTargetTypeParser extends Parser[ClassTargetType] {
+  val parser: P[ClassTargetType] = P {
+    TargetTypeParsers.`extends` |
+    TargetTypeParsers.`implementes` |
+    TargetTypeParsers.typeParameter |
+    TargetTypeParsers.typeParameterBound
+  }
+}
+
+object InsnTargetTypeParser extends Parser[InsnTargetType] {
   val parser = ???
 }
 
-object InsnTargetType extends Parser[InsnTargetType] {
-  val parser = ???
-}
-
-object LocalTargetType extends Parser[LocalTargetType] {
+object LocalTargetTypeParser extends Parser[LocalTargetType] {
   val parser = ???
 }
