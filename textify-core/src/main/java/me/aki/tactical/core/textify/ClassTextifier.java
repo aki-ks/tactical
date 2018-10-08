@@ -101,11 +101,14 @@ public class ClassTextifier implements Textifier<Classfile> {
     }
 
     private void appendPackage(Printer printer, Path path) {
-        printer.addText("package ");
-        TextUtil.joined(path.getPackage(),
-                printer::addLiteral, () -> printer.addText("."));
-        printer.addText(";");
-        printer.newLine();
+        List<String> pkg = path.getPackage();
+        if (!pkg.isEmpty()) {
+            printer.addText("package ");
+            TextUtil.joined(pkg,
+                    printer::addLiteral, () -> printer.addText("."));
+            printer.addText(";");
+            printer.newLine();
+        }
     }
 
     private void appendVersion(Printer printer, Classfile.Version version) {
