@@ -127,7 +127,7 @@ object AnnotationParser extends Parser[Annotation] {
 
   val parser: P[Annotation] = P {
     val annotationClass = P { "@" ~ WS.? ~ PathParser }
-    val visibility = P { "[" ~ WS.? ~ "visible" ~ "=" ~ boolean ~ "]" }
+    val visibility = P { "[" ~ WS.? ~ "visible" ~ WS.? ~ "=" ~ WS.? ~ boolean ~ WS.? ~ "]" }
     val valueList = P { "(" ~ WS.? ~ AnnotationParser.values ~ WS.? ~ ")" }
 
     for ((path, isVisible, values) ← annotationClass ~ WS.? ~ visibility ~ WS.? ~ valueList)
