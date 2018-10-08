@@ -3,6 +3,7 @@ package me.aki.tactical.core.annotation;
 import me.aki.tactical.core.Path;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 /**
  * An annotation as declared within classes/methods/field and for types.
@@ -29,5 +30,27 @@ public class Annotation extends AbstractAnnotation {
 
     public void setRuntimeVisible(boolean runtimeVisible) {
         isRuntimeVisible = runtimeVisible;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Annotation that = (Annotation) o;
+        return isRuntimeVisible == that.isRuntimeVisible;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isRuntimeVisible);
+    }
+
+    @Override
+    public String toString() {
+        return Annotation.class.getSimpleName() + '{' +
+                "isRuntimeVisible=" + isRuntimeVisible +
+                ", type=" + getType() +
+                ", values=" + getValues() +
+                '}';
     }
 }
