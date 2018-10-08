@@ -71,4 +71,12 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
       new ClassTypeAnnotation(typePath, annotation, new Extends())
     }
   }
+
+  "The MethodTypeAnnotationParser" should "parse method type annotations" in {
+    MethodTypeAnnotationParser.parse("#[path = { ? <1> }, target = return, annotation = @java.lang.Override[visible = true]()]") shouldEqual {
+      val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
+      val annotation = new Annotation(Path.of("java", "lang", "Object"), true)
+      new MethodTypeAnnotation(typePath, annotation, new ReturnType())
+    }
+  }
 }
