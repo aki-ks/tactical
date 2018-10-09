@@ -316,27 +316,19 @@ public class ClassTextifier implements Textifier<Classfile> {
     }
 
     private void appendNests(Printer printer, Optional<Path> nestHost, List<Path> nestMembers) {
-        if (nestHost.isPresent() || !nestMembers.isEmpty()) {
-            printer.addText("nest {");
+        nestHost.ifPresent(host -> {
+            printer.addText("nest host ");
+            printer.addPath(host);
+            printer.addText(";");
             printer.newLine();
-            printer.increaseIndent();
+        });
 
-            nestHost.ifPresent(host -> {
-                printer.addText("host ");
-                printer.addPath(host);
-                printer.addText(";");
-                printer.newLine();
-            });
-
-            nestMembers.forEach(member -> {
-                printer.addText("member ");
-                printer.addPath(member);
-                printer.addText(";");
-                printer.newLine();
-            });
-
-            printer.decreaseIndent();
-            printer.addText("}");
+        if (!nestMembers.isEmpty()) {
+            printer.addText("nest member ");
+            TextUtil.joined(nestMembers,
+                    printer::addPath,
+                    () -> printer.addText(", "));
+            printer.addText(";");
             printer.newLine();
         }
     }
