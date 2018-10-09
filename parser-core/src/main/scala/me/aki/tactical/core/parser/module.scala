@@ -9,7 +9,7 @@ import me.aki.tactical.core.{ Module, Path }
 
 object ModuleParser extends Parser[Module] {
   val parser: P[Module] = P {
-    ModuleAccessParser ~ WS.? ~ "module" ~ WS ~ PathParser ~ WS.? ~ "{" ~ WS.? ~
+    ModuleFlagParser ~ WS.? ~ "module" ~ WS ~ PathParser ~ WS.? ~ "{" ~ WS.? ~
       ModuleContentParser.rep(sep = WS.?) ~ WS.? ~ "}"
   } map {
     case (flags, name, contents) =>
@@ -84,20 +84,20 @@ object ModuleContentParser extends Parser[ModuleContent] {
 
   object RequireParser extends Parser[ModuleContent.Require] {
     val parser: P[ModuleContent.Require] =
-      for ((flags, name, version) ← ModuleRequireAccessParser ~ "requires" ~ WS ~ PathParser ~ WS.? ~ (":" ~ WS.? ~ StringLiteral ~ WS.?).? ~ ";")
+      for ((flags, name, version) ← ModuleRequireFlagParser ~ "requires" ~ WS ~ PathParser ~ WS.? ~ (":" ~ WS.? ~ StringLiteral ~ WS.?).? ~ ";")
         yield new ModuleContent.Require(new Module.Require(name, flags, Optional.ofNullable(version.orNull)))
   }
 
   object ExportParser extends Parser[ModuleContent.Export] {
     val parser: P[ModuleContent.Export] =
-      for ((flags, name, modules) ← ModuleExportAccessParser ~ "exports" ~ WS.? ~ PathParser ~ WS.? ~
+      for ((flags, name, modules) ← ModuleExportFlagParser ~ "exports" ~ WS.? ~ PathParser ~ WS.? ~
         ("to" ~ WS.? ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.?).? ~ ";")
         yield new ModuleContent.Export(new Module.Export(name, flags, modules.getOrElse(Nil).asJava))
   }
 
   object OpensParser extends Parser[ModuleContent.Opens] {
     val parser: P[ModuleContent.Opens] =
-      for ((flags, name, modules) ← ModuleOpensAccessParser ~ "opens" ~ WS.? ~ PathParser ~ WS.? ~
+      for ((flags, name, modules) ← ModuleOpensFlagParser ~ "opens" ~ WS.? ~ PathParser ~ WS.? ~
         ("to" ~ WS.? ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.?).? ~ ";")
         yield new ModuleContent.Opens(new Module.Open(name, flags, modules.getOrElse(Nil).asJava))
   }
