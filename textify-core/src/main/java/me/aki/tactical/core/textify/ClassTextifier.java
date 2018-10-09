@@ -270,7 +270,7 @@ public class ClassTextifier implements Textifier<Classfile> {
                 });
 
                 enclosingMethod.getDescriptor().ifPresent(descriptor -> {
-                    printer.addText("descriptor = (");
+                    printer.addText("descriptor = ");
                     MethodDescriptorTextifier.getInstance().textify(printer, descriptor);
                     printer.addText(";");
                     printer.newLine();

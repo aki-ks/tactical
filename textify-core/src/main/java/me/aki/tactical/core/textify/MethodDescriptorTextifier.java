@@ -13,6 +13,8 @@ public class MethodDescriptorTextifier implements Textifier<MethodDescriptor> {
 
     @Override
     public void textify(Printer printer, MethodDescriptor descriptor) {
+        printer.addText("(");
+
         TextUtil.joined(descriptor.getParameterTypes(),
                 type -> TypeTextifier.getInstance().textify(printer, type),
                 () -> printer.addText(", "));
