@@ -1,7 +1,11 @@
 package me.aki.tactical.core.parser
 
+import scala.collection.JavaConverters._
+
+import java.util.Optional
+
 import fastparse.all._
-import me.aki.tactical.core.Path
+import me.aki.tactical.core._
 import me.aki.tactical.core.`type`._
 
 object BooleanTypeParser extends StringParser[BooleanType]("boolean", BooleanType.getInstance())
@@ -74,4 +78,10 @@ object ClassLiteral extends Parser[Type] {
 
     typeParser ~ WS.? ~ "." ~ WS.? ~ "class"
   } opaque "<type>.class"
+}
+
+object MethodDescriptorParser extends Parser[MethodDescriptor] {
+  val parser: P[MethodDescriptor] =
+    for ((paramTypes, returnType) ← "(" ~ WS.? ~ TypeParser.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ ")" ~ WS.? ~ TypeParser.?)
+      yield new MethodDescriptor(paramTypes.asJava, Optional.ofNullable(returnType.orNull))
 }
