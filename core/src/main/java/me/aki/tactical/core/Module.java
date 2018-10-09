@@ -145,6 +145,44 @@ public class Module {
         this.provides = provides;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Module module1 = (Module) o;
+        return Objects.equals(module, module1.module) &&
+                Objects.equals(accessFlags, module1.accessFlags) &&
+                Objects.equals(version, module1.version) &&
+                Objects.equals(mainClass, module1.mainClass) &&
+                Objects.equals(packages, module1.packages) &&
+                Objects.equals(requires, module1.requires) &&
+                Objects.equals(exports, module1.exports) &&
+                Objects.equals(opens, module1.opens) &&
+                Objects.equals(uses, module1.uses) &&
+                Objects.equals(provides, module1.provides);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(module, accessFlags, version, mainClass, packages, requires, exports, opens, uses, provides);
+    }
+
+    @Override
+    public String toString() {
+        return Module.class.getSimpleName() + '{' +
+                "module=" + module +
+                ", accessFlags=" + accessFlags +
+                ", version=" + version +
+                ", mainClass=" + mainClass +
+                ", packages=" + packages +
+                ", requires=" + requires +
+                ", exports=" + exports +
+                ", opens=" + opens +
+                ", uses=" + uses +
+                ", provides=" + provides +
+                '}';
+    }
+
     public static enum Flag {
         OPEN, SYNTHETIC, MANDATED
     }
