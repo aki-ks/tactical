@@ -47,3 +47,17 @@ object ModuleOpensFlagParser extends FlagParser[Module.Open.Flag](
   "synthetic" -> Module.Open.Flag.SYNTHETIC,
   "mandated" -> Module.Open.Flag.MANDATED
 )
+
+object InnerClassFlagParser extends FlagParser[Classfile.InnerClass.Flag](
+  "public" -> Classfile.InnerClass.Flag.PUBLIC,
+  "private" -> Classfile.InnerClass.Flag.PRIVATE,
+  "protected" -> Classfile.InnerClass.Flag.PROTECTED,
+  "static" -> Classfile.InnerClass.Flag.STATIC,
+  "final" -> Classfile.InnerClass.Flag.FINAL,
+  "abstract" -> Classfile.InnerClass.Flag.ABSTRACT,
+  "synthetic" -> Classfile.InnerClass.Flag.SYNTHETIC,
+
+  "interface" -> Classfile.InnerClass.Flag.INTERFACE,
+  "@interface" -> Classfile.InnerClass.Flag.ANNOTATION,
+  "enum" -> Classfile.InnerClass.Flag.ENUM
+)
