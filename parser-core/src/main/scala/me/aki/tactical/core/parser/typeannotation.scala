@@ -11,10 +11,7 @@ object TypePathKindParser extends Parser[Kind] {
     val array = for (_ ← "[]".!) yield new Kind.Array()
     val inner = for (_ ← ".".!) yield new Kind.InnerClass()
     val wildcard = for (_ ← "?".!) yield new Kind.WildcardBound()
-    val typeArgument = P[Kind] {
-      for (i ← "<" ~ integerNumber.! ~ ">")
-        yield new Kind.TypeArgument(i.toInt)
-    }
+    val typeArgument = for (argument ← "<" ~ int ~ ">") yield new Kind.TypeArgument(argument)
 
     array | inner | wildcard | typeArgument
   }
@@ -29,16 +26,14 @@ object TypePathParser extends Parser[TypePath] {
 
 object TargetTypeParsers {
   import TargetType._
-  val checkedException = for (i ← "exception" ~ WS ~ integerNumber.!) yield new CheckedException(i.toInt)
-  val parameters = for (i ← "parameter" ~ WS ~ integerNumber.!) yield new MethodParameter(i.toInt)
+  val checkedException = for (exception ← "exception" ~ WS ~ int) yield new CheckedException(exception)
+  val parameters = for (parameter ← "parameter" ~ WS ~ int) yield new MethodParameter(parameter)
   val receiver = for (_ ← "receiver".!) yield new MethodReceiver()
   val returnType = for (_ ← "return".!) yield new ReturnType()
-  val typeParameter = for (i ← "type" ~ WS ~ "parameter" ~ WS ~ integerNumber.!) yield new TypeParameter(i.toInt)
-  val typeParameterBound =
-    for ((param, bound) ← "type" ~ WS ~ "parameter" ~ WS ~ "bound" ~ WS ~ integerNumber.! ~ WS ~ integerNumber.!)
-      yield new TypeParameterBound(param.toInt, bound.toInt)
+  val typeParameter = for (typeParam ← "type" ~ WS ~ "parameter" ~ WS ~ int) yield new TypeParameter(typeParam)
+  val typeParameterBound = for ((param, bound) ← "type" ~ WS ~ "parameter" ~ WS ~ "bound" ~ WS ~ int ~ WS ~ int) yield new TypeParameterBound(param, bound)
   val `extends` = for (_ ← "extends".!) yield new Extends()
-  val `implementes` = for (i ← "implements" ~ WS ~ integerNumber.!) yield new Implements(i.toInt)
+  val `implementes` = for (interface ← "implements" ~ WS ~ int) yield new Implements(interface)
 }
 
 object MethodTargetTypeParser extends Parser[MethodTargetType] {

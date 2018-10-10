@@ -13,44 +13,37 @@ object BooleanAnnotationValueParser extends Parser[BooleanAnnotationValue] {
 
 object ByteAnnotationValueParser extends Parser[ByteAnnotationValue] {
   val parser: P[ByteAnnotationValue] =
-    for (byte ← integerNumber.! ~ ("b" | "B"))
-      yield new ByteAnnotationValue(byte.toByte)
+    for (byte ← byte ~ ("b" | "B")) yield new ByteAnnotationValue(byte)
 }
 
 object CharAnnotationValueParser extends Parser[CharAnnotationValue] {
   val parser: P[CharAnnotationValue] =
-    for (char ← CharLiteral)
-      yield new CharAnnotationValue(char)
+    for (char ← CharLiteral) yield new CharAnnotationValue(char)
 }
 
 object ShortAnnotationValueParser extends Parser[ShortAnnotationValue] {
   val parser: P[ShortAnnotationValue] =
-    for (short ← integerNumber.! ~ ("s" | "S"))
-      yield new ShortAnnotationValue(short.toShort)
+    for (short ← short ~ ("s" | "S")) yield new ShortAnnotationValue(short)
 }
 
 object IntAnnotationValueParser extends Parser[IntAnnotationValue] {
   val parser: P[IntAnnotationValue] =
-    for (int ← integerNumber.!)
-      yield new IntAnnotationValue(int.toInt)
+    for (int ← int) yield new IntAnnotationValue(int)
 }
 
 object LongAnnotationValueParser extends Parser[LongAnnotationValue] {
   val parser: P[LongAnnotationValue] =
-    for (long ← integerNumber.! ~ ("l" | "L"))
-      yield new LongAnnotationValue(long.toLong)
+    for (long ← long ~ ("l" | "L")) yield new LongAnnotationValue(long)
 }
 
 object FloatAnnotationValueParser extends Parser[FloatAnnotationValue] {
   val parser: P[FloatAnnotationValue] =
-    for (float ← floatingNumber.! ~ ("f" | "F"))
-      yield new FloatAnnotationValue(float.toFloat)
+    for (float ← float ~ ("f" | "F")) yield new FloatAnnotationValue(float)
 }
 
 object DoubleAnnotationValueParser extends Parser[DoubleAnnotationValue] {
   val parser: P[DoubleAnnotationValue] =
-    for (double ← floatingNumber.! ~ ("d" | "D"))
-      yield new DoubleAnnotationValue(double.toDouble)
+    for (double ← double ~ ("d" | "D")) yield new DoubleAnnotationValue(double)
 }
 
 object PrimitiveAnnotationValueParser extends Parser[PrimitiveAnnotationValue] {

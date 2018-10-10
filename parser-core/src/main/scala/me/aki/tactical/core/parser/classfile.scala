@@ -13,7 +13,7 @@ object ClassfileParser extends Parser[Classfile] {
   val parser: P[Classfile] = P {
 
     val pkg = "package" ~ WS ~ Literal.rep(min = 1, sep = WS.? ~ "." ~ WS.?) ~ WS.? ~ ";"
-    val version = "version" ~ WS ~ integerNumber.! ~ WS.? ~ "." ~ WS.? ~ integerNumber.! ~ WS.? ~ ";"
+    val version = "version" ~ WS ~ int ~ WS.? ~ "." ~ WS.? ~ int ~ WS.? ~ ";"
 
     val classDescriptor = P {
       val classKeywordParser = Seq(
