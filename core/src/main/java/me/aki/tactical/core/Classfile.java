@@ -289,6 +289,62 @@ public class Classfile {
         this.typeAnnotations = typeAnnotations;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Classfile classfile = (Classfile) o;
+        return Objects.equals(version, classfile.version) &&
+                Objects.equals(accessFlags, classfile.accessFlags) &&
+                Objects.equals(name, classfile.name) &&
+                Objects.equals(supertype, classfile.supertype) &&
+                Objects.equals(interfaces, classfile.interfaces) &&
+                Objects.equals(signature, classfile.signature) &&
+                Objects.equals(source, classfile.source) &&
+                Objects.equals(sourceDebug, classfile.sourceDebug) &&
+                Objects.equals(innerClasses, classfile.innerClasses) &&
+                Objects.equals(enclosingMethod, classfile.enclosingMethod) &&
+                Objects.equals(nestHost, classfile.nestHost) &&
+                Objects.equals(nestMembers, classfile.nestMembers) &&
+                Objects.equals(module, classfile.module) &&
+                Objects.equals(fields, classfile.fields) &&
+                Objects.equals(methods, classfile.methods) &&
+                Objects.equals(annotations, classfile.annotations) &&
+                Objects.equals(typeAnnotations, classfile.typeAnnotations) &&
+                Objects.equals(attributes, classfile.attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(version, accessFlags, name, supertype, interfaces, signature, source,
+                sourceDebug, innerClasses, enclosingMethod, nestHost, nestMembers, module, fields,
+                methods, annotations, typeAnnotations, attributes);
+    }
+
+    @Override
+    public String toString() {
+        return Classfile.class.getSimpleName() + '{' +
+                "version=" + version +
+                ", accessFlags=" + accessFlags +
+                ", name=" + name +
+                ", supertype=" + supertype +
+                ", interfaces=" + interfaces +
+                ", signature=" + signature +
+                ", source=" + source +
+                ", sourceDebug=" + sourceDebug +
+                ", innerClasses=" + innerClasses +
+                ", enclosingMethod=" + enclosingMethod +
+                ", nestHost=" + nestHost +
+                ", nestMembers=" + nestMembers +
+                ", module=" + module +
+                ", fields=" + fields +
+                ", methods=" + methods +
+                ", annotations=" + annotations +
+                ", typeAnnotations=" + typeAnnotations +
+                ", attributes=" + attributes +
+                '}';
+    }
+
     /**
      * Version of a classfile mostly denoted as "[major].[minor]" (e.g. 52.0)
      */
