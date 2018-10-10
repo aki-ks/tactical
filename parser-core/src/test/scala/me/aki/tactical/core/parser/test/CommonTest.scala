@@ -26,22 +26,23 @@ class CommonTest extends FlatSpec with Matchers with PropertyChecks {
     CharLiteral.parse("'\\u4321'") shouldEqual '\u4321'
   }
 
-  "The Literal parser" should "parse unescaped strings" in {
+  "The Literal parser" should "parse unescaped literals" in {
     Literal.parse("abc") shouldEqual "abc"
     Literal.parse("abc123$_") shouldEqual "abc123$_"
   }
 
-  it should "parse escaped Strings with any content" in {
+  it should "parse escaped Literals with any content" in {
     Literal.parse("`abc123äöüß`") shouldEqual "abc123äöüß"
     Literal.parse("`\\``") shouldEqual "`"
     Literal.parse("``") shouldEqual ""
 
     forAll { string: String =>
-      Literal.parse(s"`$string`") shouldEqual string
+      val escapedString = string.replace("`", "\\`")
+      Literal.parse(s"`$escapedString`") shouldEqual string
     }
   }
 
-  "The StringLiteral parser" should "parse strings with any content" in {
+  "The StringLiteral parser" should "parse strings literals with any content" in {
     StringLiteral.parse('"' + "\"" + '"') shouldEqual ""
     StringLiteral.parse('"' + "\\\""+ '"') shouldEqual "\""
     StringLiteral.parse('"' + "\\t\\n" + '"') shouldEqual "\t\n"
