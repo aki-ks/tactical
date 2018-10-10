@@ -80,8 +80,16 @@ object ClassLiteral extends Parser[Type] {
   } opaque "<type>.class"
 }
 
+object ReturnTypeParser extends Parser[Optional[Type]] {
+  val parser: P[Optional[Type]] = P {
+    val voidType = for(_ ← "void".!) yield Optional.empty[Type]
+    val otherType = for (typ ← TypeParser) yield Optional.of(typ)
+    voidType | otherType
+  }
+}
+
 object MethodDescriptorParser extends Parser[MethodDescriptor] {
   val parser: P[MethodDescriptor] =
-    for ((paramTypes, returnType) ← "(" ~ WS.? ~ TypeParser.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ ")" ~ WS.? ~ TypeParser.?)
-      yield new MethodDescriptor(paramTypes.asJava, Optional.ofNullable(returnType.orNull))
+    for ((paramTypes, returnType) ← "(" ~ WS.? ~ TypeParser.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ ")" ~ WS.? ~ ReturnTypeParser)
+      yield new MethodDescriptor(paramTypes.asJava, returnType)
 }
