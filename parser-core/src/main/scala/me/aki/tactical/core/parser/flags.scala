@@ -13,7 +13,7 @@ class FlagParser[F <: Enum[F]](flags: (String, F)*) extends Parser[JSet[F]] {
         yield P[F] { (name ~ WS).!.map(_ => flag) }
     } reduce (_ | _)
 
-    flagParser.rep(sep = WS).map(x => new JHashSet(x.asJava))
+    for (flags ← flagParser.rep) yield new JHashSet(flags.asJava)
   }
 }
 
