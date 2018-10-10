@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import java.util.{HashSet => JHashSet, Set => JSet}
 
 import fastparse.all._
-import me.aki.tactical.core.{ Classfile, Module }
+import me.aki.tactical.core._
 
 class FlagParser[F <: Enum[F]](flags: (String, F)*) extends Parser[JSet[F]] {
   val parser: P[JSet[F]] = {
@@ -60,4 +60,16 @@ object InnerClassFlagParser extends FlagParser[Classfile.InnerClass.Flag](
   "interface" -> Classfile.InnerClass.Flag.INTERFACE,
   "@interface" -> Classfile.InnerClass.Flag.ANNOTATION,
   "enum" -> Classfile.InnerClass.Flag.ENUM
+)
+
+object FieldFlagParser extends FlagParser[Field.Flag](
+  "public" -> Field.Flag.PUBLIC,
+  "private" -> Field.Flag.PRIVATE,
+  "protected" -> Field.Flag.PROTECTED,
+  "static" -> Field.Flag.STATIC,
+  "final" -> Field.Flag.FINAL,
+  "volatile" -> Field.Flag.VOLATILE,
+  "transient" -> Field.Flag.TRANSIENT,
+  "synthetic" -> Field.Flag.SYNTHETIC,
+  "enum" -> Field.Flag.ENUM
 )
