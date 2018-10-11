@@ -73,3 +73,18 @@ object FieldFlagParser extends FlagParser[Field.Flag](
   "synthetic" -> Field.Flag.SYNTHETIC,
   "enum" -> Field.Flag.ENUM
 )
+
+object MethodFlagParser extends FlagParser[Method.Flag] {
+  "public" -> Method.Flag.PUBLIC,
+  "private" -> Method.Flag.PRIVATE,
+  "protected" -> Method.Flag.PROTECTED,
+  "static" -> Method.Flag.STATIC,
+  "final" -> Method.Flag.FINAL,
+  "synchronized" -> Method.Flag.SYNCHRONIZED,
+  "bridge" -> Method.Flag.BRIDGE,
+  "varargs" -> Method.Flag.VARARGS,
+  "native" -> Method.Flag.NATIVE,
+  "abstract" -> Method.Flag.ABSTRACT,
+  "strict" -> Method.Flag.STRICT,
+  "synthetic" -> Method.Flag.SYNTHETIC
+}
