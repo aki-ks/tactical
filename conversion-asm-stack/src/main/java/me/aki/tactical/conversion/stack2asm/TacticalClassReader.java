@@ -5,7 +5,6 @@ import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Method;
-import me.aki.tactical.core.Path;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FieldConstant;
@@ -53,7 +52,7 @@ public class TacticalClassReader {
 
     private void visit(ClassVisitor cv) {
         int version = convertVersion(classfile.getVersion());
-        int access = AccessConverter.classfile.toBitMap(classfile.getAccessFlags());
+        int access = AccessConverter.classfile.toBitMap(classfile.getFlags());
         String name = AsmUtil.toInternalName(classfile.getName());
         String signature = classfile.getSignature().orElse(null);
         String superName = classfile.getSupertype() == null ? null :
@@ -178,7 +177,7 @@ public class TacticalClassReader {
 
     private void visitFields(ClassVisitor cv) {
         for (Field field : this.classfile.getFields()) {
-            int access = AccessConverter.field.toBitMap(field.getAccessFlags());
+            int access = AccessConverter.field.toBitMap(field.getFlags());
             String name = field.getName();
             String descriptor = AsmUtil.toDescriptor(field.getType());
             String signature = field.getSignature().orElse(null);
@@ -209,7 +208,7 @@ public class TacticalClassReader {
 
     private void visitMethods(ClassVisitor cv) {
         for (Method method : classfile.getMethods()) {
-            int access = AccessConverter.method.toBitMap(method.getAccessFlags());
+            int access = AccessConverter.method.toBitMap(method.getFlags());
             String name = method.getName();
             String descriptor = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getParameterTypes());
             String signature = method.getSignature().orElse(name);

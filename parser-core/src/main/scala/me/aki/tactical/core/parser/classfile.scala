@@ -43,8 +43,8 @@ object ClassfileParser extends Parser[Classfile] {
           new Classfile(version, fullName, superType.orNull, interfaces.getOrElse(Nil).asJava)
         }
 
-        classfile.getAccessFlags.addAll(flags)
-        classTypeFlag.foreach(classfile.getAccessFlags.add)
+        classfile.getFlags.addAll(flags)
+        classTypeFlag.foreach(classfile.getFlags.add)
 
         prefixes.foreach(_ apply classfile)
         contents.foreach(_ apply classfile)

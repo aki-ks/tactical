@@ -14,7 +14,7 @@ object FieldParser extends Parser[Field] {
     } map {
       case (prefixes, flags, typ, name, constant) =>
         val field = new Field(name, typ)
-        field.getAccessFlags.addAll(flags)
+        field.getFlags.addAll(flags)
         field.setValue(Optional.ofNullable(constant.orNull))
         prefixes foreach (_ apply field)
         field

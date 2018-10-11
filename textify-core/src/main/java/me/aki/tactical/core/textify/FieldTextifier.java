@@ -24,7 +24,7 @@ public class FieldTextifier implements Textifier<Field> {
         appendTypeAnnotations(printer, field.getTypeAnnotations());
         appendAttributes(printer, field.getAttributes());
 
-        FlagTextifier.FIELD.textify(printer, field.getAccessFlags());
+        FlagTextifier.FIELD.textify(printer, field.getFlags());
         TypeTextifier.getInstance().textify(printer, field.getType());
         printer.addText(" ");
         printer.addLiteral(field.getName());

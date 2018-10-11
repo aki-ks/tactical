@@ -18,7 +18,7 @@ public class Method {
     /**
      * All access flags that are set for this method.
      */
-    private Set<Flag> accessFlags = new HashSet<>();
+    private Set<Flag> flags = new HashSet<>();
 
     /**
      * Name of the method
@@ -93,12 +93,12 @@ public class Method {
         this.returnType = returnType;
     }
 
-    public Set<Flag> getAccessFlags() {
-        return accessFlags;
+    public Set<Flag> getFlags() {
+        return flags;
     }
 
-    public void setAccessFlags(Set<Flag> accessFlags) {
-        this.accessFlags = accessFlags;
+    public void setFlags(Set<Flag> flags) {
+        this.flags = flags;
     }
 
     /**
@@ -108,7 +108,7 @@ public class Method {
      * @return is the flag set
      */
     public boolean getFlag(Flag flag) {
-        return accessFlags.contains(flag);
+        return flags.contains(flag);
     }
 
     /**
@@ -119,9 +119,9 @@ public class Method {
      */
     public void setFlag(Flag flag, boolean shouldSet) {
         if (shouldSet) {
-            accessFlags.add(flag);
+            flags.add(flag);
         } else {
-            accessFlags.remove(flag);
+            flags.remove(flag);
         }
     }
 

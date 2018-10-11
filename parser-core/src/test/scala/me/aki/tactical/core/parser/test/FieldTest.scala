@@ -19,7 +19,7 @@ class FieldTest extends FlatSpec with Matchers {
   }
 
   it should "parse flags" in {
-    FieldParser.parse("private static final int foo;").getAccessFlags shouldEqual
+    FieldParser.parse("private static final int foo;").getFlags shouldEqual
       JSet.of(Field.Flag.PRIVATE, Field.Flag.FINAL, Field.Flag.STATIC)
   }
 

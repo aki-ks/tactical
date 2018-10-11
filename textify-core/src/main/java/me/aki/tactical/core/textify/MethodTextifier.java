@@ -25,7 +25,7 @@ public class MethodTextifier implements Textifier<Method> {
         appendParameterInfos(printer, method.getParameterInfo());
         appendParameterAnnotations(printer, method.getParameterAnnotations());
 
-        FlagTextifier.METHOD.textify(printer, method.getAccessFlags());
+        FlagTextifier.METHOD.textify(printer, method.getFlags());
         method.getReturnType().ifPresentOrElse(
                 type -> TypeTextifier.getInstance().textify(printer, type),
                 () -> printer.addText("void"));

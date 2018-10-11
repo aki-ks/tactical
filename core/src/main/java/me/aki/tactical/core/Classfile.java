@@ -22,7 +22,7 @@ public class Classfile {
     /**
      * Access flags of this classfile
      */
-    private Set<Flag> accessFlags = new HashSet<>();
+    private Set<Flag> flags = new HashSet<>();
 
     /**
      * Package and name of the classfile
@@ -217,12 +217,12 @@ public class Classfile {
         this.module = module;
     }
 
-    public Set<Flag> getAccessFlags() {
-        return accessFlags;
+    public Set<Flag> getFlags() {
+        return flags;
     }
 
-    public void setAccessFlags(Set<Flag> accessFlags) {
-        this.accessFlags = accessFlags;
+    public void setFlags(Set<Flag> flags) {
+        this.flags = flags;
     }
 
     /**
@@ -232,7 +232,7 @@ public class Classfile {
      * @return is the flag set
      */
     public boolean getFlag(Flag flag) {
-        return accessFlags.contains(flag);
+        return flags.contains(flag);
     }
 
     /**
@@ -243,9 +243,9 @@ public class Classfile {
      */
     public void setFlag(Flag flag, boolean shouldSet) {
         if (shouldSet) {
-            accessFlags.add(flag);
+            flags.add(flag);
         } else {
-            accessFlags.remove(flag);
+            flags.remove(flag);
         }
     }
 
@@ -295,7 +295,7 @@ public class Classfile {
         if (o == null || getClass() != o.getClass()) return false;
         Classfile classfile = (Classfile) o;
         return Objects.equals(version, classfile.version) &&
-                Objects.equals(accessFlags, classfile.accessFlags) &&
+                Objects.equals(flags, classfile.flags) &&
                 Objects.equals(name, classfile.name) &&
                 Objects.equals(supertype, classfile.supertype) &&
                 Objects.equals(interfaces, classfile.interfaces) &&
@@ -316,7 +316,7 @@ public class Classfile {
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, accessFlags, name, supertype, interfaces, signature, source,
+        return Objects.hash(version, flags, name, supertype, interfaces, signature, source,
                 sourceDebug, innerClasses, enclosingMethod, nestHost, nestMembers, module, fields,
                 methods, annotations, typeAnnotations, attributes);
     }
@@ -325,7 +325,7 @@ public class Classfile {
     public String toString() {
         return Classfile.class.getSimpleName() + '{' +
                 "version=" + version +
-                ", accessFlags=" + accessFlags +
+                ", flags=" + flags +
                 ", name=" + name +
                 ", supertype=" + supertype +
                 ", interfaces=" + interfaces +

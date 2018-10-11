@@ -19,7 +19,7 @@ public class Field {
     /**
      * Access flags of the field
      */
-    private Set<Flag> accessFlags = new HashSet<>();
+    private Set<Flag> flags = new HashSet<>();
 
     /**
      * Name of the field
@@ -64,12 +64,12 @@ public class Field {
         this.type = type;
     }
 
-    public Set<Flag> getAccessFlags() {
-        return accessFlags;
+    public Set<Flag> getFlags() {
+        return flags;
     }
 
-    public void setAccessFlags(Set<Flag> accessFlags) {
-        this.accessFlags = accessFlags;
+    public void setFlags(Set<Flag> flags) {
+        this.flags = flags;
     }
 
     /**
@@ -79,7 +79,7 @@ public class Field {
      * @return is the flag set
      */
     public boolean getFlag(Flag flag) {
-        return accessFlags.contains(flag);
+        return flags.contains(flag);
     }
 
     /**
@@ -90,9 +90,9 @@ public class Field {
      */
     public void setFlag(Flag flag, boolean shouldSet) {
         if (shouldSet) {
-            accessFlags.add(flag);
+            flags.add(flag);
         } else {
-            accessFlags.remove(flag);
+            flags.remove(flag);
         }
     }
 
@@ -157,7 +157,7 @@ public class Field {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Field field = (Field) o;
-        return Objects.equals(accessFlags, field.accessFlags) &&
+        return Objects.equals(flags, field.flags) &&
                 Objects.equals(name, field.name) &&
                 Objects.equals(type, field.type) &&
                 Objects.equals(signature, field.signature) &&
@@ -169,13 +169,13 @@ public class Field {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accessFlags, name, type, signature, value, annotations, typeAnnotations, attributes);
+        return Objects.hash(flags, name, type, signature, value, annotations, typeAnnotations, attributes);
     }
 
     @Override
     public String toString() {
         return Field.class.getSimpleName() + '{' +
-                "accessFlags=" + accessFlags +
+                "flags=" + flags +
                 ", name='" + name + '\'' +
                 ", type=" + type +
                 ", signature=" + signature +

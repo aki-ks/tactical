@@ -121,8 +121,8 @@ public class ClassTextifier implements Textifier<Classfile> {
     }
 
     private void appendDescriptor(Printer printer, Classfile classfile) {
-        FlagTextifier.CLASS.textify(printer, classfile.getAccessFlags());
-        appendClassKeyword(printer, classfile.getAccessFlags());
+        FlagTextifier.CLASS.textify(printer, classfile.getFlags());
+        appendClassKeyword(printer, classfile.getFlags());
         printer.addText(" ");
         printer.addLiteral(classfile.getName().getName());
 
