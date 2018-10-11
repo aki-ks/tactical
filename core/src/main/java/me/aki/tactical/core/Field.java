@@ -50,11 +50,6 @@ public class Field {
      */
     private List<FieldTypeAnnotation> typeAnnotations = new ArrayList<>();
 
-    public Field(String name, Type type) {
-        this.name = name;
-        this.type = type;
-    }
-
     /**
      * Non-parsed attributes of this field.
      *
@@ -62,6 +57,11 @@ public class Field {
      * are not yet supported by this library.
      */
     private List<Attribute> attributes;
+
+    public Field(String name, Type type) {
+        this.name = name;
+        this.type = type;
+    }
 
     public Set<Flag> getAccessFlags() {
         return accessFlags;
