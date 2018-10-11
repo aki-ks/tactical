@@ -88,3 +88,9 @@ object MethodFlagParser extends FlagParser[Method.Flag] {
   "strict" -> Method.Flag.STRICT,
   "synthetic" -> Method.Flag.SYNTHETIC
 }
+
+object ParameterFlagParser extends FlagParser[Method.Parameter.Flag] (
+  "final" -> Method.Parameter.Flag.FINAL,
+  "synthetic" -> Method.Parameter.Flag.SYNTHETIC,
+  "mandated" -> Method.Parameter.Flag.MANDATED
+)
