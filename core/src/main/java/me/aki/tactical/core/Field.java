@@ -57,7 +57,7 @@ public class Field {
      * They are either not part of the JVM spec or
      * are not yet supported by this library.
      */
-    private List<Attribute> attributes;
+    private List<Attribute> attributes = new ArrayList<>();
 
     public Field(String name, Type type) {
         this.name = name;
