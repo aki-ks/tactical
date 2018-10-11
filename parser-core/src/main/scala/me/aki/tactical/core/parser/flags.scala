@@ -74,7 +74,7 @@ object FieldFlagParser extends FlagParser[Field.Flag](
   "enum" -> Field.Flag.ENUM
 )
 
-object MethodFlagParser extends FlagParser[Method.Flag] {
+object MethodFlagParser extends FlagParser[Method.Flag](
   "public" -> Method.Flag.PUBLIC,
   "private" -> Method.Flag.PRIVATE,
   "protected" -> Method.Flag.PROTECTED,
@@ -87,9 +87,9 @@ object MethodFlagParser extends FlagParser[Method.Flag] {
   "abstract" -> Method.Flag.ABSTRACT,
   "strict" -> Method.Flag.STRICT,
   "synthetic" -> Method.Flag.SYNTHETIC
-}
+)
 
-object ParameterFlagParser extends FlagParser[Method.Parameter.Flag] (
+object ParameterFlagParser extends FlagParser[Method.Parameter.Flag](
   "final" -> Method.Parameter.Flag.FINAL,
   "synthetic" -> Method.Parameter.Flag.SYNTHETIC,
   "mandated" -> Method.Parameter.Flag.MANDATED
