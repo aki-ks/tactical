@@ -8,6 +8,7 @@ import me.aki.tactical.core.typeannotation.FieldTypeAnnotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -149,6 +150,40 @@ public class Field {
 
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Field field = (Field) o;
+        return Objects.equals(accessFlags, field.accessFlags) &&
+                Objects.equals(name, field.name) &&
+                Objects.equals(type, field.type) &&
+                Objects.equals(signature, field.signature) &&
+                Objects.equals(value, field.value) &&
+                Objects.equals(annotations, field.annotations) &&
+                Objects.equals(typeAnnotations, field.typeAnnotations) &&
+                Objects.equals(attributes, field.attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accessFlags, name, type, signature, value, annotations, typeAnnotations, attributes);
+    }
+
+    @Override
+    public String toString() {
+        return Field.class.getSimpleName() + '{' +
+                "accessFlags=" + accessFlags +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", signature=" + signature +
+                ", value=" + value +
+                ", annotations=" + annotations +
+                ", typeAnnotations=" + typeAnnotations +
+                ", attributes=" + attributes +
+                '}';
     }
 
     public static enum Flag {
