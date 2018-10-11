@@ -7,14 +7,14 @@ import fastparse.all._
 import me.aki.tactical.core._
 
 class FlagParser[F <: Enum[F]](flags: (String, F)*) extends Parser[JSet[F]] {
-  val parser: P[JSet[F]] = {
+  val parser: P[JSet[F]] = P {
     val flagParser = {
       for ((name, flag) ← flags)
         yield P[F] { (name ~ WS).!.map(_ => flag) }
     } reduce (_ | _)
 
     for (flags ← flagParser.rep) yield new JHashSet(flags.asJava)
-  }
+  } opaque "<flags>"
 }
 
 object ClassFlagParser extends FlagParser[Classfile.Flag](
