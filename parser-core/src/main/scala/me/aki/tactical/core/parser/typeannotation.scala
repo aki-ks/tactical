@@ -73,6 +73,14 @@ object ClassTypeAnnotationParser extends Parser[ClassTypeAnnotation] {
   } yield new ClassTypeAnnotation(typePath, annotation, target)
 }
 
+object FieldTypeAnnotationParser extends Parser[FieldTypeAnnotation] {
+  val parser: P[FieldTypeAnnotation] = for {
+    (typePath, annotation) ← "#" ~ WS.? ~ "[" ~ WS.? ~
+      "path" ~ WS.? ~ "=" ~ WS.? ~ TypePathParser ~ WS.? ~ "," ~ WS.? ~
+      "annotation" ~ WS.? ~ "=" ~ WS.? ~ AnnotationParser ~ WS.? ~ "]"
+  } yield new FieldTypeAnnotation(typePath, annotation)
+}
+
 object MethodTypeAnnotationParser extends Parser[MethodTypeAnnotation] {
   val parser: P[MethodTypeAnnotation] = for {
     (typePath, target, annotation) ← "#" ~ WS.? ~ "[" ~ WS.? ~
