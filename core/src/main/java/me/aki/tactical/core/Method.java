@@ -8,6 +8,7 @@ import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -225,6 +226,51 @@ public class Method {
         this.body = body;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Method method = (Method) o;
+        return Objects.equals(flags, method.flags) &&
+                Objects.equals(name, method.name) &&
+                Objects.equals(parameterTypes, method.parameterTypes) &&
+                Objects.equals(returnType, method.returnType) &&
+                Objects.equals(exceptions, method.exceptions) &&
+                Objects.equals(signature, method.signature) &&
+                Objects.equals(defaultValue, method.defaultValue) &&
+                Objects.equals(parameterInfo, method.parameterInfo) &&
+                Objects.equals(parameterAnnotations, method.parameterAnnotations) &&
+                Objects.equals(annotations, method.annotations) &&
+                Objects.equals(typeAnnotations, method.typeAnnotations) &&
+                Objects.equals(attributes, method.attributes) &&
+                Objects.equals(body, method.body);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(flags, name, parameterTypes, returnType, exceptions, signature,
+                defaultValue, parameterInfo, parameterAnnotations, annotations, typeAnnotations, attributes, body);
+    }
+
+    @Override
+    public String toString() {
+        return Method.class.getSimpleName() + '{' +
+                "flags=" + flags +
+                ", name='" + name + '\'' +
+                ", parameterTypes=" + parameterTypes +
+                ", returnType=" + returnType +
+                ", exceptions=" + exceptions +
+                ", signature=" + signature +
+                ", defaultValue=" + defaultValue +
+                ", parameterInfo=" + parameterInfo +
+                ", parameterAnnotations=" + parameterAnnotations +
+                ", annotations=" + annotations +
+                ", typeAnnotations=" + typeAnnotations +
+                ", attributes=" + attributes +
+                ", body=" + body +
+                '}';
+    }
+
     public static enum Flag {
         PUBLIC, PRIVATE, PROTECTED, STATIC, FINAL, SYNCHRONIZED, BRIDGE, VARARGS, NATIVE, ABSTRACT, STRICT, SYNTHETIC
     }
@@ -263,6 +309,28 @@ public class Method {
 
         public void setFlags(Set<Flag> flags) {
             this.flags = flags;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Parameter parameter = (Parameter) o;
+            return Objects.equals(name, parameter.name) &&
+                    Objects.equals(flags, parameter.flags);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, flags);
+        }
+
+        @Override
+        public String toString() {
+            return Parameter.class.getSimpleName() + '{' +
+                    "name=" + name +
+                    ", flags=" + flags +
+                    '}';
         }
 
         public static enum Flag {
