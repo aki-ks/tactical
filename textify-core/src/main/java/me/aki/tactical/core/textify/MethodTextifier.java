@@ -38,7 +38,9 @@ public class MethodTextifier implements Textifier<Method> {
         List<Path> exceptions = method.getExceptions();
         if (!exceptions.isEmpty()) {
             printer.addText(" throws ");
-            exceptions.forEach(printer::addPath);
+            TextUtil.joined(exceptions,
+                    printer::addPath,
+                    () -> printer.addText(", "));
         }
 
         method.getDefaultValue().ifPresent(defaultValue -> {
