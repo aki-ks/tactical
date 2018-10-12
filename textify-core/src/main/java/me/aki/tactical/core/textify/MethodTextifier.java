@@ -46,6 +46,7 @@ public class MethodTextifier implements Textifier<Method> {
         method.getDefaultValue().ifPresent(defaultValue -> {
             printer.addText(" = ");
             AnnotationValueTextifier.getInstance().textify(printer, defaultValue);
+            printer.addText(";");
         });
 
         method.getBody().ifPresentOrElse(body -> {
