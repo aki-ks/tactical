@@ -12,7 +12,7 @@ Building a referenced based intermediation for java bytecode is the main objecti
 * [ ] conversion: stack <-> reference
 * [ ] implement the whole [jvm classfile format](https://docs.oracle.com/javase/specs/jvms/se11/html/index.html)
   * [X] for the stack intermediation (jvm 11)
-  * [X] for the reference based intermediation
+  * [ ] for the reference based intermediation
 * [ ] Turn this project into a disassambler generating human editable textfiles
   * [X] Textifier for core
   * [ ] Textifier for stack
