@@ -102,9 +102,12 @@ public class MethodTextifier implements Textifier<Method> {
 
     private void appendParameterInfos(Printer printer, List<Method.Parameter> parameterInfos) {
         for (Method.Parameter parameter : parameterInfos) {
-            printer.addText("parameter ");
             FlagTextifier.METHOD_PARAMETER.textify(printer, parameter.getFlags());
-            parameter.getName().ifPresent(name -> printer.addEscaped(name, '"'));
+            printer.addText("parameter");
+            parameter.getName().ifPresent(name -> {
+                printer.addText(" ");
+                printer.addEscaped(name, '"');
+            });
             printer.addText(";");
         }
     }
