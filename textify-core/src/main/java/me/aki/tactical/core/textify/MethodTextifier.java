@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class MethodTextifier implements Textifier<Method> {
-    private final AbstractBodyTextifier bodyTextifier;
+    private final BodyTextifier bodyTextifier;
 
-    public MethodTextifier(AbstractBodyTextifier bodyTextifier) {
+    public MethodTextifier(BodyTextifier bodyTextifier) {
         this.bodyTextifier = bodyTextifier;
     }
 
@@ -32,7 +32,9 @@ public class MethodTextifier implements Textifier<Method> {
         printer.addText(" ");
         printer.addLiteral(method.getName());
         printer.addText("(");
-        bodyTextifier.textifyParameterList(printer, method);
+        TextUtil.joined(method.getParameterTypes(),
+                type -> TypeTextifier.getInstance().textify(printer, type),
+                () -> printer.addText(", "));
         printer.addText(")");
 
         List<Path> exceptions = method.getExceptions();
