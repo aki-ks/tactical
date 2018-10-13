@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * An instance of "java.lang.Class".
  */
-public class ClassConstant implements BootstrapConstant, PushableConstant, Constant {
+public class ClassConstant implements BootstrapConstant, PushableConstant, DexConstant, Constant {
     private final RefType value;
 
     public ClassConstant(RefType value) {
