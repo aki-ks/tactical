@@ -8,6 +8,8 @@ import java.util.Optional;
 
 /**
  * Move the returned value of a just invoked method to a {@link Register}.
+ *
+ * This Statement is also used to get the result of a {@link NewFilledArrayStatement}.
  */
 public class MoveResultStatement implements Statement {
     /**
