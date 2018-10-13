@@ -9,6 +9,12 @@ val javaSettings = Seq(
   autoScalaLibrary := false // do not use scala runtime dependency
 )
 
+val parserSettings = Seq(
+  libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.0.0",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+  libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+)
+
 val asmVersion = "6.2.1"
 
 // INTERMEDIATIONS
@@ -28,13 +34,13 @@ lazy val coreTextifier = (project in file ("textify-core"))
   .dependsOn(core)
   .settings(javaSettings)
 
+lazy val stackTextifier = (project in file ("textify-stack"))
+  .dependsOn(stack, coreTextifier)
+  .settings(javaSettings)
+
 lazy val coreParser = (project in file ("parser-core"))
   .dependsOn(core)
-  .settings(
-    libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.0.0",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
-  )
+  .settings(parserSettings)
 
 // CONVERSION
 lazy val stackConversionUtils = (project in file ("stack conversion-utils"))
