@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Create a new array that contains values from certain registers.
+ * Create a new array filled with values from certain registers.
  *
  * The created array is required by a {@link MoveResultStatement} that follows this instruction.
  */
