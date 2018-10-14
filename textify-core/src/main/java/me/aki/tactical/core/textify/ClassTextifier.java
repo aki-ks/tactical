@@ -16,7 +16,7 @@ import java.util.Set;
 public class ClassTextifier implements Textifier<Classfile> {
     private final MethodTextifier methodTextifier;
 
-    public ClassTextifier(AbstractBodyTextifier bodyTextifier) {
+    public ClassTextifier(BodyTextifier bodyTextifier) {
         this.methodTextifier = new MethodTextifier(bodyTextifier);
     }
 

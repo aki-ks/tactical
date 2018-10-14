@@ -56,7 +56,7 @@ public class MethodTextifier implements Textifier<Method> {
             printer.newLine();
             printer.increaseIndent();
 
-            bodyTextifier.textify(printer, body);
+            bodyTextifier.textify(printer, method);
 
             printer.decreaseIndent();
             printer.addText("}");
