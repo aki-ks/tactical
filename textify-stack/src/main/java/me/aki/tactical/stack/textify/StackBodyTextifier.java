@@ -4,6 +4,7 @@ import me.aki.tactical.core.Body;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.textify.BodyTextifier;
 import me.aki.tactical.core.textify.Printer;
+import me.aki.tactical.core.textify.TypeTextifier;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.TryCatchBlock;
@@ -40,6 +41,7 @@ public class StackBodyTextifier implements BodyTextifier {
 
         textifyInstructions(printer, body, ctx);
 
+        textifyTryCatchBlocks(printer, body.getTryCatchBlocks(), ctx);
         textifyLines(printer, body.getLineNumbers(), ctx);
     }
 
@@ -174,11 +176,29 @@ public class StackBodyTextifier implements BodyTextifier {
         }
     }
 
+    private void textifyTryCatchBlocks(Printer printer, List<TryCatchBlock> tryCatchBlocks, TextifyContext ctx) {
+        for (TryCatchBlock tryCatchBlock : tryCatchBlocks) {
+            printer.addText("try ");
+            printer.addLiteral(ctx.getLabel(tryCatchBlock.getFirst()));
+            printer.addText(" -> ");
+            printer.addLiteral(ctx.getLabel(tryCatchBlock.getLast()));
+            printer.addText(" catch ");
+            printer.addLiteral(ctx.getLabel(tryCatchBlock.getHandler()));
+            tryCatchBlock.getExceptionType().ifPresent(exception -> {
+                printer.addText(" ");
+                printer.addPath(exception);
+            });
+            printer.addText(";");
+            printer.newLine();
+        }
+    }
+
     private void textifyLines(Printer printer, List<StackBody.LineNumber> lineNumbers, TextifyContext ctx) {
         for (StackBody.LineNumber lineNumber : lineNumbers) {
             printer.addText("line " + lineNumber.getLine() + " ");
             printer.addLiteral(ctx.getLabel(lineNumber.getInstruction()));
             printer.addText(";");
+            printer.newLine();
         }
     }
 }
