@@ -6,7 +6,7 @@ import java.util.{HashSet => JHashSet, Set => JSet}
 import fastparse.all._
 import me.aki.tactical.core._
 
-class FlagParser[F <: Enum[F]](flags: (String, F)*) extends Parser[JSet[F]] {
+class FlagParser[F <: Enum[F]](val flags: (String, F)*) extends Parser[JSet[F]] {
   val parser: P[JSet[F]] = P {
     val flagParser = {
       for ((name, flag) ← flags)
@@ -74,11 +74,11 @@ object FieldFlagParser extends FlagParser[Field.Flag](
   "enum" -> Field.Flag.ENUM
 )
 
-object MethodFlagParser extends FlagParser[Method.Flag](
+/** parse all method flags except 'static' */
+object StaticInitializerFlagParser extends FlagParser[Method.Flag] (
   "public" -> Method.Flag.PUBLIC,
   "private" -> Method.Flag.PRIVATE,
   "protected" -> Method.Flag.PROTECTED,
-  "static" -> Method.Flag.STATIC,
   "final" -> Method.Flag.FINAL,
   "synchronized" -> Method.Flag.SYNCHRONIZED,
   "bridge" -> Method.Flag.BRIDGE,
@@ -87,6 +87,10 @@ object MethodFlagParser extends FlagParser[Method.Flag](
   "abstract" -> Method.Flag.ABSTRACT,
   "strict" -> Method.Flag.STRICT,
   "synthetic" -> Method.Flag.SYNTHETIC
+)
+
+object MethodFlagParser extends FlagParser[Method.Flag](
+  ("static" -> Method.Flag.STATIC) +: StaticInitializerFlagParser.flags : _*
 )
 
 object ParameterFlagParser extends FlagParser[Method.Parameter.Flag](

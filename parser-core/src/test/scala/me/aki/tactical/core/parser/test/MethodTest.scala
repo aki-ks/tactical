@@ -1,14 +1,15 @@
 package me.aki.tactical.core.parser.test
 
 import scala.collection.JavaConverters._
-import java.util.{Optional, Set => JSet}
+import java.util.{Optional, ArrayList, Set => JSet}
 
 import fastparse.all._
+import me.aki.tactical.core.Classfile.Version
 import me.aki.tactical.core._
 import me.aki.tactical.core.`type`.{IntType, ObjectType}
 import me.aki.tactical.core.annotation.{Annotation, IntAnnotationValue}
 import me.aki.tactical.core.parser.{MethodParser, Parser}
-import me.aki.tactical.core.typeannotation.{FieldTypeAnnotation, MethodTypeAnnotation, TargetType, TypePath}
+import me.aki.tactical.core.typeannotation.{MethodTypeAnnotation, TargetType, TypePath}
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -17,11 +18,23 @@ class MethodTest extends FlatSpec with Matchers {
     val parser: P[Body] = for (_ ← Pass) yield new Body {}
   }
 
-  object DummyMethodParser extends MethodParser(DummyBodyParser)
+  val dummyClass = new Classfile(new Version(Version.MAJOR_JDK_8, 0), Path.of("foo", "Dummy"), Path.OBJECT, new ArrayList())
+  object DummyMethodParser extends MethodParser(dummyClass, DummyBodyParser)
 
   "The MethodParser" should "parse the most basic method" in {
     DummyMethodParser.parse("void a();") shouldEqual
       new Method("a", Nil.asJava, Optional.empty())
+  }
+
+  it should "parse a basic constructor" in {
+    val className = dummyClass.getName.getName
+    val method = DummyMethodParser.parse(s"$className() {}")
+    method.getName shouldEqual "<init>"
+  }
+
+  it should "parse a basic static initializer" in {
+    val method = DummyMethodParser.parse(s"static {}")
+    method.getName shouldEqual "<clinit>"
   }
 
   it should "parse abstract methods" in {

@@ -1,23 +1,41 @@
 package me.aki.tactical.core.parser
 
-import java.util.{ Optional, List => JList, ArrayList }
+import java.util.{ArrayList, Optional, List => JList}
 
 import scala.collection.JavaConverters._
 import fastparse.all._
 import me.aki.tactical.core._
+import me.aki.tactical.core.`type`.Type
 import me.aki.tactical.core.annotation.Annotation
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation
 
-class MethodParser(bodyParser: Parser[Body]) extends Parser[Method] {
+class MethodParser(classfile: Classfile, bodyParser: Parser[Body]) extends Parser[Method] {
   val parser: P[Method] = P {
     P {
       val throws = "throws" ~ WS ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?)
       val params = TypeParser.rep(sep = WS.? ~ "," ~ WS.?)
 
-      MethodPrefixParser.rep(sep = WS.?) ~ WS.? ~
-        MethodFlagParser ~ ReturnTypeParser ~ WS ~ Literal ~ WS.? ~ "(" ~ params ~ ")" ~ WS.? ~ throws.? ~ WS.?
+
+      val descriptor = P {
+        val void = Optional.empty[Type]
+
+        val staticInitializerForm =
+          for ((flags, exceptions) ← StaticInitializerFlagParser ~ "static" ~ WS ~ throws.? ~ WS.?)
+            yield (flags, void, "<clinit>", Nil, exceptions)
+
+        val constructorForm =
+          for((flags, params, exceptions) ← MethodFlagParser ~ classfile.getName.getName ~ "(" ~ params ~ ")" ~ WS.? ~ throws.? ~ WS.?)
+            yield (flags, void, "<init>", params, exceptions)
+
+        val methodForm =
+          MethodFlagParser ~ ReturnTypeParser ~ WS ~ Literal ~ WS.? ~ "(" ~ params ~ ")" ~ WS.? ~ throws.? ~ WS.?
+
+        constructorForm | methodForm | staticInitializerForm
+      }
+
+      MethodPrefixParser.rep(sep = WS.?) ~ WS.? ~ descriptor
     } flatMap {
-      case (prefixes, flags, returnType, name, parameters, exceptions) =>
+      case (prefixes, (flags, returnType, name, parameters, exceptions)) =>
         val method = new Method(name, new ArrayList(parameters.asJava), returnType)
         method.setFlags(flags)
         exceptions.getOrElse(Nil).foreach(method.getExceptions.add)
