@@ -2,9 +2,14 @@ package me.aki.tactical.stack.textify;
 
 import me.aki.tactical.core.Body;
 import me.aki.tactical.core.Method;
+import me.aki.tactical.core.textify.AnnotationTextifier;
 import me.aki.tactical.core.textify.BodyTextifier;
 import me.aki.tactical.core.textify.Printer;
+import me.aki.tactical.core.textify.TargetTypeTextifier;
+import me.aki.tactical.core.textify.TextUtil;
+import me.aki.tactical.core.textify.TypePathTextifier;
 import me.aki.tactical.core.textify.TypeTextifier;
+import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.TryCatchBlock;
@@ -44,6 +49,7 @@ public class StackBodyTextifier implements BodyTextifier {
         textifyTryCatchBlocks(printer, body.getTryCatchBlocks(), ctx);
         textifyLines(printer, body.getLineNumbers(), ctx);
         textifyLocalVariables(printer, body.getLocalVariables(), ctx);
+        textifyLocalVariableAnnotations(printer, body.getLocalVariableAnnotations(), ctx);
     }
 
     private void prepareLabels(StackBody body, TextifyContext ctx) {
@@ -126,7 +132,7 @@ public class StackBodyTextifier implements BodyTextifier {
             String localName = "this";
             ctx.setLocalName(thisLocal, localName);
 
-            printer.addText("Local " + localName + " = this;");
+            printer.addText("local " + localName + " = this;");
             printer.newLine();
         });
 
@@ -135,7 +141,7 @@ public class StackBodyTextifier implements BodyTextifier {
             String localName = "param" + parameterIndex;
             ctx.setLocalName(local, localName);
 
-            printer.addText("Local " + localName + " = parameter " + parameterIndex++ + ";");
+            printer.addText("local " + localName + " = parameter " + parameterIndex++ + ";");
             printer.newLine();
             parameterIndex++;
         }
@@ -146,7 +152,7 @@ public class StackBodyTextifier implements BodyTextifier {
 
         int localIndex = 0;
         if (remainingLocalIter.hasNext()) {
-            printer.addText("Local ");
+            printer.addText("local ");
 
             while (remainingLocalIter.hasNext()) {
                 String localName = "local" + localIndex++;
@@ -205,7 +211,7 @@ public class StackBodyTextifier implements BodyTextifier {
 
     private void textifyLocalVariables(Printer printer, List<StackBody.LocalVariable> localVariables, TextifyContext ctx) {
         for (StackBody.LocalVariable localVariable : localVariables) {
-            printer.addText("localvariable ");
+            printer.addText("local info ");
             printer.addLiteral(ctx.getLabel(localVariable.getStart()));
             printer.addText(" -> ");
             printer.addLiteral(ctx.getLabel(localVariable.getEnd()));
@@ -220,6 +226,34 @@ public class StackBodyTextifier implements BodyTextifier {
                 printer.addEscaped(signature, '"');
             });
             printer.addText(";");
+            printer.newLine();
         }
     }
+
+    private void textifyLocalVariableAnnotations(Printer printer, List<StackBody.LocalVariableAnnotation> annotations, TextifyContext ctx) {
+        for (StackBody.LocalVariableAnnotation localAnnotation : annotations) {
+            printer.addText("local annotation [");
+            TextUtil.joined(localAnnotation.getLocations(),
+                    location -> {
+                        printer.addLiteral(ctx.getLabel(location.getStart()));
+                        printer.addText(" -> ");
+                        printer.addLiteral(ctx.getLabel(location.getEnd()));
+                        printer.addText(" ");
+                        printer.addLiteral(ctx.getLocalName(location.getLocal()));
+                    },
+                    () -> printer.addText(", "));
+            printer.addText("], ");
+
+            LocalVariableTypeAnnotation typeAnnotation = localAnnotation.getAnnotation();
+            printer.addText("#[path = ");
+            TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
+            printer.addText(", target = ");
+            TargetTypeTextifier.LOCAL_TARGET_TYPE.textify(printer, typeAnnotation.getTargetType());
+            printer.addText(", annotation = ");
+            AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
+            printer.addText("];");
+            printer.newLine();
+        }
+    }
+
 }

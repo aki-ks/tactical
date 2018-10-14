@@ -59,4 +59,12 @@ public class TargetTypeTextifier {
         }
     };
 
+    public static final Textifier<TargetType.LocalTargetType> LOCAL_TARGET_TYPE = (printer, target) -> {
+        String keyword = target instanceof TargetType.LocalVariable ? "local" :
+                target instanceof TargetType.ResourceVariable ? "resource" :
+                TextUtil.assertionError();
+
+        printer.addText(keyword);
+    };
+
 }
