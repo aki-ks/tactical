@@ -4,6 +4,7 @@ import me.aki.tactical.core.Body;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.textify.BodyTextifier;
 import me.aki.tactical.core.textify.Printer;
+import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.TryCatchBlock;
@@ -36,6 +37,8 @@ public class StackBodyTextifier implements BodyTextifier {
         prepareLables(body, ctx);
 
         textifyLocals(printer, body, ctx);
+
+        textifyInstructions(printer, body, ctx);
     }
 
     private void prepareLables(StackBody body, TextifyContext ctx) {
@@ -152,6 +155,15 @@ public class StackBodyTextifier implements BodyTextifier {
 
         if (!ctx.getLocalNames().isEmpty()) {
             // if any locals were printer, insert a blank line
+            printer.newLine();
+        }
+    }
+
+    private void textifyInstructions(Printer printer, StackBody body, TextifyContext ctx) {
+        InsnTextifier insnTextifier = new InsnTextifier(ctx);
+
+        for (Instruction instruction : body.getInstructions()) {
+            insnTextifier.textify(printer, instruction);
             printer.newLine();
         }
     }
