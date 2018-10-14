@@ -9,7 +9,9 @@ import me.aki.tactical.core.textify.TargetTypeTextifier;
 import me.aki.tactical.core.textify.TextUtil;
 import me.aki.tactical.core.textify.TypePathTextifier;
 import me.aki.tactical.core.textify.TypeTextifier;
+import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
+import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.TryCatchBlock;
@@ -50,6 +52,7 @@ public class StackBodyTextifier implements BodyTextifier {
         textifyLines(printer, body.getLineNumbers(), ctx);
         textifyLocalVariables(printer, body.getLocalVariables(), ctx);
         textifyLocalVariableAnnotations(printer, body.getLocalVariableAnnotations(), ctx);
+        textifyInsnAnnotation(printer, body.getInstructions(), ctx);
     }
 
     private void prepareLabels(StackBody body, TextifyContext ctx) {
@@ -256,4 +259,20 @@ public class StackBodyTextifier implements BodyTextifier {
         }
     }
 
+    private void textifyInsnAnnotation(Printer printer, InsertList<Instruction> instructions, TextifyContext ctx) {
+        for (Instruction instruction : instructions) {
+            for (InsnTypeAnnotation typeAnnotation : instruction.getTypeAnnotations()) {
+                printer.addText("insn annotation ");
+                printer.addLiteral(ctx.getLabel(instruction));
+                printer.addText(" #[path = ");
+                TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
+                printer.addText(", target = ");
+                TargetTypeTextifier.INSN_TARGET_TYPE.textify(printer, typeAnnotation.getTargetType());
+                printer.addText(", annotation = ");
+                AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
+                printer.addText("];");
+
+            }
+        }
+    }
 }
