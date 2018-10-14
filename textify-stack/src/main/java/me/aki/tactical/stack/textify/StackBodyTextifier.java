@@ -43,6 +43,7 @@ public class StackBodyTextifier implements BodyTextifier {
 
         textifyTryCatchBlocks(printer, body.getTryCatchBlocks(), ctx);
         textifyLines(printer, body.getLineNumbers(), ctx);
+        textifyLocalVariables(printer, body.getLocalVariables(), ctx);
     }
 
     private void prepareLabels(StackBody body, TextifyContext ctx) {
@@ -199,6 +200,26 @@ public class StackBodyTextifier implements BodyTextifier {
             printer.addLiteral(ctx.getLabel(lineNumber.getInstruction()));
             printer.addText(";");
             printer.newLine();
+        }
+    }
+
+    private void textifyLocalVariables(Printer printer, List<StackBody.LocalVariable> localVariables, TextifyContext ctx) {
+        for (StackBody.LocalVariable localVariable : localVariables) {
+            printer.addText("localvariable ");
+            printer.addLiteral(ctx.getLabel(localVariable.getStart()));
+            printer.addText(" -> ");
+            printer.addLiteral(ctx.getLabel(localVariable.getEnd()));
+            printer.addText(", ");
+            printer.addText(ctx.getLocalName(localVariable.getLocal()));
+            printer.addText(", ");
+            printer.addEscaped(localVariable.getName(), '"');
+            printer.addText(", ");
+            TypeTextifier.getInstance().textify(printer, localVariable.getType());
+            localVariable.getSignature().ifPresent(signature -> {
+                printer.addText(", ");
+                printer.addEscaped(signature, '"');
+            });
+            printer.addText(";");
         }
     }
 }
