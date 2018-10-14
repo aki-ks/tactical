@@ -33,6 +33,7 @@ public class ClassTextifier implements Textifier<Classfile> {
         appendAttributes(printer, classfile.getAttributes());
 
         appendDescriptor(printer, classfile);
+        printer.newLine();
         printer.increaseIndent();
 
         appendModuleContent(printer, classfile.getModule());
@@ -337,12 +338,14 @@ public class ClassTextifier implements Textifier<Classfile> {
         for (Field field : fields) {
             FieldTextifier.getInstance().textify(printer, field);
             printer.newLine();
+            printer.newLine();
         }
     }
 
     private void appendMethods(Printer printer, List<Method> methods) {
         for (Method method : methods) {
             methodTextifier.textify(printer, method);
+            printer.newLine();
             printer.newLine();
         }
     }

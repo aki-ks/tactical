@@ -60,7 +60,6 @@ public class MethodTextifier implements Textifier<Method> {
 
             printer.decreaseIndent();
             printer.addText("}");
-            printer.newLine();
         }, () -> {
             printer.addText(";");
         });
