@@ -4,7 +4,6 @@ import me.aki.tactical.core.Body;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.textify.BodyTextifier;
 import me.aki.tactical.core.textify.Printer;
-import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.TryCatchBlock;
@@ -13,6 +12,7 @@ import me.aki.tactical.stack.insn.Instruction;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,14 +34,16 @@ public class StackBodyTextifier implements BodyTextifier {
 
     private void textifyBody(Printer printer, StackBody body) {
         TextifyContext ctx = new TextifyContext(body);
-        prepareLables(body, ctx);
+        prepareLabels(body, ctx);
 
         textifyLocals(printer, body, ctx);
 
         textifyInstructions(printer, body, ctx);
+
+        textifyLines(printer, body.getLineNumbers(), ctx);
     }
 
-    private void prepareLables(StackBody body, TextifyContext ctx) {
+    private void prepareLabels(StackBody body, TextifyContext ctx) {
         Set<Instruction> referencedInstructions = getAllReferencedInstructions(body);
         int labelCount = referencedInstructions.size();
 
@@ -82,6 +84,10 @@ public class StackBodyTextifier implements BodyTextifier {
         Set<Instruction> insns = new HashSet<>();
 
         for (Instruction instruction : body.getInstructions()) {
+            if (!instruction.getTypeAnnotations().isEmpty()) {
+                insns.add(instruction);
+            }
+
             if (instruction instanceof BranchInsn) {
                 insns.addAll(((BranchInsn) instruction).getBranchTargets());
             }
@@ -165,6 +171,14 @@ public class StackBodyTextifier implements BodyTextifier {
         for (Instruction instruction : body.getInstructions()) {
             insnTextifier.textify(printer, instruction);
             printer.newLine();
+        }
+    }
+
+    private void textifyLines(Printer printer, List<StackBody.LineNumber> lineNumbers, TextifyContext ctx) {
+        for (StackBody.LineNumber lineNumber : lineNumbers) {
+            printer.addText("line " + lineNumber.getLine() + " ");
+            printer.addLiteral(ctx.getLabel(lineNumber.getInstruction()));
+            printer.addText(";");
         }
     }
 }
