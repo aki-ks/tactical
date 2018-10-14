@@ -8,6 +8,7 @@ import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Invoke a dynamically computed method.
@@ -83,5 +84,21 @@ public class DynamicInvoke implements Invoke {
 
     public void setBootstrapArguments(List<BootstrapConstant> bootstrapArguments) {
         this.bootstrapArguments = bootstrapArguments;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DynamicInvoke that = (DynamicInvoke) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(descriptor, that.descriptor) &&
+                Objects.equals(bootstrapMethod, that.bootstrapMethod) &&
+                Objects.equals(bootstrapArguments, that.bootstrapArguments);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, descriptor, bootstrapMethod, bootstrapArguments);
     }
 }

@@ -8,6 +8,8 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.StackLocal;
 
+import java.util.Objects;
+
 /**
  * Push a value from a local onto the stack.
  */
@@ -45,5 +47,19 @@ public class LoadInsn extends AbstractTypeInsn {
     @Override
     public int getPopCount() {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        LoadInsn loadInsn = (LoadInsn) o;
+        return Objects.equals(local, loadInsn.local);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), local);
     }
 }

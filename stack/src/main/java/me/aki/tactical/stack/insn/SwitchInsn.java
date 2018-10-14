@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -83,5 +84,20 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
         List<Cell<Instruction>> cells = getBranchTableCells();
         cells.add(getDefaultLocationCell());
         return cells;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SwitchInsn that = (SwitchInsn) o;
+        return Objects.equals(branchTable, that.branchTable) &&
+                Objects.equals(defaultLocation, that.defaultLocation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), branchTable, defaultLocation);
     }
 }

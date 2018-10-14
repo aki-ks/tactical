@@ -8,6 +8,8 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.StackLocal;
 
+import java.util.Objects;
+
 /**
  * Store the upper value of the stack in a local.
  */
@@ -42,5 +44,19 @@ public class StoreInsn extends AbstractTypeInsn {
     @Override
     public int getPopCount() {
         return 1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        StoreInsn storeInsn = (StoreInsn) o;
+        return Objects.equals(local, storeInsn.local);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), local);
     }
 }

@@ -88,6 +88,21 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
         return List.of(getTargetCell());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        IfInsn ifInsn = (IfInsn) o;
+        return Objects.equals(condition, ifInsn.condition) &&
+                Objects.equals(target, ifInsn.target);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), condition, target);
+    }
+
     public static interface Condition {
         /**
          * Against what value should the popped value be compared.

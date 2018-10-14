@@ -2,6 +2,8 @@ package me.aki.tactical.stack.insn;
 
 import me.aki.tactical.core.FieldRef;
 
+import java.util.Objects;
+
 /**
  * Instruction that operates on a field
  */
@@ -35,5 +37,20 @@ public abstract class AbstractFieldInsn extends AbstractInstruction {
 
     public void setStatic(boolean aStatic) {
         isStatic = aStatic;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AbstractFieldInsn fieldInsn = (AbstractFieldInsn) o;
+        return isStatic == fieldInsn.isStatic &&
+                Objects.equals(field, fieldInsn.field);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), field, isStatic);
     }
 }
