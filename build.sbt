@@ -42,6 +42,10 @@ lazy val coreParser = (project in file ("parser-core"))
   .dependsOn(core)
   .settings(parserSettings)
 
+lazy val stackParser = (project in file ("parser-stack"))
+  .dependsOn(stack, coreParser)
+  .settings(parserSettings)
+
 // CONVERSION
 lazy val stackConversionUtils = (project in file ("stack conversion-utils"))
   .dependsOn(stack)
