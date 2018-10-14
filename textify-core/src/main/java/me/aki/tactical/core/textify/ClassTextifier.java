@@ -14,10 +14,10 @@ import java.util.Optional;
 import java.util.Set;
 
 public class ClassTextifier implements Textifier<Classfile> {
-    private final MethodTextifier methodTextifier;
+    private final BodyTextifier bodyTextifier;
 
     public ClassTextifier(BodyTextifier bodyTextifier) {
-        this.methodTextifier = new MethodTextifier(bodyTextifier);
+        this.bodyTextifier = bodyTextifier;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ClassTextifier implements Textifier<Classfile> {
         appendNests(printer, classfile.getNestHost(), classfile.getNestMembers());
 
         appendFields(printer, classfile.getFields());
-        appendMethods(printer, classfile.getMethods());
+        appendMethods(printer, classfile);
 
         printer.decreaseIndent();
         printer.addText("}");
@@ -342,8 +342,9 @@ public class ClassTextifier implements Textifier<Classfile> {
         }
     }
 
-    private void appendMethods(Printer printer, List<Method> methods) {
-        for (Method method : methods) {
+    private void appendMethods(Printer printer, Classfile classfile) {
+        MethodTextifier methodTextifier = new MethodTextifier(bodyTextifier, classfile);
+        for (Method method : classfile.getMethods()) {
             methodTextifier.textify(printer, method);
             printer.newLine();
             printer.newLine();

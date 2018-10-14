@@ -1,19 +1,24 @@
 package me.aki.tactical.core.textify;
 
 import me.aki.tactical.core.Attribute;
+import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class MethodTextifier implements Textifier<Method> {
+    private final Classfile classfile;
     private final BodyTextifier bodyTextifier;
 
-    public MethodTextifier(BodyTextifier bodyTextifier) {
+    public MethodTextifier(BodyTextifier bodyTextifier, Classfile classfile) {
         this.bodyTextifier = bodyTextifier;
+        this.classfile = classfile;
     }
 
     @Override
@@ -25,17 +30,32 @@ public class MethodTextifier implements Textifier<Method> {
         appendParameterInfos(printer, method.getParameterInfo());
         appendParameterAnnotations(printer, method.getParameterAnnotations());
 
-        FlagTextifier.METHOD.textify(printer, method.getFlags());
-        method.getReturnType().ifPresentOrElse(
-                type -> TypeTextifier.getInstance().textify(printer, type),
-                () -> printer.addText("void"));
-        printer.addText(" ");
-        printer.addLiteral(method.getName());
-        printer.addText("(");
-        TextUtil.joined(method.getParameterTypes(),
-                type -> TypeTextifier.getInstance().textify(printer, type),
-                () -> printer.addText(", "));
-        printer.addText(")");
+        String name = method.getName();
+        if (name.equals("<clinit>")) {
+            Set<Method.Flag> flags = new HashSet<>(method.getFlags());
+            flags.remove(Method.Flag.STATIC);
+            FlagTextifier.METHOD.textify(printer, flags);
+
+            printer.addText ("static");
+        } else {
+            FlagTextifier.METHOD.textify(printer, method.getFlags());
+
+            if (name.equals("<init>")) {
+                printer.addLiteral(classfile.getName().getName());
+            } else {
+                method.getReturnType().ifPresentOrElse(
+                        type -> TypeTextifier.getInstance().textify(printer, type),
+                        () -> printer.addText("void"));
+                printer.addText(" ");
+                printer.addLiteral(name);
+            }
+
+            printer.addText("(");
+            TextUtil.joined(method.getParameterTypes(),
+                    type -> TypeTextifier.getInstance().textify(printer, type),
+                    () -> printer.addText(", "));
+            printer.addText(")");
+        }
 
         List<Path> exceptions = method.getExceptions();
         if (!exceptions.isEmpty()) {
