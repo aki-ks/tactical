@@ -1,51 +1,56 @@
 package me.aki.tactical.stack.parser
 
+import scala.collection.mutable
+
 import me.aki.tactical.core.util.Cell
 import me.aki.tactical.stack.StackLocal
 import me.aki.tactical.stack.insn.Instruction
-
-import scala.collection.mutable
 
 class StackCtx(locals: Map[String, StackLocal]) {
   /** Map labels to the instructions they points to */
   private val labels = mutable.Map[String, Instruction]()
 
-  private val labelReferences = mutable.Map[String, mutable.Set[Cell[Instruction]]]()
+  /** Label references that were add before the label was known to this context */
+  private val unresolvedLabelReferences = mutable.Map[String, Set[Cell[Instruction]]]()
 
   /**
-    * Register a new reference of a label. It gets resolved as soon as the label is visited
+    * Register a new reference of a label.
+    * It gets resolved as soon as the label is registered.
     *
     * @param label name of the label
     * @param cell cell containing a the usage of the label
     */
-  def addLabelReference(label: String, cell: Cell[Instruction]) = {
-    labelReferences.getOrElseUpdate(label, mutable.Set()) += cell
-
-    for (target ← labels.get(label)) cell.set(target)
+  def registerLabelReference(label: String, cell: Cell[Instruction]) = {
+    labels get label match {
+      case Some(label) => cell.set(label)
+      case None =>
+        val unresolvedCells = unresolvedLabelReferences.getOrElse(label, Set())
+        unresolvedLabelReferences(label) = unresolvedCells + cell
+    }
   }
 
   /**
     * Add a new label.
     *
     * @param label name of the label
-    * @param target instruction that this label points to.
+    * @param target instruction that this label points to
     */
-  def addLabel(label: String, target: Instruction) = {
+  def registerLabel(label: String, target: Instruction) = {
     labels(label) = target
 
     for {
-      cells ← labelReferences.get(label)
+      cells ← unresolvedLabelReferences.remove(label)
       cell ← cells
     } cell.set(target)
   }
 
   /**
-    * Get all cells that reference a certain label.
+    * Get a map from references to labels not yet registered labels.
     *
-    * @param label name of the label
-    * @return all cells to the label
+    * @return map of labels names to references of that label
     */
-  def getReferences(label: String) = labelReferences.getOrElse(label, Set())
+  def getUnresolvedReferences: Map[String, Set[Cell[Instruction]]] =
+    this.unresolvedLabelReferences.toMap
 
   /**
     * Get a Local by its name

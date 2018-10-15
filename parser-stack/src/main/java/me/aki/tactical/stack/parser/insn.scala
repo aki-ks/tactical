@@ -64,7 +64,7 @@ class GotoInsnParser(ctx: StackCtx) extends Parser[GotoInsn] {
   val parser: P[GotoInsn] =
     for (label ← "goto" ~ WS ~ Literal ~ WS.? ~ ";") yield {
       val insn = new GotoInsn(null)
-      ctx.addLabelReference(label, insn.getTargetCell)
+      ctx.registerLabelReference(label, insn.getTargetCell)
       insn
     }
 }
@@ -109,7 +109,7 @@ class IfInsnParser(ctx: StackCtx) extends Parser[IfInsn] {
   val parser: P[IfInsn] =
     for((condition, label) ← "if" ~ WS ~ conditionParser ~ WS.? ~ "goto" ~ WS ~ Literal ~ WS.? ~ ";") yield {
       val insn = new IfInsn(condition, null)
-      ctx.addLabelReference(label, insn.getTargetCell)
+      ctx.registerLabelReference(label, insn.getTargetCell)
       insn
     }
 }
@@ -131,8 +131,8 @@ class SwitchInsnParser(ctx: StackCtx) extends Parser[SwitchInsn] {
       for ((key, _) ← cases) branchTable.put(key, null)
       val insn = new SwitchInsn(branchTable, null)
 
-      for ((key, label) ← cases) ctx.addLabelReference(label, insn.getBranchTableCell(key))
-      ctx.addLabelReference(default, insn.getDefaultLocationCell)
+      for ((key, label) ← cases) ctx.registerLabelReference(label, insn.getBranchTableCell(key))
+      ctx.registerLabelReference(default, insn.getDefaultLocationCell)
 
       insn
     }

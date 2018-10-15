@@ -31,7 +31,7 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
       val dummyInsn = new ReturnInsn()
       cell.set(dummyInsn)
 
-      val refs = ctx.getReferences(label)
+      val refs = ctx.getUnresolvedReferences.getOrElse(label, Set())
       refs.foreach(_ set dummyInsn)
       assert(refs.exists(_.get eq dummyInsn))
     }
