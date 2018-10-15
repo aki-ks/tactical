@@ -16,23 +16,23 @@ import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
 
 public class TypeTextifier implements Textifier<Type> {
-    private final static TypeTextifier INSTANCE = new TypeTextifier();
+    private static final TypeTextifier INSTANCE = new TypeTextifier();
     public static TypeTextifier getInstance() {
         return INSTANCE;
     }
 
-    public final static Textifier<BooleanType> BOOLEAN = (printer, type) -> printer.addText("boolean");
-    public final static Textifier<ByteType> BYTE = (printer, type) -> printer.addText("byte");
-    public final static Textifier<ShortType> SHORT = (printer, type) -> printer.addText("short");
-    public final static Textifier<CharType> CHAR = (printer, type) -> printer.addText("char");
-    public final static Textifier<IntType> INT = (printer, type) -> printer.addText("int");
-    public final static Textifier<LongType> LONG = (printer, type) -> printer.addText("long");
-    public final static Textifier<FloatType> FLOAT = (printer, type) -> printer.addText("float");
-    public final static Textifier<DoubleType> DOUBLE = (printer, type) -> printer.addText("double");
+    public static final Textifier<BooleanType> BOOLEAN = (printer, type) -> printer.addText("boolean");
+    public static final Textifier<ByteType> BYTE = (printer, type) -> printer.addText("byte");
+    public static final Textifier<ShortType> SHORT = (printer, type) -> printer.addText("short");
+    public static final Textifier<CharType> CHAR = (printer, type) -> printer.addText("char");
+    public static final Textifier<IntType> INT = (printer, type) -> printer.addText("int");
+    public static final Textifier<LongType> LONG = (printer, type) -> printer.addText("long");
+    public static final Textifier<FloatType> FLOAT = (printer, type) -> printer.addText("float");
+    public static final Textifier<DoubleType> DOUBLE = (printer, type) -> printer.addText("double");
 
-    public final static Textifier<ObjectType> OBJECT = (printer, object) -> printer.addPath(object.getName());
+    public static final Textifier<ObjectType> OBJECT = (printer, object) -> printer.addPath(object.getName());
 
-    public final static Textifier<ArrayType> ARRAY = (printer, array) -> {
+    public static final Textifier<ArrayType> ARRAY = (printer, array) -> {
         int dimensions = array.getDimensions();
         for (int i = 0; i < dimensions; i++) {
             printer.addText("[]");
@@ -41,7 +41,7 @@ public class TypeTextifier implements Textifier<Type> {
         TypeTextifier.getInstance().textify(printer, array.getBaseType());
     };
 
-    public final static Textifier<IntLikeType> INT_LIKE = (printer, type) -> {
+    public static final Textifier<IntLikeType> INT_LIKE = (printer, type) -> {
         if (type instanceof BooleanType) {
             BOOLEAN.textify(printer, (BooleanType) type);
         } else if (type instanceof ByteType) {
@@ -57,7 +57,7 @@ public class TypeTextifier implements Textifier<Type> {
         }
     };
 
-    public final static Textifier<PrimitiveType> PRIMITIVE_TYPE = (printer, type) -> {
+    public static final Textifier<PrimitiveType> PRIMITIVE_TYPE = (printer, type) -> {
         if (type instanceof IntLikeType) {
             INT_LIKE.textify(printer, (IntLikeType) type);
         } else if (type instanceof LongType) {
@@ -71,11 +71,22 @@ public class TypeTextifier implements Textifier<Type> {
         }
     };
 
-    public final static Textifier<RefType> REF_TYPE = (printer, type) -> {
+    public static final Textifier<RefType> REF_TYPE = (printer, type) -> {
         if (type instanceof ObjectType) {
             OBJECT.textify(printer, (ObjectType) type);
         } else if (type instanceof ArrayType) {
             ARRAY.textify(printer, (ArrayType) type);
+        }
+    };
+
+    /**
+     * A special type textifier that textifies any reference type as <tt>ref</tt>.
+     */
+    public static final Textifier<Type> INSN_TYPE = (printer, type) -> {
+        if (type instanceof RefType) {
+            printer.addText("ref");
+        } else {
+            getInstance().textify(printer, type);
         }
     };
 

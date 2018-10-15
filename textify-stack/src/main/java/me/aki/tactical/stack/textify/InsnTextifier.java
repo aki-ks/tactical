@@ -171,7 +171,7 @@ public class InsnTextifier implements Textifier<Instruction> {
                     TextUtil.assertionError();
 
             printer.addText(keyword + " ");
-            TypeTextifier.getInstance().textify(printer, instruction.getType());
+            TypeTextifier.INSN_TYPE.textify(printer, instruction.getType());
             printer.addText(";");
         }
     }
@@ -255,13 +255,13 @@ public class InsnTextifier implements Textifier<Instruction> {
 
     private void textifyArrayLoadInsn(Printer printer, ArrayLoadInsn instruction) {
         printer.addText("arrayload ");
-        TypeTextifier.getInstance().textify(printer, instruction.getType());
+        TypeTextifier.INSN_TYPE.textify(printer, instruction.getType());
         printer.addText(";");
     }
 
     private void textifyArrayStoreInsn(Printer printer, ArrayStoreInsn instruction) {
         printer.addText("arraystore ");
-        TypeTextifier.getInstance().textify(printer, instruction.getType());
+        TypeTextifier.INSN_TYPE.textify(printer, instruction.getType());
         printer.addText(";");
     }
 
@@ -341,7 +341,7 @@ public class InsnTextifier implements Textifier<Instruction> {
 
     private void textifyLoadInsn(Printer printer, LoadInsn instruction) {
         printer.addText("load ");
-        TypeTextifier.getInstance().textify(printer, instruction.getType());
+        TypeTextifier.INSN_TYPE.textify(printer, instruction.getType());
         printer.addText(" ");
         printer.addLiteral(ctx.getLocalName(instruction.getLocal()));
         printer.addText(";");
@@ -349,7 +349,7 @@ public class InsnTextifier implements Textifier<Instruction> {
 
     private void textifyStoreInsn(Printer printer, StoreInsn instruction) {
         printer.addText("store ");
-        TypeTextifier.getInstance().textify(printer, instruction.getType());
+        TypeTextifier.INSN_TYPE.textify(printer, instruction.getType());
         printer.addText(" ");
         printer.addLiteral(ctx.getLocalName(instruction.getLocal()));
         printer.addText(";");
@@ -357,7 +357,7 @@ public class InsnTextifier implements Textifier<Instruction> {
 
     private void textifyNegInsn(Printer printer, NegInsn instruction) {
         printer.addText("neg ");
-        TypeTextifier.getInstance().textify(printer, instruction.getType());
+        TypeTextifier.INSN_TYPE.textify(printer, instruction.getType());
         printer.addText(";");
     }
 
@@ -404,7 +404,7 @@ public class InsnTextifier implements Textifier<Instruction> {
         instruction.getType().ifPresentOrElse(
                 type -> {
                     printer.addText("return ");
-                    TypeTextifier.getInstance().textify(printer, type);
+                    TypeTextifier.INSN_TYPE.textify(printer, type);
                     printer.addText(";");
                 },
                 () -> printer.addText("return;"));
