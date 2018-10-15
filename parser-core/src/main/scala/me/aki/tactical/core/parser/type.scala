@@ -42,8 +42,8 @@ object ObjectTypeParser extends Parser[ObjectType] {
   }
 }
 
-class ArrayIncludingParser(baseTypeParser: P[Type], opaque: String = null) extends Parser[Type] {
-  val parser: P[Type] = {
+class ArrayIncludingParser[BaseType >: ArrayType <: Type](baseTypeParser: P[BaseType], opaque: String = null) extends Parser[BaseType] {
+  val parser: P[BaseType] = {
     val parser = P {
       baseTypeParser ~ P("[" ~ WS.? ~ "]").!.rep(min = 0, sep = WS.?) map {
         case (typ, Seq()) => typ
@@ -56,9 +56,13 @@ class ArrayIncludingParser(baseTypeParser: P[Type], opaque: String = null) exten
   }
 }
 
-object RefTypeParser extends ArrayIncludingParser(ObjectTypeParser, "<object type | array type>")
+object ArrayBaseTypeParser extends Parser[Type] {
+  val parser: P[Type] = PrimitiveTypeParser | ObjectTypeParser
+}
 
-object TypeParser extends ArrayIncludingParser(PrimitiveTypeParser | ObjectTypeParser, "<type>")
+object RefTypeParser extends ArrayIncludingParser[RefType](ObjectTypeParser, "<object type | array type>")
+
+object TypeParser extends ArrayIncludingParser[Type](ArrayBaseTypeParser, "<type>")
 
 /** Parse <type>.class */
 object ClassLiteral extends Parser[Type] {
@@ -92,4 +96,24 @@ object MethodDescriptorParser extends Parser[MethodDescriptor] {
   val parser: P[MethodDescriptor] =
     for ((paramTypes, returnType) ← "(" ~ WS.? ~ TypeParser.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ ")" ~ WS.? ~ ReturnTypeParser)
       yield new MethodDescriptor(paramTypes.asJava, returnType)
+}
+
+/**
+  * Textify a type as used as parameter in instructions
+  */
+object InsnTypeParser {
+  val b = ByteTypeParser
+  val s = ShortTypeParser
+  val c = CharTypeParser
+  val i = IntTypeParser
+  val l = LongTypeParser
+  val f = FloatTypeParser
+  val d = DoubleTypeParser
+  val ref = P { "ref".!.map(_ => ObjectType.OBJECT) }
+
+  val fd = P { f | d }
+  val il = P { i | l }
+  val ilfd = P { i | l | f | d }
+  val ilfdref = P { i | l | f | d | ref }
+  val bscilfd = P { b | s | c | i | l | f | d }
 }
