@@ -15,7 +15,7 @@ Building a referenced based intermediation for java bytecode is the main objecti
   * [ ] for the reference based intermediation
 * [ ] Turn this project into a disassambler generating human editable textfiles
   * [X] Textifier for core
-  * [ ] Textifier for stack
+  * [X] Textifier for stack
   * [ ] Textifier for ref
   * [X] Parser for core
   * [ ] Parser for stack
