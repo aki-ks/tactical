@@ -6,6 +6,7 @@ import me.aki.tactical.stack.insn.Instruction;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class TextifyContext {
     private final StackBody body;
@@ -38,6 +39,10 @@ public class TextifyContext {
 
     public Map<StackLocal, String> getLocalNames() {
         return localNames;
+    }
+
+    public Optional<String> getLabelOpt(Instruction instruction) {
+        return Optional.ofNullable(labels.get(instruction));
     }
 
     public String getLabel(Instruction instruction) {

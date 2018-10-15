@@ -181,6 +181,14 @@ public class StackBodyTextifier implements BodyTextifier {
         InsnTextifier insnTextifier = new InsnTextifier(ctx);
 
         for (Instruction instruction : body.getInstructions()) {
+            ctx.getLabelOpt(instruction).ifPresent(label -> {
+                printer.decreaseIndent();
+                printer.addLiteral(label);
+                printer.addText(":");
+                printer.newLine();
+                printer.increaseIndent();
+            });
+
             insnTextifier.textify(printer, instruction);
             printer.newLine();
         }
