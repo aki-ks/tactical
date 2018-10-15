@@ -203,7 +203,7 @@ public class StackBodyTextifier implements BodyTextifier {
             printer.addText(" catch ");
             printer.addLiteral(ctx.getLabel(tryCatchBlock.getHandler()));
             tryCatchBlock.getExceptionType().ifPresent(exception -> {
-                printer.addText(" ");
+                printer.addText(" : ");
                 printer.addPath(exception);
             });
             printer.addText(";");

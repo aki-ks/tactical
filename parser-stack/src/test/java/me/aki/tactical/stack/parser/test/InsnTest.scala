@@ -16,26 +16,11 @@ import me.aki.tactical.stack.parser.{InsnParser, StackCtx}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
 
-class InsnTest extends FlatSpec with Matchers with PropertyChecks {
-  val local1 = new StackLocal
-
-  def newCtx = new StackCtx(Map("local1" -> local1))
-
+class InsnTest extends FlatSpec with Matchers with PropertyChecks with StackCtxTest {
   def parseInsn(text: String, ctx: StackCtx = newCtx): Instruction =
     new Parser[Instruction] {
       val parser: P[Instruction] = Start ~ new InsnParser(ctx) ~ End
     } parse text
-
-  def validateLabels(ctx: StackCtx, cells: Map[String, Cell[Instruction]]): Unit = {
-    for ((label, cell) ← cells) {
-      val dummyInsn = new ReturnInsn()
-      cell.set(dummyInsn)
-
-      val refs = ctx.getUnresolvedReferences.getOrElse(label, Set())
-      refs.foreach(_ set dummyInsn)
-      assert(refs.exists(_.get eq dummyInsn))
-    }
-  }
 
   val methodRefs = Table(
     ("textifier MethodRef", "MethodRef"),
