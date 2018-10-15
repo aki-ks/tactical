@@ -20,10 +20,10 @@ public class NewArrayInsn extends AbstractInstruction {
      * Amount of dimensions that will be initialized.
      *
      * examples:
-     * - 1 for <pre><code>new int[7]</code></pre>
-     * - 1 for <pre><code>new int[7][][]</code></pre>
-     * - 2 for <pre><code>new int[7][8][]</code></pre>
-     * - 3 for <pre><code>new int[7][8][9]</code></pre>
+     * - <tt>1</tt> for <pre><code>new int[7]</code></pre>
+     * - <tt>1</tt> for <pre><code>new int[7][][]</code></pre>
+     * - <tt>2</tt> for <pre><code>new int[7][8][]</code></pre>
+     * - <tt>3</tt> for <pre><code>new int[7][8][9]</code></pre>
      */
     private int initializedDimensions;
 

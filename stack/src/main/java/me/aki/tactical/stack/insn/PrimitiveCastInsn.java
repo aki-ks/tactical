@@ -1,6 +1,10 @@
 package me.aki.tactical.stack.insn;
 
 import me.aki.tactical.core.type.BooleanType;
+import me.aki.tactical.core.type.DoubleType;
+import me.aki.tactical.core.type.FloatType;
+import me.aki.tactical.core.type.IntType;
+import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.PrimitiveType;
 
 import java.util.Objects;
@@ -31,11 +35,12 @@ public class PrimitiveCastInsn extends AbstractInstruction {
     }
 
     public void setFromType(PrimitiveType fromType) {
-        if (fromType instanceof BooleanType) {
-            throw new IllegalArgumentException("Cast from BooleanType are not possible");
+        if (fromType instanceof IntType || fromType instanceof LongType ||
+                fromType instanceof FloatType || fromType instanceof DoubleType) {
+            this.fromType = fromType;
+        } else {
+            throw new IllegalArgumentException("Cast from " + fromType + " is not possible");
         }
-
-        this.fromType = fromType;
     }
 
     public PrimitiveType getToType() {
