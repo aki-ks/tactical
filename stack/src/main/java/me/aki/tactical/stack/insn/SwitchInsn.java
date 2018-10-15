@@ -18,7 +18,7 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
     /**
      * Mapping from int constants to their corresponding branch location.
      */
-    private Map<Integer, Instruction> branchTable = new LinkedHashMap<>();
+    private LinkedHashMap<Integer, Instruction> branchTable;
 
     /**
      * The default branch location if a popped value is not contained
@@ -26,7 +26,7 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
      */
     private Instruction defaultLocation;
 
-    public SwitchInsn(Map<Integer, Instruction> branchTable, Instruction defaultLocation) {
+    public SwitchInsn(LinkedHashMap<Integer, Instruction> branchTable, Instruction defaultLocation) {
         this.branchTable = branchTable;
         this.defaultLocation = defaultLocation;
     }
@@ -35,8 +35,12 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
         return branchTable;
     }
 
-    public void setBranchTable(Map<Integer, Instruction> branchTable) {
+    public void setBranchTable(LinkedHashMap<Integer, Instruction> branchTable) {
         this.branchTable = branchTable;
+    }
+
+    public Cell<Instruction> getBranchTableCell(int key) {
+        return Cell.ofMap(0, branchTable, Instruction.class);
     }
 
     public List<Cell<Instruction>> getBranchTableCells() {

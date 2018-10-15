@@ -61,6 +61,7 @@ import org.objectweb.asm.tree.LabelNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -318,7 +319,7 @@ public class StackInsnWriter extends StackInsnVisitor<LabelNode> {
 
     @Override
     public void visitSwitch(Map<Integer, LabelNode> targetTable, LabelNode defaultTarget) {
-        Map<Integer, Instruction> table = new HashMap<>();
+        LinkedHashMap<Integer, Instruction> table = new LinkedHashMap<>();
         SwitchInsn insn = new SwitchInsn(table, null);
 
         ctx.registerForwardInsnCell(defaultTarget, insn.getDefaultLocationCell());
