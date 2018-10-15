@@ -21,3 +21,13 @@ class TryCatchBlockParser(ctx: StackCtx) extends Parser[TryCatchBlock] {
     }
   }
 }
+
+class LineNumberParser(ctx: StackCtx) extends Parser[LineNumber] {
+  val parser: P[LineNumber] = P {
+    for ((line, label) ← "line" ~ WS.? ~ int ~ WS.? ~ Literal ~ WS.? ~ ";") yield {
+      val node = new LineNumber(line, null)
+      ctx.registerLabelReference(label, node.getInstructionCell)
+      node
+    }
+  }
+}

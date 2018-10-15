@@ -31,4 +31,15 @@ class ContentTest extends FlatSpec with Matchers with PropertyChecks with StackC
       "label3" -> block.getHandlerCell
     ))
   }
+
+  "The LineNumberParser" should "parse line number declarations" in {
+    forAll { line: Int =>
+      val ctx = newCtx
+
+      val node = new LineNumberParser(ctx).parse(s"line $line label1;")
+
+      node.getLine shouldEqual line
+      validateLabels(ctx, Map("label1" -> node.getInstructionCell))
+    }
+  }
 }
