@@ -335,6 +335,7 @@ public class InsnTextifier implements Textifier<Instruction> {
             printer.addText(".");
             printer.addLiteral(method.getName());
             MethodDescriptorTextifier.getInstance().textify(printer, method.getDescriptor());
+            printer.addText(";");
         }
     }
 
