@@ -48,7 +48,7 @@ public class HandleTextifier implements Textifier<Handle> {
                 handle instanceof InvokeSpecialHandle ? "special " :
                 handle instanceof InvokeStaticHandle ? "static " :
                 handle instanceof InvokeVirtualHandle ? "virtual " :
-                handle instanceof NewInstanceHandle ? "newInstance " :
+                handle instanceof NewInstanceHandle ? "new " :
                 TextUtil.assertionError()
         );
 
