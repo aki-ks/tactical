@@ -31,3 +31,23 @@ class LineNumberParser(ctx: StackCtx) extends Parser[LineNumber] {
     }
   }
 }
+
+class LocalVariableParser(ctx: StackCtx) extends Parser[LocalVariable] {
+  val parser: P[LocalVariable] = P {
+    for {
+      (start, end, local, name, typ, signature) ←
+        "local" ~ WS.? ~ "info" ~ WS.? ~
+          Literal ~ WS.? ~ ("->" | "→") ~ WS.? ~ Literal ~ WS.? ~ "," ~ WS.? ~ // range
+          Literal ~ WS.? ~ "," ~ WS.? ~ // local
+          StringLiteral ~ WS.? ~ "," ~ WS.? ~ // name
+          TypeParser ~ WS.? ~ // type
+          ("," ~ WS.? ~ StringLiteral ~ WS.?).? ~ // signature
+          ";"
+    } yield {
+      val variable = new LocalVariable(name, typ, Optional.ofNullable(signature.orNull), null, null, ctx.getLocal(local))
+      ctx.registerLabelReference(start, variable.getStartCell)
+      ctx.registerLabelReference(end, variable.getEndCell)
+      variable
+    }
+  }
+}
