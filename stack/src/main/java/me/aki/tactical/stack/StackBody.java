@@ -11,6 +11,7 @@ import me.aki.tactical.stack.insn.StoreInsn;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class StackBody implements Body {
@@ -225,6 +226,24 @@ public class StackBody implements Body {
         public void setLocal(StackLocal local) {
             this.local = local;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LocalVariable that = (LocalVariable) o;
+            return Objects.equals(name, that.name) &&
+                    Objects.equals(type, that.type) &&
+                    Objects.equals(signature, that.signature) &&
+                    Objects.equals(start, that.start) &&
+                    Objects.equals(end, that.end) &&
+                    Objects.equals(local, that.local);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, type, signature, start, end, local);
+        }
     }
 
     public static class LocalVariableAnnotation {
@@ -257,6 +276,20 @@ public class StackBody implements Body {
 
         public void setLocations(List<Location> locations) {
             this.locations = locations;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LocalVariableAnnotation that = (LocalVariableAnnotation) o;
+            return Objects.equals(annotation, that.annotation) &&
+                    Objects.equals(locations, that.locations);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(annotation, locations);
         }
 
         /**
@@ -315,6 +348,21 @@ public class StackBody implements Body {
             public void setLocal(StackLocal local) {
                 this.local = local;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Location location = (Location) o;
+                return Objects.equals(start, location.start) &&
+                        Objects.equals(end, location.end) &&
+                        Objects.equals(local, location.local);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(start, end, local);
+            }
         }
     }
 
@@ -355,6 +403,20 @@ public class StackBody implements Body {
 
         public Cell<Instruction> getInstructionCell() {
             return Cell.of(this::getInstruction, this::setInstruction, Instruction.class);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LineNumber that = (LineNumber) o;
+            return line == that.line &&
+                    Objects.equals(instruction, that.instruction);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(line, instruction);
         }
     }
 }
