@@ -2,21 +2,28 @@ package me.aki.tactical.core.parser.test
 
 import java.util.{Optional, Set => JSet}
 
+import fastparse.all._
 import me.aki.tactical.core.Classfile.InnerClass
 import me.aki.tactical.core.annotation.Annotation
 
 import scala.collection.JavaConverters._
 import me.aki.tactical.core._
 import me.aki.tactical.core.`type`._
-import me.aki.tactical.core.parser.{ClassfileParser, InnerClassFlagParser}
+import me.aki.tactical.core.parser.{ClassfileParser, Parser}
 import me.aki.tactical.core.typeannotation._
 import me.aki.tactical.core.typeannotation.TargetType.Extends
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 import org.scalatest.{FlatSpec, Matchers}
 
 class ClassfileTest extends FlatSpec with Matchers {
-  "The ClassfileParser" should "parse the most basic classes" in {
-    ClassfileParser.parse {
+  object DummyBodyParser extends Parser[Body] {
+    val parser: P[Body] = for (_ ← Pass) yield new Body {}
+  }
+
+  val classParser = new ClassfileParser(DummyBodyParser)
+
+  "The classParser" should "parse the most basic classes" in {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -26,7 +33,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse implementes and extends" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -38,7 +45,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse different class keywords" in {
-    ClassfileParser.parse {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -46,7 +53,7 @@ class ClassfileTest extends FlatSpec with Matchers {
       """.stripMargin
     }.getFlag(Classfile.Flag.INTERFACE) shouldEqual true
 
-    ClassfileParser.parse {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -54,7 +61,7 @@ class ClassfileTest extends FlatSpec with Matchers {
       """.stripMargin
     }.getFlag(Classfile.Flag.ANNOTATION) shouldEqual true
 
-    ClassfileParser.parse {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -62,7 +69,7 @@ class ClassfileTest extends FlatSpec with Matchers {
       """.stripMargin
     }.getFlag(Classfile.Flag.ENUM) shouldEqual true
 
-    ClassfileParser.parse {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -72,7 +79,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse class signatures" in {
-    ClassfileParser.parse {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -83,7 +90,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse source and debug info" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -98,7 +105,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse annotations" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -111,7 +118,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse type annotations" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -130,7 +137,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse attributes" in {
-    ClassfileParser.parse {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -143,7 +150,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse a module" in {
-    ClassfileParser.parse {
+    classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -155,7 +162,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse the enclosing method" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -173,7 +180,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse inner classes" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -194,7 +201,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse the nest host" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -207,7 +214,7 @@ class ClassfileTest extends FlatSpec with Matchers {
   }
 
   it should "parse the nest members" in {
-    val classfile = ClassfileParser.parse {
+    val classfile = classParser.parse {
       """package com.example;
         |version 54.0;
         |
@@ -219,6 +226,29 @@ class ClassfileTest extends FlatSpec with Matchers {
     classfile.getNestMembers shouldEqual List(Path.of("com", "example", "Bar"), Path.of("com", "example", "Baz")).asJava
   }
 
-  //TODO Fields
-  //TODO Methods
+  it should "parse fields" in {
+    val classfile = classParser.parse {
+      """package com.example;
+        |version 54.0;
+        |
+        |class Foo {
+        |  int i;
+        |}
+      """.stripMargin
+    }
+    classfile.getFields shouldEqual List(new Field("i", IntType.getInstance)).asJava
+  }
+
+  it should "parse methods" in {
+    val classfile = classParser.parse {
+      """package com.example;
+        |version 54.0;
+        |
+        |class Foo {
+        |  void foo();
+        |}
+      """.stripMargin
+    }
+    classfile.getMethods shouldEqual List(new Method("foo", Nil.asJava, Optional.empty[Type])).asJava
+  }
 }

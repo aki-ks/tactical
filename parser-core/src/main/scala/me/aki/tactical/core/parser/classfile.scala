@@ -9,9 +9,8 @@ import me.aki.tactical.core.Classfile.{EnclosingMethod, Version}
 import me.aki.tactical.core.annotation.Annotation
 import me.aki.tactical.core.typeannotation.ClassTypeAnnotation
 
-object ClassfileParser extends Parser[Classfile] {
+class ClassfileParser(bodyParser: Parser[Body]) extends Parser[Classfile] {
   val parser: P[Classfile] = P {
-
     val pkg = "package" ~ WS ~ Literal.rep(min = 1, sep = WS.? ~ "." ~ WS.?) ~ WS.? ~ ";"
     val version = "version" ~ WS ~ int ~ WS.? ~ "." ~ WS.? ~ int ~ WS.? ~ ";"
 
@@ -32,11 +31,9 @@ object ClassfileParser extends Parser[Classfile] {
 
     P {
       pkg ~ WS.? ~ version ~ WS.? ~ ClassPrefixParser.rep(sep = WS.?) ~ WS.? ~
-        classDescriptor ~ WS.? ~ "{" ~ WS.? ~
-        ClassContentParser.rep(sep = WS.?) ~ WS.? ~
-        "}"
-    } map {
-      case (pkg, (major, minor), prefixes, (flags, classTypeFlag, name, superType, interfaces), contents) =>
+        classDescriptor ~ WS.? ~ "{" ~ WS.?
+    } flatMap {
+      case (pkg, (major, minor), prefixes, (flags, classTypeFlag, name, superType, interfaces)) =>
         val classfile = {
           val version = new Version(major.toInt, minor.toInt)
           val fullName = new Path(pkg.asJava, name)
@@ -47,9 +44,11 @@ object ClassfileParser extends Parser[Classfile] {
         classTypeFlag.foreach(classfile.getFlags.add)
 
         prefixes.foreach(_ apply classfile)
-        contents.foreach(_ apply classfile)
 
-        classfile
+        for (contents ← new ClassContentParser(classfile, bodyParser).rep(sep = WS.?) ~ WS.? ~ "}") yield {
+          contents.foreach(_ apply classfile)
+          classfile
+        }
     }
   }
 }
@@ -162,7 +161,7 @@ object ClassContent {
   }
 }
 
-object ClassContentParser extends Parser[ClassContent] {
+object ClassContentParser {
   object ModuleContentParser extends Parser[ClassContent.ModuleContent] {
     val parser: P[ClassContent.ModuleContent] = P {
       for (module ← ModuleParser) yield new ClassContent.ModuleContent(module)
@@ -220,23 +219,27 @@ object ClassContentParser extends Parser[ClassContent] {
 
   object FieldContentParser extends Parser[ClassContent.FieldContent] {
     val parser: P[ClassContent.FieldContent] = P {
-      Fail
+      for (field ← FieldParser) yield new ClassContent.FieldContent(field)
     } opaque "<field>"
   }
 
-  object MethodContentParser extends Parser[ClassContent.MethodContent] {
+  class MethodContentParser(classfile: Classfile, bodyParser: Parser[Body]) extends Parser[ClassContent.MethodContent] {
     val parser: P[ClassContent.MethodContent] = P {
-      Fail
+      for (method ← new MethodParser(classfile, bodyParser)) yield new ClassContent.MethodContent(method)
     } opaque "<method>"
   }
+}
+
+class ClassContentParser(classfile: Classfile, bodyParser: Parser[Body]) extends Parser[ClassContent] {
+  import ClassContentParser._
 
   val parser: P[ClassContent] = P {
-    ModuleContentParser |
+    ClassContentParser.ModuleContentParser |
       EnclosingContentParser |
       InnerClassContentParser |
       NestHostContentParser |
       NestMemberContentParser |
       FieldContentParser |
-      MethodContentParser
+      new MethodContentParser(classfile, bodyParser)
   }
 }
