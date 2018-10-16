@@ -48,7 +48,7 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
-  "The ClassTargetTypeParser" should "parse all kinds of ClassTargetTypeParser" in {
+  "The ClassTargetTypeParser" should "parse all kinds of ClassTargetType" in {
     ClassTargetTypeParser.parse("extends") shouldEqual new Extends()
 
     forAll { interface: Int =>
@@ -62,6 +62,11 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     forAll { (parameter: Int, bound: Int) =>
       ClassTargetTypeParser.parse(s"type parameter bound $parameter $bound") shouldEqual new TypeParameterBound(parameter, bound)
     }
+  }
+
+  "The LocalTargetTypeParser" should "parse all kinds of LocalTargetTypes" in {
+    LocalTargetTypeParser.parse("local") shouldEqual new LocalVariable
+    LocalTargetTypeParser.parse("resource") shouldEqual new ResourceVariable
   }
 
   "The ClassTypeAnnotationParser" should "parse classfile type annotations" in {
@@ -79,4 +84,21 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
       new MethodTypeAnnotation(typePath, annotation, new ReturnType())
     }
   }
+
+  "The FieldTypeAnnotationParser" should "parse field type annotations" in {
+    FieldTypeAnnotationParser.parse("#[path = { ? <1> }, annotation = @java.lang.Deprecated[visible = true]()]") shouldEqual {
+      val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
+      val annotation = new Annotation(Path.of("java", "lang", "Object"), true)
+      new FieldTypeAnnotation(typePath, annotation)
+    }
+  }
+
+  "The LocalTypeAnnotationParser" should "parse local type annotations" in {
+    LocalTypeAnnotationParser.parse("#[path = { ? <1> }, target = local, annotation = @java.lang.Override[visible = false]()]") shouldEqual {
+      val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
+      val annotation = new Annotation(Path.of("java", "lang", "Object"), false)
+      new LocalVariableTypeAnnotation(typePath, annotation, new LocalVariable())
+    }
+  }
+
 }

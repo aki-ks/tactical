@@ -1,9 +1,14 @@
 package me.aki.tactical.stack.parser.test
 
+import scala.collection.JavaConverters._
 import java.util.Optional
 
 import me.aki.tactical.core.Path
 import me.aki.tactical.core.`type`.{IntType, LongType}
+import me.aki.tactical.core.annotation.Annotation
+import me.aki.tactical.core.typeannotation.TargetType.{LocalVariable, ResourceVariable}
+import me.aki.tactical.core.typeannotation.TypePath.Kind
+import me.aki.tactical.core.typeannotation.{LocalVariableTypeAnnotation, TypePath}
 import me.aki.tactical.stack.parser._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
@@ -69,6 +74,32 @@ class ContentTest extends FlatSpec with Matchers with PropertyChecks with StackC
     validateLabels(ctx, Map(
       "label1" -> local.getStartCell,
       "label2" -> local.getEndCell
+    ))
+  }
+
+  "The LocalVariableAnnotationParser" should "parse local variable type annotations" in {
+    val ctx = newCtx
+    val anno = new LocalVariableAnnotationParser(ctx).parse(
+      """local annotation [label1 -> label2 local1, label3 -> label1 local2] #[path = { ? <1> }, target = resource, annotation = @java.lang.Override[visible = false]()]""")
+
+    val typeAnnotation = {
+      val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
+      val annotation = new Annotation(Path.of("java", "lang", "Object"), false)
+      new LocalVariableTypeAnnotation(typePath, annotation, new ResourceVariable())
+    }
+    anno.getAnnotation shouldEqual typeAnnotation
+
+    val location1 = anno.getLocations.get(0)
+    val location2 = anno.getLocations.get(1)
+
+    location1.getLocal shouldEqual local1
+    location2.getLocal shouldEqual local2
+
+    validateLabels(ctx, Map(
+      "label1" -> location1.getStartCell,
+      "label2" -> location1.getEndCell,
+      "label3" -> location2.getStartCell,
+      "label1" -> location2.getEndCell
     ))
   }
 

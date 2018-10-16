@@ -1,10 +1,10 @@
 package me.aki.tactical.stack.parser
 
+import scala.collection.JavaConverters._
 import java.util.Optional
-
 import fastparse.all._
 import me.aki.tactical.core.parser.{Parser, _}
-import me.aki.tactical.stack.StackBody.{LineNumber, LocalVariable}
+import me.aki.tactical.stack.StackBody.{LineNumber, LocalVariable, LocalVariableAnnotation}
 import me.aki.tactical.stack.TryCatchBlock
 
 class TryCatchBlockParser(ctx: StackCtx) extends Parser[TryCatchBlock] {
@@ -49,5 +49,25 @@ class LocalVariableParser(ctx: StackCtx) extends Parser[LocalVariable] {
       ctx.registerLabelReference(end, variable.getEndCell)
       variable
     }
+  }
+}
+
+class LocalVariableAnnotationParser(ctx: StackCtx) extends Parser[LocalVariableAnnotation] {
+  val parser: P[LocalVariableAnnotation] = P {
+    val locations = {
+      val locationParser = P {
+        for ((start, end, local) ← Literal ~ WS.? ~ ("->" | "→") ~ WS.? ~ Literal ~ WS.? ~ Literal) yield {
+          val location = new LocalVariableAnnotation.Location(null, null, ctx.getLocal(local))
+          ctx.registerLabelReference(start, location.getStartCell)
+          ctx.registerLabelReference(end, location.getEndCell)
+          location
+        }
+      }
+
+      "[" ~ WS.? ~ locationParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "]"
+    }
+
+    for ((locations, annotation) ← "local" ~ WS.? ~ "annotation" ~ WS.? ~ locations.log() ~ WS.? ~ LocalTypeAnnotationParser)
+      yield new LocalVariableAnnotation(annotation, locations.asJava)
   }
 }

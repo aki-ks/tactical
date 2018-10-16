@@ -34,6 +34,8 @@ object TargetTypeParsers {
   val typeParameterBound = for ((param, bound) ← "type" ~ WS ~ "parameter" ~ WS ~ "bound" ~ WS ~ int ~ WS ~ int) yield new TypeParameterBound(param, bound)
   val `extends` = for (_ ← "extends".!) yield new Extends()
   val `implementes` = for (interface ← "implements" ~ WS ~ int) yield new Implements(interface)
+  val local = for (_ ← "local".!) yield new LocalVariable
+  val resource = for (_ ← "resource".!) yield new ResourceVariable
 }
 
 object MethodTargetTypeParser extends Parser[MethodTargetType] {
@@ -61,7 +63,10 @@ object InsnTargetTypeParser extends Parser[InsnTargetType] {
 }
 
 object LocalTargetTypeParser extends Parser[LocalTargetType] {
-  val parser = ???
+  val parser = P {
+    TargetTypeParsers.local |
+    TargetTypeParsers.resource
+  }
 }
 
 object ClassTypeAnnotationParser extends Parser[ClassTypeAnnotation] {
@@ -88,4 +93,13 @@ object MethodTypeAnnotationParser extends Parser[MethodTypeAnnotation] {
       "target" ~ WS.? ~ "=" ~ WS.? ~ MethodTargetTypeParser ~ WS.? ~ "," ~ WS.? ~
       "annotation" ~ WS.? ~ "=" ~ WS.? ~ AnnotationParser ~ WS.? ~ "]"
   } yield new MethodTypeAnnotation(typePath, annotation, target)
+}
+
+object LocalTypeAnnotationParser extends Parser[LocalVariableTypeAnnotation] {
+  val parser: P[LocalVariableTypeAnnotation] = for {
+    (typePath, target, annotation) ← "#" ~ WS.? ~ "[" ~ WS.? ~
+      "path" ~ WS.? ~ "=" ~ WS.? ~ TypePathParser ~ WS.? ~ "," ~ WS.? ~
+      "target" ~ WS.? ~ "=" ~ WS.? ~ LocalTargetTypeParser ~ WS.? ~ "," ~ WS.? ~
+      "annotation" ~ WS.? ~ "=" ~ WS.? ~ AnnotationParser ~ WS.? ~ "]"
+  } yield new LocalVariableTypeAnnotation(typePath, annotation, target)
 }
