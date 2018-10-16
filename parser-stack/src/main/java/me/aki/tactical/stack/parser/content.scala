@@ -58,7 +58,7 @@ class LocalVariableAnnotationParser(ctx: ResolvedStackCtx) extends Parser[LocalV
       "[" ~ WS.? ~ locationParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "]"
     }
 
-    for ((locations, annotation) ← "local" ~ WS.? ~ "annotation" ~ WS.? ~ locations.log() ~ WS.? ~ LocalTypeAnnotationParser ~ WS.? ~ ";")
+    for ((locations, annotation) ← "local" ~ WS.? ~ "annotation" ~ WS.? ~ locations ~ WS.? ~ LocalTypeAnnotationParser ~ WS.? ~ ";")
       yield new LocalVariableAnnotation(annotation, locations.asJava)
   }
 }
