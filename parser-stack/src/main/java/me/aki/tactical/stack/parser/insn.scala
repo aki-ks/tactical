@@ -10,7 +10,7 @@ import me.aki.tactical.core.parser.InsnTypeParser._
 import me.aki.tactical.stack.insn._
 import me.aki.tactical.stack.invoke._
 
-class InsnParser(ctx: StackCtx) extends Parser[Instruction] {
+class InsnParser(ctx: UnresolvedStackCtx) extends Parser[Instruction] {
   val parser: P[Instruction] = P {
     new MathInsnParser(ctx) |
       new GotoInsnParser(ctx) |
@@ -41,7 +41,7 @@ class InsnParser(ctx: StackCtx) extends Parser[Instruction] {
   }
 }
 
-class MathInsnParser(ctx: StackCtx) extends Parser[AbstractBinaryMathInsn] {
+class MathInsnParser(ctx: UnresolvedStackCtx) extends Parser[AbstractBinaryMathInsn] {
   val parser: P[AbstractBinaryMathInsn] = P {
     P { for (typ ← "add" ~ WS ~ ilfd ~ WS.? ~ ";") yield new AddInsn(typ) } |
       P { for (typ ← "sub" ~ WS ~ ilfd ~ WS.? ~ ";") yield new SubInsn(typ) } |
@@ -60,7 +60,7 @@ class MathInsnParser(ctx: StackCtx) extends Parser[AbstractBinaryMathInsn] {
   }
 }
 
-class GotoInsnParser(ctx: StackCtx) extends Parser[GotoInsn] {
+class GotoInsnParser(ctx: UnresolvedStackCtx) extends Parser[GotoInsn] {
   val parser: P[GotoInsn] =
     for (label ← "goto" ~ WS ~ Literal ~ WS.? ~ ";") yield {
       val insn = new GotoInsn(null)
@@ -69,7 +69,7 @@ class GotoInsnParser(ctx: StackCtx) extends Parser[GotoInsn] {
     }
 }
 
-class IfInsnParser(ctx: StackCtx) extends Parser[IfInsn] {
+class IfInsnParser(ctx: UnresolvedStackCtx) extends Parser[IfInsn] {
   import IfInsn._
 
   val conditionParser = P {
@@ -114,7 +114,7 @@ class IfInsnParser(ctx: StackCtx) extends Parser[IfInsn] {
     }
 }
 
-class SwitchInsnParser(ctx: StackCtx) extends Parser[SwitchInsn] {
+class SwitchInsnParser(ctx: UnresolvedStackCtx) extends Parser[SwitchInsn] {
   val parser: P[SwitchInsn] = P {
     val cases = "case" ~ WS.? ~ int ~ WS.? ~ ":" ~ WS.? ~ "goto" ~ WS.? ~ Literal~ WS.? ~ ";"
     val default = "default" ~ WS.? ~ ":" ~ WS.? ~ "goto" ~ WS.? ~ Literal ~ WS.? ~ ";"
@@ -139,7 +139,7 @@ class SwitchInsnParser(ctx: StackCtx) extends Parser[SwitchInsn] {
   }
 }
 
-class FieldInsnParser(ctx: StackCtx) extends Parser[AbstractFieldInsn] {
+class FieldInsnParser(ctx: UnresolvedStackCtx) extends Parser[AbstractFieldInsn] {
   val parser: P[AbstractFieldInsn] = P {
     val static: P[Boolean] = for (opt ← ("static".! ~ WS).?) yield opt.isDefined
 
@@ -165,7 +165,7 @@ object ArrayStoreInsnParser extends Parser[ArrayStoreInsn] {
       yield new ArrayStoreInsn(typ)
 }
 
-class IncrementInsnParser(ctx: StackCtx) extends Parser[IncrementInsn] {
+class IncrementInsnParser(ctx: UnresolvedStackCtx) extends Parser[IncrementInsn] {
   val parser: P[IncrementInsn] =
     for ((local, number) ← "inc" ~ WS ~ Literal ~ WS ~ int ~ WS.? ~ ";")
       yield new IncrementInsn(ctx.getLocal(local), number)
@@ -206,13 +206,13 @@ object InvokeInsnParser extends Parser[InvokeInsn] {
   }
 }
 
-class LoadInsnParser(ctx: StackCtx) extends Parser[LoadInsn] {
+class LoadInsnParser(ctx: UnresolvedStackCtx) extends Parser[LoadInsn] {
   val parser: P[LoadInsn] =
     for ((typ, local) ← "load" ~ WS ~ ilfdref ~ WS ~ Literal ~ WS.? ~ ";")
       yield new LoadInsn(typ, ctx.getLocal(local))
 }
 
-class StoreInsnParser(ctx: StackCtx) extends Parser[StoreInsn] {
+class StoreInsnParser(ctx: UnresolvedStackCtx) extends Parser[StoreInsn] {
   val parser: P[StoreInsn] =
     for ((typ, local) ← "store" ~ WS ~ ilfdref ~ WS ~ Literal ~ WS.? ~ ";")
       yield new StoreInsn(typ, ctx.getLocal(local))

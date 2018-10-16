@@ -2,72 +2,63 @@ package me.aki.tactical.stack.parser
 
 import scala.collection.JavaConverters._
 import java.util.Optional
+
 import fastparse.all._
 import me.aki.tactical.core.parser.{Parser, _}
+import me.aki.tactical.core.typeannotation.InsnTypeAnnotation
 import me.aki.tactical.stack.StackBody.{LineNumber, LocalVariable, LocalVariableAnnotation}
 import me.aki.tactical.stack.TryCatchBlock
+import me.aki.tactical.stack.insn.Instruction
 
-class TryCatchBlockParser(ctx: StackCtx) extends Parser[TryCatchBlock] {
+class TryCatchBlockParser(ctx: ResolvedStackCtx) extends Parser[TryCatchBlock] {
   val parser: P[TryCatchBlock] = P {
-    for {
-      (first, last, handler, exception) ←
-        "try" ~ WS.? ~ Literal ~ WS.? ~ ("->" | "→") ~ WS.? ~ Literal ~ WS.? ~ "catch" ~ WS.? ~ Literal ~ WS.? ~ (":" ~ WS.? ~ PathParser ~ WS.?).? ~ ";"
-    } yield {
-      val block = new TryCatchBlock(null, null, null, Optional.ofNullable(exception.orNull))
-      ctx.registerLabelReference(first, block.getFirstCell)
-      ctx.registerLabelReference(last, block.getLastCell)
-      ctx.registerLabelReference(handler, block.getHandlerCell)
-      block
-    }
+    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+
+    for ((first, last, handler, exception) ← "try" ~ WS.? ~ label ~ WS.? ~ ("->" | "→") ~ WS.? ~ label ~ WS.? ~ "catch" ~ WS.? ~ label ~ WS.? ~ (":" ~ WS.? ~ PathParser ~ WS.?).? ~ ";")
+      yield new TryCatchBlock(first, last, handler, Optional.ofNullable(exception.orNull))
   }
 }
 
-class LineNumberParser(ctx: StackCtx) extends Parser[LineNumber] {
+class LineNumberParser(ctx: ResolvedStackCtx) extends Parser[LineNumber] {
   val parser: P[LineNumber] = P {
-    for ((line, label) ← "line" ~ WS.? ~ int ~ WS.? ~ Literal ~ WS.? ~ ";") yield {
-      val node = new LineNumber(line, null)
-      ctx.registerLabelReference(label, node.getInstructionCell)
-      node
-    }
+    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+
+    for ((line, label) ← "line" ~ WS.? ~ int ~ WS.? ~ label ~ WS.? ~ ";")
+      yield new LineNumber(line, label)
   }
 }
 
-class LocalVariableParser(ctx: StackCtx) extends Parser[LocalVariable] {
+class LocalVariableParser(ctx: ResolvedStackCtx) extends Parser[LocalVariable] {
   val parser: P[LocalVariable] = P {
+    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+
     for {
       (start, end, local, name, typ, signature) ←
         "local" ~ WS.? ~ "info" ~ WS.? ~
-          Literal ~ WS.? ~ ("->" | "→") ~ WS.? ~ Literal ~ WS.? ~ "," ~ WS.? ~ // range
+          label ~ WS.? ~ ("->" | "→") ~ WS.? ~ label ~ WS.? ~ "," ~ WS.? ~ // range
           Literal ~ WS.? ~ "," ~ WS.? ~ // local
           StringLiteral ~ WS.? ~ "," ~ WS.? ~ // name
           TypeParser ~ WS.? ~ // type
           ("," ~ WS.? ~ StringLiteral ~ WS.?).? ~ // signature
           ";"
-    } yield {
-      val variable = new LocalVariable(name, typ, Optional.ofNullable(signature.orNull), null, null, ctx.getLocal(local))
-      ctx.registerLabelReference(start, variable.getStartCell)
-      ctx.registerLabelReference(end, variable.getEndCell)
-      variable
-    }
+    } yield new LocalVariable(name, typ, Optional.ofNullable(signature.orNull), start, end, ctx.getLocal(local))
   }
 }
 
-class LocalVariableAnnotationParser(ctx: StackCtx) extends Parser[LocalVariableAnnotation] {
+class LocalVariableAnnotationParser(ctx: ResolvedStackCtx) extends Parser[LocalVariableAnnotation] {
   val parser: P[LocalVariableAnnotation] = P {
+    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+
     val locations = {
       val locationParser = P {
-        for ((start, end, local) ← Literal ~ WS.? ~ ("->" | "→") ~ WS.? ~ Literal ~ WS.? ~ Literal) yield {
-          val location = new LocalVariableAnnotation.Location(null, null, ctx.getLocal(local))
-          ctx.registerLabelReference(start, location.getStartCell)
-          ctx.registerLabelReference(end, location.getEndCell)
-          location
-        }
+        for ((start, end, local) ← label ~ WS.? ~ ("->" | "→") ~ WS.? ~ label ~ WS.? ~ Literal)
+          yield new LocalVariableAnnotation.Location(start, end, ctx.getLocal(local))
       }
 
       "[" ~ WS.? ~ locationParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "]"
     }
 
-    for ((locations, annotation) ← "local" ~ WS.? ~ "annotation" ~ WS.? ~ locations.log() ~ WS.? ~ LocalTypeAnnotationParser)
+    for ((locations, annotation) ← "local" ~ WS.? ~ "annotation" ~ WS.? ~ locations.log() ~ WS.? ~ LocalTypeAnnotationParser ~ WS.? ~ ";")
       yield new LocalVariableAnnotation(annotation, locations.asJava)
   }
 }

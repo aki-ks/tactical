@@ -6,7 +6,18 @@ import me.aki.tactical.core.util.Cell
 import me.aki.tactical.stack.StackLocal
 import me.aki.tactical.stack.insn.Instruction
 
-class StackCtx(locals: Map[String, StackLocal]) {
+trait StackCtx {
+  /**
+    * Get a Local by its name
+    *
+    * @param name name of the local
+    * @return the resolved local
+    */
+  def getLocal(name: String): StackLocal
+}
+
+/** A context that's still resolving locals */
+class UnresolvedStackCtx(locals: Map[String, StackLocal]) extends StackCtx {
   /** Map labels to the instructions they points to */
   private val labels = mutable.Map[String, Instruction]()
 
@@ -30,7 +41,7 @@ class StackCtx(locals: Map[String, StackLocal]) {
   }
 
   /**
-    * Add a new label.
+    * Register a new label.
     *
     * @param label name of the label
     * @param target instruction that this label points to
@@ -52,12 +63,17 @@ class StackCtx(locals: Map[String, StackLocal]) {
   def getUnresolvedReferences: Map[String, Set[Cell[Instruction]]] =
     this.unresolvedLabelReferences.toMap
 
-  /**
-    * Get a Local by its name
-    *
-    * @param name name of the local
-    * @return the resolved local
-    */
   def getLocal(name: String): StackLocal =
-    locals.getOrElse(name, throw new RuntimeException("No such local"))
+    locals.getOrElse(name, throw new NoSuchElementException("No such local"))
+
+  def toResolved = new ResolvedStackCtx(locals, labels.toMap)
+}
+
+/** A context where all labels have already been resolved. */
+class ResolvedStackCtx(locals: Map[String, StackLocal], labels: Map[String, Instruction]) extends StackCtx {
+  def getLabel(name: String) =
+    labels.getOrElse(name, throw new NoSuchElementException("No such label"))
+
+  def getLocal(name: String): StackLocal =
+    locals.getOrElse(name, throw new NoSuchElementException("No such local"))
 }
