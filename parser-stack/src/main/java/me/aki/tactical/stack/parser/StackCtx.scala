@@ -29,9 +29,6 @@ abstract class StackCtx {
 class UnresolvedStackCtx() extends StackCtx {
   var locals = Map[String, StackLocal]()
 
-  /** Map labels to the instructions they points to */
-  private val labels = mutable.Map[String, Instruction]()
-
   /** Label references that were add before the label was known to this context */
   private val unresolvedLabelReferences = mutable.Map[String, Set[Cell[Instruction]]]()
 
@@ -43,12 +40,8 @@ class UnresolvedStackCtx() extends StackCtx {
     * @param cell cell containing a the usage of the label
     */
   def registerLabelReference(label: String, cell: Cell[Instruction]) = {
-    labels get label match {
-      case Some(label) => cell.set(label)
-      case None =>
-        val unresolvedCells = unresolvedLabelReferences.getOrElse(label, Set())
-        unresolvedLabelReferences(label) = unresolvedCells + cell
-    }
+    val unresolvedCells = unresolvedLabelReferences.getOrElse(label, Set())
+    unresolvedLabelReferences(label) = unresolvedCells + cell
   }
 
   /**
@@ -58,8 +51,6 @@ class UnresolvedStackCtx() extends StackCtx {
     * @param target instruction that this label points to
     */
   def registerLabel(label: String, target: Instruction) = {
-    labels(label) = target
-
     for {
       cells ← unresolvedLabelReferences.remove(label)
       cell ← cells
@@ -74,7 +65,15 @@ class UnresolvedStackCtx() extends StackCtx {
   def getUnresolvedReferences: Map[String, Set[Cell[Instruction]]] =
     this.unresolvedLabelReferences.toMap
 
-  def toResolved = new ResolvedStackCtx(locals, labels.toMap)
+  def resolve(labels: Map[String, Instruction]): ResolvedStackCtx = {
+    for {
+      (labelName, cells) ← unresolvedLabelReferences
+      val label = labels.getOrElse(labelName, throw new NoSuchElementException(s"No such label '$labelName'"))
+      cell ← cells
+    } cell.set(label)
+
+    new ResolvedStackCtx(locals, labels.toMap)
+  }
 }
 
 /** A context where all labels have already been resolved. */
