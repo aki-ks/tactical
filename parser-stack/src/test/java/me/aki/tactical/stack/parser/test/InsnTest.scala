@@ -1,5 +1,7 @@
 package me.aki.tactical.stack.parser.test
 
+import java.util
+
 import scala.collection.JavaConverters._
 import java.util.Optional
 
@@ -9,38 +11,27 @@ import me.aki.tactical.core.parser.Parser
 import me.aki.tactical.core.`type`._
 import me.aki.tactical.core.constant._
 import me.aki.tactical.core.handle.InvokeStaticHandle
-import me.aki.tactical.core.util.Cell
 import me.aki.tactical.stack.insn._
 import me.aki.tactical.stack.invoke._
-import me.aki.tactical.stack.parser.{InsnParser, UnresolvedStackCtx}
+import me.aki.tactical.stack.parser.{InsnParser, ResolvedStackCtx, UnresolvedStackCtx}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
 
 class InsnTest extends FlatSpec with Matchers with PropertyChecks {
-  val newCtx = new UnresolvedStackCtx()
-  val local1 = newCtx.getLocal("local1")
-  val local2 = newCtx.getLocal("local2")
-  val local3 = newCtx.getLocal("local3")
-  val local4 = newCtx.getLocal("local4")
+  val label1: Instruction = new PushInsn(new StringConstant("label1"))
+  val label2: Instruction = new PushInsn(new StringConstant("label2"))
+  val label3: Instruction = new PushInsn(new StringConstant("label3"))
+  val label4: Instruction = new PushInsn(new StringConstant("label4"))
 
-  /**
-    * Ensure that certain instruction references point to the correct labels
-    *
-    * @param ctx the context where the cells/label reference have been registered
-    * @param cells map from the name of a label to all cells referencing it
-    */
-  def validateLabels(ctx: UnresolvedStackCtx, cells: Map[String, Cell[Instruction]]): Unit = {
-    for ((label, cell) ← cells) {
-      val dummyInsn = new ReturnInsn()
-      cell.set(dummyInsn)
+  def resolve(ctx: UnresolvedStackCtx): ResolvedStackCtx =
+    ctx.resolve(Map(
+      "label1" -> label1,
+      "label2" -> label2,
+      "label3" -> label3,
+      "label4" -> label4
+    ))
 
-      val refs = ctx.getUnresolvedReferences.getOrElse(label, Set())
-      refs.foreach(_ set dummyInsn)
-      assert(refs.exists(_.get eq dummyInsn))
-    }
-  }
-
-  def parseInsn(text: String, ctx: UnresolvedStackCtx = newCtx): Instruction =
+  def parseInsn(text: String, ctx: UnresolvedStackCtx = new UnresolvedStackCtx()): Instruction =
     new Parser[Instruction] {
       val parser: P[Instruction] = Start ~ new InsnParser(ctx) ~ End
     } parse text
@@ -140,52 +131,59 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
   }
 
   it should "parse goto instructions" in {
-    val ctx = newCtx
+    val ctx = new UnresolvedStackCtx
     val insn = parseInsn("goto label1;", ctx)
-    insn shouldEqual new GotoInsn(null)
-    validateLabels(ctx, Map("label1" -> insn.asInstanceOf[GotoInsn].getTargetCell))
+    resolve(ctx)
+
+    insn shouldEqual new GotoInsn(label1)
   }
 
   it should "parse if instructions" in {
     import IfInsn._
+    def parseIfInsn(unparsed: String, condition: Condition, label: Instruction): Unit = {
+      val ctx = new UnresolvedStackCtx
+      val insn = parseInsn(unparsed, ctx)
+      resolve(ctx)
 
-    parseInsn("if ref (? == null) goto label1;") shouldEqual new IfInsn(IF_NULL, null)
-    parseInsn("if ref (? != null) goto label2;") shouldEqual new IfInsn(IF_NONNULL, null)
+      insn shouldEqual new IfInsn(condition, label)
+    }
 
-    parseInsn("if ref (? == ?) goto label1;") shouldEqual new IfInsn(IF_REF_EQ, null)
-    parseInsn("if ref (? != ?) goto label2;") shouldEqual new IfInsn(IF_REF_NE, null)
+    parseIfInsn("if ref (? == null) goto label1;", IF_NULL, label1)
+    parseIfInsn("if ref (? != null) goto label2;", IF_NONNULL, label2)
 
-    parseInsn("if int (? == ?) goto label1;") shouldEqual new IfInsn(IF_INT_EQ, null)
-    parseInsn("if int (? != ?) goto label2;") shouldEqual new IfInsn(IF_INT_NE, null)
-    parseInsn("if int (? < ?) goto label3;") shouldEqual new IfInsn(IF_INT_LT, null)
-    parseInsn("if int (? <= ?) goto label3;") shouldEqual new IfInsn(IF_INT_LE, null)
-    parseInsn("if int (? > ?) goto label3;") shouldEqual new IfInsn(IF_INT_GT, null)
-    parseInsn("if int (? >= ?) goto label3;") shouldEqual new IfInsn(IF_INT_GE, null)
+    parseIfInsn("if ref (? == ?) goto label1;", IF_REF_EQ, label1)
+    parseIfInsn("if ref (? != ?) goto label2;", IF_REF_NE, label2)
 
-    parseInsn("if int (? == 0) goto label1;") shouldEqual new IfInsn(IF_EQ_ZERO, null)
-    parseInsn("if int (? != 0) goto label2;") shouldEqual new IfInsn(IF_NE_ZERO, null)
-    parseInsn("if int (? < 0) goto label3;") shouldEqual new IfInsn(IF_LT_ZERO, null)
-    parseInsn("if int (? <= 0) goto label3;") shouldEqual new IfInsn(IF_LE_ZERO, null)
-    parseInsn("if int (? > 0) goto label3;") shouldEqual new IfInsn(IF_GT_ZERO, null)
-    parseInsn("if int (? >= 0) goto label3;") shouldEqual new IfInsn(IF_GE_ZERO, null)
+    parseIfInsn("if int (? == ?) goto label1;", IF_INT_EQ, label1)
+    parseIfInsn("if int (? != ?) goto label2;", IF_INT_NE, label2)
+    parseIfInsn("if int (? < ?) goto label3;", IF_INT_LT, label3)
+    parseIfInsn("if int (? <= ?) goto label3;", IF_INT_LE, label3)
+    parseIfInsn("if int (? > ?) goto label3;", IF_INT_GT, label3)
+    parseIfInsn("if int (? >= ?) goto label3;", IF_INT_GE, label3)
+
+    parseIfInsn("if int (? == 0) goto label1;", IF_EQ_ZERO, label1)
+    parseIfInsn("if int (? != 0) goto label2;", IF_NE_ZERO, label2)
+    parseIfInsn("if int (? < 0) goto label3;", IF_LT_ZERO, label3)
+    parseIfInsn("if int (? <= 0) goto label3;", IF_LE_ZERO, label3)
+    parseIfInsn("if int (? > 0) goto label3;", IF_GT_ZERO, label3)
+    parseIfInsn("if int (? >= 0) goto label3;", IF_GE_ZERO, label3)
   }
 
   it should "parse switch instructions" in {
-    val ctx = newCtx
+    val ctx = new UnresolvedStackCtx
     val insn = parseInsn(
       """switch {
-        |  case 0 : goto label0 ;
-        |  case 1: goto label1 ;
-        |  default: goto defaultLabel;
+        |  case 0 : goto label1 ;
+        |  case 1: goto label2;
+        |  default: goto label3;
         |}
-      """.stripMargin.trim, ctx).asInstanceOf[SwitchInsn]
+      """.stripMargin.trim, ctx)
+    resolve(ctx)
 
-    assert(insn.getBranchTable.keySet().asScala == Set(0, 1))
-    validateLabels(ctx, Map(
-      "label0" -> insn.getBranchTableCell(0),
-      "label1" -> insn.getBranchTableCell(1),
-      "defaultLabel" -> insn.getDefaultLocationCell,
-    ))
+    val table = new util.LinkedHashMap[Integer, Instruction]()
+    table.put(0, label1)
+    table.put(1, label2)
+    insn shouldEqual new SwitchInsn(table, label3)
   }
 
   it should "parse field get and sets" in {
@@ -220,8 +218,11 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
   }
 
   it should "parse increment insns" in {
+    val ctx = new UnresolvedStackCtx()
+    val local = ctx.getLocal("local")
+
     forAll { int: Int =>
-      parseInsn(s"inc local1 $int;") shouldEqual new IncrementInsn(local1, int)
+      parseInsn(s"inc local $int;", ctx) shouldEqual new IncrementInsn(local, int)
     }
   }
 
@@ -264,14 +265,20 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
   }
 
   it should "parse load instructions" in {
+    val ctx = new UnresolvedStackCtx()
+    val local = ctx.getLocal("local")
+
     forAll (intLongFloatDouble) { (typString, typ) =>
-      parseInsn(s"load $typString local1;") shouldEqual new LoadInsn(typ, local1)
+      parseInsn(s"load $typString local;", ctx) shouldEqual new LoadInsn(typ, local)
     }
   }
 
   it should "parse store instructions" in {
+    val ctx = new UnresolvedStackCtx()
+    val local = ctx.getLocal("local")
+
     forAll (intLongFloatDouble) { (typString, typ) =>
-      parseInsn(s"store $typString local1;") shouldEqual new StoreInsn(typ, local1)
+      parseInsn(s"store $typString local;", ctx) shouldEqual new StoreInsn(typ, local)
     }
   }
 

@@ -29,45 +29,23 @@ abstract class StackCtx {
 class UnresolvedStackCtx() extends StackCtx {
   var locals = Map[String, StackLocal]()
 
-  /** Label references that were add before the label was known to this context */
-  private val unresolvedLabelReferences = mutable.Map[String, Set[Cell[Instruction]]]()
+  private var labelReferences = Map[String, Set[Cell[Instruction]]]()
 
   /**
     * Register a new reference of a label.
-    * It gets resolved as soon as the label is registered.
     *
     * @param label name of the label
     * @param cell cell containing a the usage of the label
     */
   def registerLabelReference(label: String, cell: Cell[Instruction]) = {
-    val unresolvedCells = unresolvedLabelReferences.getOrElse(label, Set())
-    unresolvedLabelReferences(label) = unresolvedCells + cell
+    val otherCells = labelReferences.getOrElse(label, Set())
+    labelReferences += label -> (otherCells + cell)
   }
 
-  /**
-    * Register a new label.
-    *
-    * @param label name of the label
-    * @param target instruction that this label points to
-    */
-  def registerLabel(label: String, target: Instruction) = {
-    for {
-      cells ← unresolvedLabelReferences.remove(label)
-      cell ← cells
-    } cell.set(target)
-  }
-
-  /**
-    * Get a map from references to labels not yet registered labels.
-    *
-    * @return map of labels names to references of that label
-    */
-  def getUnresolvedReferences: Map[String, Set[Cell[Instruction]]] =
-    this.unresolvedLabelReferences.toMap
 
   def resolve(labels: Map[String, Instruction]): ResolvedStackCtx = {
     for {
-      (labelName, cells) ← unresolvedLabelReferences
+      (labelName, cells) ← labelReferences
       val label = labels.getOrElse(labelName, throw new NoSuchElementException(s"No such label '$labelName'"))
       cell ← cells
     } cell.set(label)
