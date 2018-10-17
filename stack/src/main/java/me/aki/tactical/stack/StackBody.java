@@ -125,6 +125,26 @@ public class StackBody implements Body {
         this.lineNumbers = lineNumbers;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StackBody stackBody = (StackBody) o;
+        return Objects.equals(locals, stackBody.locals) &&
+                Objects.equals(thisLocal, stackBody.thisLocal) &&
+                Objects.equals(parameterLocals, stackBody.parameterLocals) &&
+                Objects.equals(instructions, stackBody.instructions) &&
+                Objects.equals(tryCatchBlocks, stackBody.tryCatchBlocks) &&
+                Objects.equals(localVariables, stackBody.localVariables) &&
+                Objects.equals(localVariableAnnotations, stackBody.localVariableAnnotations) &&
+                Objects.equals(lineNumbers, stackBody.lineNumbers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(locals, thisLocal, parameterLocals, instructions, tryCatchBlocks, localVariables, localVariableAnnotations, lineNumbers);
+    }
+
     /**
      * Debug information about a local variable that existed in source.
      */
