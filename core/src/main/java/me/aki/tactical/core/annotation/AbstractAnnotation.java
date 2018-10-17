@@ -3,6 +3,7 @@ package me.aki.tactical.core.annotation;
 import me.aki.tactical.core.Path;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 public class AbstractAnnotation {
     /**
@@ -39,5 +40,19 @@ public class AbstractAnnotation {
 
     public void setValues(LinkedHashMap<String, AnnotationValue> values) {
         this.values = values;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractAnnotation that = (AbstractAnnotation) o;
+        return Objects.equals(type, that.type) &&
+                Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, values);
     }
 }

@@ -36,13 +36,14 @@ public class Annotation extends AbstractAnnotation {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Annotation that = (Annotation) o;
         return isRuntimeVisible == that.isRuntimeVisible;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(isRuntimeVisible);
+        return Objects.hash(super.hashCode(), isRuntimeVisible);
     }
 
     @Override

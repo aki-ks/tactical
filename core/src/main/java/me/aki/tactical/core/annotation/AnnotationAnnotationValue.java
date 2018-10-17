@@ -21,6 +21,7 @@ public class AnnotationAnnotationValue extends AbstractAnnotation implements Ann
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         AnnotationAnnotationValue that = (AnnotationAnnotationValue) o;
         return Objects.equals(getType(), that.getType()) &&
                 Objects.equals(getValues(), that.getValues());
@@ -28,7 +29,7 @@ public class AnnotationAnnotationValue extends AbstractAnnotation implements Ann
 
     @Override
     public int hashCode() {
-        return Objects.hash(getType(), getValues());
+        return Objects.hash(super.hashCode(), getType(), getValues());
     }
 
     @Override
