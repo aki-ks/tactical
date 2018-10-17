@@ -114,7 +114,7 @@ class MethodTest extends FlatSpec with Matchers {
 
     val typeAnnotation = {
       val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
-      val annotation = new Annotation(Path.of("java", "lang", "Object"), true)
+      val annotation = new Annotation(Path.of("java", "lang", "Deprecated"), true)
       val target = new TargetType.CheckedException(0)
       new MethodTypeAnnotation(typePath, annotation, target)
     }

@@ -53,7 +53,7 @@ class FieldTest extends FlatSpec with Matchers {
 
     val typeAnnotation = {
       val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
-      val annotation = new Annotation(Path.of("java", "lang", "Object"), true)
+      val annotation = new Annotation(Path.of("java", "lang", "Deprecated"), true)
       new FieldTypeAnnotation(typePath, annotation)
     }
 
