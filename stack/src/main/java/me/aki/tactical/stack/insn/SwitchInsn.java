@@ -40,7 +40,7 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
     }
 
     public Cell<Instruction> getBranchTableCell(int key) {
-        return Cell.ofMap(0, branchTable, Instruction.class);
+        return Cell.ofMap(key, branchTable, Instruction.class);
     }
 
     public List<Cell<Instruction>> getBranchTableCells() {
