@@ -9,6 +9,7 @@ import me.aki.tactical.core.textify.TargetTypeTextifier;
 import me.aki.tactical.core.textify.TextUtil;
 import me.aki.tactical.core.textify.TypePathTextifier;
 import me.aki.tactical.core.textify.TypeTextifier;
+import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.InsertList;
@@ -23,8 +24,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class StackBodyTextifier implements BodyTextifier {
+    @Override
+    public void textifyParameters(Printer printer, Method method) {
+        int paramIndex = 0;
+        Iterator<Type> paramIter = method.getParameterTypes().iterator();
+        while (paramIter.hasNext()) {
+            Type type = paramIter.next();
+
+            TypeTextifier.getInstance().textify(printer, type);
+            printer.addText(" ");
+            printer.addLiteral(getParamLocalName(paramIndex++));
+
+            if (paramIter.hasNext()) {
+                printer.addText(", ");
+            }
+        }
+    }
+
+    private String getParamLocalName(int param) {
+        return "param" + param;
+    }
+
     @Override
     public void textify(Printer printer, Method method) {
         Optional<Body> bodyOpt = method.getBody();
@@ -43,8 +66,7 @@ public class StackBodyTextifier implements BodyTextifier {
     private void textifyBody(Printer printer, StackBody body) {
         TextifyContext ctx = new TextifyContext(body);
         prepareLabels(body, ctx);
-
-        textifyLocals(printer, body, ctx);
+        prepareLocals(body, ctx);
 
         textifyInstructions(printer, body, ctx);
 
@@ -84,6 +106,31 @@ public class StackBodyTextifier implements BodyTextifier {
 
         builder.append(Integer.toString(number));
         return builder.toString();
+    }
+
+    /**
+     * Assign names to all locals.
+     *
+     * @param body body that contains the locals
+     * @param ctx register the locals in that context
+     */
+    private void prepareLocals(StackBody body, TextifyContext ctx) {
+        body.getThisLocal().ifPresent(thisLocal ->
+                ctx.setLocalName(thisLocal, "this"));
+
+        int paramIndex = 0;
+        for (StackLocal param : body.getParameterLocals()) {
+            ctx.setLocalName(param, getParamLocalName(paramIndex++));
+        }
+
+        List<StackLocal> remainingLocals = body.getLocals().stream()
+                .filter(local -> !ctx.isLocalNamed(local))
+                .collect(Collectors.toList());
+
+        int localIndex = 0;
+        for (StackLocal local : remainingLocals) {
+            ctx.setLocalName(local, "local" + paddedNumber(localIndex++, remainingLocals.size()));
+        }
     }
 
     /**
@@ -128,53 +175,6 @@ public class StackBodyTextifier implements BodyTextifier {
         }
 
         return insns;
-    }
-
-    private void textifyLocals(Printer printer, StackBody body, TextifyContext ctx) {
-        body.getThisLocal().ifPresent(thisLocal -> {
-            String localName = "this";
-            ctx.setLocalName(thisLocal, localName);
-
-            printer.addText("local " + localName + " = this;");
-            printer.newLine();
-        });
-
-        int parameterIndex = 0;
-        for (StackLocal local : body.getParameterLocals()) {
-            String localName = "param" + parameterIndex;
-            ctx.setLocalName(local, localName);
-
-            printer.addText("local " + localName + " = parameter " + parameterIndex++ + ";");
-            printer.newLine();
-            parameterIndex++;
-        }
-
-        Iterator<StackLocal> remainingLocalIter = body.getLocals().stream()
-                .filter(local -> !ctx.isLocalNamed(local))
-                .iterator();
-
-        int localIndex = 0;
-        if (remainingLocalIter.hasNext()) {
-            printer.addText("local ");
-
-            while (remainingLocalIter.hasNext()) {
-                String localName = "local" + localIndex++;
-                ctx.setLocalName(remainingLocalIter.next(), localName);
-                printer.addText(localName);
-
-                if (remainingLocalIter.hasNext()) {
-                    printer.addText(", ");
-                }
-            }
-
-            printer.addText(";");
-            printer.newLine();
-        }
-
-        if (!ctx.getLocalNames().isEmpty()) {
-            // if any locals were printer, insert a blank line
-            printer.newLine();
-        }
     }
 
     private void textifyInstructions(Printer printer, StackBody body, TextifyContext ctx) {
@@ -279,7 +279,6 @@ public class StackBodyTextifier implements BodyTextifier {
                 printer.addText(", annotation = ");
                 AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
                 printer.addText("];");
-
             }
         }
     }

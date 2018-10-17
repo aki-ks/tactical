@@ -3,21 +3,16 @@ package me.aki.tactical.core.parser.test
 import scala.collection.JavaConverters._
 import java.util.{Optional, ArrayList, Set => JSet}
 
-import fastparse.all._
 import me.aki.tactical.core.Classfile.Version
 import me.aki.tactical.core._
 import me.aki.tactical.core.`type`.{IntType, ObjectType}
 import me.aki.tactical.core.annotation.{Annotation, IntAnnotationValue}
-import me.aki.tactical.core.parser.{MethodParser, Parser}
+import me.aki.tactical.core.parser.MethodParser
 import me.aki.tactical.core.typeannotation.{MethodTypeAnnotation, TargetType, TypePath}
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 import org.scalatest.{FlatSpec, Matchers}
 
 class MethodTest extends FlatSpec with Matchers {
-  object DummyBodyParser extends Parser[Body] {
-    val parser: P[Body] = for (_ ← Pass) yield new Body {}
-  }
-
   val dummyClass = new Classfile(new Version(Version.MAJOR_JDK_8, 0), Path.of("foo", "Dummy"), Path.OBJECT, new ArrayList())
   object DummyMethodParser extends MethodParser(dummyClass, DummyBodyParser)
 
@@ -50,11 +45,10 @@ class MethodTest extends FlatSpec with Matchers {
       Optional.of(new IntAnnotationValue(20))
   }
 
-  it should "parse parameter and return types" in {
-    val method = DummyMethodParser.parse("int value(java.lang.String, int);")
+  it should "parse return types" in {
+    val method = DummyMethodParser.parse("int value();")
 
     method.getReturnType shouldEqual Optional.of(IntType.getInstance)
-    method.getParameterTypes shouldEqual List(new ObjectType(Path.of("java", "lang", "String")), IntType.getInstance).asJava
   }
 
   it should "parse method flags" in {
@@ -78,7 +72,7 @@ class MethodTest extends FlatSpec with Matchers {
   it should "parse method parameter info" in {
     val method = DummyMethodParser.parse(
       """final synthetic parameter "foo";
-        |void a(int);
+        |void a();
       """.stripMargin
     )
 
@@ -90,7 +84,7 @@ class MethodTest extends FlatSpec with Matchers {
     val method = DummyMethodParser.parse(
       """parameter annotations {}
         |parameter annotations { @java.lang.Override[visible = true]() }
-        |void a(int, long);
+        |void a();
       """.stripMargin
     )
 
@@ -104,7 +98,7 @@ class MethodTest extends FlatSpec with Matchers {
   it should "parse annotations" in {
     val method = DummyMethodParser.parse(
       """@java.lang.Override[visible = true]()
-        |void a(int, long);
+        |void a();
       """.stripMargin
     )
 
@@ -114,7 +108,7 @@ class MethodTest extends FlatSpec with Matchers {
   it should "parse type annotations" in {
     val method = DummyMethodParser.parse(
       """#[path = { ? <1> }, target = exception 0, annotation = @java.lang.Deprecated[visible = true]()];
-        |void a(int, long);
+        |void a();
       """.stripMargin
     )
 
@@ -131,7 +125,7 @@ class MethodTest extends FlatSpec with Matchers {
   it should "parse attributes" in {
     DummyMethodParser.parse(
       """attribute "foo" { 10 FF }
-        |void a(int, long);
+        |void a();
       """.stripMargin
     ).getAttributes shouldEqual List(new Attribute("foo", Array(16, -1))).asJava
   }

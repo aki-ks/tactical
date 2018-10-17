@@ -10,7 +10,6 @@ import me.aki.tactical.core.`type`._
 import me.aki.tactical.core.constant._
 import me.aki.tactical.core.handle.InvokeStaticHandle
 import me.aki.tactical.core.util.Cell
-import me.aki.tactical.stack.StackLocal
 import me.aki.tactical.stack.insn._
 import me.aki.tactical.stack.invoke._
 import me.aki.tactical.stack.parser.{InsnParser, UnresolvedStackCtx}
@@ -18,17 +17,11 @@ import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
 
 class InsnTest extends FlatSpec with Matchers with PropertyChecks {
-  val local1 = new StackLocal
-  val local2 = new StackLocal
-  val local3 = new StackLocal
-  val local4 = new StackLocal
-
-  def newCtx = new UnresolvedStackCtx(Map(
-    "local1" -> local1,
-    "local2" -> local2,
-    "local3" -> local3,
-    "local4" -> local4
-  ))
+  val newCtx = new UnresolvedStackCtx()
+  val local1 = newCtx.getLocal("local1")
+  val local2 = newCtx.getLocal("local2")
+  val local3 = newCtx.getLocal("local3")
+  val local4 = newCtx.getLocal("local4")
 
   /**
     * Ensure that certain instruction references point to the correct labels

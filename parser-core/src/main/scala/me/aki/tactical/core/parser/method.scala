@@ -1,63 +1,99 @@
 package me.aki.tactical.core.parser
 
-import java.util.{ArrayList, Optional, List => JList}
-
+import java.util.{ArrayList, Optional, List => JList, Set => JSet}
 import scala.collection.JavaConverters._
 import fastparse.all._
 import me.aki.tactical.core._
 import me.aki.tactical.core.`type`.Type
-import me.aki.tactical.core.annotation.Annotation
+import me.aki.tactical.core.annotation.{Annotation, AnnotationValue}
 import me.aki.tactical.core.typeannotation.MethodTypeAnnotation
 
-class MethodParser(classfile: Classfile, bodyParser: Parser[Body]) extends Parser[Method] {
-  val parser: P[Method] = P {
-    P {
-      val throws = "throws" ~ WS ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?)
-      val params = TypeParser.rep(sep = WS.? ~ "," ~ WS.?)
+trait BodyParser {
+  /**
+    * Additional data collected by the parameter list parser
+    */
+  type Ctx
 
+  /** Get a content for the static initializer */
+  def staticInitializerCtx: Ctx
 
-      val descriptor = P {
-        val void = Optional.empty[Type]
+  /** A parser for the parameter list of a method */
+  def parameterParser: P[(Ctx, List[Type])]
 
-        val staticInitializerForm =
-          for ((flags, exceptions) ← StaticInitializerFlagParser ~ "static" ~ WS ~ throws.? ~ WS.?)
-            yield (flags, void, "<clinit>", Nil, exceptions)
+  def bodyParser(method: Method, ctx: Ctx): P[Body]
+}
 
-        val constructorForm =
-          for((flags, params, exceptions) ← MethodFlagParser ~ classfile.getName.getName ~ "(" ~ params ~ ")" ~ WS.? ~ throws.? ~ WS.?)
-            yield (flags, void, "<init>", params, exceptions)
+class MethodParser[B <: BodyParser](classfile: Classfile, bodyParser: B) extends Parser[Method] {
+  private type MethodDescriptor = (JSet[Method.Flag], Optional[Type], String, (bodyParser.type#Ctx, List[Type]), Option[Seq[Path]])
 
-        val methodForm =
-          MethodFlagParser ~ ReturnTypeParser ~ WS ~ Literal ~ WS.? ~ "(" ~ params ~ ")" ~ WS.? ~ throws.? ~ WS.?
+  def methodParser(descriptorParser: P[MethodDescriptor], contentParser: (Method, bodyParser.type, bodyParser.type#Ctx) => P[MethodContent]) = P {
+    MethodPrefixParser.rep(sep = WS.?) ~ WS.? ~ descriptorParser ~ WS.?
+  } flatMap {
+    case (prefixes, (flags, returnType, name, (paramCtx, paramTypes), exceptions)) =>
+      val method = new Method(name, new ArrayList(paramTypes.asJava), returnType)
+      method.setFlags(flags)
+      exceptions.getOrElse(Nil).foreach(method.getExceptions.add)
+      prefixes.foreach(_ apply method)
 
-        constructorForm | methodForm | staticInitializerForm
+      for (methodContent ← contentParser(method, bodyParser, paramCtx)) yield {
+        methodContent.apply(method)
+        method
       }
+  }
 
-      MethodPrefixParser.rep(sep = WS.?) ~ WS.? ~ descriptor
-    } flatMap {
-      case (prefixes, (flags, returnType, name, parameters, exceptions)) =>
-        val method = new Method(name, new ArrayList(parameters.asJava), returnType)
-        method.setFlags(flags)
-        exceptions.getOrElse(Nil).foreach(method.getExceptions.add)
-        prefixes.foreach(_ apply method)
+  val parser: P[Method] = {
+    val throws = "throws" ~ WS ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?)
+    val void = Optional.empty[Type]
 
-        val abstractForm =
-          for (_  ← P(";")) yield method
+    val staticInitializerForm =
+      for ((flags, exceptions) ← StaticInitializerFlagParser ~ "static" ~ WS ~ throws.? ~ WS.?)
+        yield (flags, void, "<clinit>", (bodyParser.staticInitializerCtx, Nil), exceptions)
 
-        val annotationForm =
-          for (value ← "=" ~ WS.? ~ AnnotationValueParser ~ WS.? ~ ";") yield {
-            method.setDefaultValue(Optional.of(value))
-            method
-          }
+    val constructorForm =
+      for ((flags, params, exceptions) ← MethodFlagParser ~ classfile.getName.getName ~ "(" ~ bodyParser.parameterParser ~ ")" ~ WS.? ~ throws.? ~ WS.?)
+        yield (flags, void, "<init>", params, exceptions)
 
-        val bodyForm =
-          for (body ← "{" ~ WS.? ~ bodyParser ~ WS.? ~ "}") yield {
-            method.setBody(Optional.of(body))
-            method
-          }
+    val methodForm =
+      for ((flags, returnType, name, params, exceptions) ← MethodFlagParser ~ ReturnTypeParser ~ WS ~ Literal ~ WS.? ~ "(" ~ bodyParser.parameterParser ~ ")" ~ WS.? ~ throws.? ~ WS.?)
+        yield (flags, returnType, name, params, exceptions)
 
-        abstractForm | annotationForm | bodyForm
-    }
+    methodParser(staticInitializerForm, (method, bp, ctx) => new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](method, bp, ctx)) |
+      methodParser(constructorForm, (method, bp, ctx) => new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](method, bp, ctx)) |
+      methodParser(methodForm, (method, bp, ctx) => MethodContentParser.AbstractFormParser | MethodContentParser.AnnotationFormParser | new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](method, bp, ctx))
+  }
+}
+
+trait MethodContent extends (Method => Unit)
+object MethodContent {
+  object AbstractForm extends MethodContent {
+    def apply(method: Method) {}
+  }
+
+  class AnnotationForm(value: AnnotationValue) extends MethodContent {
+    def apply(method: Method) = method.setDefaultValue(Optional.of(value))
+  }
+
+  class BodyForm(body: Body) extends MethodContent {
+    def apply(method: Method) = method.setBody(Optional.of(body))
+  }
+}
+
+object MethodContentParser {
+  object AbstractFormParser extends Parser[MethodContent.AbstractForm.type] {
+    val parser: P[MethodContent.AbstractForm.type] =
+      for (_  ← P(";")) yield MethodContent.AbstractForm
+  }
+
+  object AnnotationFormParser extends Parser[MethodContent.AnnotationForm] {
+    val parser: P[MethodContent.AnnotationForm] =
+      for (value ← "=" ~ WS.? ~ AnnotationValueParser ~ WS.? ~ ";")
+        yield new MethodContent.AnnotationForm(value)
+  }
+
+  class BodyFormParser[C, B <: BodyParser { type Ctx = C }](method: Method, bp: B, ctx: C) extends Parser[MethodContent.BodyForm] {
+    val parser: P[MethodContent.BodyForm] =
+      for (body ← "{" ~ WS.? ~ bp.bodyParser(method, ctx) ~ WS.? ~ "}")
+        yield new MethodContent.BodyForm(body)
   }
 }
 

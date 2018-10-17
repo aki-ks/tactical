@@ -62,3 +62,11 @@ class LocalVariableAnnotationParser(ctx: ResolvedStackCtx) extends Parser[LocalV
       yield new LocalVariableAnnotation(annotation, locations.asJava)
   }
 }
+
+class InsnAnnotationParser(ctx: ResolvedStackCtx) extends Parser[(Instruction, InsnTypeAnnotation)] {
+  val parser: P[(Instruction, InsnTypeAnnotation)] = P {
+    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+
+    "insn" ~ WS.? ~ "annotation" ~ WS.? ~ label ~ WS.? ~ InsnTypeAnnotationParser
+  }
+}

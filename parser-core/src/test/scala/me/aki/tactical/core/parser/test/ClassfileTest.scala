@@ -2,24 +2,19 @@ package me.aki.tactical.core.parser.test
 
 import java.util.{Optional, Set => JSet}
 
-import fastparse.all._
 import me.aki.tactical.core.Classfile.InnerClass
 import me.aki.tactical.core.annotation.Annotation
 
 import scala.collection.JavaConverters._
 import me.aki.tactical.core._
 import me.aki.tactical.core.`type`._
-import me.aki.tactical.core.parser.{ClassfileParser, Parser}
+import me.aki.tactical.core.parser.ClassfileParser
 import me.aki.tactical.core.typeannotation._
 import me.aki.tactical.core.typeannotation.TargetType.Extends
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 import org.scalatest.{FlatSpec, Matchers}
 
 class ClassfileTest extends FlatSpec with Matchers {
-  object DummyBodyParser extends Parser[Body] {
-    val parser: P[Body] = for (_ ← Pass) yield new Body {}
-  }
-
   val classParser = new ClassfileParser(DummyBodyParser)
 
   "The classParser" should "parse the most basic classes" in {

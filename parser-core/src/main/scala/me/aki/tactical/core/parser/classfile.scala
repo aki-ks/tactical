@@ -9,7 +9,7 @@ import me.aki.tactical.core.Classfile.{EnclosingMethod, Version}
 import me.aki.tactical.core.annotation.Annotation
 import me.aki.tactical.core.typeannotation.ClassTypeAnnotation
 
-class ClassfileParser(bodyParser: Parser[Body]) extends Parser[Classfile] {
+class ClassfileParser(bodyParser: BodyParser) extends Parser[Classfile] {
   val parser: P[Classfile] = P {
     val pkg = "package" ~ WS ~ Literal.rep(min = 1, sep = WS.? ~ "." ~ WS.?) ~ WS.? ~ ";"
     val version = "version" ~ WS ~ int ~ WS.? ~ "." ~ WS.? ~ int ~ WS.? ~ ";"
@@ -223,14 +223,14 @@ object ClassContentParser {
     } opaque "<field>"
   }
 
-  class MethodContentParser(classfile: Classfile, bodyParser: Parser[Body]) extends Parser[ClassContent.MethodContent] {
+  class MethodContentParser(classfile: Classfile, bodyParser: BodyParser) extends Parser[ClassContent.MethodContent] {
     val parser: P[ClassContent.MethodContent] = P {
       for (method ← new MethodParser(classfile, bodyParser)) yield new ClassContent.MethodContent(method)
     } opaque "<method>"
   }
 }
 
-class ClassContentParser(classfile: Classfile, bodyParser: Parser[Body]) extends Parser[ClassContent] {
+class ClassContentParser(classfile: Classfile, bodyParser: BodyParser) extends Parser[ClassContent] {
   import ClassContentParser._
 
   val parser: P[ClassContent] = P {
