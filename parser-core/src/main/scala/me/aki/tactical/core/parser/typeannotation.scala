@@ -27,15 +27,24 @@ object TypePathParser extends Parser[TypePath] {
 object TargetTypeParsers {
   import TargetType._
   val checkedException = for (exception ← "exception" ~ WS ~ int) yield new CheckedException(exception)
-  val parameters = for (parameter ← "parameter" ~ WS ~ int) yield new MethodParameter(parameter)
+  val parameters = for (parameter ← "parameter" ~ WS.? ~ int) yield new MethodParameter(parameter)
   val receiver = for (_ ← "receiver".!) yield new MethodReceiver()
   val returnType = for (_ ← "return".!) yield new ReturnType()
-  val typeParameter = for (typeParam ← "type" ~ WS ~ "parameter" ~ WS ~ int) yield new TypeParameter(typeParam)
+  val typeParameter = for (typeParam ← "type" ~ WS ~ "parameter" ~ WS.? ~ int) yield new TypeParameter(typeParam)
   val typeParameterBound = for ((param, bound) ← "type" ~ WS ~ "parameter" ~ WS ~ "bound" ~ WS ~ int ~ WS ~ int) yield new TypeParameterBound(param, bound)
   val `extends` = for (_ ← "extends".!) yield new Extends()
-  val `implementes` = for (interface ← "implements" ~ WS ~ int) yield new Implements(interface)
+  val `implementes` = for (interface ← "implements" ~ WS.? ~ int) yield new Implements(interface)
   val local = for (_ ← "local".!) yield new LocalVariable
   val resource = for (_ ← "resource".!) yield new ResourceVariable
+  val `new` = for (_ ← "new".!) yield new New
+  val cast = for (intersection ← "cast" ~ WS.? ~ int) yield new Cast(intersection)
+  val instanceof = for (_ ← "instanceof".!) yield new InstanceOf
+  val constructorReference = for (_ ← "constructor" ~ WS ~ "reference") yield new ConstructorReference
+  val constructorInvokeTypeParameter = for (param ← "constructor" ~ WS ~ "invoke" ~ WS ~ "type" ~ WS ~ "parameter" ~ WS.? ~ int) yield new ConstructorInvokeTypeParameter(param)
+  val constructorReferenceTypeParameter = for (param ← "constructor" ~ WS ~ "reference" ~ WS ~ "type" ~ WS ~ "parameter" ~ WS.? ~ int) yield new ConstructorReferenceTypeParameter(param)
+  val methodReference = for (_ ← "method" ~ WS ~ "reference") yield new MethodReference
+  val methodInvokeTypeParameter = for (param ← "method" ~ WS ~ "invoke" ~ WS ~ "type" ~ WS ~ "parameter" ~ WS.? ~ int) yield new MethodInvokeTypeParameter(param)
+  val methodReferenceTypeParameter = for (param ← "method" ~ WS ~ "reference" ~ WS ~ "type" ~ WS ~ "parameter" ~ WS.? ~ int) yield new MethodReferenceTypeParameter(param)
 }
 
 object MethodTargetTypeParser extends Parser[MethodTargetType] {
@@ -59,7 +68,17 @@ object ClassTargetTypeParser extends Parser[ClassTargetType] {
 }
 
 object InsnTargetTypeParser extends Parser[InsnTargetType] {
-  val parser = ???
+  val parser = P {
+    TargetTypeParsers.`new` |
+    TargetTypeParsers.cast |
+    TargetTypeParsers.instanceof |
+    TargetTypeParsers.constructorReferenceTypeParameter |
+    TargetTypeParsers.constructorReference |
+    TargetTypeParsers.constructorInvokeTypeParameter |
+    TargetTypeParsers.methodReferenceTypeParameter |
+    TargetTypeParsers.methodReference |
+    TargetTypeParsers.methodInvokeTypeParameter
+  }
 }
 
 object LocalTargetTypeParser extends Parser[LocalTargetType] {
@@ -93,6 +112,15 @@ object MethodTypeAnnotationParser extends Parser[MethodTypeAnnotation] {
       "target" ~ WS.? ~ "=" ~ WS.? ~ MethodTargetTypeParser ~ WS.? ~ "," ~ WS.? ~
       "annotation" ~ WS.? ~ "=" ~ WS.? ~ AnnotationParser ~ WS.? ~ "]"
   } yield new MethodTypeAnnotation(typePath, annotation, target)
+}
+
+object InsnTypeAnnotationParser extends Parser[InsnTypeAnnotation] {
+  val parser: P[InsnTypeAnnotation] = for {
+    (typePath, target, annotation) ← "#" ~ WS.? ~ "[" ~ WS.? ~
+      "path" ~ WS.? ~ "=" ~ WS.? ~ TypePathParser ~ WS.? ~ "," ~ WS.? ~
+      "target" ~ WS.? ~ "=" ~ WS.? ~ InsnTargetTypeParser ~ WS.? ~ "," ~ WS.? ~
+      "annotation" ~ WS.? ~ "=" ~ WS.? ~ AnnotationParser ~ WS.? ~ "]"
+  } yield new InsnTypeAnnotation(typePath, annotation, target)
 }
 
 object LocalTypeAnnotationParser extends Parser[LocalVariableTypeAnnotation] {

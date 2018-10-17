@@ -46,19 +46,19 @@ public class TargetTypeTextifier {
             printer.addText("constructor reference");
 
     private static final Textifier<TargetType.ConstructorInvokeTypeParameter> CONSTRUCTOR_INVOKE_TYPE_PARAMETER = (printer, target) ->
-            printer.addText("constructor invoke type parameter");
+            printer.addText("constructor invoke type parameter " + target.getTypeParameter());
 
     private static final Textifier<TargetType.ConstructorReferenceTypeParameter> CONSTRUCTOR_REFERENCE_TYPE_PARAMETER = (printer, target) ->
-            printer.addText("constructor reference type parameter");
+            printer.addText("constructor reference type parameter " + target.getTypeParameter());
 
     private static final Textifier<TargetType.MethodReference> METHOD_REFERENCE = (printer, target) ->
             printer.addText("method reference");
 
     private static final Textifier<TargetType.MethodInvokeTypeParameter> METHOD_INVOKE_TYPE_PARAMETER = (printer, target) ->
-            printer.addText("method invoke type parameter");
+            printer.addText("method invoke type parameter " + target.getTypeParameter());
 
     private static final Textifier<TargetType.MethodReferenceTypeParameter> METHOD_REFERENCE_TYPE_PARAMETER = (printer, target) ->
-            printer.addText("method reference type parameter");
+            printer.addText("method reference type parameter " + target.getTypeParameter());
 
     public final static Textifier<TargetType.ClassTargetType> CLASS_TARGET_TYPE = (printer, target) -> {
         if (target instanceof TargetType.Extends) {

@@ -69,6 +69,36 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     LocalTargetTypeParser.parse("resource") shouldEqual new ResourceVariable
   }
 
+  "The InsnTargetTypeParser" should "parse all kinds of InsnTargetTypes" in {
+    InsnTargetTypeParser.parse("new") shouldEqual new New
+
+    forAll { intersection: Int =>
+      InsnTargetTypeParser.parse(s"cast $intersection") shouldEqual new Cast(intersection)
+    }
+
+    InsnTargetTypeParser.parse("instanceof") shouldEqual new InstanceOf
+
+    InsnTargetTypeParser.parse("constructor reference") shouldEqual new ConstructorReference
+
+    forAll { parameter: Int =>
+      InsnTargetTypeParser.parse(s"constructor invoke type parameter $parameter") shouldEqual new ConstructorInvokeTypeParameter(parameter)
+    }
+
+    forAll { parameter: Int =>
+      InsnTargetTypeParser.parse(s"constructor reference type parameter $parameter") shouldEqual new ConstructorReferenceTypeParameter(parameter)
+    }
+
+    InsnTargetTypeParser.parse("method reference") shouldEqual new MethodReference
+
+    forAll { parameter: Int =>
+      InsnTargetTypeParser.parse(s"method invoke type parameter $parameter") shouldEqual new MethodInvokeTypeParameter(parameter)
+    }
+
+    forAll { parameter: Int =>
+      InsnTargetTypeParser.parse(s"method reference type parameter $parameter") shouldEqual new MethodReferenceTypeParameter(parameter)
+    }
+  }
+
   "The ClassTypeAnnotationParser" should "parse classfile type annotations" in {
     ClassTypeAnnotationParser.parse("#[path = { ? <1> }, target = extends, annotation = @java.lang.Override[visible = true]()]") shouldEqual {
       val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
@@ -93,6 +123,14 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
+  "The InsnTypeAnnotationParser" should "parse insn type annotations" in {
+    InsnTypeAnnotationParser.parse("#[path = { ? <1> }, target = constructor reference type parameter 9, annotation = @java.lang.Override[visible = false]()]") shouldEqual {
+      val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
+      val annotation = new Annotation(Path.of("java", "lang", "Object"), false)
+      new InsnTypeAnnotation(typePath, annotation, new ConstructorReferenceTypeParameter(9))
+    }
+  }
+
   "The LocalTypeAnnotationParser" should "parse local type annotations" in {
     LocalTypeAnnotationParser.parse("#[path = { ? <1> }, target = local, annotation = @java.lang.Override[visible = false]()]") shouldEqual {
       val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
@@ -100,5 +138,4 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
       new LocalVariableTypeAnnotation(typePath, annotation, new LocalVariable())
     }
   }
-
 }
