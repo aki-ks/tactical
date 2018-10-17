@@ -6,9 +6,9 @@ import java.util.Optional
 import me.aki.tactical.core.Path
 import me.aki.tactical.core.`type`.{IntType, LongType}
 import me.aki.tactical.core.annotation.Annotation
-import me.aki.tactical.core.typeannotation.TargetType.ResourceVariable
+import me.aki.tactical.core.typeannotation.TargetType.{New, ResourceVariable}
 import me.aki.tactical.core.typeannotation.TypePath.Kind
-import me.aki.tactical.core.typeannotation.{LocalVariableTypeAnnotation, TypePath}
+import me.aki.tactical.core.typeannotation.{InsnTypeAnnotation, LocalVariableTypeAnnotation, TypePath}
 import me.aki.tactical.stack.{StackBody, StackLocal, TryCatchBlock}
 import me.aki.tactical.stack.insn.{Instruction, PopInsn}
 import me.aki.tactical.stack.parser._
@@ -83,4 +83,17 @@ class ContentTest extends FlatSpec with Matchers with PropertyChecks {
     anno shouldEqual new StackBody.LocalVariableAnnotation(typeAnnotation, locations)
   }
 
+  "The InsnAnnotationParser" should "parse instruction annotation" in {
+    val (label, annotation) = new InsnAnnotationParser(newCtx).parse(
+      "insn annotation label1 #[path = { ? <1> }, target = new, annotation = @java.lang.Override[visible = false]()];")
+
+    val typeAnnotation = {
+      val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
+      val annotation = new Annotation(Path.of("java", "lang", "Override"), false)
+      new InsnTypeAnnotation(typePath, annotation, new New())
+    }
+
+    label shouldEqual label1
+    typeAnnotation shouldEqual typeAnnotation
+  }
 }
