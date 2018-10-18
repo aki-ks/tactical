@@ -23,6 +23,15 @@ public class NewExpr implements Expression {
         this.path = path;
     }
 
+    public Path getPath() {
+        return path;
+    }
+
+
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
     @Override
     public Type getType() {
         return new ObjectType(path);
