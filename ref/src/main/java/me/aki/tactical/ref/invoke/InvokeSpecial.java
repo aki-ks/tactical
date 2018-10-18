@@ -5,7 +5,7 @@ import me.aki.tactical.ref.Expression;
 
 import java.util.List;
 
-public class InvokeSpecial extends AbstractInstanceInvoke {
+public class InvokeSpecial extends AbstractInstanceInvoke implements AmbigiousInvoke {
     /**
      * Is the method declared within an interface.
      */
