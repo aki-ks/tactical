@@ -1,13 +1,14 @@
 package me.aki.tactical.core.parser.test
 
 import scala.collection.JavaConverters._
-import java.util.{Optional, ArrayList, Set => JSet}
+import java.util.{ArrayList, Optional, Set => JSet}
 
 import me.aki.tactical.core.Classfile.Version
 import me.aki.tactical.core._
 import me.aki.tactical.core.`type`.{IntType, ObjectType}
 import me.aki.tactical.core.annotation.{Annotation, IntAnnotationValue}
 import me.aki.tactical.core.parser.MethodParser
+import me.aki.tactical.core.textify.MethodTextifier
 import me.aki.tactical.core.typeannotation.{MethodTypeAnnotation, TargetType, TypePath}
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 import org.scalatest.{FlatSpec, Matchers}
@@ -128,5 +129,9 @@ class MethodTest extends FlatSpec with Matchers {
         |void a();
       """.stripMargin
     ).getAttributes shouldEqual List(new Attribute("foo", Array(16, -1))).asJava
+  }
+
+  it should "parse random textified methods" in {
+    generatorTest(CoreGenerator.method, DummyMethodParser, new MethodTextifier(null, dummyClass))
   }
 }

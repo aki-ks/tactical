@@ -166,8 +166,8 @@ object MethodPrefixParser extends Parser[MethodPrefix] {
 
   val parser: P[MethodPrefix] = P {
     SignaturePrefixParser |
-      ParameterInfoPrefixParser |
       ParameterAnnotationsPrefixParser |
+      ParameterInfoPrefixParser |
       AnnotationPrefixParser |
       TypeAnnotationPrefixParser |
       AttributePrefixParser

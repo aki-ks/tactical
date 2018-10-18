@@ -27,7 +27,9 @@ package object test {
         val parsed = parser.parse(text)
         value shouldEqual parsed
       } catch {
-        case t: Throwable => throw new RuntimeException(s"Error while parsing text '${text}'", t)
+        case t: Throwable =>
+          Console.err.println(s"Error while parsing text '${text}'")
+          throw t
       }
     }
   }
@@ -37,7 +39,7 @@ package object test {
     override type Ctx = DummyCtx.type
 
     def staticInitializerCtx = DummyCtx
-    def parameterParser: P[(Ctx, List[Type])] = for(_ ← Pass) yield (DummyCtx, Nil)
+    def parameterParser: P[(Ctx, List[Type])] = for (paramTypes ← TypeParser.rep(sep = WS.? ~ "," ~ WS.?)) yield (DummyCtx, paramTypes.toList)
     def bodyParser(method: Method, ctx: Ctx): P[Body] = for (_ ← Pass) yield new Body {}
   }
 }

@@ -19,7 +19,7 @@ public class Method {
     /**
      * All access flags that are set for this method.
      */
-    private Set<Flag> flags = new HashSet<>();
+    private Set<Flag> flags;
 
     /**
      * Name of the method
@@ -39,17 +39,17 @@ public class Method {
     /**
      * Checked exceptions that might be thrown by this method.
      */
-    private List<Path> exceptions = new ArrayList<>();
+    private List<Path> exceptions;
 
     /**
      * Signature of the method with type variables.
      */
-    private Optional<String> signature = Optional.empty();
+    private Optional<String> signature;
 
     /**
      * Default value for methods in interfaces.
      */
-    private Optional<AnnotationValue> defaultValue = Optional.empty();
+    private Optional<AnnotationValue> defaultValue;
 
     /**
      * Additional debug informations about parameters.
@@ -57,22 +57,22 @@ public class Method {
      * It will only be added to a classfile if javac is run with the "-parameters" flag.
      * The information is runtime accessible via the java reflection api.
      */
-    private List<Parameter> parameterInfo = new ArrayList<>();
+    private List<Parameter> parameterInfo;
 
     /**
      * A list of parameter annotations.
      */
-    private List<List<Annotation>> parameterAnnotations = new ArrayList<>();
+    private List<List<Annotation>> parameterAnnotations;
 
     /**
      * Annotations of this methods.
      */
-    private List<Annotation> annotations = new ArrayList<>();
+    private List<Annotation> annotations;
 
     /**
      * Annotations on types within this method.
      */
-    private List<MethodTypeAnnotation> typeAnnotations = new ArrayList<>();
+    private List<MethodTypeAnnotation> typeAnnotations;
 
     /**
      * Non-parsed attributes of this method.
@@ -80,18 +80,39 @@ public class Method {
      * They are either not part of the JVM spec or
      * are not yet supported by this library.
      */
-    private List<Attribute> attributes = new ArrayList<>();
+    private List<Attribute> attributes;
 
     /**
      * Body of the method that contains the instructions.
      * It is absent for abstract methods.
      */
-    private Optional<Body> body = Optional.empty();
+    private Optional<Body> body;
 
     public Method(String name, List<Type> parameterTypes, Optional<Type> returnType) {
+        this(new HashSet<>(), name, parameterTypes, returnType, new ArrayList<>(), Optional.empty(),
+                Optional.empty(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                new ArrayList<>(), new ArrayList<>(), Optional.empty());
+    }
+
+    public Method(Set<Flag> flags, String name, List<Type> parameterTypes,
+                  Optional<Type> returnType, List<Path> exceptions, Optional<String> signature,
+                  Optional<AnnotationValue> defaultValue, List<Parameter> parameterInfo,
+                  List<List<Annotation>> parameterAnnotations, List<Annotation> annotations,
+                  List<MethodTypeAnnotation> typeAnnotations, List<Attribute> attributes,
+                  Optional<Body> body) {
+        this.flags = flags;
         this.name = name;
         this.parameterTypes = parameterTypes;
         this.returnType = returnType;
+        this.exceptions = exceptions;
+        this.signature = signature;
+        this.defaultValue = defaultValue;
+        this.parameterInfo = parameterInfo;
+        this.parameterAnnotations = parameterAnnotations;
+        this.annotations = annotations;
+        this.typeAnnotations = typeAnnotations;
+        this.attributes = attributes;
+        this.body = body;
     }
 
     public Set<Flag> getFlags() {

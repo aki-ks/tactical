@@ -281,4 +281,29 @@ object CoreGenerator {
     typeAnnotations ← Gen.listOf(fieldTypeAnnotation)
     attributes ← Gen.listOf(attribute)
   } yield new Field(flags, name, typ, signature.asJava, value.asJava, annotations.asJava, typeAnnotations.asJava, attributes.asJava)
+
+
+  // METHOD
+
+  def parmeterInfo = for {
+    name ← Gen.option(literal)
+    flags ← flags(Method.Parameter.Flag.values)
+  } yield new Method.Parameter(name.asJava, flags)
+
+  def method = for {
+    flags ← accessFlags(Seq(Method.Flag.PUBLIC, Method.Flag.PRIVATE, Method.Flag.PROTECTED), Method.Flag.values)
+    name ← literal
+    paramTypes ← Gen.listOf(typ)
+    returnType ← Gen.option(typ)
+    exceptions ← Gen.listOf(path)
+    signature ← Gen.option(literal)
+    defaultValue ← Gen.option(annotationValue)
+    parameters ← Gen.listOf(parmeterInfo)
+    parameterAnnotations ← Gen.listOf(Gen.listOf(annotation) map (_.asJava))
+    annotations ← Gen.listOf(annotation)
+    typeAnnotations ← Gen.listOf(methodTypeAnnotation)
+    attributes ← Gen.listOf(attribute)
+  } yield new Method(flags, name, paramTypes.asJava, returnType.asJava, exceptions.asJava,
+    signature.asJava, defaultValue.asJava, parameters.asJava, parameterAnnotations.asJava,
+    annotations.asJava, typeAnnotations.asJava, attributes.asJava, Optional.empty())
 }
