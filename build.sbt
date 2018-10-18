@@ -38,6 +38,10 @@ lazy val stackTextifier = (project in file ("textify-stack"))
   .dependsOn(stack, coreTextifier)
   .settings(javaSettings)
 
+lazy val refTextifier = (project in file ("textify-ref"))
+  .dependsOn(ref, coreTextifier)
+  .settings(javaSettings)
+
 lazy val coreParser = (project in file ("parser-core"))
   .dependsOn(core)
   .settings(parserSettings)
