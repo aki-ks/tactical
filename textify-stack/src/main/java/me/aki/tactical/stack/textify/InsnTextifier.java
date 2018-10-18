@@ -282,7 +282,6 @@ public class InsnTextifier implements Textifier<Instruction> {
 
         if (invoke instanceof DynamicInvoke) {
             DynamicInvoke dynamicInvoke = (DynamicInvoke) invoke;
-            // Instruction annotation
 
             printer.addText("invoke dynamic { name = ");
             printer.addEscaped(dynamicInvoke.getName(), '"');
