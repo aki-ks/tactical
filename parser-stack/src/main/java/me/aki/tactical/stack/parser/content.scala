@@ -67,6 +67,6 @@ class InsnAnnotationParser(ctx: ResolvedStackCtx) extends Parser[(Instruction, I
   val parser: P[(Instruction, InsnTypeAnnotation)] = P {
     val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
 
-    "insn" ~ WS.? ~ "annotation" ~ WS.? ~ label ~ WS.? ~ InsnTypeAnnotationParser
+    "insn" ~ WS.? ~ "annotation" ~ WS.? ~ label ~ WS.? ~ InsnTypeAnnotationParser ~ WS.? ~ ";"
   }
 }
