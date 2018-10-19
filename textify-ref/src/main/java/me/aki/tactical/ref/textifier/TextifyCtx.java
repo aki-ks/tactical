@@ -4,6 +4,7 @@ import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class TextifyCtx {
     /**
@@ -48,5 +49,16 @@ public class TextifyCtx {
             throw new IllegalArgumentException("Unlabeled instruction");
         }
         return label;
+    }
+
+    /**
+     * Get the name of a label if present.
+     *
+     * @param target statement to be referenced
+     * @return name of the label
+     * @see #getLabel(Statement)
+     */
+    public Optional<String> getLabelOpt(Statement target) {
+        return Optional.ofNullable(labels.get(target));
     }
 }

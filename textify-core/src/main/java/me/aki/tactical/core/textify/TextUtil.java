@@ -121,6 +121,25 @@ public class TextUtil {
         }
     }
 
+    /**
+     * Get a number as string and prepend zeros until it is as long as another string.
+     *
+     * @param number to be turned into a string
+     * @param max reference for amount of prepended zeros.
+     * @return number prepended with zeros
+     */
+    public static String paddedNumber(int number, int max) {
+        StringBuilder builder = new StringBuilder();
+
+        int zeroCount = ((int) Math.log10(max)) - ((int) Math.log10(number));
+        for (int i = 0; i < zeroCount; i++) {
+            builder.append('0');
+        }
+
+        builder.append(Integer.toString(number));
+        return builder.toString();
+    }
+
     public static <T> void joined(Iterable<T> iterable, Consumer<T> appendElement, Runnable appendSeperator) {
         Iterator<T> iterator = iterable.iterator();
         while (iterator.hasNext()) {

@@ -6,6 +6,12 @@ import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.stmt.*;
 
 public class StatementTextifier implements Textifier<Statement> {
+    private static final StatementTextifier INSTANCE = new StatementTextifier();
+
+    public static StatementTextifier getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void textify(Printer printer, Statement statement) {
         if (statement instanceof BranchStmt) {

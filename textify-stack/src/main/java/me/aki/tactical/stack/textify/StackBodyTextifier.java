@@ -84,28 +84,9 @@ public class StackBodyTextifier implements BodyTextifier {
         int index = 0;
         for (Instruction instruction : body.getInstructions()) {
             if (referencedInstructions.contains(instruction)) {
-                ctx.setLabel(instruction, "label" + paddedNumber(index++, labelCount));
+                ctx.setLabel(instruction, "label" + TextUtil.paddedNumber(index++, labelCount));
             }
         }
-    }
-
-    /**
-     * Get a number as string and prepend zeros until it is as long as another string.
-     *
-     * @param number to be turned into a string
-     * @param max reference for amount of prepended zeros.
-     * @return number prepended with zeros
-     */
-    private String paddedNumber(int number, int max) {
-        StringBuilder builder = new StringBuilder();
-
-        int zeroCount = ((int) Math.log10(max)) - ((int) Math.log10(number));
-        for (int i = 0; i < zeroCount; i++) {
-            builder.append('0');
-        }
-
-        builder.append(Integer.toString(number));
-        return builder.toString();
     }
 
     /**
@@ -129,7 +110,7 @@ public class StackBodyTextifier implements BodyTextifier {
 
         int localIndex = 0;
         for (StackLocal local : remainingLocals) {
-            ctx.setLocalName(local, "local" + paddedNumber(localIndex++, remainingLocals.size()));
+            ctx.setLocalName(local, "local" + TextUtil.paddedNumber(localIndex++, remainingLocals.size()));
         }
     }
 
