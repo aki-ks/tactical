@@ -48,7 +48,7 @@ public class RefBodyTextifier implements BodyTextifier {
         RefBody body = (RefBody) method.getBody().get();
         TextifyCtx ctx = new TextifyCtx(getNamedLocals(body), getLabels(body));
 
-        textifyLocals(printer, ctx, body.getLocals());
+        textifyLocals(printer, ctx, body);
 
         textifyStatement(printer, ctx, body);
     }
@@ -139,8 +139,16 @@ public class RefBodyTextifier implements BodyTextifier {
         return statements;
     }
 
-    private void textifyLocals(Printer printer, TextifyCtx ctx, List<RefLocal> locals) {
-        for (RefLocal local : locals) {
+    private void textifyLocals(Printer printer, TextifyCtx ctx, RefBody body) {
+        Set<RefLocal> hiddenLocals = new HashSet<>();
+        body.getThisLocal().ifPresent(hiddenLocals::add);
+        hiddenLocals.addAll(body.getArgumentLocals());
+
+        for (RefLocal local : body.getLocals()) {
+            if (hiddenLocals.contains(local)) {
+                continue;
+            }
+
             if (local.getType() == null) {
                 // Locals should always have a type. It's only absent during conversions from other intermediations.
                 printer.addText("<null>");
@@ -153,7 +161,7 @@ public class RefBodyTextifier implements BodyTextifier {
             printer.addText(";");
         }
 
-        if (!locals.isEmpty()) {
+        if (!body.getLocals().isEmpty()) {
             printer.newLine();
         }
     }
