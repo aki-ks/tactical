@@ -12,6 +12,7 @@ import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
+import javax.naming.Context;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,7 +48,9 @@ public class RefBodyTextifier implements BodyTextifier {
         RefBody body = (RefBody) method.getBody().get();
         TextifyCtx ctx = new TextifyCtx(getNamedLocals(body), getLabels(body));
 
-        textifyInstructions(printer, ctx, body);
+        textifyLocals(printer, ctx, body.getLocals());
+
+        textifyStatement(printer, ctx, body);
     }
 
     /**
@@ -136,7 +139,26 @@ public class RefBodyTextifier implements BodyTextifier {
         return statements;
     }
 
-    private void textifyInstructions(Printer printer, TextifyCtx ctx, RefBody body) {
+    private void textifyLocals(Printer printer, TextifyCtx ctx, List<RefLocal> locals) {
+        for (RefLocal local : locals) {
+            if (local.getType() == null) {
+                // Locals should always have a type. It's only absent during conversions from other intermediations.
+                printer.addText("<null>");
+            } else {
+                TypeTextifier.getInstance().textify(printer, local.getType());
+            }
+
+            printer.addText(" ");
+            printer.addLiteral(ctx.getLocalName(local));
+            printer.addText(";");
+        }
+
+        if (!locals.isEmpty()) {
+            printer.newLine();
+        }
+    }
+
+    private void textifyStatement(Printer printer, TextifyCtx ctx, RefBody body) {
         for (Statement statement : body.getStatements()) {
             ctx.getLabelOpt(statement).ifPresent(label -> {
                 printer.decreaseIndent();
@@ -146,7 +168,7 @@ public class RefBodyTextifier implements BodyTextifier {
                 printer.increaseIndent();
             });
 
-            StatementTextifier.getInstance().textify(printer, statement);
+            StatementTextifier.getInstance().textify(printer, ctx, statement);
         }
     }
 }
