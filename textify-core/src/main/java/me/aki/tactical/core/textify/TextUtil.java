@@ -41,17 +41,27 @@ public class TextUtil {
     public static boolean shouldEscape(String text) {
         int length = text.length();
 
-        if(length == 0 || !Character.isLetter(text.charAt(0)) || KEYWORDS.contains(text))
+        if (length == 0 || !isLetter(text.charAt(0)) || KEYWORDS.contains(text))
             return true;
 
         for (int i = 0; i < length; i++) {
             char c = text.charAt(i);
+            if (isLetter(c) || isDigit(c) || c == '_' || c == '$') {
+                continue;
+            }
 
-            if(!Character.isLetterOrDigit(c) && c != '_' && c != '$')
-                return true;
+            return true;
         }
 
         return false;
+    }
+
+    private static boolean isLetter(char c) {
+        return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+    }
+
+    private static boolean isDigit(char c) {
+        return '0' <= c && c <= '9';
     }
 
     /**
