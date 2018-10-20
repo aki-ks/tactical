@@ -33,12 +33,12 @@ public class TypeTextifier implements Textifier<Type> {
     public static final Textifier<ObjectType> OBJECT = (printer, object) -> printer.addPath(object.getName());
 
     public static final Textifier<ArrayType> ARRAY = (printer, array) -> {
+        TypeTextifier.getInstance().textify(printer, array.getBaseType());
+
         int dimensions = array.getDimensions();
         for (int i = 0; i < dimensions; i++) {
             printer.addText("[]");
         }
-
-        TypeTextifier.getInstance().textify(printer, array.getBaseType());
     };
 
     public static final Textifier<IntLikeType> INT_LIKE = (printer, type) -> {
