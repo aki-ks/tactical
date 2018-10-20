@@ -6,6 +6,7 @@ import me.aki.tactical.core.`type`.{ArrayType, IntType, ObjectType}
 import scala.collection.JavaConverters._
 import me.aki.tactical.core.annotation._
 import me.aki.tactical.core.parser._
+import me.aki.tactical.core.textify.{AnnotationTextifier, AnnotationValueTextifier}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -88,8 +89,16 @@ class AnnotationParserTest extends FlatSpec with Matchers with PropertyChecks {
       new AnnotationAnnotationValue(Path.of("java", "lang", "Override"), values)
   }
 
+  it should "parse all kinds of textified annotation values" in {
+    generatorTest(CoreGenerator.annotationValue, AnnotationValueParser, AnnotationValueTextifier.getInstance)
+  }
+
   "The AnnotationParser" should "parse regular annotations" in {
     AnnotationParser.parse("@java.lang.Object[visible = true]()") shouldEqual
       new Annotation(Path.of("java", "lang", "Object"), true)
+  }
+
+  it should "parse all kinds of textified annotations" in {
+    generatorTest(CoreGenerator.annotation, AnnotationParser, AnnotationTextifier.getInstance)
   }
 }
