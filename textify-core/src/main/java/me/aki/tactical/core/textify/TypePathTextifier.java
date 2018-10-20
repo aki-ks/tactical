@@ -1,6 +1,5 @@
 package me.aki.tactical.core.textify;
 
-import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.typeannotation.TypePath;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public class TypePathTextifier implements Textifier<TypePath> {
     public final static Textifier<TypePath.Kind> KIND = (printer, kind) -> {
         if (kind instanceof TypePath.Kind.Array) {
             printer.addText("[]");
-        } else if (kind instanceof Classfile.InnerClass) {
+        } else if (kind instanceof TypePath.Kind.InnerClass) {
             printer.addText(".");
         } else if (kind instanceof TypePath.Kind.WildcardBound) {
             printer.addText("?");
