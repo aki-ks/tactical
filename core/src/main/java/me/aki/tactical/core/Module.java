@@ -19,50 +19,67 @@ public class Module {
     /**
      * Access flags of the module.
      */
-    private Set<Flag> accessFlags = new HashSet<>();
+    private Set<Flag> accessFlags;
 
     /**
      * Version of the module.
      */
-    private Optional<String> version = Optional.empty();
+    private Optional<String> version;
 
     /**
      * Name of the main class in the module.
      */
-    private Optional<Path> mainClass = Optional.empty();
+    private Optional<Path> mainClass;
 
     /**
      * Packages of the module.
      */
-    private List<Path> packages = new ArrayList<>();
+    private List<Path> packages;
 
     /**
      * Modules that this module required/depends on.
      */
-    private List<Require> requires = new ArrayList<>();
+    private List<Require> requires;
 
     /**
      * Packages that the module exports.
      */
-    private List<Export> exports = new ArrayList<>();
+    private List<Export> exports;
 
     /**
      * Packages that the module opens for reflection.
      */
-    private List<Open> opens = new ArrayList<>();
+    private List<Open> opens;
 
     /**
      * List of service interfaces used by this module.
      */
-    private List<Path> uses = new ArrayList<>();
+    private List<Path> uses;
 
     /**
      * List of service interface implementations
      */
-    private List<Provide> provides = new ArrayList<>();
+    private List<Provide> provides;
 
     public Module(Path module) {
+        this(module, new HashSet<>(), Optional.empty(), Optional.empty(), new ArrayList<>(),
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                new ArrayList<>());
+    }
+
+    public Module(Path module, Set<Flag> accessFlags, Optional<String> version,
+                  Optional<Path> mainClass, List<Path> packages, List<Require> requires,
+                  List<Export> exports, List<Open> opens, List<Path> uses, List<Provide> provides) {
         this.module = module;
+        this.accessFlags = accessFlags;
+        this.version = version;
+        this.mainClass = mainClass;
+        this.packages = packages;
+        this.requires = requires;
+        this.exports = exports;
+        this.opens = opens;
+        this.uses = uses;
+        this.provides = provides;
     }
 
     public Path getModule() {
