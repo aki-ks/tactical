@@ -3,6 +3,7 @@ package me.aki.tactical.core.parser.test
 import me.aki.tactical.core.Path
 import me.aki.tactical.core.`type`._
 import me.aki.tactical.core.parser.TypeParser
+import me.aki.tactical.core.textify.TypeTextifier
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.prop.PropertyChecks
 
@@ -26,5 +27,9 @@ class TypeParserTest extends FlatSpec with Matchers with PropertyChecks {
     TypeParser.parse("int[]") shouldEqual new ArrayType(IntType.getInstance(), 1)
     TypeParser.parse("java.lang.String[]") shouldEqual new ArrayType(new ObjectType(Path.of("java", "lang", "String")), 1)
     TypeParser.parse("java.lang.String[][][]") shouldEqual new ArrayType(new ObjectType(Path.of("java", "lang", "String")), 3)
+  }
+
+  it should "parse random textified types" in {
+    generatorTest(CoreGenerator.typ, TypeParser, TypeTextifier.getInstance)
   }
 }
