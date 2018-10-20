@@ -81,7 +81,7 @@ object ClassAnnotationValue extends Parser[ClassAnnotationValue] {
 
 object EnumAnnotationValue extends Parser[EnumAnnotationValue] {
   val parser: P[EnumAnnotationValue] =
-    for (strings ← Literal.rep(min = 2, sep = ".")) yield {
+    for (strings ← Literal.rep(min = 2, sep = WS.? ~ "." ~ WS.?)) yield {
       val field = strings.last
       val owner = strings.init
       new EnumAnnotationValue(new Path(owner.init.asJava, owner.last), field)
