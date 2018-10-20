@@ -61,7 +61,7 @@ object Literal extends Parser[String] {
       CharLiteral.escapedChar | escapedQuote | CharPred(_ != '`').!
     }
 
-    "`" ~/ escapableChar.rep(min = 0).map(_.mkString) ~/ "`"
+    "`" ~ escapableChar.rep(min = 0).map(_.mkString) ~ "`"
   }
 
   override val parser: P[String] = P {
