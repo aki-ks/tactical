@@ -1,15 +1,17 @@
 package me.aki.tactical.core.parser.test
 
+import scala.collection.JavaConverters._
+
 import me.aki.tactical.core.Path
 import me.aki.tactical.core.annotation.Annotation
-
-import scala.collection.JavaConverters._
 import me.aki.tactical.core.parser._
+import me.aki.tactical.core.textify._
 import me.aki.tactical.core.typeannotation._
 import me.aki.tactical.core.typeannotation.TargetType._
 import me.aki.tactical.core.typeannotation.TypePath.Kind
+
 import org.scalatest.prop.PropertyChecks
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest._
 
 class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
   "The TypePathKindParser" should "parse all type path kinds" in {
@@ -20,10 +22,18 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     TypePathKindParser.parse("<1>") shouldEqual new Kind.TypeArgument(1)
   }
 
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.typePathKind, TypePathKindParser, TypePathTextifier.KIND)
+  }
+
   "The TypePathParser" should "parse TypePaths" in {
     TypePathParser.parse("{}") shouldEqual new TypePath(Nil.asJava)
     TypePathParser.parse("{ [] ? <3> }") shouldEqual
       new TypePath(List[Kind](new Kind.Array(), new Kind.WildcardBound(), new Kind.TypeArgument(3)).asJava)
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.typePath, TypePathParser, TypePathTextifier.getInstance())
   }
 
   "The MethodTargetTypeParser" should "parse all kinds of MethodTargetTypes" in {
@@ -48,6 +58,10 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.methodTargetType, MethodTargetTypeParser, TargetTypeTextifier.METHOD_TARGET_TYPE)
+  }
+
   "The ClassTargetTypeParser" should "parse all kinds of ClassTargetType" in {
     ClassTargetTypeParser.parse("extends") shouldEqual new Extends()
 
@@ -64,9 +78,17 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.classTargetType, ClassTargetTypeParser, TargetTypeTextifier.CLASS_TARGET_TYPE)
+  }
+
   "The LocalTargetTypeParser" should "parse all kinds of LocalTargetTypes" in {
     LocalTargetTypeParser.parse("local") shouldEqual new LocalVariable
     LocalTargetTypeParser.parse("resource") shouldEqual new ResourceVariable
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.localTargetType, LocalTargetTypeParser, TargetTypeTextifier.LOCAL_TARGET_TYPE)
   }
 
   "The InsnTargetTypeParser" should "parse all kinds of InsnTargetTypes" in {
@@ -97,6 +119,10 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     forAll { parameter: Int =>
       InsnTargetTypeParser.parse(s"method reference type parameter $parameter") shouldEqual new MethodReferenceTypeParameter(parameter)
     }
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.insnTargetType, InsnTargetTypeParser, TargetTypeTextifier.INSN_TARGET_TYPE)
   }
 
   "The ClassTypeAnnotationParser" should "parse classfile type annotations" in {
@@ -138,4 +164,5 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
       new LocalVariableTypeAnnotation(typePath, annotation, new LocalVariable())
     }
   }
+
 }
