@@ -55,11 +55,7 @@ public class FieldTextifier implements Textifier<Field> {
 
     private void appendTypeAnnotations(Printer printer, List<FieldTypeAnnotation> typeAnnotations) {
         for (FieldTypeAnnotation typeAnnotation : typeAnnotations) {
-            printer.addText("#[path = ");
-            TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
-            printer.addText(", annotation = ");
-            AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
-            printer.addText("]");
+            TypeAnnotationTextifier.FIELD.textify(printer, typeAnnotation);
             printer.newLine();
         }
     }

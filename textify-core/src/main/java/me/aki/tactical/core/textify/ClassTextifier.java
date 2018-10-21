@@ -84,13 +84,7 @@ public class ClassTextifier implements Textifier<Classfile> {
 
     private void appendTypeAnnotations(Printer printer, List<ClassTypeAnnotation> typeAnnotations) {
         for (ClassTypeAnnotation typeAnnotation : typeAnnotations) {
-            printer.addText("#[path = ");
-            TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
-            printer.addText(", target = ");
-            TargetTypeTextifier.CLASS_TARGET_TYPE.textify(printer, typeAnnotation.getTargetType());
-            printer.addText(", annotation = ");
-            AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
-            printer.addText("]");
+            TypeAnnotationTextifier.CLASS.textify(printer, typeAnnotation);
             printer.newLine();
         }
     }

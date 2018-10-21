@@ -7,6 +7,7 @@ import me.aki.tactical.core.textify.BodyTextifier;
 import me.aki.tactical.core.textify.Printer;
 import me.aki.tactical.core.textify.TargetTypeTextifier;
 import me.aki.tactical.core.textify.TextUtil;
+import me.aki.tactical.core.textify.TypeAnnotationTextifier;
 import me.aki.tactical.core.textify.TypePathTextifier;
 import me.aki.tactical.core.textify.TypeTextifier;
 import me.aki.tactical.core.type.Type;
@@ -236,14 +237,8 @@ public class StackBodyTextifier implements BodyTextifier {
                     () -> printer.addText(", "));
             printer.addText("], ");
 
-            LocalVariableTypeAnnotation typeAnnotation = localAnnotation.getAnnotation();
-            printer.addText("#[path = ");
-            TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
-            printer.addText(", target = ");
-            TargetTypeTextifier.LOCAL_TARGET_TYPE.textify(printer, typeAnnotation.getTargetType());
-            printer.addText(", annotation = ");
-            AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
-            printer.addText("];");
+            TypeAnnotationTextifier.LOCAL.textify(printer, localAnnotation.getAnnotation());
+            printer.addText(";");
             printer.newLine();
         }
     }
@@ -253,13 +248,9 @@ public class StackBodyTextifier implements BodyTextifier {
             for (InsnTypeAnnotation typeAnnotation : instruction.getTypeAnnotations()) {
                 printer.addText("insn annotation ");
                 printer.addLiteral(ctx.getLabel(instruction));
-                printer.addText(" #[path = ");
-                TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
-                printer.addText(", target = ");
-                TargetTypeTextifier.INSN_TARGET_TYPE.textify(printer, typeAnnotation.getTargetType());
-                printer.addText(", annotation = ");
-                AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
-                printer.addText("];");
+                printer.addText(" ");
+                TypeAnnotationTextifier.INSN.textify(printer, typeAnnotation);
+                printer.addText(";");
             }
         }
     }

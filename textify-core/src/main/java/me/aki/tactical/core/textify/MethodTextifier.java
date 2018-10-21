@@ -103,13 +103,7 @@ public class MethodTextifier implements Textifier<Method> {
 
     private void appendTypeAnnotations(Printer printer, List<MethodTypeAnnotation> typeAnnotations) {
         for (MethodTypeAnnotation typeAnnotation : typeAnnotations) {
-            printer.addText("#[path = ");
-            TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
-            printer.addText(", target = ");
-            TargetTypeTextifier.METHOD_TARGET_TYPE.textify(printer, typeAnnotation.getTargetType());
-            printer.addText(", annotation = ");
-            AnnotationTextifier.getInstance().textify(printer, typeAnnotation.getAnnotation());
-            printer.addText("]");
+            TypeAnnotationTextifier.METHOD.textify(printer, typeAnnotation);
             printer.newLine();
         }
     }
