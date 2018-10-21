@@ -140,6 +140,8 @@ public class MethodTextifier implements Textifier<Method> {
                         () -> printer.addText(", "));
                 printer.addText(" }");
             }
+            printer.addText(";");
+            printer.newLine();
         }
     }
 }
