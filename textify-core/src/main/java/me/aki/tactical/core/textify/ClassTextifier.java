@@ -188,6 +188,7 @@ public class ClassTextifier implements Textifier<Classfile> {
                     printer.addText(" : ");
                     printer.addEscaped(version, '"');
                 });
+                printer.addText(";");
                 printer.newLine();
             }
 
