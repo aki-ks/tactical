@@ -124,6 +124,7 @@ public class MethodTextifier implements Textifier<Method> {
                 printer.addEscaped(name, '"');
             });
             printer.addText(";");
+            printer.newLine();
         }
     }
 

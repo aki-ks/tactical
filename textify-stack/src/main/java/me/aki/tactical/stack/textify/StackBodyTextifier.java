@@ -251,6 +251,7 @@ public class StackBodyTextifier implements BodyTextifier {
                 printer.addText(" ");
                 TypeAnnotationTextifier.INSN.textify(printer, typeAnnotation);
                 printer.addText(";");
+                printer.newLine();
             }
         }
     }

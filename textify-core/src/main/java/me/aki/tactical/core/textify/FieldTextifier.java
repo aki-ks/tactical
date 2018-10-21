@@ -63,6 +63,7 @@ public class FieldTextifier implements Textifier<Field> {
     private void appendAttributes(Printer printer, List<Attribute> attributes) {
         for (Attribute attribute : attributes) {
             AttributeTextifier.getInstance().textify(printer, attribute);
+            printer.newLine();
         }
     }
 }

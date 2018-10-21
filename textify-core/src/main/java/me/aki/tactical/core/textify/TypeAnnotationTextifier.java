@@ -36,7 +36,7 @@ public class TypeAnnotationTextifier {
     };
 
     public static final Textifier<InsnTypeAnnotation> INSN = (printer, typeAnnotation) -> {
-        printer.addText(" #[path = ");
+        printer.addText("#[path = ");
         TypePathTextifier.getInstance().textify(printer, typeAnnotation.getTypePath());
         printer.addText(", target = ");
         TargetTypeTextifier.INSN_TARGET_TYPE.textify(printer, typeAnnotation.getTargetType());

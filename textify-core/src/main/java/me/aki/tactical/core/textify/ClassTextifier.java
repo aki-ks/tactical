@@ -56,6 +56,7 @@ public class ClassTextifier implements Textifier<Classfile> {
             printer.addText("signature ");
             printer.addEscaped(signature, '"');
             printer.addText(";");
+            printer.newLine();
         });
     }
 
@@ -64,6 +65,7 @@ public class ClassTextifier implements Textifier<Classfile> {
             printer.addText("source ");
             printer.addEscaped(source, '"');
             printer.addText(";");
+            printer.newLine();
         });
     }
 
@@ -72,6 +74,7 @@ public class ClassTextifier implements Textifier<Classfile> {
             printer.addText("debug ");
             printer.addEscaped(debug, '"');
             printer.addText(";");
+            printer.newLine();
         });
     }
 
@@ -92,6 +95,7 @@ public class ClassTextifier implements Textifier<Classfile> {
     private void appendAttributes(Printer printer, List<Attribute> attributes) {
         for (Attribute attribute : attributes) {
             AttributeTextifier.getInstance().textify(printer, attribute);
+            printer.newLine();
         }
     }
 
