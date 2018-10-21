@@ -133,12 +133,20 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.classTypeAnnotation, ClassTypeAnnotationParser, TypeAnnotationTextifier.CLASS)
+  }
+
   "The MethodTypeAnnotationParser" should "parse method type annotations" in {
     MethodTypeAnnotationParser.parse("#[path = { ? <1> }, target = return, annotation = @java.lang.Override[visible = true]()]") shouldEqual {
       val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
       val annotation = new Annotation(Path.of("java", "lang", "Override"), true)
       new MethodTypeAnnotation(typePath, annotation, new ReturnType())
     }
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.methodTypeAnnotation, MethodTypeAnnotationParser, TypeAnnotationTextifier.METHOD)
   }
 
   "The FieldTypeAnnotationParser" should "parse field type annotations" in {
@@ -149,12 +157,20 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.fieldTypeAnnotation, FieldTypeAnnotationParser, TypeAnnotationTextifier.FIELD)
+  }
+
   "The InsnTypeAnnotationParser" should "parse insn type annotations" in {
     InsnTypeAnnotationParser.parse("#[path = { ? <1> }, target = constructor reference type parameter 9, annotation = @java.lang.Override[visible = false]()]") shouldEqual {
       val typePath = new TypePath(List(new Kind.WildcardBound(), new Kind.TypeArgument(1)).asJava)
       val annotation = new Annotation(Path.of("java", "lang", "Override"), false)
       new InsnTypeAnnotation(typePath, annotation, new ConstructorReferenceTypeParameter(9))
     }
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.insnTypeAnnotation, InsnTypeAnnotationParser, TypeAnnotationTextifier.INSN)
   }
 
   "The LocalTypeAnnotationParser" should "parse local type annotations" in {
@@ -165,4 +181,7 @@ class TypeAnnotationTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.localTypeAnnotation, LocalTypeAnnotationParser, TypeAnnotationTextifier.LOCAL)
+  }
 }
