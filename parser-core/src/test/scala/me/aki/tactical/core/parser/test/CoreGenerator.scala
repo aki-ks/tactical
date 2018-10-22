@@ -21,7 +21,7 @@ object CoreGenerator {
       x ← Gen.alphaChar
       xs ← Gen.listOf(Gen.frequency(2 → numChar, 10 → alphaChar, 1 → Gen.oneOf('$', '_')))
     } yield (x :: xs).mkString
-    Gen.frequency(5 → legalJavaLiteral, 1 → randomString)
+    Gen.frequency(10 → legalJavaLiteral, 1 → randomString)
   }
 
   // TYPES
@@ -30,7 +30,11 @@ object CoreGenerator {
     ShortType.getInstance, CharType.getInstance, IntType.getInstance, LongType.getInstance,
     FloatType.getInstance, DoubleType.getInstance)
 
-  def path = for (literals ← Gen.nonEmptyListOf(literal)) yield new Path(literals.init.asJava, literals.last)
+  def path = for {
+    size ← Gen.choose(1, 5)
+    literals ← Gen.listOfN(size, literal)
+  } yield new Path(literals.init.asJava, literals.last)
+
   def objectType = for (path ← path) yield new ObjectType(path)
   def arrayType = for {
     baseType ← Gen.frequency(2 → primitiveType, 1 → objectType)
