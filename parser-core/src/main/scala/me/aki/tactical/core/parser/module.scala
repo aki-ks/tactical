@@ -64,65 +64,61 @@ object ModuleContent {
 }
 
 object ModuleContentParser extends Parser[ModuleContent] {
-  object VersionParser extends Parser[ModuleContent.Version] {
-    val parser: P[ModuleContent.Version] =
-      for (version ← "version" ~ WS ~ StringLiteral ~ WS.? ~ ";")
-        yield new ModuleContent.Version(version)
+  object VersionParser extends Parser[String] {
+    val parser: P[String] =
+      for (version ← "version" ~ WS ~ StringLiteral ~ WS.? ~ ";") yield version
   }
 
-  object MainParser extends Parser[ModuleContent.Main] {
-    val parser: P[ModuleContent.Main] =
-      for (version ← "main" ~ WS ~ PathParser ~ WS.? ~ ";")
-        yield new ModuleContent.Main(version)
+  object MainParser extends Parser[Path] {
+    val parser: P[Path] =
+      for (main ← "main" ~ WS ~ PathParser ~ WS.? ~ ";") yield main
   }
 
-  object PackageParser extends Parser[ModuleContent.Package] {
-    val parser: P[ModuleContent.Package] =
-      for (version ← "package" ~ WS ~ PathParser ~ WS.? ~ ";")
-        yield new ModuleContent.Package(version)
+  object PackageParser extends Parser[Path] {
+    val parser: P[Path] =
+      for (pkg ← "package" ~ WS ~ PathParser ~ WS.? ~ ";") yield pkg
   }
 
-  object RequireParser extends Parser[ModuleContent.Require] {
-    val parser: P[ModuleContent.Require] =
+  object RequireParser extends Parser[Module.Require] {
+    val parser: P[Module.Require] =
       for ((flags, name, version) ← ModuleRequireFlagParser ~ "requires" ~ WS ~ PathParser ~ WS.? ~ (":" ~ WS.? ~ StringLiteral ~ WS.?).? ~ ";")
-        yield new ModuleContent.Require(new Module.Require(name, flags, Optional.ofNullable(version.orNull)))
+        yield new Module.Require(name, flags, Optional.ofNullable(version.orNull))
   }
 
-  object ExportParser extends Parser[ModuleContent.Export] {
-    val parser: P[ModuleContent.Export] =
+  object ExportParser extends Parser[Module.Export] {
+    val parser: P[Module.Export] =
       for ((flags, name, modules) ← ModuleExportFlagParser ~ "exports" ~ WS.? ~ PathParser ~ WS.? ~
         ("to" ~ WS.? ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.?).? ~ ";")
-        yield new ModuleContent.Export(new Module.Export(name, flags, modules.getOrElse(Nil).asJava))
+        yield new Module.Export(name, flags, modules.getOrElse(Nil).asJava)
   }
 
-  object OpensParser extends Parser[ModuleContent.Opens] {
-    val parser: P[ModuleContent.Opens] =
+  object OpensParser extends Parser[Module.Open] {
+    val parser: P[Module.Open] =
       for ((flags, name, modules) ← ModuleOpensFlagParser ~ "opens" ~ WS.? ~ PathParser ~ WS.? ~
         ("to" ~ WS.? ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.?).? ~ ";")
-        yield new ModuleContent.Opens(new Module.Open(name, flags, modules.getOrElse(Nil).asJava))
+        yield new Module.Open(name, flags, modules.getOrElse(Nil).asJava)
   }
 
-  object UsesParser extends Parser[ModuleContent.Use] {
-    val parser: P[ModuleContent.Use] =
-      for (path ← "uses" ~ WS.? ~ PathParser ~ WS.? ~ ";")
-        yield new ModuleContent.Use(path)
+  object UsesParser extends Parser[Path] {
+    val parser: P[Path] =
+      for (path ← "uses" ~ WS.? ~ PathParser ~ WS.? ~ ";") yield path
   }
 
-  object ProvidesParser extends Parser[ModuleContent.Provides] {
-    val parser: P[ModuleContent.Provides] =
+  object ProvidesParser extends Parser[Module.Provide] {
+    val parser: P[Module.Provide] =
       for ((service, providers) ← "provides" ~ WS.? ~ PathParser ~ WS.? ~
         ("with" ~ WS.? ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.?).? ~ ";")
-        yield new ModuleContent.Provides(new Module.Provide(service, providers.getOrElse(Nil).asJava))
+        yield new Module.Provide(service, providers.getOrElse(Nil).asJava)
   }
 
   val parser: P[ModuleContent] = P {
-    VersionParser |
-      MainParser |
-      PackageParser |
-      UsesParser |
-      ProvidesParser |
-      RequireParser |
-      ExportParser |
-      OpensParser
+    P { for (version ← VersionParser) yield new ModuleContent.Version(version) } |
+      P { for (main ← MainParser) yield new ModuleContent.Main(main) } |
+      P { for (pkg ← PackageParser) yield new ModuleContent.Package(pkg) } |
+      P { for (use ← UsesParser) yield new ModuleContent.Use(use) } |
+      P { for (provide ← ProvidesParser) yield new ModuleContent.Provides(provide) } |
+      P { for (require ← RequireParser) yield new ModuleContent.Require(require) } |
+      P { for (export ← ExportParser) yield new ModuleContent.Export(export) } |
+      P { for (open ← OpensParser) yield new ModuleContent.Opens(open) }
   }
 }
