@@ -38,6 +38,7 @@ public class ModuleTextifier implements Textifier<Module> {
             printer.addText(" : ");
             printer.addEscaped(version, '"');
         });
+        printer.addText(";");
     };
 
     public static final Textifier<Module.Export> EXPORT = (printer, exports) -> {
