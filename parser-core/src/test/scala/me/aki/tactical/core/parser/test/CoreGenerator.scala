@@ -250,7 +250,7 @@ object CoreGenerator {
   } yield new Module.Provide(service, providers.asJava)
 
   def module = for {
-    path ← path
+    name ← path
     flags ← flags(Module.Flag.values)
     version ← Gen.option(literal)
     mainClass ← Gen.option(path)
@@ -260,6 +260,6 @@ object CoreGenerator {
     open ← Gen.listOf(moduleOpen)
     uses ← Gen.listOf(path)
     provides ← Gen.listOf(moduleProvide)
-  } yield new Module(path, flags, version.asJava, mainClass.asJava, packages.asJava, require.asJava,
+  } yield new Module(name, flags, version.asJava, mainClass.asJava, packages.asJava, require.asJava,
     exports.asJava, open.asJava, uses.asJava, provides.asJava)
 }
