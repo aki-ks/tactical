@@ -1,11 +1,11 @@
 package me.aki.tactical.core.parser.test
 
 import scala.collection.JavaConverters._
-
-import java.util.{ Set => JSet, List => JList, Optional }
+import java.util.{Optional, List => JList, Set => JSet}
 
 import me.aki.tactical.core.{Module, Path}
 import me.aki.tactical.core.parser.ModuleParser
+import me.aki.tactical.core.textify.ModuleTextifier
 import org.scalatest.{FlatSpec, Matchers}
 
 class ModuleTest extends FlatSpec with Matchers {
@@ -51,5 +51,9 @@ class ModuleTest extends FlatSpec with Matchers {
   it should "parse provides" in {
     ModuleParser.parse("module foo { provides com.example.foo with com.example.bar, com.example.baz; }").getProvides shouldEqual
       List(new Module.Provide(Path.of("com", "example", "foo"), JList.of(Path.of("com", "example", "bar"), Path.of("com", "example", "baz")))).asJava
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.module, ModuleParser, ModuleTextifier.getInstance())
   }
 }
