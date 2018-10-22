@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import java.util.{Optional, List => JList, Set => JSet}
 
 import me.aki.tactical.core.{Module, Path}
-import me.aki.tactical.core.parser.ModuleParser
+import me.aki.tactical.core.parser.{ModuleContentParser, ModuleParser}
 import me.aki.tactical.core.textify.ModuleTextifier
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -55,5 +55,37 @@ class ModuleTest extends FlatSpec with Matchers {
 
   it should "parse all kinds of generated textified values" in {
     generatorTest(CoreGenerator.module, ModuleParser, ModuleTextifier.getInstance())
+  }
+
+  "The module version parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.literal, ModuleContentParser.VersionParser, ModuleTextifier.VERSION)
+  }
+
+  "The module main class parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.path, ModuleContentParser.MainParser, ModuleTextifier.MAIN_CLASS)
+  }
+
+  "The module package parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.path, ModuleContentParser.PackageParser, ModuleTextifier.PACKAGE)
+  }
+
+  "The module require parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.moduleRequire, ModuleContentParser.RequireParser, ModuleTextifier.REQUIRE)
+  }
+
+  "The module export parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.moduleExport, ModuleContentParser.ExportParser, ModuleTextifier.EXPORT)
+  }
+
+  "The module open parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.moduleOpen, ModuleContentParser.OpensParser, ModuleTextifier.OPEN)
+  }
+
+  "The module use parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.path, ModuleContentParser.UsesParser, ModuleTextifier.USE)
+  }
+
+  "The module provides parser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.moduleProvide, ModuleContentParser.ProvidesParser, ModuleTextifier.PROVIDES)
   }
 }
