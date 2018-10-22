@@ -82,7 +82,9 @@ public class ModuleTextifier implements Textifier<Module> {
         List<Path> providers = provide.getProviders();
         if (!providers.isEmpty()) {
             printer.addText(" with ");
-            providers.forEach(printer::addPath);
+            TextUtil.joined(providers,
+                    printer::addPath,
+                    () -> printer.addText(", "));
         }
 
         printer.addText(";");
