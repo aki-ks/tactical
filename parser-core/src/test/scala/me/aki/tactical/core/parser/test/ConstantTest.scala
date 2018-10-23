@@ -92,6 +92,10 @@ class ConstantTest extends FlatSpec with Matchers with PropertyChecks {
     generatorTest(CoreGenerator.pushableConstant, PushableConstantParser, ConstantTextifier.PUSHABLE)
   }
 
+  "The BootstrapConstantParser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.bootstrapConstant, BootstrapConstantParser, ConstantTextifier.BOOTSTRAP)
+  }
+
   "The MethodTypeConstantParser" should "parse all kinds of generated textified values" in {
     generatorTest(CoreGenerator.methodTypeConstant, MethodTypeConstantParser, ConstantTextifier.METHOD_TYPE)
   }
