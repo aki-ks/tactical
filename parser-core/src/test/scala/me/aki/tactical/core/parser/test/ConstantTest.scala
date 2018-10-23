@@ -8,6 +8,7 @@ import me.aki.tactical.core.`type`._
 import me.aki.tactical.core.constant._
 import me.aki.tactical.core.handle.{InvokeInterfaceHandle, InvokeStaticHandle, SetStaticHandle}
 import me.aki.tactical.core.parser._
+import me.aki.tactical.core.textify.ConstantTextifier
 import org.scalatest.prop.PropertyChecks
 import org.scalatest._
 
@@ -46,6 +47,10 @@ class ConstantTest extends FlatSpec with Matchers with PropertyChecks {
     }
   }
 
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.fieldConstant, FieldConstantParser, ConstantTextifier.FIELD)
+  }
+
   "The PushableConstantParser" should "parse 'null' constants" in {
     PushableConstantParser.parse("null") shouldEqual NullConstant.getInstance
   }
@@ -81,5 +86,17 @@ class ConstantTest extends FlatSpec with Matchers with PropertyChecks {
     val bootstrapMethod = new MethodRef(Path.of("java", "lang", "Integer"), "parseInt", List[Type](new ObjectType(Path.STRING)).asJava, Optional.of(IntType.getInstance))
     val arguments = List[BootstrapConstant](new IntConstant(10), new IntConstant(20), new StringConstant("bar"))
     constant shouldEqual new DynamicConstant("foo", IntType.getInstance, new InvokeStaticHandle(bootstrapMethod, false), arguments.asJava)
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.pushableConstant, PushableConstantParser, ConstantTextifier.PUSHABLE)
+  }
+
+  "The MethodTypeConstantParser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.methodTypeConstant, MethodTypeConstantParser, ConstantTextifier.METHOD_TYPE)
+  }
+
+  "The DynamicConstantParser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.dynamicConstant, DynamicConstantParser, ConstantTextifier.DYNAMIC)
   }
 }
