@@ -43,11 +43,11 @@ lazy val refTextifier = (project in file ("textify-ref"))
   .settings(javaSettings)
 
 lazy val coreParser = (project in file ("parser-core"))
-  .dependsOn(core)
+  .dependsOn(core, coreTextifier % "test")
   .settings(parserSettings)
 
 lazy val stackParser = (project in file ("parser-stack"))
-  .dependsOn(stack, coreParser)
+  .dependsOn(stack, coreParser, stackTextifier % "test")
   .settings(parserSettings)
 
 // CONVERSION
