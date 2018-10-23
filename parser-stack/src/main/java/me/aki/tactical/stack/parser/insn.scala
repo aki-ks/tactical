@@ -186,10 +186,10 @@ object InvokeInsnParser extends Parser[InvokeInsn] {
           "dynamic" ~ WS.? ~ "{" ~ WS.? ~
             "name" ~ WS.? ~ "=" ~ WS.? ~ StringLiteral ~ WS.? ~ "," ~ WS.? ~
             "type" ~ WS.? ~ "=" ~ WS.? ~ MethodDescriptorParser ~ WS.? ~ "," ~ WS.? ~
-            "bootstrap" ~ WS.? ~ "=" ~ WS.? ~ HandleParser ~ WS.? ~ "," ~ WS.? ~
-            "arguments" ~ WS.? ~ "=" ~ WS.? ~ arguments ~ WS.? ~
+            "bootstrap" ~ WS.? ~ "=" ~ WS.? ~ HandleParser ~ WS.? ~
+            ("," ~ WS.? ~ "arguments" ~ WS.? ~ "=" ~ WS.? ~ arguments ~ WS.?).? ~
           "}"
-      } yield new DynamicInvoke(name, typ, bootstrap, arguments.asJava)
+      } yield new DynamicInvoke(name, typ, bootstrap, arguments.getOrElse(Nil).asJava)
     }
 
     val invokeParser: P[Invoke] = {
