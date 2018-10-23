@@ -1,12 +1,12 @@
 package me.aki.tactical.core.parser.test
 
 import scala.collection.JavaConverters._
-
 import java.util.Optional
 
 import me.aki.tactical.core.`type`.{DoubleType, IntType, ObjectType, Type}
 import me.aki.tactical.core.handle._
-import me.aki.tactical.core.parser.HandleParser
+import me.aki.tactical.core.parser._
+import me.aki.tactical.core.textify._
 import me.aki.tactical.core.{FieldRef, MethodRef, Path}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
@@ -48,5 +48,17 @@ class HandleTest extends FlatSpec with Matchers with PropertyChecks {
       HandleParser.parse(s"invoke special interface $textified") shouldEqual new InvokeSpecialHandle(methodRef, true)
       HandleParser.parse(s"invoke static interface $textified") shouldEqual new InvokeStaticHandle(methodRef, true)
     }
+  }
+
+  it should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.handle, HandleParser, HandleTextifier.getInstance())
+  }
+
+  "The MethodHandleParser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.methodHandle, MethodHandleParser, HandleTextifier.METHOD_HANDLE)
+  }
+
+  "The FieldHandleParser" should "parse all kinds of generated textified values" in {
+    generatorTest(CoreGenerator.fieldHandle, FieldHandleParser, HandleTextifier.FIELD_HANDLE)
   }
 }
