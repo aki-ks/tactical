@@ -2,6 +2,7 @@ package me.aki.tactical.core.parser.test
 
 import me.aki.tactical.core.Attribute
 import me.aki.tactical.core.parser.AttributeParser
+import me.aki.tactical.core.textify.AttributeTextifier
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -25,5 +26,9 @@ class AttributeTest extends FlatSpec with Matchers with PropertyChecks {
 
       AttributeParser.parse("attribute \"foo\" { " + hexData + " }") shouldEqual new Attribute("foo", data)
     }
+  }
+
+  it should "parse random textified attributes" in {
+    generatorTest(CoreGenerator.attribute, AttributeParser, AttributeTextifier.getInstance())
   }
 }
