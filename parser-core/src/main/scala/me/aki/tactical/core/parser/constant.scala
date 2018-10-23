@@ -60,10 +60,10 @@ object DynamicConstantParser extends Parser[DynamicConstant] {
         "dynamic" ~ WS.? ~ "{" ~ WS.? ~
           "name" ~ WS.? ~ "=" ~ WS.? ~ StringLiteral ~ WS.? ~ "," ~ WS.? ~
           "type" ~ WS.? ~ "=" ~ WS.? ~ TypeParser ~ WS.? ~ "," ~ WS.? ~
-          "bootstrap" ~ WS.? ~ "=" ~ WS.? ~ HandleParser ~ WS.? ~ "," ~ WS.? ~
-          "arguments" ~ WS.? ~ "=" ~ WS.? ~ arguments ~ WS.? ~
+          "bootstrap" ~ WS.? ~ "=" ~ WS.? ~ HandleParser ~ WS.? ~
+          ("," ~ WS.? ~ "arguments" ~ WS.? ~ "=" ~ WS.? ~ arguments ~ WS.?).? ~
         "}"
-    } yield new DynamicConstant(name, typ, bootstrap, arguments.asJava)
+    } yield new DynamicConstant(name, typ, bootstrap, arguments.getOrElse(Nil).asJava)
   }
 }
 
