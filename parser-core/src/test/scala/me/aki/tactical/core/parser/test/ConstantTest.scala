@@ -61,8 +61,8 @@ class ConstantTest extends FlatSpec with Matchers with PropertyChecks {
   }
 
   it should "parse method type constants" in {
-    PushableConstantParser.parse("() void") shouldEqual new MethodTypeConstant(Nil.asJava, Optional.empty[Type])
-    PushableConstantParser.parse("(int, long) double") shouldEqual new MethodTypeConstant(List[Type](IntType.getInstance, LongType.getInstance).asJava, Optional.of(DoubleType.getInstance))
+    PushableConstantParser.parse("method { () void }") shouldEqual new MethodTypeConstant(Nil.asJava, Optional.empty[Type])
+    PushableConstantParser.parse("method { (int, long) double }") shouldEqual new MethodTypeConstant(List[Type](IntType.getInstance, LongType.getInstance).asJava, Optional.of(DoubleType.getInstance))
   }
 
   it should "parse handle constants" in {

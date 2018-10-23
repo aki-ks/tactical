@@ -43,7 +43,7 @@ object ClassConstantParser extends Parser[ClassConstant] {
 
 object MethodTypeConstantParser extends Parser[MethodTypeConstant] {
   val parser: P[MethodTypeConstant] =
-    for (desc ← MethodDescriptorParser) yield new MethodTypeConstant(desc.getParameterTypes, desc.getReturnType)
+    for (desc ← "method" ~ WS.? ~ "{" ~ WS.? ~ MethodDescriptorParser ~ WS.? ~ "}") yield new MethodTypeConstant(desc.getParameterTypes, desc.getReturnType)
 }
 
 object HandleConstantParser extends Parser[HandleConstant] {
