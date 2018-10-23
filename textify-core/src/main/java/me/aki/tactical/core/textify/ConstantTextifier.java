@@ -73,11 +73,11 @@ public class ConstantTextifier {
 
         List<BootstrapConstant> arguments = constant.getBootstrapArguments();
         if (!arguments.isEmpty()) {
-            printer.addText("arguments = { ");
-            for (BootstrapConstant argument : arguments) {
-                BOOTSTRAP.textify(printer, argument);
-            }
-            printer.addText(" }");
+            printer.addText(", arguments = [ ");
+            TextUtil.joined(arguments,
+                    argument -> BOOTSTRAP.textify(printer, argument),
+                    () -> printer.addText(", "));
+            printer.addText(" ]");
         }
 
         printer.addText(" }");
