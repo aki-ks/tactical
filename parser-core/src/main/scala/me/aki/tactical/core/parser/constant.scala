@@ -94,10 +94,10 @@ object PushableConstantParser extends Parser[PushableConstant] {
 
 object BootstrapConstantParser extends Parser[BootstrapConstant] {
   val parser: P[BootstrapConstant] = P {
-    IntConstantParser |
-      LongConstantParser |
+    DoubleConstantParser |
       FloatConstantParser |
-      DoubleConstantParser |
+      LongConstantParser |
+      IntConstantParser |
       StringConstantParser |
       ClassConstantParser |
       HandleConstantParser |
