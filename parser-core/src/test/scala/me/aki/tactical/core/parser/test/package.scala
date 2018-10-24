@@ -23,8 +23,12 @@ package object test {
 
     forAll (gen) { value =>
       val text = textifier.toString(value)
-      val parsed = parser.parse(text)
-      value shouldEqual parsed
+      try {
+        val parsed = parser.parse(text)
+        value shouldEqual parsed
+      } catch {
+        case t: Throwable => throw new RuntimeException(s"Error while parsing text '${text}'", t)
+      }
     }
   }
 
