@@ -4,8 +4,10 @@ import me.aki.tactical.core.Method;
 import me.aki.tactical.core.textify.BodyTextifier;
 import me.aki.tactical.core.textify.Printer;
 import me.aki.tactical.core.textify.TextUtil;
+import me.aki.tactical.core.textify.TypeAnnotationTextifier;
 import me.aki.tactical.core.textify.TypeTextifier;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
@@ -54,6 +56,7 @@ public class RefBodyTextifier implements BodyTextifier {
 
         textifyTryCatchBlocks(printer, ctx, body);
         textifyLines(printer, ctx, body);
+        textifyLocalVariables(printer, ctx, body);
     }
 
     /**
@@ -212,4 +215,24 @@ public class RefBodyTextifier implements BodyTextifier {
         }
     }
 
+    private void textifyLocalVariables(Printer printer, TextifyCtx ctx, RefBody body) {
+        for (RefBody.LocalVariable local : body.getLocalVariables()) {
+            printer.addText("local info ");
+            printer.addLiteral(ctx.getLabel(local.getStart()));
+            printer.addText(" -> ");
+            printer.addLiteral(ctx.getLabel(local.getEnd()));
+            printer.addText(" ");
+            printer.addLiteral(ctx.getLocalName(local.getLocal()));
+            printer.addText(" ");
+            printer.addEscaped(local.getName(), '"');
+            printer.addText(" ");
+            TypeTextifier.getInstance().textify(printer, local.getType());
+            local.getSignature().ifPresent(signature -> {
+                printer.addText(" ");
+                printer.addEscaped(signature, '"');
+            });
+            printer.addText(";");
+            printer.newLine();
+        }
+    }
 }
