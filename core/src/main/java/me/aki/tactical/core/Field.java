@@ -19,7 +19,7 @@ public class Field {
     /**
      * Access flags of the field
      */
-    private Set<Flag> flags = new HashSet<>();
+    private Set<Flag> flags;
 
     /**
      * Name of the field
@@ -34,22 +34,22 @@ public class Field {
     /**
      * Type of the field with type variables.
      */
-    private Optional<String> signature = Optional.empty();
+    private Optional<String> signature;
 
     /**
      * The initial value of a static field of primitive or {@link String} type.
      */
-    private Optional<FieldConstant> value = Optional.empty();
+    private Optional<FieldConstant> value;
 
     /**
      * Annotations of this field.
      */
-    private List<Annotation> annotations = new ArrayList<>();
+    private List<Annotation> annotations;
 
     /**
      * Type annotations on the type of this field.
      */
-    private List<FieldTypeAnnotation> typeAnnotations = new ArrayList<>();
+    private List<FieldTypeAnnotation> typeAnnotations;
 
     /**
      * Non-parsed attributes of this field.
@@ -57,11 +57,21 @@ public class Field {
      * They are either not part of the JVM spec or
      * are not yet supported by this library.
      */
-    private List<Attribute> attributes = new ArrayList<>();
+    private List<Attribute> attributes;
 
     public Field(String name, Type type) {
+        this(new HashSet<>(), name, type, Optional.empty(), Optional.empty(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    }
+
+    public Field(Set<Flag> flags, String name, Type type, Optional<String> signature, Optional<FieldConstant> value, List<Annotation> annotations, List<FieldTypeAnnotation> typeAnnotations, List<Attribute> attributes) {
+        this.flags = flags;
         this.name = name;
         this.type = type;
+        this.signature = signature;
+        this.value = value;
+        this.annotations = annotations;
+        this.typeAnnotations = typeAnnotations;
+        this.attributes = attributes;
     }
 
     public Set<Flag> getFlags() {

@@ -1,9 +1,9 @@
 package me.aki.tactical.core.parser.test
 
-import java.util.{LinkedHashMap, HashSet, Optional}
+import java.util.{HashSet, LinkedHashMap, Optional}
 
 import scala.collection.JavaConverters._
-import me.aki.tactical.core.{Attribute, FieldRef, MethodRef, Path, Module}
+import me.aki.tactical.core.{Attribute, Field, FieldRef, Method, MethodRef, Module, Path}
 import me.aki.tactical.core.`type`._
 import me.aki.tactical.core.annotation._
 import me.aki.tactical.core.constant._
@@ -262,4 +262,23 @@ object CoreGenerator {
     provides ← Gen.listOf(moduleProvide)
   } yield new Module(name, flags, version.asJava, mainClass.asJava, packages.asJava, require.asJava,
     exports.asJava, open.asJava, uses.asJava, provides.asJava)
+
+  // FIELD
+
+  /** Get a set of flags that contains only one or non access flag */
+  def accessFlags[F](accessFlags: Seq[F], other: Seq[F]) = for {
+    access ← Gen.option(Gen.oneOf(accessFlags))
+    otherFlags ← Gen.listOf(Gen.oneOf(other diff accessFlags))
+  } yield new HashSet((otherFlags ++ access).asJava)
+
+  def field = for {
+    flags ← accessFlags(Seq(Field.Flag.PUBLIC, Field.Flag.PRIVATE, Field.Flag.PROTECTED), Field.Flag.values)
+    name ← literal
+    typ ← typ
+    signature ← Gen.option(literal)
+    value ← Gen.option(fieldConstant)
+    annotations ← Gen.listOf(annotation)
+    typeAnnotations ← Gen.listOf(fieldTypeAnnotation)
+    attributes ← Gen.listOf(attribute)
+  } yield new Field(flags, name, typ, signature.asJava, value.asJava, annotations.asJava, typeAnnotations.asJava, attributes.asJava)
 }
