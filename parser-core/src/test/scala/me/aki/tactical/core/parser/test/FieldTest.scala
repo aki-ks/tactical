@@ -69,7 +69,7 @@ class FieldTest extends FlatSpec with Matchers {
     ).getAttributes shouldEqual List(new Attribute("foo", Array(0, -1))).asJava
   }
 
-  it should "parse random textified fields" in {
+  ignore should "parse random textified fields" in {
     generatorTest(CoreGenerator.field, FieldParser, FieldTextifier.getInstance)
   }
 }
