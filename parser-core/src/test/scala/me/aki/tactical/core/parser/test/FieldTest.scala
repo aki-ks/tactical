@@ -8,6 +8,7 @@ import me.aki.tactical.core.`type`.IntType
 import me.aki.tactical.core.annotation.Annotation
 import me.aki.tactical.core.constant.IntConstant
 import me.aki.tactical.core.parser.FieldParser
+import me.aki.tactical.core.textify.FieldTextifier
 import me.aki.tactical.core.typeannotation.TargetType.Extends
 import me.aki.tactical.core.typeannotation.TypePath.Kind
 import me.aki.tactical.core.typeannotation.{ClassTypeAnnotation, FieldTypeAnnotation, TypePath}
@@ -66,5 +67,9 @@ class FieldTest extends FlatSpec with Matchers {
         |int foo = 20;
       """.stripMargin
     ).getAttributes shouldEqual List(new Attribute("foo", Array(0, -1))).asJava
+  }
+
+  it should "parse random textified fields" in {
+    generatorTest(CoreGenerator.field, FieldParser, FieldTextifier.getInstance)
   }
 }
