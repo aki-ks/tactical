@@ -53,6 +53,7 @@ public class RefBodyTextifier implements BodyTextifier {
         textifyStatement(printer, ctx, body);
 
         textifyTryCatchBlocks(printer, ctx, body);
+        textifyLines(printer, ctx, body);
     }
 
     /**
@@ -201,4 +202,14 @@ public class RefBodyTextifier implements BodyTextifier {
             printer.newLine();
         }
     }
+
+    private void textifyLines(Printer printer, TextifyCtx ctx, RefBody body) {
+        for (RefBody.LineNumber node : body.getLineNumbers()) {
+            printer.addText("line " + node.getLine() + " ");
+            printer.addLiteral(ctx.getLabel(node.getStatement()));
+            printer.addText(";");
+            printer.newLine();
+        }
+    }
+
 }
