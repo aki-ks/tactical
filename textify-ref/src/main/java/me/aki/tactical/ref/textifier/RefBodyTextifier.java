@@ -57,6 +57,7 @@ public class RefBodyTextifier implements BodyTextifier {
         textifyTryCatchBlocks(printer, ctx, body);
         textifyLines(printer, ctx, body);
         textifyLocalVariables(printer, ctx, body);
+        textifyLocalAnnotations(printer, ctx, body);
     }
 
     /**
@@ -235,4 +236,22 @@ public class RefBodyTextifier implements BodyTextifier {
             printer.newLine();
         }
     }
+
+    private void textifyLocalAnnotations(Printer printer, TextifyCtx ctx, RefBody body) {
+        for (RefBody.LocalVariableAnnotation node : body.getLocalVariableAnnotations()) {
+            printer.addText("local annotation [");
+            TextUtil.joined(node.getLocations(),
+                    location -> {
+                        printer.addLiteral(ctx.getLabel(location.getStart()));
+                        printer.addText(" -> ");
+                        printer.addLiteral(ctx.getLabel(location.getEnd()));
+                        printer.addText(" ");
+                        printer.addLiteral(ctx.getLocalName(location.getLocal()));
+                    },
+                    () -> printer.addText(", "));
+            printer.addText("] ");
+            TypeAnnotationTextifier.LOCAL.textify(printer, node.getAnnotation());
+        }
+    }
+
 }
