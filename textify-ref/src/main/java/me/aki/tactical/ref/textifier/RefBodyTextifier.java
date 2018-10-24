@@ -51,6 +51,8 @@ public class RefBodyTextifier implements BodyTextifier {
         textifyLocals(printer, ctx, body);
 
         textifyStatement(printer, ctx, body);
+
+        textifyTryCatchBlocks(printer, ctx, body);
     }
 
     /**
@@ -177,6 +179,26 @@ public class RefBodyTextifier implements BodyTextifier {
             });
 
             StatementTextifier.getInstance().textify(printer, ctx, statement);
+            printer.newLine();
+        }
+    }
+
+    private void textifyTryCatchBlocks(Printer printer, TextifyCtx ctx, RefBody body) {
+        for (TryCatchBlock block : body.getTryCatchBlocks()) {
+            printer.addText("try ");
+            printer.addLiteral(ctx.getLabel(block.getFirst()));
+            printer.addText(" -> ");
+            printer.addLiteral(ctx.getLabel(block.getLast()));
+            printer.addText(" catch ");
+            printer.addLiteral(ctx.getLabel(block.getHandler()));
+            printer.addText(" ");
+            printer.addLiteral(ctx.getLocalName(block.getExceptionLocal()));
+            block.getException().ifPresent(exception -> {
+                printer.addText(" : ");
+                printer.addPath(exception);
+            });
+            printer.addText(";");
+            printer.newLine();
         }
     }
 }

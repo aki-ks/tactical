@@ -2,17 +2,13 @@ package me.aki.tactical.stack.textify;
 
 import me.aki.tactical.core.Body;
 import me.aki.tactical.core.Method;
-import me.aki.tactical.core.textify.AnnotationTextifier;
 import me.aki.tactical.core.textify.BodyTextifier;
 import me.aki.tactical.core.textify.Printer;
-import me.aki.tactical.core.textify.TargetTypeTextifier;
 import me.aki.tactical.core.textify.TextUtil;
 import me.aki.tactical.core.textify.TypeAnnotationTextifier;
-import me.aki.tactical.core.textify.TypePathTextifier;
 import me.aki.tactical.core.textify.TypeTextifier;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.InsnTypeAnnotation;
-import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
