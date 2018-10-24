@@ -127,21 +127,21 @@ object MethodPrefix {
 object MethodPrefixParser extends Parser[MethodPrefix] {
   object SignaturePrefixParser extends Parser[MethodPrefix.SignaturePrefix] {
     val parser: P[MethodPrefix.SignaturePrefix] = P {
-      for (signature ← "signature" ~ WS ~ StringLiteral ~ WS.? ~ ";")
+      for (signature ← "signature" ~ WS ~ StringLiteral ~ WS.? ~ ";".?)
         yield new MethodPrefix.SignaturePrefix(signature)
     } opaque "<signature>"
   }
 
   object ParameterInfoPrefixParser extends Parser[MethodPrefix.ParameterInfoPrefix] {
     val parser: P[MethodPrefix.ParameterInfoPrefix] = P {
-      for ((flags, name) ← ParameterFlagParser ~ "parameter" ~ WS.? ~ (StringLiteral ~ WS.?).? ~ ";")
+      for ((flags, name) ← ParameterFlagParser ~ "parameter" ~ WS.? ~ (StringLiteral ~ WS.?).? ~ ";".?)
         yield new MethodPrefix.ParameterInfoPrefix(new Method.Parameter(Optional.ofNullable(name.orNull), flags))
     } opaque "<parameter-info>"
   }
 
   object ParameterAnnotationsPrefixParser extends Parser[MethodPrefix.ParameterAnnotationPrefix] {
     val parser: P[MethodPrefix.ParameterAnnotationPrefix] = P {
-      for (annotations ← "parameter" ~ WS ~ "annotations" ~ WS.? ~ "{" ~ WS.? ~ AnnotationParser.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "}")
+      for (annotations ← "parameter" ~ WS ~ "annotations" ~ WS.? ~ "{" ~ WS.? ~ AnnotationParser.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "}" ~ WS.? ~ ";".?)
         yield new MethodPrefix.ParameterAnnotationPrefix(annotations.asJava)
     } opaque "<parameter-annotations>"
   }
@@ -154,7 +154,7 @@ object MethodPrefixParser extends Parser[MethodPrefix] {
 
   object TypeAnnotationPrefixParser extends Parser[MethodPrefix.TypeAnnotationPrefix] {
     val parser: P[MethodPrefix.TypeAnnotationPrefix] = P {
-      for (annotation ← MethodTypeAnnotationParser ~ WS.? ~ ";") yield new MethodPrefix.TypeAnnotationPrefix(annotation)
+      for (annotation ← MethodTypeAnnotationParser ~ WS.? ~ ";".?) yield new MethodPrefix.TypeAnnotationPrefix(annotation)
     } opaque "<type-annotation>"
   }
 

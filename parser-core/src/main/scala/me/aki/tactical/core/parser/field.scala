@@ -43,7 +43,7 @@ object FieldPrefix {
 object FieldPrefixParser extends Parser[FieldPrefix] {
   object SignaturePrefixParser extends Parser[FieldPrefix.SignaturePrefix] {
     val parser: P[FieldPrefix.SignaturePrefix] = P {
-      for (signature ← "signature" ~ WS ~ StringLiteral ~ WS.? ~ ";")
+      for (signature ← "signature" ~ WS ~ StringLiteral ~ WS.? ~ ";".?)
         yield new FieldPrefix.SignaturePrefix(signature)
     } opaque "<signature>"
   }
@@ -56,7 +56,7 @@ object FieldPrefixParser extends Parser[FieldPrefix] {
 
   object TypeAnnotationPrefixParser extends Parser[FieldPrefix.TypeAnnotationPrefix] {
     val parser: P[FieldPrefix.TypeAnnotationPrefix] = P {
-      for (annotation ← FieldTypeAnnotationParser ~ WS.? ~ ";") yield new FieldPrefix.TypeAnnotationPrefix(annotation)
+      for (annotation ← FieldTypeAnnotationParser ~ WS.? ~ ";".?) yield new FieldPrefix.TypeAnnotationPrefix(annotation)
     } opaque "<type-annotation>"
   }
 

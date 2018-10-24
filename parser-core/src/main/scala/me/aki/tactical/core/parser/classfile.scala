@@ -164,7 +164,7 @@ object ClassContent {
 object ClassContentParser {
   object ModuleContentParser extends Parser[ClassContent.ModuleContent] {
     val parser: P[ClassContent.ModuleContent] = P {
-      for (module ← ModuleParser) yield new ClassContent.ModuleContent(module)
+      for (module ← ModuleParser ~ WS.? ~ ";".?) yield new ClassContent.ModuleContent(module)
     } opaque "<module>"
   }
 
@@ -173,7 +173,7 @@ object ClassContentParser {
       val name = "name" ~ WS.? ~ "=" ~ WS.? ~ StringLiteral ~ WS.? ~ ";"
       val descriptor = "descriptor" ~ WS.? ~ "=" ~ WS.? ~ MethodDescriptorParser ~ WS.? ~ ";"
 
-      for ((owner, name, descriptor) ← "enclosing" ~ WS.? ~ PathParser ~ WS.? ~ "{" ~ WS.? ~ (name ~ WS.?).? ~ (descriptor ~ WS.?).? ~ "}")
+      for ((owner, name, descriptor) ← "enclosing" ~ WS.? ~ PathParser ~ WS.? ~ "{" ~ WS.? ~ (name ~ WS.?).? ~ (descriptor ~ WS.?).? ~ "}" ~ WS.? ~ ";".?)
         yield new ClassContent.EnclosingContent(new EnclosingMethod(owner, Optional.ofNullable(name.orNull), Optional.ofNullable(descriptor.orNull)))
     } opaque "<enclosing-method>"
   }
@@ -190,11 +190,11 @@ object ClassContentParser {
           cinner.setOuterName(Optional.of(outer))
       }
 
-      val inner = for (inner ← "inner" ~ WS ~ StringLiteral ~ ";") yield new Inner(inner)
-      val outer = for (outer ← "outer" ~ WS ~ PathParser ~ ";") yield new Outer(outer)
+      val inner = for (inner ← "inner" ~ WS ~ StringLiteral ~ WS.? ~ ";".?) yield new Inner(inner)
+      val outer = for (outer ← "outer" ~ WS ~ PathParser ~ WS.? ~ ";".?) yield new Outer(outer)
 
       for ((flags, name, content) ← InnerClassFlagParser ~ "inner" ~ WS ~ PathParser ~ WS.? ~ "{" ~ WS.? ~
-        (inner | outer).rep(sep = WS.?) ~ WS.? ~ "}") yield {
+        (inner | outer).rep(sep = WS.?) ~ WS.? ~ "}" ~ WS.? ~ ";".?) yield {
         val inner = new Classfile.InnerClass(name)
         inner.setFlags(flags)
         content.foreach(_ apply inner)
@@ -205,14 +205,14 @@ object ClassContentParser {
 
   object NestHostContentParser extends Parser[ClassContent.NestHostContent] {
     val parser: P[ClassContent.NestHostContent] = P {
-      for (host ← "nest" ~ WS ~ "host" ~ WS ~ PathParser ~ WS.? ~ ";")
+      for (host ← "nest" ~ WS ~ "host" ~ WS ~ PathParser ~ WS.? ~ ";".?)
         yield new ClassContent.NestHostContent(host)
     } opaque "<nest-host>"
   }
 
   object NestMemberContentParser extends Parser[ClassContent.NestMemberContent] {
     val parser: P[ClassContent.NestMemberContent] = P {
-      for (hosts ← "nest" ~ WS ~ "member" ~ WS ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ ";")
+      for (hosts ← "nest" ~ WS ~ "member" ~ WS ~ PathParser.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ ";".?)
         yield new ClassContent.NestMemberContent(hosts)
     } opaque "<nest-member>"
   }
