@@ -34,13 +34,7 @@ class LocalVariableParser(ctx: ResolvedStackCtx) extends Parser[LocalVariable] {
 
     for {
       (start, end, local, name, typ, signature) ←
-        "local" ~ WS.? ~ "info" ~ WS.? ~
-          label ~ WS.? ~ ("->" | "→") ~ WS.? ~ label ~ WS.? ~ "," ~ WS.? ~ // range
-          Literal ~ WS.? ~ "," ~ WS.? ~ // local
-          StringLiteral ~ WS.? ~ "," ~ WS.? ~ // name
-          TypeParser ~ WS.? ~ // type
-          ("," ~ WS.? ~ StringLiteral ~ WS.?).? ~ // signature
-          ";"
+        "local" ~ WS.? ~ "info" ~ WS.? ~ label ~ WS.? ~ ("->" | "→") ~ WS.? ~ label ~ WS.? ~ Literal ~ WS.? ~ StringLiteral ~ WS.? ~ TypeParser ~ WS.? ~ (StringLiteral ~ WS.?).? ~ ";"
     } yield new LocalVariable(name, typ, Optional.ofNullable(signature.orNull), start, end, ctx.getLocal(local))
   }
 }

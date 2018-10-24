@@ -204,14 +204,14 @@ public class StackBodyTextifier implements BodyTextifier {
             printer.addLiteral(ctx.getLabel(localVariable.getStart()));
             printer.addText(" -> ");
             printer.addLiteral(ctx.getLabel(localVariable.getEnd()));
-            printer.addText(", ");
+            printer.addText(" ");
             printer.addText(ctx.getLocalName(localVariable.getLocal()));
-            printer.addText(", ");
+            printer.addText(" ");
             printer.addEscaped(localVariable.getName(), '"');
-            printer.addText(", ");
+            printer.addText(" ");
             TypeTextifier.getInstance().textify(printer, localVariable.getType());
             localVariable.getSignature().ifPresent(signature -> {
-                printer.addText(", ");
+                printer.addText(" ");
                 printer.addEscaped(signature, '"');
             });
             printer.addText(";");
@@ -231,7 +231,7 @@ public class StackBodyTextifier implements BodyTextifier {
                         printer.addLiteral(ctx.getLocalName(location.getLocal()));
                     },
                     () -> printer.addText(", "));
-            printer.addText("], ");
+            printer.addText("] ");
 
             TypeAnnotationTextifier.LOCAL.textify(printer, localAnnotation.getAnnotation());
             printer.addText(";");
