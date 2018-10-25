@@ -5,7 +5,6 @@ import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.textify.ConstantTextifier;
 import me.aki.tactical.core.textify.HandleTextifier;
-import me.aki.tactical.core.textify.MethodDescriptorTextifier;
 import me.aki.tactical.core.textify.Printer;
 import me.aki.tactical.core.textify.TextUtil;
 import me.aki.tactical.core.textify.TypeTextifier;
@@ -14,7 +13,6 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.invoke.AbstractConcreteInvoke;
 import me.aki.tactical.ref.invoke.AbstractInstanceInvoke;
 import me.aki.tactical.ref.invoke.AbstractInvoke;
-import me.aki.tactical.ref.invoke.AmbigiousInvoke;
 import me.aki.tactical.ref.invoke.InvokeDynamic;
 import me.aki.tactical.ref.invoke.InvokeInterface;
 import me.aki.tactical.ref.invoke.InvokeSpecial;
@@ -34,14 +32,14 @@ public class InvokeTextifier implements CtxTextifier<AbstractInvoke> {
     public static final CtxTextifier<InvokeDynamic> DYNAMIC = (printer, ctx, invoke) -> {
         printer.addText("invoke dynamic { name = ");
         printer.addEscaped(invoke.getName(), '"');
-        printer.addText(", type = ");
 
+        printer.addText(", type = ");
         textifyDescriptorWithArguments(printer, ctx, invoke.getDescriptor(), invoke.getArguments());
 
         printer.addText(", bootstrap = ");
         HandleTextifier.getInstance().textify(printer, invoke.getBootstrapMethod());
-        printer.addText(", arguments = ");
 
+        printer.addText(", arguments = ");
         List<BootstrapConstant> bootstrapArguments = invoke.getBootstrapArguments();
         if (bootstrapArguments.isEmpty()) {
             printer.addText("[]");
@@ -57,98 +55,65 @@ public class InvokeTextifier implements CtxTextifier<AbstractInvoke> {
     };
 
     private static void textifyDescriptorWithArguments(Printer printer, TextifyCtx ctx, MethodDescriptor descriptor, List<Expression> parameters) {
-        if (descriptor.getParameterTypes().size() != parameters.size()) {
-            throw new IllegalArgumentException("");
-        }
-
-        Iterator<Type> paramTypeIter = descriptor.getParameterTypes().iterator();
-        Iterator<Expression> paramIter = parameters.iterator();
-
-        while (paramIter.hasNext()) {
-            ExpressionTextifier.getInstance().textify(printer, ctx, paramIter.next());
-            printer.addText(" : ");
-            TypeTextifier.getInstance().textify(printer, paramTypeIter.next());
-
-            if(paramIter.hasNext()) {
-                printer.addText(", ");
-            }
-        }
+        TextUtil.biJoined(descriptor.getParameterTypes(), parameters,
+                (parameterType, parameter) -> {
+                    ExpressionTextifier.getInstance().textify(printer, ctx, parameter);
+                    printer.addText(" : ");
+                    TypeTextifier.getInstance().textify(printer, parameterType);
+                },
+                () -> printer.addText(", "));
 
         printer.addText(" : ");
+
         descriptor.getReturnType().ifPresentOrElse(
                 type -> TypeTextifier.getInstance().textify(printer, type),
                 () -> printer.addText("void"));
     }
 
     public static final CtxTextifier<AbstractConcreteInvoke> CONCRETE = (printer, ctx, invoke) -> {
-        boolean isInterface = invoke instanceof AmbigiousInvoke && ((AmbigiousInvoke) invoke).isInterface();
-        boolean isInstanceInvoke = invoke instanceof AbstractInstanceInvoke;
         MethodRef method = invoke.getMethod();
+
+        printer.addPath(method.getOwner());
+        printer.addText(".<");
 
         String keyword;
         if (invoke instanceof InvokeInterface) {
-            keyword = "invoke interface ";
+            keyword = "interface ";
         } else if (invoke instanceof InvokeSpecial) {
-            keyword = "invoke special ";
+            boolean isInterface = ((InvokeSpecial) invoke).isInterface();
+            keyword = "special " + (isInterface ? "interface " : "");
         } else if (invoke instanceof InvokeStatic) {
-            keyword = "invoke static ";
+            boolean isInterface = ((InvokeStatic) invoke).isInterface();
+            keyword = "static " + (isInterface ? "interface " : "");
         } else if (invoke instanceof InvokeVirtual) {
-            keyword = "inovke virtual ";
+            keyword = "virtual ";
         } else {
             throw new AssertionError();
         }
         printer.addText(keyword);
 
-        printer.addPath(method.getOwner());
-        printer.addText(".");
-
-        if (isInterface || isInstanceInvoke) {
-            printer.addText("<");
-
-            if (isInterface) {
-                printer.addText("interface");
-            }
-
-            if (isInterface && isInstanceInvoke) {
-                printer.addText(" ");
-            }
-
-            if (isInstanceInvoke) {
-                ExpressionTextifier.getInstance().textify(printer, ctx, ((AbstractInstanceInvoke) invoke).getInstance());
-            }
-
-            printer.addText(">.");
+        if (invoke instanceof AbstractInstanceInvoke) {
+            Expression instance = ((AbstractInstanceInvoke) invoke).getInstance();
+            ExpressionTextifier.getInstance().textify(printer, ctx, instance);
         }
+        printer.addText(">.");
 
         printer.addLiteral(method.getName());
         printer.addText("(");
 
-        textifyArguments(printer, ctx, method.getArguments(), invoke.getArguments());
+        TextUtil.biJoined(invoke.getArguments(), method.getArguments(),
+                (argument, argumentType) -> {
+                    ExpressionTextifier.getInstance().textify(printer, ctx, argument);
+                    printer.addText(" : ");
+                    TypeTextifier.getInstance().textify(printer, argumentType);
+                },
+                () -> printer.addText(", "));
 
         printer.addText(") : ");
         method.getReturnType().ifPresentOrElse(
                 type -> TypeTextifier.getInstance().textify(printer, type),
                 () -> printer.addText("void"));
     };
-
-    private static void textifyArguments(Printer printer, TextifyCtx ctx, List<Type> argumentTypes, List<Expression> arguments) {
-        if (argumentTypes.size() != arguments.size()) {
-            throw new IllegalArgumentException("Argument type count does not match argument expressions count");
-        }
-
-        Iterator<Type> argTypeIter = argumentTypes.iterator();
-        Iterator<Expression> argIter = arguments.iterator();
-
-        while (argIter.hasNext()) {
-            ExpressionTextifier.getInstance().textify(printer, ctx, argIter.next());
-            printer.addText(" : ");
-            TypeTextifier.getInstance().textify(printer, argTypeIter.next());
-
-            if (argIter.hasNext()) {
-                printer.addText(", ");
-            }
-        }
-    }
 
     @Override
     public void textify(Printer printer, TextifyCtx ctx, AbstractInvoke invoke) {

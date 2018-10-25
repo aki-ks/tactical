@@ -1,8 +1,10 @@
 package me.aki.tactical.core.textify;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class TextUtil {
@@ -148,6 +150,22 @@ public class TextUtil {
 
         builder.append(Integer.toString(number));
         return builder.toString();
+    }
+
+    public static <A, B> void biJoined(Iterable<A> a, Iterable<B> b, BiConsumer<A, B> appendElement, Runnable appendSeperator) {
+        Iterator<A> iterA = a.iterator();
+        Iterator<B> iterB = b.iterator();
+        while (iterA.hasNext() && iterB.hasNext()) {
+            appendElement.accept(iterA.next(), iterB.next());
+
+            if (iterA.hasNext()) {
+                appendSeperator.run();
+            }
+        }
+
+        if (iterA.hasNext() || iterB.hasNext()) {
+            throw new IllegalArgumentException("Supplied list have difference length");
+        }
     }
 
     public static <T> void joined(Iterable<T> iterable, Consumer<T> appendElement, Runnable appendSeperator) {
