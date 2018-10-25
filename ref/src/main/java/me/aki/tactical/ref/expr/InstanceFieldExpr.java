@@ -1,38 +1,23 @@
 package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.FieldRef;
-import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
-import me.aki.tactical.ref.Variable;
 
 import java.util.List;
 
 /**
  * Reference the value of a non-static field.
  */
-public class InstanceFieldExpr implements Variable {
-    /**
-     * The referenced field.
-     */
-    private FieldRef field;
-
+public class InstanceFieldExpr extends AbstractFieldExpr {
     /**
      * Instance of the class containing the field.
      */
     private Expression instance;
 
     public InstanceFieldExpr(FieldRef field, Expression instance) {
-        this.field = field;
+        super(field);
         this.instance = instance;
-    }
-
-    public FieldRef getField() {
-        return field;
-    }
-
-    public void setField(FieldRef field) {
-        this.field = field;
     }
 
     public Expression getInstance() {
@@ -45,11 +30,6 @@ public class InstanceFieldExpr implements Variable {
 
     public Cell<Expression> getInstanceCell() {
         return Cell.of(this::getInstance, this::setInstance, Expression.class);
-    }
-
-    @Override
-    public Type getType() {
-        return field.getType();
     }
 
     @Override
