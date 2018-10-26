@@ -61,7 +61,7 @@ public class GotoInsn extends AbstractInstruction implements BranchInsn {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         GotoInsn gotoInsn = (GotoInsn) o;
-        return Objects.equals(target, gotoInsn.target);
+        return target == gotoInsn.target;
     }
 
     @Override

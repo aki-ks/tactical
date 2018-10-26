@@ -95,7 +95,7 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
         if (!super.equals(o)) return false;
         IfInsn ifInsn = (IfInsn) o;
         return Objects.equals(condition, ifInsn.condition) &&
-                Objects.equals(target, ifInsn.target);
+                target == ifInsn.target;
     }
 
     @Override

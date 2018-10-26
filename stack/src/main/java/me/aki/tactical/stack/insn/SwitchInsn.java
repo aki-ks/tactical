@@ -96,8 +96,20 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SwitchInsn that = (SwitchInsn) o;
-        return Objects.equals(branchTable, that.branchTable) &&
-                Objects.equals(defaultLocation, that.defaultLocation);
+        return defaultLocation == that.defaultLocation &&
+                areBranchTableEqual(branchTable, that.branchTable);
+    }
+
+    private boolean areBranchTableEqual(Map<Integer, Instruction> tableA, Map<Integer, Instruction> tableB) {
+        if (tableA == null || tableB == null) {
+            return tableA == tableB;
+        }
+        if (tableA.size() == tableB.size()) {
+            // check for equal identity of instruction references.
+            return tableA.entrySet().stream().allMatch(e -> tableB.get(e.getKey()) == e.getValue());
+        } else {
+            return false;
+        }
     }
 
     @Override

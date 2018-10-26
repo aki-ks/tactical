@@ -255,8 +255,8 @@ public class StackBody implements Body {
             return Objects.equals(name, that.name) &&
                     Objects.equals(type, that.type) &&
                     Objects.equals(signature, that.signature) &&
-                    Objects.equals(start, that.start) &&
-                    Objects.equals(end, that.end) &&
+                    start == that.start &&
+                    end == that.end &&
                     Objects.equals(local, that.local);
         }
 
@@ -374,8 +374,8 @@ public class StackBody implements Body {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Location location = (Location) o;
-                return Objects.equals(start, location.start) &&
-                        Objects.equals(end, location.end) &&
+                return start == location.start &&
+                        end == location.end &&
                         Objects.equals(local, location.local);
             }
 
@@ -431,7 +431,7 @@ public class StackBody implements Body {
             if (o == null || getClass() != o.getClass()) return false;
             LineNumber that = (LineNumber) o;
             return line == that.line &&
-                    Objects.equals(instruction, that.instruction);
+                    instruction == that.instruction;
         }
 
         @Override

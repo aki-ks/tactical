@@ -104,9 +104,9 @@ public class TryCatchBlock {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TryCatchBlock that = (TryCatchBlock) o;
-        return Objects.equals(first, that.first) &&
-                Objects.equals(last, that.last) &&
-                Objects.equals(handler, that.handler) &&
+        return first == that.first &&
+                last == that.last &&
+                handler == that.handler &&
                 Objects.equals(exceptionType, that.exceptionType) &&
                 Objects.equals(typeAnnotations, that.typeAnnotations);
     }
