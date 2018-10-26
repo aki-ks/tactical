@@ -3,7 +3,7 @@ package me.aki.tactical.core.parser.test
 import java.util.{HashSet, LinkedHashMap, Optional}
 
 import scala.collection.JavaConverters._
-import me.aki.tactical.core.{Attribute, Field, FieldRef, Method, MethodRef, Module, Path}
+import me.aki.tactical.core.{Attribute, Field, FieldRef, Method, MethodDescriptor, MethodRef, Module, Path}
 import me.aki.tactical.core.`type`._
 import me.aki.tactical.core.annotation._
 import me.aki.tactical.core.constant._
@@ -14,7 +14,8 @@ import org.scalacheck._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.{alphaChar, numChar}
 
-object CoreGenerator {
+object CoreGenerator extends CoreGenerator
+trait CoreGenerator {
   def literal = {
     val randomString = Arbitrary.arbitrary[String]
     val legalJavaLiteral = for {
@@ -56,6 +57,11 @@ object CoreGenerator {
     arguments ← Gen.listOf(typ)
     returnType ← returnType
   } yield new MethodRef(owner, name, arguments.asJava, returnType)
+
+  def methodDescriptor = for {
+    arguments ← Gen.listOf(typ)
+    returnType ← Gen.option(typ)
+  } yield new MethodDescriptor(arguments.asJava, returnType.asJava)
 
   // HANDLES
 
