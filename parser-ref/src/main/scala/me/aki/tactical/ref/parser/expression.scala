@@ -46,12 +46,12 @@ class ExpressionParser(ctx: UnresolvedRefCtx) extends Parser[Expression] {
       P { for (op2 ← "&" ~ WS.? ~ parser) yield new AndExpr(expr, op2) } |
       P { for (op2 ← "|" ~ WS.? ~ parser) yield new OrExpr(expr, op2) } |
       P { for (op2 ← "^" ~ WS.? ~ parser) yield new XorExpr(expr, op2) } |
-      P { for (op2 ← "cmp" ~ WS.? ~ parser) yield new CmpExpr(expr, op2) } |
       P { for (op2 ← "cmpl" ~ WS.? ~ parser) yield new CmplExpr(expr, op2) } |
       P { for (op2 ← "cmpg" ~ WS.? ~ parser) yield new CmpgExpr(expr, op2) } |
+      P { for (op2 ← "cmp" ~ WS.? ~ parser) yield new CmpExpr(expr, op2) } |
       P { for (op2 ← "<<" ~ WS.? ~ parser) yield new ShlExpr(expr, op2) } |
-      P { for (op2 ← ">>" ~ WS.? ~ parser) yield new ShrExpr(expr, op2) } |
       P { for (op2 ← ">>>" ~ WS.? ~ parser) yield new UShrExpr(expr, op2) } |
+      P { for (op2 ← ">>" ~ WS.? ~ parser) yield new ShrExpr(expr, op2) } |
       P { for (_ ← "." ~ WS.? ~ "length") yield new ArrayLengthExpr(expr) } |
       P { for (typ ← "instanceof" ~ WS.? ~ RefTypeParser) yield new InstanceOfExpr(typ, expr) } |
       P { for (index ← "[" ~ WS.? ~ parser ~ WS.? ~ "]") yield new ArrayBoxExpr(expr, index) } |
