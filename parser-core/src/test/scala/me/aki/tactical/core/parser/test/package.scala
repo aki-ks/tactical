@@ -17,7 +17,7 @@ package object test {
     }
   }
 
-  def generatorTest[A](gen: Gen[A], parser: Parser[A], textifier: Textifier[A]): Unit = {
+  def generatorTest[A](gen: Gen[A], parser: Parser[_ >: A], textifier: Textifier[_ >: A]): Unit = {
     import org.scalatest.Matchers._
     import org.scalatest.prop.PropertyChecks._
 
