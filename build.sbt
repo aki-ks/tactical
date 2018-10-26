@@ -52,6 +52,7 @@ lazy val stackParser = (project in file ("parser-stack"))
 
 lazy val refParser = (project in file ("parser-ref"))
   .dependsOn(ref, coreParser, refTextifier % Test)
+  .settings(parserSettings)
 
 // CONVERSION
 lazy val stackConversionUtils = (project in file ("stack conversion-utils"))
