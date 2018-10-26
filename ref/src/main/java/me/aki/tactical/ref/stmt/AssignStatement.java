@@ -6,6 +6,7 @@ import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.Variable;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Assign a value to a variable
@@ -53,5 +54,19 @@ public class AssignStatement implements Statement {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of(getVariableCell().cast(), getValueCell());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssignStatement statement = (AssignStatement) o;
+        return Objects.equals(variable, statement.variable) &&
+                Objects.equals(value, statement.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(variable, value);
     }
 }

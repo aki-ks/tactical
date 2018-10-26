@@ -5,6 +5,7 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
 import java.util.List;
+import java.util.Objects;
 
 public class AbstractUnaryStmt implements Statement {
     private Expression value;
@@ -28,5 +29,18 @@ public class AbstractUnaryStmt implements Statement {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of(getValueCell());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractUnaryStmt that = (AbstractUnaryStmt) o;
+        return Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

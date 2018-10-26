@@ -5,6 +5,7 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Referencing;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A condition that compares two values.
@@ -48,4 +49,18 @@ public abstract class Condition implements Referencing {
     }
 
     public abstract Condition negate();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Condition condition = (Condition) o;
+        return Objects.equals(value1, condition.value1) &&
+                Objects.equals(value2, condition.value2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value1, value2);
+    }
 }

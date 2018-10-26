@@ -5,6 +5,7 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Unconditionally branch to another statement.
@@ -49,5 +50,18 @@ public class GotoStmt implements BranchStmt {
     @Override
     public boolean continuesExecution() {
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GotoStmt gotoStmt = (GotoStmt) o;
+        return target == gotoStmt.target;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(target);
     }
 }

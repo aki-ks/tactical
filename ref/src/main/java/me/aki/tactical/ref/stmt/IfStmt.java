@@ -6,6 +6,7 @@ import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.condition.Condition;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Branch to another statement if a certain condition is true
@@ -59,5 +60,19 @@ public class IfStmt implements BranchStmt {
     @Override
     public List<Cell<Statement>> getBranchTargetsCells() {
         return List.of(getTargetCell());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IfStmt ifStmt = (IfStmt) o;
+        return Objects.equals(condition, ifStmt.condition) &&
+                target == ifStmt.target;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(condition, target);
     }
 }

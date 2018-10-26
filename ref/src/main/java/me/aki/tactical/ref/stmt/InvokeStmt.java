@@ -7,6 +7,7 @@ import me.aki.tactical.ref.expr.InvokeExpr;
 import me.aki.tactical.ref.invoke.AbstractInvoke;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Invoke a method without storing the return value.
@@ -31,5 +32,18 @@ public class InvokeStmt implements Statement {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return invoke.getReferencedValues();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InvokeStmt that = (InvokeStmt) o;
+        return Objects.equals(invoke, that.invoke);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(invoke);
     }
 }
