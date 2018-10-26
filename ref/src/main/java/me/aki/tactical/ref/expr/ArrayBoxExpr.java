@@ -7,6 +7,7 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Variable;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Reference a value contained in an array.
@@ -59,5 +60,19 @@ public class ArrayBoxExpr implements Variable {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of(getArrayCell(), getIndexCell());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArrayBoxExpr expr = (ArrayBoxExpr) o;
+        return Objects.equals(array, expr.array) &&
+                Objects.equals(index, expr.index);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(array, index);
     }
 }

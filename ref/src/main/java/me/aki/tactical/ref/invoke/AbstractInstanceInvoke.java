@@ -7,6 +7,7 @@ import me.aki.tactical.ref.Expression;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Invoke a method of an instance of a class.
@@ -37,5 +38,19 @@ public class AbstractInstanceInvoke extends AbstractConcreteInvoke {
         cells.add(getInstanceCell());
         cells.addAll(getArgumentCells());
         return Collections.unmodifiableList(cells);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AbstractInstanceInvoke that = (AbstractInstanceInvoke) o;
+        return Objects.equals(instance, that.instance);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), instance);
     }
 }

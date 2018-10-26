@@ -5,6 +5,7 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Reference the value of a non-static field.
@@ -35,5 +36,19 @@ public class InstanceFieldExpr extends AbstractFieldExpr {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of(getInstanceCell());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        InstanceFieldExpr fieldExpr = (InstanceFieldExpr) o;
+        return Objects.equals(instance, fieldExpr.instance);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), instance);
     }
 }

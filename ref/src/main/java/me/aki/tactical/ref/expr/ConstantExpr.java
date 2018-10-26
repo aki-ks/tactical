@@ -6,6 +6,7 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Reference the value of a constant.
@@ -33,5 +34,18 @@ public class ConstantExpr implements Expression {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConstantExpr that = (ConstantExpr) o;
+        return Objects.equals(constant, that.constant);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(constant);
     }
 }

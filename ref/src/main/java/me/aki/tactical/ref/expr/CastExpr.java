@@ -5,6 +5,7 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Expression that casts another value to a certain type.
@@ -49,5 +50,19 @@ public class CastExpr implements Expression {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of(getValueCell());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CastExpr expr = (CastExpr) o;
+        return Objects.equals(type, expr.type) &&
+                Objects.equals(value, expr.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, value);
     }
 }

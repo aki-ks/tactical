@@ -7,6 +7,7 @@ import me.aki.tactical.ref.Referencing;
 
 import java.lang.invoke.CallSite;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -44,5 +45,18 @@ public abstract class AbstractInvoke implements Referencing {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return getArgumentCells();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractInvoke that = (AbstractInvoke) o;
+        return Objects.equals(arguments, that.arguments);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(arguments);
     }
 }

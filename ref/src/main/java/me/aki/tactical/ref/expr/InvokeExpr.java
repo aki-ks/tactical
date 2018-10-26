@@ -7,6 +7,7 @@ import me.aki.tactical.ref.invoke.AbstractInvoke;
 import me.aki.tactical.ref.stmt.InvokeStmt;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An expression for the result of a method invoke.
@@ -40,5 +41,18 @@ public class InvokeExpr implements Expression {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return invocation.getReferencedValues();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InvokeExpr that = (InvokeExpr) o;
+        return Objects.equals(invocation, that.invocation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(invocation);
     }
 }

@@ -7,6 +7,7 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Create a new instance of a class.
@@ -27,7 +28,6 @@ public class NewExpr implements Expression {
         return path;
     }
 
-
     public void setPath(Path path) {
         this.path = path;
     }
@@ -40,5 +40,18 @@ public class NewExpr implements Expression {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NewExpr expr = (NewExpr) o;
+        return Objects.equals(path, expr.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
     }
 }

@@ -7,6 +7,7 @@ import me.aki.tactical.ref.Expression;
 
 import java.lang.invoke.CallSite;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Invoke a runtime resolved method.
@@ -79,5 +80,22 @@ public class InvokeDynamic extends AbstractInvoke {
     @Override
     public MethodDescriptor getMethodDescriptor() {
         return descriptor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        InvokeDynamic that = (InvokeDynamic) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(descriptor, that.descriptor) &&
+                Objects.equals(bootstrapMethod, that.bootstrapMethod) &&
+                Objects.equals(bootstrapArguments, that.bootstrapArguments);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), name, descriptor, bootstrapMethod, bootstrapArguments);
     }
 }

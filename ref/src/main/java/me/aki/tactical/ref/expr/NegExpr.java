@@ -5,6 +5,7 @@ import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Negate the value of another (numeric) expression.
@@ -39,5 +40,18 @@ public class NegExpr implements Expression {
     @Override
     public List<Cell<Expression>> getReferencedValues() {
         return List.of(getValueCell());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NegExpr negExpr = (NegExpr) o;
+        return Objects.equals(value, negExpr.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }
