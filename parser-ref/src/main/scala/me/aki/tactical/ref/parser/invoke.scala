@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import java.util.{List => JList}
 import fastparse.all._
 import me.aki.tactical.core._
-import me.aki.tactical.core.parser._
+import me.aki.tactical.core.parser.{Parser, _}
 import me.aki.tactical.core.`type`.Type
 import me.aki.tactical.ref.Expression
 import me.aki.tactical.ref.invoke._
@@ -29,7 +29,7 @@ class DynamicInvokeParser(ctx: UnresolvedRefCtx) extends Parser[InvokeDynamic] {
           "name" ~ WS.? ~ "=" ~ WS.? ~ StringLiteral ~ WS.? ~
           "," ~ WS.? ~ "type" ~ WS.? ~ "=" ~ WS.? ~ methodTypeParser ~ WS.? ~
           "," ~ WS.? ~ "bootstrap" ~ WS.? ~ "=" ~ WS.? ~ HandleParser ~ WS.? ~
-          ("," ~ WS.? ~ "arguments" ~ WS.? ~ "=" ~ WS.? ~ "[" ~ BootstrapConstantParser.rep(sep = WS.? ~ "," ~ WS.?) ~ "]" ~ WS.?).? ~
+          ("," ~ WS.? ~ "arguments" ~ WS.? ~ "=" ~ WS.? ~ "[" ~ WS.? ~ BootstrapConstantParser.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "]" ~ WS.?).? ~
           "}"
     } yield new InvokeDynamic(name, descriptor, bootstrapMethod, bootstrapArguments.getOrElse(Nil).asJava, arguments)
   }
