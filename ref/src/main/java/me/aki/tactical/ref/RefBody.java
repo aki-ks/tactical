@@ -10,6 +10,7 @@ import me.aki.tactical.ref.stmt.AssignStatement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RefBody implements Body {
@@ -121,6 +122,26 @@ public class RefBody implements Body {
         this.lineNumbers = lineNumbers;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RefBody refBody = (RefBody) o;
+        return Objects.equals(locals, refBody.locals) &&
+                Objects.equals(thisLocal, refBody.thisLocal) &&
+                Objects.equals(argumentLocals, refBody.argumentLocals) &&
+                Objects.equals(statements, refBody.statements) &&
+                Objects.equals(tryCatchBlocks, refBody.tryCatchBlocks) &&
+                Objects.equals(localVariables, refBody.localVariables) &&
+                Objects.equals(localVariableAnnotations, refBody.localVariableAnnotations) &&
+                Objects.equals(lineNumbers, refBody.lineNumbers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(locals, thisLocal, argumentLocals, statements, tryCatchBlocks, localVariables, localVariableAnnotations, lineNumbers);
+    }
+
     /**
      * Debug information about a local variable that existed in source.
      */
@@ -222,6 +243,24 @@ public class RefBody implements Body {
         public void setLocal(RefLocal local) {
             this.local = local;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LocalVariable that = (LocalVariable) o;
+            return Objects.equals(name, that.name) &&
+                    Objects.equals(type, that.type) &&
+                    Objects.equals(signature, that.signature) &&
+                    start == that.start &&
+                    end == that.end &&
+                    Objects.equals(local, that.local);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, type, signature, start, end, local);
+        }
     }
 
     /**
@@ -257,6 +296,20 @@ public class RefBody implements Body {
 
         public void setLocations(List<Location> locations) {
             this.locations = locations;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LocalVariableAnnotation that = (LocalVariableAnnotation) o;
+            return Objects.equals(annotation, that.annotation) &&
+                    Objects.equals(locations, that.locations);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(annotation, locations);
         }
 
         /**
@@ -315,6 +368,21 @@ public class RefBody implements Body {
             public void setLocal(RefLocal local) {
                 this.local = local;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Location location = (Location) o;
+                return start == location.start &&
+                        end == location.end &&
+                        Objects.equals(local, location.local);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(start, end, local);
+            }
         }
     }
 
@@ -355,6 +423,20 @@ public class RefBody implements Body {
 
         public Cell<Statement> getStatementCell() {
             return Cell.of(this::getStatement, this::setStatement, Statement.class);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            LineNumber that = (LineNumber) o;
+            return line == that.line &&
+                    statement == that.statement;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(line, statement);
         }
     }
 }

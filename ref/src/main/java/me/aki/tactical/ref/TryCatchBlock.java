@@ -6,6 +6,7 @@ import me.aki.tactical.core.util.Cell;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -114,5 +115,23 @@ public class TryCatchBlock {
 
     public void setTypeAnnotations(List<ExceptionTypeAnnotation> typeAnnotations) {
         this.typeAnnotations = typeAnnotations;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TryCatchBlock that = (TryCatchBlock) o;
+        return Objects.equals(first, that.first) &&
+                Objects.equals(last, that.last) &&
+                Objects.equals(handler, that.handler) &&
+                Objects.equals(exception, that.exception) &&
+                Objects.equals(exceptionLocal, that.exceptionLocal) &&
+                Objects.equals(typeAnnotations, that.typeAnnotations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, last, handler, exception, exceptionLocal, typeAnnotations);
     }
 }
