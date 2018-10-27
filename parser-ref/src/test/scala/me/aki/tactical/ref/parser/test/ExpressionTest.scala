@@ -35,55 +35,55 @@ class ExpressionTest extends FlatSpec with Matchers with PropertyChecks {
 
   val textifyCtx = new TextifyCtx(locals.map(_.swap).asJava, Map().asJava)
 
-  "The ConstantExpressionParser" should "parse all kinds of constants" in {
-    ConstantExpressionParser.parse("10") shouldEqual new ConstantExpr(new IntConstant(10))
-    ConstantExpressionParser.parse("20L") shouldEqual new ConstantExpr(new LongConstant(20))
+  "The ExpressionParser" should "parse all kinds of constants" in {
+    expr.parse("10") shouldEqual new ConstantExpr(new IntConstant(10))
+    expr.parse("20L") shouldEqual new ConstantExpr(new LongConstant(20))
   }
 
-  "The NegExpressionParser" should "parse all kinds of neg expressions" in {
-    new NegExpressionParser(parseCtx).parse("-(20)") shouldEqual new NegExpr(new ConstantExpr(new IntConstant(20)))
-    new NegExpressionParser(parseCtx).parse("-local1") shouldEqual new NegExpr(local1)
+  it should "parse all kinds of neg expressions" in {
+    expr.parse("-(20)") shouldEqual new NegExpr(new ConstantExpr(new IntConstant(20)))
+    expr.parse("-local1") shouldEqual new NegExpr(local1)
   }
 
 
-  "The NewExprParser" should "parse new expressions" in {
-    NewExpressionParser.parse("new java.lang.String") shouldEqual new NewExpr(Path.STRING)
-    NewExpressionParser.parse("new java.lang.Throwable") shouldEqual new NewExpr(Path.THROWABLE)
+  it should "parse new expressions" in {
+    expr.parse("new java.lang.String") shouldEqual new NewExpr(Path.STRING)
+    expr.parse("new java.lang.Throwable") shouldEqual new NewExpr(Path.THROWABLE)
   }
 
-  "The NewArrayParser" should "parse one-dimensional array initializations" in {
-    new NewArrayParser(parseCtx).parse("new int[3]") shouldEqual
+  it should "parse one-dimensional array initializations" in {
+    expr.parse("new int[3]") shouldEqual
       new NewArrayExpr(new ArrayType(IntType.getInstance, 1), List[Expression](new ConstantExpr(new IntConstant(3))).asJava)
   }
 
   it should "parse simple multi-dimensional array initializations" in {
-    new NewArrayParser(parseCtx).parse("new int[3][]") shouldEqual
+    expr.parse("new int[3][]") shouldEqual
       new NewArrayExpr(new ArrayType(IntType.getInstance, 2), List[Expression](new ConstantExpr(new IntConstant(3))).asJava)
   }
 
   it should "parse multi-dimensional array initializations with multiple initilized dimensions" in {
-    new NewArrayParser(parseCtx).parse("new int[3][2][9]") shouldEqual
+    expr.parse("new int[3][2][9]") shouldEqual
       new NewArrayExpr(new ArrayType(IntType.getInstance, 3), List[Expression](
         new ConstantExpr(new IntConstant(3)),
         new ConstantExpr(new IntConstant(2)),
         new ConstantExpr(new IntConstant(9))).asJava)
   }
 
-  "The Cast parser" should "parse all kinds of casts" in {
-    new CastParser(parseCtx).parse("(int) local1") shouldEqual new CastExpr(IntType.getInstance, local1)
-    new CastParser(parseCtx).parse("(java.lang.String) local1") shouldEqual new CastExpr(ObjectType.STRING, local1)
+  it should "parse all kinds of casts" in {
+    expr.parse("(int) local1") shouldEqual new CastExpr(IntType.getInstance, local1)
+    expr.parse("(java.lang.String) local1") shouldEqual new CastExpr(ObjectType.STRING, local1)
   }
 
-  "The InvokeExprParser" should "parse regular invokes" in {
-    new InvokeExprParser(parseCtx).parse("java.lang.String.<static>.valueOf(local1 : int) : java.lang.String") shouldEqual
+  it should "parse regular invokes" in {
+    expr.parse("java.lang.String.<static>.valueOf(local1 : int) : java.lang.String") shouldEqual
       new InvokeExpr(new InvokeStatic(new MethodRef(Path.STRING, "valueOf", List[Type](IntType.getInstance).asJava, Optional.of(ObjectType.STRING)), List[Expression](local1).asJava, false))
 
-    new InvokeExprParser(parseCtx).parse("java.lang.String.<special interface local1>.valueOf(local2 : int) : java.lang.String") shouldEqual
+    expr.parse("java.lang.String.<special interface local1>.valueOf(local2 : int) : java.lang.String") shouldEqual
       new InvokeExpr(new InvokeSpecial(new MethodRef(Path.STRING, "valueOf", List[Type](IntType.getInstance).asJava, Optional.of(ObjectType.STRING)), local1, List[Expression](local2).asJava, true))
   }
 
   it should "parse dynamic invokes" in {
-    val invoke = new InvokeExprParser(parseCtx).parse(
+    val invoke = expr.parse(
       """invoke dynamic {
         |    name = "foo",
         |    type = (local1 : int, local2 : java.lang.String) : void,
@@ -100,17 +100,17 @@ class ExpressionTest extends FlatSpec with Matchers with PropertyChecks {
     invoke shouldEqual new InvokeExpr(new InvokeDynamic("foo", typ, bootstrap, bootstrapArguments, arguments))
   }
 
-  "The StaticFieldParser" should "parse static field expressions" in {
-    StaticFieldExprParser.parse("java.lang.System.out : java.io.PrintStream") shouldEqual
+  it should "parse static field expressions" in {
+    expr.parse("java.lang.System.out : java.io.PrintStream") shouldEqual
       new StaticFieldExpr(new FieldRef(Path.of("java", "lang", "System"), "out", new ObjectType(Path.of("java", "io", "PrintStream"))))
   }
 
-  "The InstanceFieldParser" should "parse instance field expressions" in {
-    new InstanceFieldExprParser(parseCtx).parse("java.lang.System.<local1>.out : java.io.PrintStream") shouldEqual
+  it should "parse instance field expressions" in {
+    expr.parse("java.lang.System.<local1>.out : java.io.PrintStream") shouldEqual
       new InstanceFieldExpr(new FieldRef(Path.of("java", "lang", "System"), "out", new ObjectType(Path.of("java", "io", "PrintStream"))), local1)
   }
 
-  "The ExpressionParser" should "parse all kinds of math instructions" in {
+  it should "parse all kinds of math instructions" in {
     val operations: Gen[(String, (Expression, Expression) => AbstractBinaryExpr)] = Gen.oneOf(
       ("+", new AddExpr(_, _)),
       ("-", new SubExpr(_, _)),
