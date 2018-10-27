@@ -17,6 +17,20 @@ public class ReturnStmt implements Statement {
      */
     private Optional<Expression> value;
 
+    /**
+     * Initialize a ReturnStmt that returns no value as found in <tt>void</tt> methods.
+     */
+    public ReturnStmt() {
+        this(Optional.empty());
+    }
+
+    /**
+     * Initialize a ReturnStmt that returns a value as found in non-void methods.
+     */
+    public ReturnStmt(Expression value) {
+        this(Optional.of(value));
+    }
+
     public ReturnStmt(Optional<Expression> value) {
         this.value = value;
     }
