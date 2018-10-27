@@ -1,19 +1,26 @@
 package me.aki.tactical.ref.parser.test
 
+import scala.collection.JavaConverters._
 import java.util.Optional
 
-import me.aki.tactical.core.{FieldRef, MethodDescriptor, MethodRef, Path}
+import fastparse.all._
 
-import scala.collection.JavaConverters._
+import me.aki.tactical.core.{FieldRef, MethodDescriptor, MethodRef, Path}
 import me.aki.tactical.core.`type`.{ArrayType, IntType, ObjectType, Type}
+import me.aki.tactical.core.parser.{Parser, _}
 import me.aki.tactical.core.constant._
 import me.aki.tactical.core.handle.InvokeStaticHandle
 import me.aki.tactical.ref.Expression
 import me.aki.tactical.ref.expr._
 import me.aki.tactical.ref.invoke.{InvokeDynamic, InvokeSpecial, InvokeStatic}
+import me.aki.tactical.ref.parser.ExpressionParser
 import org.scalacheck.Gen
 
 class ExpressionTest extends AbstractUnresolvedCtxTest {
+  val expr = new Parser[Expression] {
+    val parser: P[Expression] = Start ~ new ExpressionParser(parseCtx) ~ End
+  }
+
   "The ExpressionParser" should "parse all kinds of constants" in {
     expr.parse("10") shouldEqual new ConstantExpr(new IntConstant(10))
     expr.parse("20L") shouldEqual new ConstantExpr(new LongConstant(20))
@@ -23,7 +30,6 @@ class ExpressionTest extends AbstractUnresolvedCtxTest {
     expr.parse("-(20)") shouldEqual new NegExpr(new ConstantExpr(new IntConstant(20)))
     expr.parse("-local1") shouldEqual new NegExpr(local1)
   }
-
 
   it should "parse new expressions" in {
     expr.parse("new java.lang.String") shouldEqual new NewExpr(Path.STRING)

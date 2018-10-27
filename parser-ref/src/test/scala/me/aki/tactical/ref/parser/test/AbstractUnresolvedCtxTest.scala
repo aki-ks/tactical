@@ -21,7 +21,5 @@ class AbstractUnresolvedCtxTest extends FlatSpec with Matchers with PropertyChec
   )
 
   val parseCtx = new UnresolvedRefCtx(locals)
-  val expr = new ExpressionParser(parseCtx)
-
   val textifyCtx = new TextifyCtx(locals.map(_.swap).asJava, Map().asJava)
 }
