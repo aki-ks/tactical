@@ -4,7 +4,7 @@ import fastparse.all._
 import me.aki.tactical.core.parser.Parser
 import me.aki.tactical.ref.Statement
 import me.aki.tactical.ref.parser.StatementParser
-import me.aki.tactical.ref.stmt.{MonitorEnterStmt, MonitorExitStmt}
+import me.aki.tactical.ref.stmt.{MonitorEnterStmt, MonitorExitStmt, ReturnStmt, ThrowStmt}
 
 class StatementTest extends AbstractUnresolvedCtxTest {
   val stmt = new Parser[Statement] {
@@ -17,6 +17,14 @@ class StatementTest extends AbstractUnresolvedCtxTest {
 
   it should "parse monitor exit statements" in {
     stmt.parse("monitor exit local1") shouldEqual new MonitorExitStmt(local1)
+  }
+
+  it should "parse return statements" in {
+    stmt.parse("return local1") shouldEqual new ReturnStmt(local1)
+  }
+
+  it should "parse throw statements" in {
+    stmt.parse("throw local1") shouldEqual new ThrowStmt(local1)
   }
 
 }
