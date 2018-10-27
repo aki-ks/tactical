@@ -8,33 +8,12 @@ import scala.collection.JavaConverters._
 import me.aki.tactical.core.`type`.{ArrayType, IntType, ObjectType, Type}
 import me.aki.tactical.core.constant._
 import me.aki.tactical.core.handle.InvokeStaticHandle
-import me.aki.tactical.core.parser.test._
-import me.aki.tactical.core.textify.Printer
-import me.aki.tactical.ref.{Expression, RefLocal}
+import me.aki.tactical.ref.Expression
 import me.aki.tactical.ref.expr._
 import me.aki.tactical.ref.invoke.{InvokeDynamic, InvokeSpecial, InvokeStatic}
-import me.aki.tactical.ref.parser._
-import me.aki.tactical.ref.textifier._
 import org.scalacheck.Gen
-import org.scalatest._
-import org.scalatest.prop.PropertyChecks
 
-class ExpressionTest extends FlatSpec with Matchers with PropertyChecks {
-  val local1 = new RefLocal(null)
-  val local2 = new RefLocal(null)
-  val local3 = new RefLocal(null)
-
-  val locals = Map(
-    "local1" -> local1,
-    "local2" -> local2,
-    "local3" -> local3
-  )
-
-  val parseCtx = new UnresolvedRefCtx(locals)
-  val expr = new ExpressionParser(parseCtx)
-
-  val textifyCtx = new TextifyCtx(locals.map(_.swap).asJava, Map().asJava)
-
+class ExpressionTest extends AbstractUnresolvedCtxTest {
   "The ExpressionParser" should "parse all kinds of constants" in {
     expr.parse("10") shouldEqual new ConstantExpr(new IntConstant(10))
     expr.parse("20L") shouldEqual new ConstantExpr(new LongConstant(20))
