@@ -12,19 +12,18 @@ class StatementTest extends AbstractUnresolvedCtxTest {
   }
 
   "The StatementParser" should "parse monitor enter statements" in {
-    stmt.parse("monitor enter local1") shouldEqual new MonitorEnterStmt(local1)
+    stmt.parse("monitor enter local1;") shouldEqual new MonitorEnterStmt(local1)
   }
 
   it should "parse monitor exit statements" in {
-    stmt.parse("monitor exit local1") shouldEqual new MonitorExitStmt(local1)
+    stmt.parse("monitor exit local1;") shouldEqual new MonitorExitStmt(local1)
   }
 
   it should "parse return statements" in {
-    stmt.parse("return local1") shouldEqual new ReturnStmt(local1)
+    stmt.parse("return local1;") shouldEqual new ReturnStmt(local1)
   }
 
   it should "parse throw statements" in {
-    stmt.parse("throw local1") shouldEqual new ThrowStmt(local1)
+    stmt.parse("throw local1;") shouldEqual new ThrowStmt(local1)
   }
-
 }

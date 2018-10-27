@@ -12,7 +12,8 @@ class StatementParser(ctx: UnresolvedRefCtx) extends Parser[Statement] {
   val parser: P [Statement] = P {
     new MonitorEnterStatementParser(ctx) |
     new MonitorExitStatementParser(ctx) |
-    new ReturnStatementParser(ctx)
+    new ReturnStatementParser(ctx) |
+    new ThrowStatementParser(ctx)
   }
 }
 
@@ -32,4 +33,9 @@ class ReturnStatementParser(ctx : UnresolvedRefCtx) extends Parser[ReturnStmt] {
   val parser: P[ReturnStmt] =
     for (value ← "return" ~ WS.? ~ (new ExpressionParser(ctx) ~ WS.?).? ~ ";")
       yield new ReturnStmt(Optional.ofNullable(value.orNull))
+}
+
+class ThrowStatementParser(ctx: UnresolvedRefCtx) extends Parser[ThrowStmt] {
+  val parser: P[ThrowStmt] =
+    for (value ← "throw" ~ WS.? ~ new ExpressionParser(ctx) ~ WS.? ~ ";") yield new ThrowStmt(value)
 }
