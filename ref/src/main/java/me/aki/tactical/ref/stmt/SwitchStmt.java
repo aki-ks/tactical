@@ -24,7 +24,7 @@ public class SwitchStmt implements BranchStmt {
     /**
      * Table that maps integers to branch locations.
      */
-    private LinkedHashMap<Integer, Statement> branchTable = new LinkedHashMap<>();
+    private LinkedHashMap<Integer, Statement> branchTable;
 
     /**
      * Branch target if the value is not contained within the branch table.
@@ -55,6 +55,10 @@ public class SwitchStmt implements BranchStmt {
 
     public void setBranchTable(LinkedHashMap<Integer, Statement> branchTable) {
         this.branchTable = branchTable;
+    }
+
+    public Cell<Statement> getBranchTableCell(int key) {
+        return Cell.ofMap(key, branchTable, Statement.class);
     }
 
     public List<Cell<Statement>> getBranchTableCells() {

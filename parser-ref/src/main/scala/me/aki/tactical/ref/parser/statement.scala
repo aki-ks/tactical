@@ -1,7 +1,7 @@
 package me.aki.tactical.ref.parser
 
-import java.util.Optional
-
+import scala.collection.JavaConverters._
+import java.util.{ Optional, LinkedHashMap => JLinkedHashMap }
 import fastparse.all._
 import me.aki.tactical.core.parser.{Parser, _}
 import me.aki.tactical.ref.Statement
@@ -17,6 +17,7 @@ class StatementParser(ctx: UnresolvedRefCtx) extends Parser[Statement] {
     new InvokeStatementParser(ctx) |
     new GotoStatementParser(ctx) |
     new IfStatementParser(ctx) |
+    new SwitchStatementParser(ctx) |
     new AssignStatementParser(ctx)
   }
 }
@@ -81,5 +82,23 @@ class IfStatementParser(ctx: UnresolvedRefCtx) extends Parser[IfStmt] {
       ctx.registerReference(label, stmt.getTargetCell)
       stmt
     }
+  }
+}
+
+class SwitchStatementParser(ctx: UnresolvedRefCtx) extends Parser[SwitchStmt] {
+  val parser: P[SwitchStmt] = for {
+    (value, cases, default) ←
+    "switch" ~ WS.? ~ "(" ~ WS.? ~ new ExpressionParser(ctx) ~ WS.? ~ ")" ~ WS.? ~ "{" ~ WS.? ~
+      ("case" ~ WS.? ~ int ~ WS.? ~ ":" ~ WS.? ~ "goto" ~ WS.? ~ Literal ~ WS.? ~ ";").rep(sep = WS.?) ~ WS.? ~
+      "default" ~ WS.? ~ ":" ~ WS.? ~ "goto" ~ WS.? ~ Literal ~ WS.? ~ ";" ~ WS.? ~
+      "}"
+  } yield {
+    val nullBranchTable = new JLinkedHashMap[Integer, Statement](cases.map { case (key, _) => (key: Integer, null: Statement) }.toMap.asJava)
+    val stmt = new SwitchStmt(value, nullBranchTable, null)
+
+    for ((key, label) ← cases) ctx.registerReference(label, stmt.getBranchTableCell(key))
+    ctx.registerReference(default, stmt.getDefaultTargetCell)
+
+    stmt
   }
 }

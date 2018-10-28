@@ -1,8 +1,7 @@
 package me.aki.tactical.ref.parser.test
 
 import scala.collection.JavaConverters._
-import java.util.Optional
-
+import java.util.{ Optional, LinkedHashMap => JLinkedHashMap }
 import fastparse.all._
 import me.aki.tactical.core.{MethodDescriptor, MethodRef, Path}
 import me.aki.tactical.core.`type`.{IntType, ObjectType, Type}
@@ -79,5 +78,17 @@ class StatementTest extends AbstractUnresolvedCtxTest {
 
   it should "parse if statements" in {
     parseStmt(_.parse("if (local1 == local2) goto label1;")) shouldEqual new IfStmt(new Equal(local1, local2), label1)
+  }
+
+  it should "parse switch statements" in {
+    parseStmt(_.parse(
+      """switch (local1) {
+        |  case 9: goto label1;
+        |  case 2: goto label2;
+        |  default: goto label3;
+        |}
+      """.stripMargin.trim)) shouldEqual {
+      new SwitchStmt(local1, new JLinkedHashMap(Map[Integer, Statement]((9, label1), (2, label2)).asJava), label3)
+    }
   }
 }
