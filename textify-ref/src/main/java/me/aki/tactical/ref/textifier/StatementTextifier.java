@@ -105,7 +105,7 @@ public class StatementTextifier implements CtxTextifier<Statement> {
         printer.addText(";");
     };
 
-    private  static final CtxTextifier<MonitorEnterStmt> MONITOR_EXIT = (printer, ctx, statement) -> {
+    private  static final CtxTextifier<MonitorExitStmt> MONITOR_EXIT = (printer, ctx, statement) -> {
         printer.addText("monitor exit ");
         ExpressionTextifier.getInstance().textify(printer, ctx, statement.getValue());
         printer.addText(";");
@@ -134,7 +134,7 @@ public class StatementTextifier implements CtxTextifier<Statement> {
         } else if (statement instanceof MonitorEnterStmt) {
             MONITOR_ENTER.textify(printer, ctx, (MonitorEnterStmt) statement);
         } else if (statement instanceof MonitorExitStmt) {
-            MONITOR_EXIT.textify(printer, ctx, (MonitorEnterStmt) statement);
+            MONITOR_EXIT.textify(printer, ctx, (MonitorExitStmt) statement);
         } else {
             throw new AssertionError();
         }
