@@ -13,6 +13,7 @@ class StatementParser(ctx: UnresolvedRefCtx) extends Parser[Statement] {
     new ReturnStatementParser(ctx) |
     new ThrowStatementParser(ctx) |
     new InvokeStatementParser(ctx) |
+    new GotoStatementParser(ctx) |
     new AssignStatementParser(ctx)
   }
 }
@@ -49,4 +50,13 @@ class AssignStatementParser(ctx: UnresolvedRefCtx) extends Parser[AssignStatemen
 class InvokeStatementParser(ctx: UnresolvedRefCtx) extends Parser[InvokeStmt] {
   val parser: P[InvokeStmt] =
     for (invoke ← new AbstractInvokeParser(ctx) ~ WS.? ~ ";") yield new InvokeStmt(invoke)
+}
+
+class GotoStatementParser(ctx: UnresolvedRefCtx) extends Parser[GotoStmt] {
+  val parser: P[GotoStmt] =
+    for (label ← "goto" ~ WS.? ~ Literal ~ WS.? ~ ";") yield {
+      val stmt = new GotoStmt(null)
+      ctx.registerReference(label, stmt.getTargetCell)
+      stmt
+    }
 }
