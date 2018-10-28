@@ -9,6 +9,7 @@ import me.aki.tactical.core.`type`.{IntType, ObjectType, Type}
 import me.aki.tactical.core.constant.{BootstrapConstant, ClassConstant, IntConstant, StringConstant}
 import me.aki.tactical.core.handle.InvokeStaticHandle
 import me.aki.tactical.core.parser.Parser
+import me.aki.tactical.ref.condition.{Equal, LessThan}
 import me.aki.tactical.ref.invoke.{InvokeDynamic, InvokeSpecial, InvokeStatic}
 import me.aki.tactical.ref.{Expression, Statement}
 import me.aki.tactical.ref.parser.StatementParser
@@ -74,5 +75,9 @@ class StatementTest extends AbstractUnresolvedCtxTest {
 
   it should "parse goto statements" in {
     parseStmt(_.parse("goto label1;")) shouldEqual new GotoStmt(label1)
+  }
+
+  it should "parse if statements" in {
+    parseStmt(_.parse("if (local1 == local2) goto label1;")) shouldEqual new IfStmt(new Equal(local1, local2), label1)
   }
 }
