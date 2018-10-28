@@ -1,8 +1,6 @@
 package me.aki.tactical.ref.parser
 
 import java.util.Optional
-
-import scala.collection.JavaConverters._
 import fastparse.all._
 import me.aki.tactical.core.parser.{Parser, _}
 import me.aki.tactical.ref.Statement
@@ -14,6 +12,7 @@ class StatementParser(ctx: UnresolvedRefCtx) extends Parser[Statement] {
     new MonitorExitStatementParser(ctx) |
     new ReturnStatementParser(ctx) |
     new ThrowStatementParser(ctx) |
+    new InvokeStatementParser(ctx) |
     new AssignStatementParser(ctx)
   }
 }
@@ -45,4 +44,9 @@ class AssignStatementParser(ctx: UnresolvedRefCtx) extends Parser[AssignStatemen
   val parser: P[AssignStatement] =
     for ((variable, value) ← new VariableParser(ctx) ~ WS.? ~ "=" ~ WS.? ~ new ExpressionParser(ctx))
       yield new AssignStatement(variable, value)
+}
+
+class InvokeStatementParser(ctx: UnresolvedRefCtx) extends Parser[InvokeStmt] {
+  val parser: P[InvokeStmt] =
+    for (invoke ← new AbstractInvokeParser(ctx) ~ WS.? ~ ";") yield new InvokeStmt(invoke)
 }

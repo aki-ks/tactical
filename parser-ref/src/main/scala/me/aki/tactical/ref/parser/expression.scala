@@ -8,8 +8,6 @@ import me.aki.tactical.core.parser.{Parser, _}
 import me.aki.tactical.ref.{Expression, RefLocal, Variable}
 import me.aki.tactical.ref.expr._
 
-import scala.util.Try
-
 class VariableParser(ctx: UnresolvedRefCtx) extends Parser[Variable] {
   val arrayBoxParser =
     for (expr ← new ExpressionParser(ctx) if expr.isInstanceOf[ArrayBoxExpr])
