@@ -8,6 +8,8 @@ import me.aki.tactical.core.parser.{Parser, _}
 import me.aki.tactical.ref.{Expression, RefLocal, Variable}
 import me.aki.tactical.ref.expr._
 
+import scala.util.Try
+
 class VariableParser(ctx: UnresolvedRefCtx) extends Parser[Variable] {
   val arrayBoxParser =
     for (expr ← new ExpressionParser(ctx) if expr.isInstanceOf[ArrayBoxExpr])
@@ -116,5 +118,6 @@ class InstanceFieldExprParser(ctx: UnresolvedRefCtx) extends Parser[InstanceFiel
 
 class LocalParser(ctx: UnresolvedRefCtx) extends Parser[RefLocal] {
   val parser: P[RefLocal] =
-    for (name ← Literal) yield ctx.getLocal(name)
+    Literal.map(ctx.getLocalOpt)
+      .filter(_.isDefined).map(_.get)
 }

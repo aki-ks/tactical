@@ -6,8 +6,7 @@ import me.aki.tactical.ref.{RefLocal, Statement}
 abstract class RefCtx() {
   protected val locals: Map[String, RefLocal]
 
-  def getLocal(name: String): RefLocal =
-    locals.getOrElse(name, throw new NoSuchElementException(s"No such local '$name'"))
+  def getLocalOpt(name: String): Option[RefLocal] = locals.get(name)
 }
 
 /** A conversion context that's still resolving labels */
