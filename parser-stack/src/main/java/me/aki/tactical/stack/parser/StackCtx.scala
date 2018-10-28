@@ -56,6 +56,5 @@ class UnresolvedStackCtx() extends StackCtx {
 
 /** A context where all labels have already been resolved. */
 class ResolvedStackCtx(var locals: Map[String, StackLocal], labels: Map[String, Instruction]) extends StackCtx {
-  def getLabel(name: String) =
-    labels.getOrElse(name, throw new NoSuchElementException("No such label"))
+  def getLabelOpt(name: String): Option[Instruction] = labels.get(name)
 }

@@ -10,10 +10,16 @@ import me.aki.tactical.stack.StackBody.{LineNumber, LocalVariable, LocalVariable
 import me.aki.tactical.stack.TryCatchBlock
 import me.aki.tactical.stack.insn.Instruction
 
+class Label(ctx: ResolvedStackCtx) extends Parser[Instruction] {
+  val parser: P[Instruction] = P {
+    Literal.map(ctx.getLabelOpt)
+      .filter(_.isDefined).map(_.get)
+  } opaque "label"
+}
+
 class TryCatchBlockParser(ctx: ResolvedStackCtx) extends Parser[TryCatchBlock] {
   val parser: P[TryCatchBlock] = P {
-    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
-
+    val label = new Label(ctx)
     for ((first, last, handler, exception) ← "try" ~ WS.? ~ label ~ WS.? ~ ("->" | "→") ~ WS.? ~ label ~ WS.? ~ "catch" ~ WS.? ~ label ~ WS.? ~ (":" ~ WS.? ~ PathParser ~ WS.?).? ~ ";")
       yield new TryCatchBlock(first, last, handler, Optional.ofNullable(exception.orNull))
   }
@@ -21,7 +27,7 @@ class TryCatchBlockParser(ctx: ResolvedStackCtx) extends Parser[TryCatchBlock] {
 
 class LineNumberParser(ctx: ResolvedStackCtx) extends Parser[LineNumber] {
   val parser: P[LineNumber] = P {
-    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+    val label = new Label(ctx)
 
     for ((line, label) ← "line" ~ WS.? ~ int ~ WS.? ~ label ~ WS.? ~ ";")
       yield new LineNumber(line, label)
@@ -30,7 +36,7 @@ class LineNumberParser(ctx: ResolvedStackCtx) extends Parser[LineNumber] {
 
 class LocalVariableParser(ctx: ResolvedStackCtx) extends Parser[LocalVariable] {
   val parser: P[LocalVariable] = P {
-    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+    val label = new Label(ctx)
 
     for {
       (start, end, local, name, typ, signature) ←
@@ -41,7 +47,7 @@ class LocalVariableParser(ctx: ResolvedStackCtx) extends Parser[LocalVariable] {
 
 class LocalVariableAnnotationParser(ctx: ResolvedStackCtx) extends Parser[LocalVariableAnnotation] {
   val parser: P[LocalVariableAnnotation] = P {
-    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+    val label = new Label(ctx)
 
     val locations = {
       val locationParser = P {
@@ -59,7 +65,7 @@ class LocalVariableAnnotationParser(ctx: ResolvedStackCtx) extends Parser[LocalV
 
 class InsnAnnotationParser(ctx: ResolvedStackCtx) extends Parser[(Instruction, InsnTypeAnnotation)] {
   val parser: P[(Instruction, InsnTypeAnnotation)] = P {
-    val label: P[Instruction] = Literal.map(ctx.getLabel) opaque "label"
+    val label = new Label(ctx)
 
     "insn" ~ WS.? ~ "annotation" ~ WS.? ~ label ~ WS.? ~ InsnTypeAnnotationParser ~ WS.? ~ ";"
   }

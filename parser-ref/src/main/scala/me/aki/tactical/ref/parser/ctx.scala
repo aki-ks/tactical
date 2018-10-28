@@ -31,6 +31,5 @@ class UnresolvedRefCtx(protected val locals: Map[String, RefLocal]) extends RefC
 
 /** A conversion context where all labels have been resolved */
 class ResolvedRefCtx(protected val locals: Map[String, RefLocal], labels: Map[String, Statement]) extends RefCtx {
-  def getLabel(name: String): Statement =
-    labels.getOrElse(name, throw new NoSuchElementException(s"No such label '$name'"))
+  def getLabelOpt(name: String): Option[Statement] = labels.get(name)
 }
