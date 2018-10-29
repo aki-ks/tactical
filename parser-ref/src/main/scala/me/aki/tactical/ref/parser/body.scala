@@ -27,7 +27,7 @@ class RefBodyParser extends BodyParser {
     val thisLocal = if (method.getFlag(Method.Flag.STATIC)) None else Some(new RefLocal(new ObjectType(classfile.getName)))
     val paramLocals = for (typ ← method.getParameterTypes.asScala) yield new RefLocal(typ)
 
-    P { (TypeParser ~ WS.? ~ Literal ~ WS.? ~ ";").rep(sep = WS.?) }
+    P { (TypeParser ~ WS.? ~ Literal ~ WS.? ~ ";").rep(sep = WS.?) ~ WS.? }
       .map { _ map { case (typ, name) => (name, new RefLocal(typ)) } }
       .flatMap { locals =>
         val localMap = {
@@ -37,6 +37,16 @@ class RefBodyParser extends BodyParser {
         }.toMap
 
         val unresolvedCtx = new UnresolvedRefCtx(localMap)
+
+        val stmtWithLabel = (Literal ~ WS.? ~ ":" ~ WS.?).? ~ new StatementParser(unresolvedCtx)
+        P { stmtWithLabel.rep(sep = WS.?) } ~ WS.? flatMap { statementsWithLabels =>
+          val resolvedCtx = {
+            val labels = statementsWithLabels collect { case (Some(name), stmt) => (name, stmt) }
+            unresolvedCtx.resolve(labels.toMap)
+          }
+
+          Fail
+        }
       }
   }
 }
