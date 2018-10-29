@@ -5,7 +5,7 @@ import fastparse.all._
 import me.aki.tactical.core.`type`.{ObjectType, Type}
 import me.aki.tactical.core.{Body, Classfile, Method}
 import me.aki.tactical.core.parser.{Parser, _}
-import me.aki.tactical.ref.RefLocal
+import me.aki.tactical.ref.{RefBody, RefLocal}
 
 case class RefArgumentCtx(params: Seq[(Type, String)])
 
@@ -24,6 +24,19 @@ class RefBodyParser extends BodyParser {
   }
 
   override def bodyParser(classfile: Classfile, method: Method, ctx: Ctx): P[Body] = P {
-    Fail
+    val thisLocal = if (method.getFlag(Method.Flag.STATIC)) None else Some(new RefLocal(new ObjectType(classfile.getName)))
+    val paramLocals = for (typ ← method.getParameterTypes.asScala) yield new RefLocal(typ)
+
+    P { (TypeParser ~ WS.? ~ Literal ~ WS.? ~ ";").rep(sep = WS.?) }
+      .map { _ map { case (typ, name) => (name, new RefLocal(typ)) } }
+      .flatMap { locals =>
+        val localMap = {
+          val thisLocalMap = for (local ← thisLocal) yield ("this", local)
+          val paramLocalMap = for (((typ, name), local) ← ctx.params zip paramLocals) yield (name, local)
+          thisLocalMap ++ paramLocalMap ++ locals
+        }.toMap
+
+        val unresolvedCtx = new UnresolvedRefCtx(localMap)
+      }
   }
 }
