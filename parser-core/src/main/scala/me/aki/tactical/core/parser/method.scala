@@ -20,7 +20,7 @@ trait BodyParser {
   /** A parser for the parameter list of a method */
   def parameterParser: P[(Ctx, List[Type])]
 
-  def bodyParser(method: Method, ctx: Ctx): P[Body]
+  def bodyParser(classfile: Classfile, method: Method, ctx: Ctx): P[Body]
 }
 
 class MethodParser[B <: BodyParser](classfile: Classfile, bodyParser: B) extends Parser[Method] {
@@ -57,9 +57,9 @@ class MethodParser[B <: BodyParser](classfile: Classfile, bodyParser: B) extends
       for ((flags, returnType, name, params, exceptions) ← MethodFlagParser ~ ReturnTypeParser ~ WS ~ Literal ~ WS.? ~ "(" ~ bodyParser.parameterParser ~ ")" ~ WS.? ~ throws.? ~ WS.?)
         yield (flags, returnType, name, params, exceptions)
 
-    methodParser(staticInitializerForm, (method, bp, ctx) => new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](method, bp, ctx)) |
-      methodParser(constructorForm, (method, bp, ctx) => new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](method, bp, ctx)) |
-      methodParser(methodForm, (method, bp, ctx) => MethodContentParser.AbstractFormParser | MethodContentParser.AnnotationFormParser | new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](method, bp, ctx))
+    methodParser(staticInitializerForm, (method, bp, ctx) => new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](classfile, method, bp, ctx)) |
+      methodParser(constructorForm, (method, bp, ctx) => new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](classfile, method, bp, ctx)) |
+      methodParser(methodForm, (method, bp, ctx) => MethodContentParser.AbstractFormParser | MethodContentParser.AnnotationFormParser | new MethodContentParser.BodyFormParser[bp.type#Ctx, bp.type](classfile, method, bp, ctx))
   }
 }
 
@@ -90,9 +90,9 @@ object MethodContentParser {
         yield new MethodContent.AnnotationForm(value)
   }
 
-  class BodyFormParser[C, B <: BodyParser { type Ctx = C }](method: Method, bp: B, ctx: C) extends Parser[MethodContent.BodyForm] {
+  class BodyFormParser[C, B <: BodyParser { type Ctx = C }](classfile: Classfile, method: Method, bp: B, ctx: C) extends Parser[MethodContent.BodyForm] {
     val parser: P[MethodContent.BodyForm] =
-      for (body ← "{" ~ WS.? ~ bp.bodyParser(method, ctx) ~ WS.? ~ "}")
+      for (body ← "{" ~ WS.? ~ bp.bodyParser(classfile, method, ctx) ~ WS.? ~ "}")
         yield new MethodContent.BodyForm(body)
   }
 }

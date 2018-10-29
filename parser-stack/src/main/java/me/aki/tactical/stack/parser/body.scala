@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import java.util.Optional
 
 import fastparse.all._
-import me.aki.tactical.core.{Body, Method}
+import me.aki.tactical.core.{Body, Classfile, Method}
 import me.aki.tactical.core.`type`.Type
 import me.aki.tactical.core.parser.{Parser, _}
 import me.aki.tactical.core.typeannotation.InsnTypeAnnotation
@@ -34,7 +34,7 @@ class StackBodyParser extends BodyParser {
     }
   }
 
-  def bodyParser(method: Method, ctx: Ctx): P[Body] = P {
+  def bodyParser(classfile: Classfile, method: Method, ctx: Ctx): P[Body] = P {
     val unresolvedCtx = new UnresolvedStackCtx()
 
     val thisLocalOpt = if (method.getFlag(Method.Flag.STATIC)) None else Some(unresolvedCtx.getLocal("this"))

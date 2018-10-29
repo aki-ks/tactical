@@ -40,6 +40,6 @@ package object test {
 
     def staticInitializerCtx = DummyCtx
     def parameterParser: P[(Ctx, List[Type])] = for (paramTypes ← TypeParser.rep(sep = WS.? ~ "," ~ WS.?)) yield (DummyCtx, paramTypes.toList)
-    def bodyParser(method: Method, ctx: Ctx): P[Body] = for (_ ← Pass) yield new Body {}
+    def bodyParser(classfile: Classfile, method: Method, ctx: Ctx): P[Body] = for (_ ← Pass) yield new Body {}
   }
 }
