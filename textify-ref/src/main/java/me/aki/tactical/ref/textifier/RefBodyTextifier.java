@@ -83,7 +83,7 @@ public class RefBodyTextifier implements BodyTextifier {
 
         int localIndex = 0;
         for (RefLocal unnamedLocal : unnamedLocals) {
-            nameMap.put(unnamedLocal, "local" + TextUtil.paddedNumber(localIndex, unnamedLocals.size()));
+            nameMap.put(unnamedLocal, "local" + TextUtil.paddedNumber(localIndex++, unnamedLocals.size()));
         }
 
         return nameMap;
@@ -99,7 +99,7 @@ public class RefBodyTextifier implements BodyTextifier {
         int labelIndex = 0;
         for (Statement statement : body.getStatements()) {
             if (referencedStatements.contains(statement)) {
-                labels.put(statement, "label" + TextUtil.paddedNumber(labelIndex, referencedStatements.size()));
+                labels.put(statement, "label" + TextUtil.paddedNumber(labelIndex++, referencedStatements.size()));
             }
         }
 
