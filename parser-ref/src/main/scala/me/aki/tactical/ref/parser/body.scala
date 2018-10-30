@@ -11,7 +11,7 @@ import me.aki.tactical.ref.{RefBody, RefLocal, TryCatchBlock}
 
 case class RefArgumentCtx(params: Seq[(Type, String)])
 
-class RefBodyParser extends BodyParser {
+object RefBodyParser extends BodyParser {
   type Ctx = RefArgumentCtx
 
   override def staticInitializerCtx = RefArgumentCtx(Nil)
@@ -29,7 +29,8 @@ class RefBodyParser extends BodyParser {
     val thisLocal = if (method.getFlag(Method.Flag.STATIC)) None else Some(new RefLocal(new ObjectType(classfile.getName)))
     val paramLocals = for (typ ← method.getParameterTypes.asScala) yield new RefLocal(typ)
 
-    P { (TypeParser ~ WS.? ~ Literal ~ WS.? ~ ";").rep(sep = WS.?) ~ WS.? }
+    val local = "local" ~ WS.? ~ TypeParser ~ WS.? ~ Literal ~ WS.? ~ ";"
+    P { local.rep(sep = WS.?) ~ WS.? }
       .map { _ map { case (typ, name) => (name, new RefLocal(typ)) } }
       .flatMap { locals =>
         val localMap = {

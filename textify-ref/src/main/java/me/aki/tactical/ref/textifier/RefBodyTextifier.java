@@ -156,6 +156,8 @@ public class RefBodyTextifier implements BodyTextifier {
                 continue;
             }
 
+            printer.addText("local ");
+
             if (local.getType() == null) {
                 // Locals should always have a type. It's only absent during conversions from other intermediations.
                 printer.addText("<null>");
