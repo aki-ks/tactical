@@ -47,7 +47,7 @@ class ContentTest extends AbstractResolvedCtxTest {
     val locations = new RefBody.LocalVariableAnnotation.Location(label1, label2, local1) ::
       new RefBody.LocalVariableAnnotation.Location(label2, label3, local2) :: Nil
 
-    new LocalVariableAnnotationParser(parseCtx).parse(s"local annotation [label1 -> label2 local1, label2 -> label3 local2] $annotationString") shouldEqual
+    new LocalVariableAnnotationParser(parseCtx).parse(s"local annotation [label1 -> label2 local1, label2 -> label3 local2] $annotationString;") shouldEqual
       new RefBody.LocalVariableAnnotation(annotation, locations.asJava)
   }
 }

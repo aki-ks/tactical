@@ -44,7 +44,7 @@ class LocalVariableAnnotationParser(ctx: ResolvedRefCtx) extends Parser[RefBody.
       for ((start, end, local) ← label ~ WS.? ~ ("->" | "→") ~ WS.? ~ label ~ WS.? ~ local)
         yield new RefBody.LocalVariableAnnotation.Location(start, end, local)
 
-    for ((locations, annotation) ← "local" ~ WS ~ "annotation" ~ WS.? ~ "[" ~ WS.? ~ location.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "]" ~ WS.? ~ LocalTypeAnnotationParser)
+    for ((locations, annotation) ← "local" ~ WS ~ "annotation" ~ WS.? ~ "[" ~ WS.? ~ location.rep(sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ "]" ~ WS.? ~ LocalTypeAnnotationParser ~ WS.? ~ ";")
       yield new RefBody.LocalVariableAnnotation(annotation, locations.asJava)
   }
 }
