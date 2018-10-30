@@ -6,7 +6,8 @@ ThisBuild / version := "0.1"
 
 val javaSettings = Seq(
   crossPaths := false, // do not append scala version to artifact names
-  autoScalaLibrary := false // do not use scala runtime dependency
+  autoScalaLibrary := false, // do not use scala runtime dependency
+  javacOptions ++= Seq("-source", "1.10", "-target", "1.10", "-Xlint")
 )
 
 val parserSettings = Seq(
