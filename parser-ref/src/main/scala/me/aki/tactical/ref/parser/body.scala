@@ -29,9 +29,14 @@ object RefBodyParser extends BodyParser {
     val thisLocal = if (method.getFlag(Method.Flag.STATIC)) None else Some(new RefLocal(new ObjectType(classfile.getName)))
     val paramLocals = for (typ ← method.getParameterTypes.asScala) yield new RefLocal(typ)
 
-    val local = "local" ~ WS.? ~ TypeParser ~ WS.? ~ Literal ~ WS.? ~ ";"
+    val local = "local" ~ WS.? ~ TypeParser ~ WS.? ~ Literal.rep(min = 1, sep = WS.? ~ "," ~ WS.?) ~ WS.? ~ ";"
     P { local.rep(sep = WS.?) ~ WS.? }
-      .map { _ map { case (typ, name) => (name, new RefLocal(typ)) } }
+      .map { parseResult =>
+        for {
+          (typ, names) ← parseResult
+          name ← names
+        } yield (name, new RefLocal(typ))
+      }
       .flatMap { locals =>
         val localMap = {
           val thisLocalMap = for (local ← thisLocal) yield ("this", local)
