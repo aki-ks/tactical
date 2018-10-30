@@ -147,12 +147,12 @@ public class RefBodyTextifier implements BodyTextifier {
     }
 
     private void textifyLocals(Printer printer, TextifyCtx ctx, RefBody body) {
-        Set<RefLocal> hiddenLocals = new HashSet<>();
-        body.getThisLocal().ifPresent(hiddenLocals::add);
-        hiddenLocals.addAll(body.getArgumentLocals());
+        Set<RefLocal> syntheticLocals = new HashSet<>();
+        body.getThisLocal().ifPresent(syntheticLocals::add);
+        syntheticLocals.addAll(body.getArgumentLocals());
 
         for (RefLocal local : body.getLocals()) {
-            if (hiddenLocals.contains(local)) {
+            if (syntheticLocals.contains(local)) {
                 continue;
             }
 
@@ -166,6 +166,7 @@ public class RefBodyTextifier implements BodyTextifier {
             printer.addText(" ");
             printer.addLiteral(ctx.getLocalName(local));
             printer.addText(";");
+            printer.newLine();
         }
 
         if (!body.getLocals().isEmpty()) {
