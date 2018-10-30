@@ -3,7 +3,7 @@ package me.aki.tactical.ref.parser
 import me.aki.tactical.core.util.Cell
 import me.aki.tactical.ref.{RefLocal, Statement}
 
-abstract class RefCtx() {
+abstract class RefCtx {
   protected val locals: Map[String, RefLocal]
 
   def getLocalOpt(name: String): Option[RefLocal] = locals.get(name)

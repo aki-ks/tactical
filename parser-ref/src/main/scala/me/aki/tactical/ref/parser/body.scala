@@ -1,11 +1,13 @@
 package me.aki.tactical.ref.parser
 
+import java.util.Optional
+
 import scala.collection.JavaConverters._
 import fastparse.all._
 import me.aki.tactical.core.`type`.{ObjectType, Type}
 import me.aki.tactical.core.{Body, Classfile, Method}
 import me.aki.tactical.core.parser.{Parser, _}
-import me.aki.tactical.ref.{RefBody, RefLocal}
+import me.aki.tactical.ref.{RefBody, RefLocal, TryCatchBlock}
 
 case class RefArgumentCtx(params: Seq[(Type, String)])
 
@@ -45,8 +47,44 @@ class RefBodyParser extends BodyParser {
             unresolvedCtx.resolve(labels.toMap)
           }
 
-          Fail
+          new BodyContentParser(resolvedCtx).rep(sep = WS.?) map { contents =>
+            val body = new RefBody()
+            for (local ← thisLocal) body.setThisLocal(Optional.of(local))
+            for (local ← paramLocals) body.getArgumentLocals.add(local)
+            for ((_, local) ← localMap) body.getLocals.add(local)
+            for ((_, stmt) ← statementsWithLabels) body.getStatements.add(stmt)
+            for (content ← contents) content.apply(body)
+            body
+          }
         }
       }
+  }
+}
+
+sealed trait BodyContent extends (RefBody => Unit)
+object BodyContent {
+  case class TryCatch(block: TryCatchBlock) extends BodyContent {
+    def apply(body: RefBody) = body.getTryCatchBlocks.add(block)
+  }
+
+  case class Line(line: RefBody.LineNumber) extends BodyContent {
+    def apply(body: RefBody) = body.getLineNumbers.add(line)
+  }
+
+  case class LocalVariable(variable: RefBody.LocalVariable) extends BodyContent {
+    def apply(body: RefBody) = body.getLocalVariables.add(variable)
+  }
+
+  case class LocalVariableAnnotation(anno: RefBody.LocalVariableAnnotation) extends BodyContent {
+    def apply(body: RefBody) = body.getLocalVariableAnnotations.add(anno)
+  }
+}
+
+class BodyContentParser(ctx: ResolvedRefCtx) extends Parser[BodyContent] {
+  val parser: P[BodyContent] = P {
+    new TryCatchBlockParser(ctx).map(BodyContent.TryCatch) |
+    new LineParser(ctx).map(BodyContent.Line) |
+    new LocalVariableParser(ctx).map(BodyContent.LocalVariable) |
+    new LocalVariableAnnotationParser(ctx).map(BodyContent.LocalVariableAnnotation)
   }
 }

@@ -5,13 +5,13 @@ import me.aki.tactical.core.constant.NullConstant
 import scala.collection.JavaConverters._
 import me.aki.tactical.ref.RefLocal
 import me.aki.tactical.ref.expr.ConstantExpr
-import me.aki.tactical.ref.parser.UnresolvedRefCtx
+import me.aki.tactical.ref.parser.{ResolvedRefCtx, UnresolvedRefCtx}
 import me.aki.tactical.ref.stmt.{GotoStmt, ReturnStmt, ThrowStmt}
 import me.aki.tactical.ref.textifier.TextifyCtx
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
 
-abstract class AbstractUnresolvedCtxTest extends FlatSpec with Matchers with PropertyChecks {
+abstract class AbstractCtxTest extends FlatSpec with Matchers with PropertyChecks {
   val local1 = new RefLocal(null)
   val local2 = new RefLocal(null)
   val local3 = new RefLocal(null)
@@ -32,6 +32,13 @@ abstract class AbstractUnresolvedCtxTest extends FlatSpec with Matchers with Pro
     "label3" → label3
   )
 
-  def parseCtx = new UnresolvedRefCtx(locals)
   def textifyCtx = new TextifyCtx(locals.map(_.swap).asJava, labels.map(_.swap).asJava)
+}
+
+abstract class AbstractResolvedCtxTest extends AbstractCtxTest {
+  def parseCtx = new ResolvedRefCtx(locals, labels)
+}
+
+abstract class AbstractUnresolvedCtxTest extends AbstractCtxTest {
+  def parseCtx = new UnresolvedRefCtx(locals)
 }

@@ -113,9 +113,3 @@ class InstanceFieldExprParser(ctx: UnresolvedRefCtx) extends Parser[InstanceFiel
     for ((owner, instance, name, typ) ← PathParser ~ WS.? ~ "." ~ WS.? ~ "<" ~ WS.? ~ new ExpressionParser(ctx) ~ WS.? ~ ">" ~ WS.? ~ "." ~ Literal ~ WS.? ~ ":" ~ WS.? ~ TypeParser)
       yield new InstanceFieldExpr(new FieldRef(owner, name, typ), instance)
 }
-
-class LocalParser(ctx: UnresolvedRefCtx) extends Parser[RefLocal] {
-  val parser: P[RefLocal] =
-    Literal.map(ctx.getLocalOpt)
-      .filter(_.isDefined).map(_.get)
-}
