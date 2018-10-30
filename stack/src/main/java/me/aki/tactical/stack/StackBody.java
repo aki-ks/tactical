@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.core.util.InsertList;
-import me.aki.tactical.core.util.LinkedInsertList;
+import me.aki.tactical.core.util.LinkedIdentityInsertList;
 import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.insn.StoreInsn;
 
@@ -39,7 +39,7 @@ public class StackBody implements Body {
     /**
      * The instructions of this method
      */
-    private InsertList<Instruction> instructions = new LinkedInsertList<>();
+    private InsertList<Instruction> instructions = new LinkedIdentityInsertList<>();
 
     /**
      * The try-catch-blocks of this method.

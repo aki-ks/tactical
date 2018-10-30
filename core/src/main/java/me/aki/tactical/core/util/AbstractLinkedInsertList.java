@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
  *
  * @param <T> type of the stored elements
  */
-public class LinkedInsertList<T> extends AbstractList<T> implements InsertList<T> {
+public class AbstractLinkedInsertList<T> extends AbstractList<T> implements InsertList<T> {
     /**
      * Node of the first element in the list or <tt>null</tt>.
      */
@@ -28,14 +28,16 @@ public class LinkedInsertList<T> extends AbstractList<T> implements InsertList<T
     /**
      * Map from all values in the list to their corresponding {@link Node}.
      */
-    private Map<T, Node> nodes = new HashMap<>();
+    private Map<T, Node> nodes;
 
-    public LinkedInsertList() {
+    AbstractLinkedInsertList(Map<T, Node> nodeMap) {
+        this.nodes = nodeMap;
         this.first = null;
         this.last = null;
     }
 
-    public LinkedInsertList(Iterable<T> elements) {
+    AbstractLinkedInsertList(Map<T, Node> nodeMap, Iterable<T> elements) {
+        this.nodes = nodeMap;
         Node node = null;
 
         Iterator<T> iterator = elements.iterator();
@@ -337,13 +339,13 @@ public class LinkedInsertList<T> extends AbstractList<T> implements InsertList<T
          */
         public void remove() {
             if (prev == null) {
-                LinkedInsertList.this.first = next;
+                AbstractLinkedInsertList.this.first = next;
             } else {
                 prev.next = next;
             }
 
             if (next == null) {
-                LinkedInsertList.this.last = prev;
+                AbstractLinkedInsertList.this.last = prev;
             } else {
                 next.prev = prev;
             }
