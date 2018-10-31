@@ -2,6 +2,7 @@ package me.aki.tactical.ref;
 
 import me.aki.tactical.core.util.Cell;
 
+import java.sql.Ref;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,7 +23,7 @@ public interface Referencing {
      *
      * @return all references expressions
      */
-    default List<Expression> getReferencedValue() {
+    default List<Expression> getReferencedValues() {
         return getReferencedValueCells().stream()
                 .map(Cell::get)
                 .collect(Collectors.toUnmodifiableList());
@@ -34,9 +35,13 @@ public interface Referencing {
      * @return cells of all (recursive collected) referenced expressions
      */
     default List<Expression> getRecursiveReferencedValues() {
-        return getReferencedValue().stream()
-                .flatMap(refCell -> Stream.concat(Stream.of(refCell), refCell.getRecursiveReferencedValues().stream()))
-                .collect(Collectors.toUnmodifiableList());
+        return getRecursiveReferencedValueStream().collect(Collectors.toUnmodifiableList());
+    }
+
+    private Stream<Expression> getRecursiveReferencedValueStream() {
+        return getReferencedValueCells().stream()
+                .map(Cell::get)
+                .flatMap(expr -> Stream.concat(Stream.of(expr), ((Referencing) expr).getRecursiveReferencedValueStream()));
     }
 
     /**
@@ -45,8 +50,11 @@ public interface Referencing {
      * @return cells of all (recursive collected) referenced expressions
      */
     default List<Cell<Expression>> getRecursiveReferencedValueCells() {
+        return getRecursiveReferencedValueCellStream().collect(Collectors.toUnmodifiableList());
+    }
+
+    private Stream<Cell<Expression>> getRecursiveReferencedValueCellStream() {
         return getReferencedValueCells().stream()
-                .flatMap(refCell -> Stream.concat(Stream.of(refCell), refCell.get().getRecursiveReferencedValueCells().stream()))
-                .collect(Collectors.toUnmodifiableList());
+                .flatMap(refCell -> Stream.concat(Stream.of(refCell), ((Referencing) refCell.get()).getRecursiveReferencedValueCellStream()));
     }
 }
