@@ -30,6 +30,10 @@ lazy val ref = (project in file ("ref"))
   .dependsOn(core)
   .settings(javaSettings)
 
+lazy val dex = (project in file("dex"))
+  .dependsOn(core)
+  .settings(javaSettings)
+
 // TEXTIFIER & PARSER
 lazy val coreTextifier = (project in file ("textify-core"))
   .dependsOn(core)
