@@ -33,6 +33,17 @@ public interface Referencing {
      *
      * @return cells of all (recursive collected) referenced expressions
      */
+    default List<Expression> getRecursiveReferencedValues() {
+        return getReferencedValue().stream()
+                .flatMap(refCell -> Stream.concat(Stream.of(refCell), refCell.getRecursiveReferencedValues().stream()))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    /**
+     * Get all expressions referenced by this entity and also add their used references.
+     *
+     * @return cells of all (recursive collected) referenced expressions
+     */
     default List<Cell<Expression>> getRecursiveReferencedValueCells() {
         return getReferencedValueCells().stream()
                 .flatMap(refCell -> Stream.concat(Stream.of(refCell), refCell.get().getRecursiveReferencedValueCells().stream()))
