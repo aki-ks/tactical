@@ -126,7 +126,7 @@ class BodyTest extends FlatSpec with Matchers with PropertyChecks {
         |  end:
         |    return ref;
         |
-        |    local info start -> end, param2, "foo", int;
+        |    local info start -> end param2 "foo" int;
         |}
       """.stripMargin.trim)
 

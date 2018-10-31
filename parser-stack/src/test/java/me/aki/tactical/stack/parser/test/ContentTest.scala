@@ -56,12 +56,12 @@ class ContentTest extends FlatSpec with Matchers with PropertyChecks {
   }
 
   "The LocalInfoParser" should "parse local variable infos" in {
-    new LocalVariableParser(newCtx).parse("local info label1 -> label2, local1, \"foo\", int;") shouldEqual
+    new LocalVariableParser(newCtx).parse("local info label1 -> label2 local1 \"foo\" int;") shouldEqual
       new StackBody.LocalVariable("foo", IntType.getInstance, Optional.empty[String], label1, label2, local1)
   }
 
   it should "parse local variable infos with signature" in {
-    new LocalVariableParser(newCtx).parse("local info label1 -> label2, local1, \"foo\", long, \"J\";") shouldEqual
+    new LocalVariableParser(newCtx).parse("local info label1 -> label2 local1 \"foo\" long \"J\";") shouldEqual
       new StackBody.LocalVariable("foo", LongType.getInstance, Optional.of("J"), label1, label2, local1)
   }
 
