@@ -27,7 +27,7 @@ public class InvokeStatic extends AbstractConcreteInvoke implements AmbigiousInv
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return List.copyOf(getArgumentCells());
     }
 

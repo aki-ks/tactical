@@ -44,7 +44,7 @@ public abstract class Condition implements Referencing {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return List.of(getValue1Cell(), getValue2Cell());
     }
 

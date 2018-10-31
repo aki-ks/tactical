@@ -48,7 +48,7 @@ public class CastExpr implements Expression {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return List.of(getValueCell());
     }
 

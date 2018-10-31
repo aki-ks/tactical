@@ -52,7 +52,7 @@ public class AssignStatement implements Statement {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return List.of(getVariableCell().cast(), getValueCell());
     }
 

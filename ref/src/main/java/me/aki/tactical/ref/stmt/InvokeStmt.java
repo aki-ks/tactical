@@ -30,8 +30,8 @@ public class InvokeStmt implements Statement {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
-        return invoke.getReferencedValues();
+    public List<Cell<Expression>> getReferencedValueCells() {
+        return invoke.getReferencedValueCells();
     }
 
     @Override

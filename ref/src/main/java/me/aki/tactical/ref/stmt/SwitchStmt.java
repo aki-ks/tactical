@@ -80,7 +80,7 @@ public class SwitchStmt implements BranchStmt {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return List.of(getValueCell());
     }
 

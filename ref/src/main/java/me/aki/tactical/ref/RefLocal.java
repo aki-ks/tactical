@@ -24,7 +24,7 @@ public class RefLocal implements Variable {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return List.of();
     }
 }

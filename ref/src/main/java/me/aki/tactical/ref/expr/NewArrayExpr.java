@@ -53,7 +53,7 @@ public class NewArrayExpr implements Expression {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return List.copyOf(getDimensionSizeCells());
     }
 

@@ -39,8 +39,8 @@ public class InvokeExpr implements Expression {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
-        return invocation.getReferencedValues();
+    public List<Cell<Expression>> getReferencedValueCells() {
+        return invocation.getReferencedValueCells();
     }
 
     @Override

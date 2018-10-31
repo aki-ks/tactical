@@ -48,8 +48,8 @@ public class IfStmt implements BranchStmt {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
-        return condition.getReferencedValues();
+    public List<Cell<Expression>> getReferencedValueCells() {
+        return condition.getReferencedValueCells();
     }
 
     @Override

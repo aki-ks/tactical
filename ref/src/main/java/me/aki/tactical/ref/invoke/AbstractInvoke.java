@@ -43,7 +43,7 @@ public abstract class AbstractInvoke implements Referencing {
     public abstract MethodDescriptor getMethodDescriptor();
 
     @Override
-    public List<Cell<Expression>> getReferencedValues() {
+    public List<Cell<Expression>> getReferencedValueCells() {
         return getArgumentCells();
     }
 
