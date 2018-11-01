@@ -58,7 +58,9 @@ public class BodyConverter {
 
     private void initLocals() {
         for (int i = 0; i < mn.maxLocals; i++) {
-            ctx.getLocals().add(new StackLocal());
+            StackLocal local = new StackLocal();
+            ctx.getLocals().add(local);
+            this.body.getLocals().add(local);
         }
 
         int localIndex = 0;
