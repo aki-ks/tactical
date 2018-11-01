@@ -14,6 +14,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -82,6 +84,24 @@ public class CfgUnitGraph {
             nodes.put(statement, node = new Node(statement));
         }
         return node;
+    }
+
+    /**
+     * Get the node of the first statement of the method.
+     *
+     * @return entry point of the method
+     */
+    public Node getHead() {
+        return getNode(body.getStatements().getFirst());
+    }
+
+    /**
+     * Get all Nodes of this cfg graph.
+     *
+     * @return all nodes of the cfg
+     */
+    public List<Node> getNodes() {
+        return new ArrayList<>(nodes.values());
     }
 
     /**
