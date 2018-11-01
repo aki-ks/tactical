@@ -8,21 +8,25 @@ import me.aki.tactical.ref.stmt.BranchStmt;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CfgGraph {
+/**
+ * Build a Control-Flow-Graph of a method.
+ * Each block consists of a list of instructions that don't branch.
+ */
+public class CfgBlockGraph {
     /**
-     * Build a {@link CfgGraph} from a {@link RefBody}.
+     * Build a {@link CfgBlockGraph} from a {@link RefBody}.
      *
      * @param body whose cfg should be build
-     * @return the {@link CfgGraph} for a method
+     * @return the {@link CfgBlockGraph} for a method
      */
-    public static CfgGraph from(RefBody body) {
+    public static CfgBlockGraph from(RefBody body) {
         Builder builder = new Builder(body);
         builder.build();
         return builder.graph;
@@ -31,9 +35,9 @@ public class CfgGraph {
     private Node entryNode;
     private Set<Node> handlerNodes = new HashSet<>();
     private Set<Node> nodes = new HashSet<>();
-    private Map<Statement, Node> nodeByStatement = new HashMap<>();
+    private Map<Statement, Node> nodeByStatement = new IdentityHashMap<>();
 
-    private CfgGraph() {}
+    private CfgBlockGraph() {}
 
     /**
      * Get the {@link Node} that starts with the first statement of the method.
@@ -148,15 +152,15 @@ public class CfgGraph {
 
     private static class Builder {
         private final RefBody body;
-        private CfgGraph graph;
+        private CfgBlockGraph graph;
 
-        private Map<Statement, Node> nodeByStatement = new HashMap<>();
+        private Map<Statement, Node> nodeByStatement = new IdentityHashMap<>();
 
         private Deque<WorkTask> worklist = new ArrayDeque<>();
 
         public Builder(RefBody body) {
             this.body = body;
-            this.graph = new CfgGraph();
+            this.graph = new CfgBlockGraph();
         }
 
         public void build() {
