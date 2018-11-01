@@ -4,7 +4,7 @@ import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.Instruction;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,12 +14,12 @@ public class TextifyContext {
     /**
      * Map locals to their name used to identify them in the textified code.
      */
-    private final Map<StackLocal, String> localNames = new HashMap<>();
+    private final Map<StackLocal, String> localNames = new IdentityHashMap<>();
 
     /**
      * Map instructions to labels names uniquely identifying it.
      */
-    private final Map<Instruction, String> labels = new HashMap<>();
+    private final Map<Instruction, String> labels = new IdentityHashMap<>();
 
     public TextifyContext(StackBody body) {
         this.body = body;

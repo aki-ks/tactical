@@ -21,8 +21,8 @@ import me.aki.tactical.stack.insn.Instruction;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,19 +42,19 @@ public class BodyConverter {
     /**
      * Map locals in stack representation to the corresponding ref locals.
      */
-    private final Map<StackLocal, RefLocal> localMap = new HashMap<>();
+    private final Map<StackLocal, RefLocal> localMap = new IdentityHashMap<>();
 
     /**
      * Cells that should be assigned to the statement corresponding to a certain instructions.
      */
-    private final Map<Instruction, List<Cell<Statement>>> instructionReferences = new HashMap<>();
+    private final Map<Instruction, List<Cell<Statement>>> instructionReferences = new IdentityHashMap<>();
 
     /**
      * Map instructions to the statements that represent them.
      */
-    private final Map<Instruction, List<Statement>> convertedStatements = new HashMap<>();
+    private final Map<Instruction, List<Statement>> convertedStatements = new IdentityHashMap<>();
 
-    private final Map<Instruction, StackDelta> stackDeltaMap = new HashMap<>();
+    private final Map<Instruction, StackDelta> stackDeltaMap = new IdentityHashMap<>();
 
     private final Stack.Mutable<StackValue> stack = new Stack.Mutable<>();
 
@@ -224,11 +224,11 @@ public class BodyConverter {
         /**
          * First instruction of this cfg block.
          */
-        private Instruction instruction;
+        private final Instruction instruction;
         /**
          * Values on the stack
          */
-        private Stack.Immutable<StackValue> stack;
+        private final Stack.Immutable<StackValue> stack;
 
         public CfgNode(Instruction instruction, Stack.Immutable<StackValue> stack) {
             this.instruction = instruction;
@@ -243,7 +243,7 @@ public class BodyConverter {
         /**
          * Map an instruction to all instruction that branch to it and have already been visited.
          */
-        private Map<Instruction, Set<BranchInsn>> visited = new HashMap<>();
+        private Map<Instruction, Set<BranchInsn>> visited = new IdentityHashMap<>();
 
         /**
          * Check whether a branch from one instruction to another one was already visited.

@@ -7,16 +7,14 @@ import me.aki.tactical.core.textify.TextUtil;
 import me.aki.tactical.core.textify.TypeAnnotationTextifier;
 import me.aki.tactical.core.textify.TypeTextifier;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
-import javax.naming.Context;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +64,7 @@ public class RefBodyTextifier implements BodyTextifier {
      * @return map from locals to their names
      */
     private Map<RefLocal, String> getNamedLocals(RefBody body) {
-        Map<RefLocal, String> nameMap = new HashMap<>();
+        Map<RefLocal, String> nameMap = new IdentityHashMap<>();
 
         body.getThisLocal().ifPresent(thisLocal ->
                 nameMap.put(thisLocal, "this"));
@@ -93,7 +91,7 @@ public class RefBodyTextifier implements BodyTextifier {
      * Assign a label name to all instructions that are referenced somewhere in the method.
      */
     private Map<Statement, String> getLabels(RefBody body) {
-        Map<Statement, String> labels = new HashMap<>();
+        Map<Statement, String> labels = new IdentityHashMap<>();
         Set<Statement> referencedStatements = getReferencedStatements(body);
 
         int labelIndex = 0;

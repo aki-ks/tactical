@@ -32,7 +32,7 @@ import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeAnnotationNode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -172,7 +172,7 @@ public class TacticalMethodReader {
     }
 
     private LabelResolver convertInstructions(StackBody body, Analysis analysis, InsnList insnList) {
-        Map<Instruction, List<AbstractInsnNode>> convertedInsns = new HashMap<>();
+        Map<Instruction, List<AbstractInsnNode>> convertedInsns = new IdentityHashMap<>();
         ConversionContext ctx = new ConversionContext(body);
 
         AsmInsnWriter insnWriter = new AsmInsnWriter(ctx);
@@ -469,8 +469,8 @@ public class TacticalMethodReader {
         private final InsnList insnList;
         private final Map<Instruction, List<AbstractInsnNode>> convertedInsns;
 
-        private final Map<Instruction, LabelNode> forwardLabels = new HashMap<>();
-        private final Map<Instruction, LabelNode> backwardLabels = new HashMap<>();
+        private final Map<Instruction, LabelNode> forwardLabels = new IdentityHashMap<>();
+        private final Map<Instruction, LabelNode> backwardLabels = new IdentityHashMap<>();
 
         LabelResolver(InsnList insnList, Map<Instruction, List<AbstractInsnNode>> convertedInsns) {
             this.insnList = insnList;

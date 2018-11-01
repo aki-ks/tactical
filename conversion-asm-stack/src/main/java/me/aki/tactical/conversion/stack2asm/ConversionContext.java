@@ -7,14 +7,14 @@ import me.aki.tactical.stack.insn.Instruction;
 import org.objectweb.asm.tree.LabelNode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ConversionContext {
     private final StackBody body;
     private final List<StackLocal> locals;
-    private final Map<Instruction, List<Cell<LabelNode>>> convertedLabels = new HashMap<>();
+    private final Map<Instruction, List<Cell<LabelNode>>> convertedLabels = new IdentityHashMap<>();
 
     public ConversionContext(StackBody body) {
         this.body = body;
