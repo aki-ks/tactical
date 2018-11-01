@@ -131,6 +131,8 @@ public class BodyConverter {
         convertLocalVariables();
         convertLocalVariableAnnotations();
         convertLineNumbers();
+
+        insertConvertedStatements();
     }
 
     private void convertLocals() {
@@ -402,5 +404,13 @@ public class BodyConverter {
                 .map(line -> new RefBody.LineNumber(line.getLine(),
                         getCorrespondingStmt(line.getInstruction())))
                 .forEach(refBody.getLineNumbers()::add);
+    }
+
+    private void insertConvertedStatements() {
+        for (Instruction instruction : stackBody.getInstructions()) {
+            for (Statement statement : this.convertedStatements.getOrDefault(instruction, List.of())) {
+                refBody.getStatements().add(statement);
+            }
+        }
     }
 }
