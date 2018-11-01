@@ -499,8 +499,8 @@ public class AsmInsnReader {
         BasicValue value = frame.getStack(frame.getStackSize() - 1 - index);
         int sort = value.getType().getSort();
 
-        return sort == org.objectweb.asm.Type.LONG ||
-                sort == org.objectweb.asm.Type.DOUBLE;
+        return sort != org.objectweb.asm.Type.LONG &&
+                sort != org.objectweb.asm.Type.DOUBLE;
     }
 
     private Type getArrayLoadType(int opcode) {
