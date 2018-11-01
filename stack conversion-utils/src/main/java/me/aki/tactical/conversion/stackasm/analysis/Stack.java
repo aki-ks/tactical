@@ -1,8 +1,13 @@
 package me.aki.tactical.conversion.stackasm.analysis;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A stack implemented as immutable single linked list to allow constant time copies.
@@ -182,6 +187,29 @@ public class Stack<T> {
     public boolean isEqual(Stack stack) {
         return size == stack.size &&
                 Objects.equals(head, stack.head);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> U[] toArray(Function<Integer, U[]> newArray) {
+        U[] obj = newArray.apply(this.size);
+        Optional<Node> nodeOpt = this.head;
+        int i = this.size - 1;
+        while (nodeOpt.isPresent()) {
+            Node node = nodeOpt.get();
+            obj[i--] = (U) node.value;
+            nodeOpt = node.tail;
+        }
+        return obj;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Stream<T> stream() {
+        return (Stream<T>) Arrays.stream(toArray(Object[]::new));
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<T> toList() {
+        return stream().collect(Collectors.toList());
     }
 
     private class Node {
