@@ -141,15 +141,25 @@ public class TextUtil {
      * @return number prepended with zeros
      */
     public static String paddedNumber(int number, int max) {
-        StringBuilder builder = new StringBuilder();
+        int requiredDigits = (int) getDigits(max);
+        String textifiedNumber = Integer.toString(number);
+        int requiredZeros = requiredDigits - textifiedNumber.length();
 
-        int zeroCount = ((int) Math.log10(max)) - ((int) Math.log10(number));
-        for (int i = 0; i < zeroCount; i++) {
+        StringBuilder builder = new StringBuilder(requiredZeros + textifiedNumber.length());
+        for (int i = 0; i < requiredZeros; i++) {
             builder.append('0');
         }
-
-        builder.append(Integer.toString(number));
+        builder.append(textifiedNumber);
         return builder.toString();
+    }
+
+    private static int getDigits(int number) {
+        int i = 0;
+        do {
+            number /= 10;
+            i += 1;
+        } while (number > 0);
+        return i;
     }
 
     public static <A, B> void biJoined(Iterable<A> a, Iterable<B> b, BiConsumer<A, B> appendElement, Runnable appendSeperator) {
