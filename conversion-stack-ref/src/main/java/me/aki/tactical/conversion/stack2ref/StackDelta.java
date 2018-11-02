@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.stack2ref;
 
+import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefLocal;
 
 import java.util.Iterator;
@@ -31,7 +32,9 @@ public class StackDelta {
 
     public void merge(BodyConverter converter, List<StackValue> pops) {
         if (pops.size() != this.pops.size()) {
-            throw new IllegalArgumentException();
+            // Two stack frames should be merged that do not have equal stack heights.
+            // This would not be able to pass the classfile verifier.
+            throw new IllegalArgumentException("Illegal bytecode");
         }
 
         Iterator<StackValue> thisPopIter = this.pops.iterator();
@@ -45,16 +48,21 @@ public class StackDelta {
     }
 
     private void merge(BodyConverter converter, StackValue valueA, StackValue valueB) {
-        RefLocal local;
-        if (valueA.getValue() instanceof RefLocal) {
-            local = (RefLocal) valueA.getValue();
-        } else if (valueB.getValue() instanceof RefLocal) {
-            local = (RefLocal) valueB.getValue();
-        } else {
-            local = converter.newLocal();
-        }
+        Expression exprA = valueA.getValue();
+        Expression exprB = valueB.getValue();
 
-        valueA.storeInLocal(converter, local);
-        valueB.storeInLocal(converter, local);
+        if (exprA != exprB) {
+            RefLocal local =
+                    exprA instanceof RefLocal ? (RefLocal) exprA :
+                    exprB instanceof RefLocal ? (RefLocal) exprB :
+                        converter.newLocal();
+
+            if (local != exprA) {
+                valueA.storeInLocal(converter, local);
+            }
+            if (local != exprB) {
+                valueB.storeInLocal(converter, local);
+            }
+        }
     }
 }
