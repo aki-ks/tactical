@@ -78,21 +78,22 @@ public class InvokeTextifier implements CtxTextifier<AbstractInvoke> {
 
         String keyword;
         if (invoke instanceof InvokeInterface) {
-            keyword = "interface ";
+            keyword = "interface";
         } else if (invoke instanceof InvokeSpecial) {
             boolean isInterface = ((InvokeSpecial) invoke).isInterface();
-            keyword = "special " + (isInterface ? "interface " : "");
+            keyword = "special" + (isInterface ? " interface" : "");
         } else if (invoke instanceof InvokeStatic) {
             boolean isInterface = ((InvokeStatic) invoke).isInterface();
-            keyword = "static " + (isInterface ? "interface " : "");
+            keyword = "static" + (isInterface ? " interface" : "");
         } else if (invoke instanceof InvokeVirtual) {
-            keyword = "virtual ";
+            keyword = "virtual";
         } else {
             throw new AssertionError();
         }
         printer.addText(keyword);
 
         if (invoke instanceof AbstractInstanceInvoke) {
+            printer.addText(" ");
             Expression instance = ((AbstractInstanceInvoke) invoke).getInstance();
             ExpressionTextifier.getInstance().textify(printer, ctx, instance);
         }
