@@ -75,6 +75,7 @@ public class StackValue {
      * @return statement that stores the value in the local
      */
     public AssignStatement storeInLocal(BodyConverter converter, RefLocal local) {
+        Expression oldValue = this.value;
         this.setValue(local);
 
         if (this.assignStatement.isPresent()) {
@@ -82,7 +83,7 @@ public class StackValue {
             assignStatement.setVariable(local);
             return assignStatement;
         } else {
-            AssignStatement assignment = new AssignStatement(local, this.value);
+            AssignStatement assignment = new AssignStatement(local, oldValue);
             this.assignStatement = Optional.of(assignment);
 
             converter.getConvertedStatements()
