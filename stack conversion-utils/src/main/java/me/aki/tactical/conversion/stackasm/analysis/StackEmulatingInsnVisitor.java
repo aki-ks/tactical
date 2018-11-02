@@ -403,8 +403,7 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
 
     @Override
     public void visitReturn(Optional<Type> type) {
-        type.map(JvmType::from)
-                .ifPresent(this::popRequire); // value to be returned
+        type.map(JvmType::from).ifPresent(this::popRequire); // value to be returned
 
         super.visitReturn(type);
     }
@@ -467,6 +466,9 @@ public class StackEmulatingInsnVisitor<T> extends StackInsnVisitor<T> {
         if (invoke instanceof AbstractInstanceInvoke) {
             popRequire(JvmType.REFERENCE); // instance of class containing the method
         }
+
+        invoke.getDescriptor().getReturnType()
+                .map(JvmType::from).ifPresent(this::push);
 
         super.visitInvokeInsn(invoke);
     }
