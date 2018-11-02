@@ -14,7 +14,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,7 +44,8 @@ public class CfgUnitGraph {
             Node node = worklist.poll();
             Statement stmt = node.getStatement();
 
-            if (visited.contains(stmt)) {
+            if (!visited.add(stmt)) {
+                // Node already visited
                 continue;
             }
 
@@ -93,6 +93,18 @@ public class CfgUnitGraph {
      */
     public Node getHead() {
         return getNode(body.getStatements().getFirst());
+    }
+
+    /**
+     * Get the nodes for all statements that are assigned as Handler of a try/catch block.
+     *
+     * @return all try/catch handler nodes
+     */
+    public List<Node> getHandlerNodes() {
+        return body.getTryCatchBlocks().stream()
+                .map(TryCatchBlock::getHandler)
+                .map(this::getNode)
+                .collect(Collectors.toList());
     }
 
     /**
