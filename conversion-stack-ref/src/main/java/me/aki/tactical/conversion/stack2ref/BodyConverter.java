@@ -21,6 +21,7 @@ import me.aki.tactical.stack.insn.Instruction;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -264,7 +265,7 @@ public class BodyConverter {
          * @param target branch location
          */
         public void setVisited(BranchInsn cause, Instruction target) {
-            Set<BranchInsn> visitedCauses = visited.computeIfAbsent(target, x -> new HashSet<>());
+            Set<BranchInsn> visitedCauses = visited.computeIfAbsent(target, x -> Collections.newSetFromMap(new IdentityHashMap<>()));
             visitedCauses.add(cause);
         }
     }

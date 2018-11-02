@@ -13,6 +13,7 @@ import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -111,7 +112,7 @@ public class RefBodyTextifier implements BodyTextifier {
      * @return a set of all referenced statements
      */
     private Set<Statement> getReferencedStatements(RefBody body) {
-        Set<Statement> statements = new HashSet<>();
+        Set<Statement> statements = Collections.newSetFromMap(new IdentityHashMap<>());
 
         for (Statement statement : body.getStatements()) {
             if (statement instanceof BranchStmt) {
@@ -145,7 +146,7 @@ public class RefBodyTextifier implements BodyTextifier {
     }
 
     private void textifyLocals(Printer printer, TextifyCtx ctx, RefBody body) {
-        Set<RefLocal> syntheticLocals = new HashSet<>();
+        Set<RefLocal> syntheticLocals = Collections.newSetFromMap(new IdentityHashMap<>());
         body.getThisLocal().ifPresent(syntheticLocals::add);
         syntheticLocals.addAll(body.getArgumentLocals());
 
