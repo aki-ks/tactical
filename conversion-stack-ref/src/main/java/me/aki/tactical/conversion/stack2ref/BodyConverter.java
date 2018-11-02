@@ -193,7 +193,7 @@ public class BodyConverter {
                     BranchInsn branchInsn = (BranchInsn) instruction;
                     for (Instruction branchTarget : branchInsn.getBranchTargets()) {
                         if (!record.wasVisited(branchInsn, branchTarget)) {
-                            worklist.add(new CfgNode(instruction, this.stack.immutableCopy()));
+                            worklist.add(new CfgNode(branchTarget, this.stack.immutableCopy()));
                             record.setVisited(branchInsn, branchTarget);
                         }
                     }
