@@ -2,7 +2,6 @@ package me.aki.tactical.ref;
 
 import me.aki.tactical.core.util.Cell;
 
-import java.sql.Ref;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

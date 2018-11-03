@@ -7,6 +7,9 @@ import me.aki.tactical.ref.Variable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Assign a value to a variable
@@ -54,6 +57,28 @@ public class AssignStatement implements Statement {
     @Override
     public List<Cell<Expression>> getReferencedValueCells() {
         return List.of(getVariableCell().cast(), getValueCell());
+    }
+
+    @Override
+    public List<Expression> getReadValues() {
+        return Stream.concat(Stream.of(getValue()), getValue().getRecursiveReferencedValues().stream())
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<Cell<Expression>> getReadValueCells() {
+        return Stream.concat(Stream.of(getValueCell()), getValue().getRecursiveReferencedValueCells().stream())
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public Optional<Variable> getWriteValues() {
+        return Optional.of(getVariable());
+    }
+
+    @Override
+    public Optional<Cell<Variable>> getWriteValueCells() {
+        return Optional.of(getVariableCell());
     }
 
     @Override
