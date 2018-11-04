@@ -2,11 +2,17 @@ package me.aki.tactical.ref.util;
 
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.core.util.InsertList;
+import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
+import me.aki.tactical.ref.stmt.AssignStatement;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class CommonOperations {
@@ -93,5 +99,41 @@ public class CommonOperations {
 
         body.getLocals().remove(local);
         return true;
+    }
+
+    /**
+     * Get a mapping from locals to all statements that read from it.
+     *
+     * @param body the body that contains all statements
+       * @return map locals to statements that read their value
+     */
+    public static Map<RefLocal, List<Statement>> getLocalReadMap(RefBody body) {
+        final Map<RefLocal, List<Statement>> localReadMap = new IdentityHashMap<>();
+        for (Statement statement : body.getStatements()) {
+            for (Expression expr : statement.getReadValues()) {
+                if (expr instanceof RefLocal) {
+                    localReadMap.computeIfAbsent((RefLocal) expr, x -> new ArrayList<>()).add(statement);
+                }
+            }
+        }
+        return localReadMap;
+    }
+
+    /**
+     * Get a mapping from locals to all assign statements that write to it.
+     *
+     * @param body the body that contains all statements
+     * @return locals zipped with corresponding assign statements
+     */
+    public static Map<RefLocal, List<AssignStatement>> getLocalWriteMap(RefBody body) {
+        final Map<RefLocal, List<AssignStatement>> localWriteMap = new IdentityHashMap<>();
+        for (Statement statement : body.getStatements()) {
+            statement.getWriteValues().ifPresent(variable -> {
+                if (variable instanceof RefLocal) {
+                    localWriteMap.computeIfAbsent((RefLocal) variable, x -> new ArrayList<>()).add((AssignStatement) statement);
+                }
+            });
+        }
+        return localWriteMap;
     }
 }

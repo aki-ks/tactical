@@ -1,15 +1,12 @@
 package me.aki.tactical.conversion.stack2ref;
 
 import me.aki.tactical.core.util.InsertList;
-import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.stmt.AssignStatement;
 import me.aki.tactical.ref.util.CommonOperations;
 
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,23 +23,9 @@ import java.util.Map;
 public class DirectReuseInliningPostProcessor implements PostProcessor {
     @Override
     public void process(RefBody body) {
-        final Map<RefLocal, List<Statement>> localReadMap = new IdentityHashMap<>();
-        final Map<RefLocal, List<AssignStatement>> localWriteMap = new IdentityHashMap<>();
-
-        InsertList<Statement> statements = body.getStatements();
-        for (Statement statement : statements) {
-            for (Expression expr : statement.getReadValues()) {
-                if (expr instanceof RefLocal) {
-                    localReadMap.computeIfAbsent((RefLocal) expr, x -> new ArrayList<>()).add(statement);
-                }
-            }
-
-            statement.getWriteValues().ifPresent(variable -> {
-                if (variable instanceof RefLocal) {
-                    localWriteMap.computeIfAbsent((RefLocal) variable, x -> new ArrayList<>()).add((AssignStatement) statement);
-                }
-            });
-        }
+        final InsertList<Statement> statements = body.getStatements();
+        final Map<RefLocal, List<Statement>> localReadMap = CommonOperations.getLocalReadMap(body);
+        final Map<RefLocal, List<AssignStatement>> localWriteMap = CommonOperations.getLocalWriteMap(body);
 
         localWriteMap.forEach((local, writingStatements) -> {
             List<Statement> readingStatements = localReadMap.get(local);
