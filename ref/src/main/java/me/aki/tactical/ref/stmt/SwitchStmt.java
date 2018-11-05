@@ -104,28 +104,4 @@ public class SwitchStmt implements BranchStmt {
     public boolean continuesExecution() {
         return false;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SwitchStmt that = (SwitchStmt) o;
-        return Objects.equals(value, that.value) &&
-                areBranchTablesEqual(branchTable, that.branchTable) &&
-                defaultTarget == that.defaultTarget;
-    }
-
-    private boolean areBranchTablesEqual(Map<Integer, Statement> tableA, Map<Integer, Statement> tableB) {
-        if (tableA.size() == tableB.size()) {
-            // statement references must have equal identity.
-            return tableA.entrySet().stream().allMatch(e -> tableB.get(e.getKey()) == e.getValue());
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value, branchTable, defaultTarget);
-    }
 }

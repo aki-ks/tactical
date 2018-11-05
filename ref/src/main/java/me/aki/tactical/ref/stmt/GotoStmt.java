@@ -51,17 +51,4 @@ public class GotoStmt implements BranchStmt {
     public boolean continuesExecution() {
         return false;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GotoStmt gotoStmt = (GotoStmt) o;
-        return target == gotoStmt.target;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(target);
-    }
 }

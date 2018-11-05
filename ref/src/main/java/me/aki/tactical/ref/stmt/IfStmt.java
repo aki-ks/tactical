@@ -61,18 +61,4 @@ public class IfStmt implements BranchStmt {
     public List<Cell<Statement>> getBranchTargetsCells() {
         return List.of(getTargetCell());
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        IfStmt ifStmt = (IfStmt) o;
-        return Objects.equals(condition, ifStmt.condition) &&
-                target == ifStmt.target;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(condition, target);
-    }
 }

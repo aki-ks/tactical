@@ -80,18 +80,4 @@ public class AssignStatement implements Statement {
     public Optional<Cell<Variable>> getWriteValueCells() {
         return Optional.of(getVariableCell());
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AssignStatement statement = (AssignStatement) o;
-        return Objects.equals(variable, statement.variable) &&
-                Objects.equals(value, statement.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(variable, value);
-    }
 }

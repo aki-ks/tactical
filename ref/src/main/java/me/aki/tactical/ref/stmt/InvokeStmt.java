@@ -33,17 +33,4 @@ public class InvokeStmt implements Statement {
     public List<Cell<Expression>> getReferencedValueCells() {
         return invoke.getReferencedValueCells();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        InvokeStmt that = (InvokeStmt) o;
-        return Objects.equals(invoke, that.invoke);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(invoke);
-    }
 }
