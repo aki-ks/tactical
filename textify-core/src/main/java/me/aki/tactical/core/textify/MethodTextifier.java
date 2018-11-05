@@ -51,9 +51,7 @@ public class MethodTextifier implements Textifier<Method> {
             }
 
             printer.addText("(");
-            TextUtil.joined(method.getParameterTypes(),
-                    type -> TypeTextifier.getInstance().textify(printer, type),
-                    () -> printer.addText(", "));
+            bodyTextifier.textifyParameters(printer, method);
             printer.addText(")");
         }
 

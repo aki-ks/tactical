@@ -14,7 +14,6 @@ import me.aki.tactical.ref.TryCatchBlock;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
