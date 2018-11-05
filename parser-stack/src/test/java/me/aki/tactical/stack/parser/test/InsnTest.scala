@@ -76,57 +76,83 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
 
   "The InsnTextifier" should "parse math instructions" in {
     forAll (intLongFloatDouble) { (typName: String, typ: Type) =>
-      parseInsn(s"add $typName;") shouldEqual new AddInsn(typ)
+      parseInsn(s"add $typName;") match {
+        case insn: AddInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLongFloatDouble) { (typName: String, typ: Type) =>
-      parseInsn(s"sub $typName;") shouldEqual new SubInsn(typ)
+      parseInsn(s"sub $typName;") match {
+        case insn: SubInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLongFloatDouble) { (typName: String, typ: Type) =>
-      parseInsn(s"mul $typName;") shouldEqual new MulInsn(typ)
+      parseInsn(s"mul $typName;") match {
+        case insn: MulInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLongFloatDouble) { (typName: String, typ: Type) =>
-      parseInsn(s"div $typName;") shouldEqual new DivInsn(typ)
+      parseInsn(s"div $typName;") match {
+        case insn: DivInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLongFloatDouble) { (typName: String, typ: Type) =>
-      parseInsn(s"mod $typName;") shouldEqual new ModInsn(typ)
+      parseInsn(s"mod $typName;") match {
+        case insn: ModInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLong) { (typName: String, typ: Type) =>
-      parseInsn(s"and $typName;") shouldEqual new AndInsn(typ)
+      parseInsn(s"and $typName;") match {
+        case insn: AndInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLong) { (typName: String, typ: Type) =>
-      parseInsn(s"or $typName;") shouldEqual new OrInsn(typ)
+      parseInsn(s"or $typName;") match {
+        case insn: OrInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLong) { (typName: String, typ: Type) =>
-      parseInsn(s"xor $typName;") shouldEqual new XorInsn(typ)
+      parseInsn(s"xor $typName;") match {
+        case insn: XorInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLong) { (typName: String, typ: Type) =>
-      parseInsn(s"shl $typName;") shouldEqual new ShlInsn(typ)
+      parseInsn(s"shl $typName;") match {
+        case insn: ShlInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLong) { (typName: String, typ: Type) =>
-      parseInsn(s"shr $typName;") shouldEqual new ShrInsn(typ)
+      parseInsn(s"shr $typName;") match {
+        case insn: ShrInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (intLong) { (typName: String, typ: Type) =>
-      parseInsn(s"ushr $typName;") shouldEqual new UShrInsn(typ)
+      parseInsn(s"ushr $typName;") match {
+        case insn: UShrInsn => insn.getType shouldEqual typ
+      }
     }
 
-    parseInsn(s"cmp;") shouldEqual new CmpInsn()
+    assert(parseInsn(s"cmp;").isInstanceOf[CmpInsn])
 
     forAll (floatDouble) { (typName: String, typ: Type) =>
-      parseInsn(s"cmpl $typName;") shouldEqual new CmplInsn(typ)
+      parseInsn(s"cmpl $typName;") match {
+        case insn: CmplInsn => insn.getType shouldEqual typ
+      }
     }
 
     forAll (floatDouble) { (typName: String, typ: Type) =>
-      parseInsn(s"cmpg $typName;") shouldEqual new CmpgInsn(typ)
+      parseInsn(s"cmpg $typName;") match {
+        case insn: CmpgInsn => insn.getType shouldEqual typ
+      }
     }
   }
 
@@ -135,7 +161,9 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
     val insn = parseInsn("goto label1;", ctx)
     resolve(ctx)
 
-    insn shouldEqual new GotoInsn(label1)
+    insn match {
+      case insn: GotoInsn => insn.getTarget shouldEqual label1
+    }
   }
 
   it should "parse if instructions" in {
@@ -145,7 +173,11 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
       val insn = parseInsn(unparsed, ctx)
       resolve(ctx)
 
-      insn shouldEqual new IfInsn(condition, label)
+      insn match {
+        case insn: IfInsn =>
+          insn.getCondition shouldEqual condition
+          insn.getTarget shouldEqual label
+      }
     }
 
     parseIfInsn("if ref (? == null) goto label1;", IF_NULL, label1)
@@ -180,40 +212,61 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
       """.stripMargin.trim, ctx)
     resolve(ctx)
 
-    val table = new util.LinkedHashMap[Integer, Instruction]()
-    table.put(0, label1)
-    table.put(1, label2)
-    insn shouldEqual new SwitchInsn(table, label3)
+    insn match {
+      case insn: SwitchInsn =>
+        val table = new util.LinkedHashMap[Integer, Instruction]()
+        table.put(0, label1)
+        table.put(1, label2)
+
+        insn.getBranchTable shouldEqual table
+        insn.getDefaultLocation shouldEqual label3
+    }
   }
 
   it should "parse field get and sets" in {
-    parseInsn("get example.Test.foo : int;") shouldEqual
-      new FieldGetInsn(new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance), false)
+    parseInsn("get example.Test.foo : int;") match {
+      case insn: FieldGetInsn =>
+        insn.getField shouldEqual new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance)
+        insn.isStatic shouldEqual false
+    }
 
-    parseInsn("get static example.Test.foo : int;") shouldEqual
-      new FieldGetInsn(new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance), true)
+    parseInsn("get static example.Test.foo : int;") match {
+      case insn: FieldGetInsn =>
+        insn.getField shouldEqual new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance)
+        insn.isStatic shouldEqual true
+    }
 
-    parseInsn("set example.Test.foo : int;") shouldEqual
-      new FieldSetInsn(new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance), false)
+    parseInsn("set example.Test.foo : int;") match {
+      case insn: FieldSetInsn =>
+        insn.getField shouldEqual new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance)
+        insn.isStatic shouldEqual false
+    }
 
-    parseInsn("set static example.Test.foo : int;") shouldEqual
-      new FieldSetInsn(new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance), true)
+    parseInsn("set static example.Test.foo : int;") match {
+      case insn: FieldSetInsn =>
+        insn.getField shouldEqual new FieldRef(Path.of("example", "Test"), "foo", IntType.getInstance)
+        insn.isStatic shouldEqual true
+    }
   }
 
   it should "parse array length insns" in {
-    parseInsn("arraylength;") shouldEqual new ArrayLengthInsn()
-    parseInsn("arraylength ;") shouldEqual new ArrayLengthInsn()
+    assert(parseInsn("arraylength;").isInstanceOf[ArrayLengthInsn])
+    assert(parseInsn("arraylength ;").isInstanceOf[ArrayLengthInsn])
   }
 
   it should "parse array load insns" in {
     forAll (intLongFloatDouble) { (typString, typ) =>
-      parseInsn(s"arrayload $typString;") shouldEqual new ArrayLoadInsn(typ)
+      parseInsn(s"arrayload $typString;") match {
+        case insn: ArrayLoadInsn => insn.getType shouldEqual typ
+      }
     }
   }
 
   it should "parse array store insns" in {
     forAll (intLongFloatDouble) { (typString, typ) =>
-      parseInsn(s"arraystore $typString;") shouldEqual new ArrayStoreInsn(typ)
+      parseInsn(s"arraystore $typString;") match {
+        case insn: ArrayStoreInsn => insn.getType shouldEqual typ
+      }
     }
   }
 
@@ -222,46 +275,68 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
     val local = ctx.getLocal("local")
 
     forAll { int: Int =>
-      parseInsn(s"inc local $int;", ctx) shouldEqual new IncrementInsn(local, int)
+      parseInsn(s"inc local $int;", ctx) match {
+        case insn: IncrementInsn =>
+          insn.getLocal shouldEqual local
+          insn.getValue shouldEqual int
+      }
     }
   }
 
   it should "parse instanceof insns" in {
-    parseInsn(s"instanceof java.lang.String;") shouldEqual
-      new InstanceOfInsn(new ObjectType(Path.of("java", "lang", "String")))
+    parseInsn(s"instanceof java.lang.String;") match {
+      case insn: InstanceOfInsn => insn.getType shouldEqual new ObjectType(Path.STRING)
+    }
   }
 
   it should "parse regular invokes" in {
     forAll (methodRefs) { (textified, methodRef) =>
-      parseInsn(s"invoke interface $textified;") shouldEqual new InvokeInsn(new InterfaceInvoke(methodRef))
-      parseInsn(s"invoke virtual $textified;") shouldEqual new InvokeInsn(new VirtualInvoke(methodRef))
-      parseInsn(s"invoke special $textified;") shouldEqual new InvokeInsn(new SpecialInvoke(methodRef, false))
-      parseInsn(s"invoke static $textified;") shouldEqual new InvokeInsn(new StaticInvoke(methodRef, false))
+      parseInsn(s"invoke interface $textified;") match {
+        case insn: InvokeInsn => insn.getInvoke shouldEqual new InterfaceInvoke(methodRef)
+      }
+
+      parseInsn(s"invoke virtual $textified;") match {
+        case insn: InvokeInsn => insn.getInvoke shouldEqual new VirtualInvoke(methodRef)
+      }
+
+      parseInsn(s"invoke special $textified;") match {
+        case insn: InvokeInsn => insn.getInvoke shouldEqual new SpecialInvoke(methodRef, false)
+      }
+
+      parseInsn(s"invoke static $textified;") match {
+        case insn: InvokeInsn => insn.getInvoke shouldEqual new StaticInvoke(methodRef, false)
+      }
     }
   }
 
   it should "parse static/special invokes of methods in interfaces" in {
     forAll (methodRefs) { (textified, methodRef) =>
-      parseInsn(s"invoke special interface $textified;") shouldEqual new InvokeInsn(new SpecialInvoke(methodRef, true))
-      parseInsn(s"invoke static interface $textified;") shouldEqual new InvokeInsn(new StaticInvoke(methodRef, true))
+      parseInsn(s"invoke special interface $textified;") match {
+        case insn: InvokeInsn => insn.getInvoke shouldEqual new SpecialInvoke(methodRef, true)
+      }
+
+      parseInsn(s"invoke static interface $textified;") match {
+        case insn: InvokeInsn => insn.getInvoke shouldEqual new StaticInvoke(methodRef, true)
+      }
     }
   }
 
   it should "parse invoke dynamic instructions" in {
-    val insn = parseInsn(
+    parseInsn(
       """invoke dynamic {
         |  name = "foo",
         |  type = (int, long) void,
         |  bootstrap = invoke static java.lang.Integer.parseInt(java.lang.String) : int,
         |  arguments = [ 10, "foo", java.lang.String.class ]
         |};
-      """.stripMargin.trim)
-
-    val desc = new MethodDescriptor(List[Type](IntType.getInstance, LongType.getInstance).asJava, Optional.empty())
-    val bootstrapMethod = new MethodRef(Path.of("java", "lang", "Integer"), "parseInt", List[Type](new ObjectType(Path.STRING)).asJava, Optional.of(IntType.getInstance))
-    val bootstrap = new InvokeStaticHandle(bootstrapMethod, false)
-    val arguments = List[BootstrapConstant](new IntConstant(10), new StringConstant("foo"), new ClassConstant(new ObjectType(Path.STRING))).asJava
-    insn shouldEqual new InvokeInsn(new DynamicInvoke("foo", desc, bootstrap, arguments))
+      """.stripMargin.trim) match {
+      case insn: InvokeInsn =>
+        val desc = new MethodDescriptor(List[Type](IntType.getInstance, LongType.getInstance).asJava, Optional.empty())
+        val bootstrapMethod = new MethodRef(Path.of("java", "lang", "Integer"), "parseInt", List[Type](new ObjectType(Path.STRING)).asJava, Optional.of(IntType.getInstance))
+        val bootstrap = new InvokeStaticHandle(bootstrapMethod, false)
+        val arguments = List[BootstrapConstant](new IntConstant(10), new StringConstant("foo"), new ClassConstant(new ObjectType(Path.STRING))).asJava
+        insn.getInvoke shouldEqual new DynamicInvoke("foo", desc, bootstrap, arguments)
+    }
   }
 
   it should "parse load instructions" in {
@@ -269,7 +344,11 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
     val local = ctx.getLocal("local")
 
     forAll (intLongFloatDouble) { (typString, typ) =>
-      parseInsn(s"load $typString local;", ctx) shouldEqual new LoadInsn(typ, local)
+      parseInsn(s"load $typString local;", ctx) match {
+        case insn: LoadInsn =>
+          insn.getType shouldEqual typ
+          insn.getLocal shouldEqual local
+      }
     }
   }
 
@@ -278,82 +357,129 @@ class InsnTest extends FlatSpec with Matchers with PropertyChecks {
     val local = ctx.getLocal("local")
 
     forAll (intLongFloatDouble) { (typString, typ) =>
-      parseInsn(s"store $typString local;", ctx) shouldEqual new StoreInsn(typ, local)
+      parseInsn(s"store $typString local;", ctx) match {
+        case insn: StoreInsn =>
+          insn.getType shouldEqual typ
+          insn.getLocal shouldEqual local
+      }
     }
   }
 
   it should "parse monitor enter instructions" in {
-    parseInsn(s"monitor enter;") shouldEqual new MonitorEnterInsn
+    assert(parseInsn(s"monitor enter;").isInstanceOf[MonitorEnterInsn])
   }
 
   it should "parse monitor exit instructions" in {
-    parseInsn(s"monitor exit;") shouldEqual new MonitorExitInsn
+    assert(parseInsn(s"monitor exit;").isInstanceOf[MonitorExitInsn])
   }
 
   it should "parse neg insn" in {
     forAll (intLongFloatDouble) { (typString, typ) =>
-      parseInsn(s"neg $typString;") shouldEqual new NegInsn(typ)
+      parseInsn(s"neg $typString;") match {
+        case insn: NegInsn => insn.getType shouldEqual typ
+      }
     }
   }
 
   it should "parse new array insns" in {
-    parseInsn("new int[?];") shouldEqual new NewArrayInsn(new ArrayType(IntType.getInstance, 1))
-    parseInsn("new int[?][];") shouldEqual new NewArrayInsn(new ArrayType(IntType.getInstance, 2))
-    parseInsn("new int[?][?][?];") shouldEqual new NewArrayInsn(new ArrayType(IntType.getInstance, 3), 3)
+    parseInsn("new int[?];") match {
+      case insn: NewArrayInsn =>
+        insn.getType shouldEqual new ArrayType(IntType.getInstance, 1)
+        insn.getInitializedDimensions shouldEqual 1
+    }
+
+    parseInsn("new int[?][];") match {
+      case insn: NewArrayInsn =>
+        insn.getType shouldEqual new ArrayType(IntType.getInstance, 2)
+        insn.getInitializedDimensions shouldEqual 1
+    }
+
+    parseInsn("new int[?][?][?];") match {
+      case insn: NewArrayInsn =>
+        insn.getType shouldEqual new ArrayType(IntType.getInstance, 3)
+        insn.getInitializedDimensions shouldEqual 3
+    }
   }
 
   it should "parse 'new' instructions" in {
-    parseInsn("new java.lang.String;") shouldEqual new NewInsn(Path.STRING)
+    parseInsn("new java.lang.String;") match {
+      case insn: NewInsn => insn.getPath shouldEqual Path.STRING
+    }
   }
 
   it should "parse primitive cast instructions" in {
     forAll (intLongFloatDouble) { (fromTypeString, fromType) =>
       forAll(primitiveType) { (toTypeString, toType) =>
         whenever(!toType.isInstanceOf[BooleanType]) {
-          parseInsn(s"cast $fromTypeString -> $toTypeString;") shouldEqual new PrimitiveCastInsn(fromType, toType)
+          parseInsn(s"cast $fromTypeString -> $toTypeString;") match {
+            case insn: PrimitiveCastInsn =>
+              insn.getFromType shouldEqual fromType
+              insn.getToType shouldEqual toType
+          }
         }
       }
     }
   }
 
   it should "parse ref cast instructions" in {
-    parseInsn(s"cast java.lang.String;") shouldEqual new RefCastInsn(new ObjectType(Path.STRING))
-    parseInsn(s"cast java.lang.String[];") shouldEqual new RefCastInsn(new ArrayType(new ObjectType(Path.STRING), 1))
+    parseInsn(s"cast java.lang.String;") match {
+      case insn: RefCastInsn => insn.getType shouldEqual new ObjectType(Path.STRING)
+    }
+
+    parseInsn(s"cast java.lang.String[];") match {
+      case insn: RefCastInsn => insn.getType shouldEqual new ArrayType(new ObjectType(Path.STRING), 1)
+    }
   }
 
   it should "parse push instructions" in {
-    parseInsn("push 10;") shouldEqual new PushInsn(new IntConstant(10))
-    parseInsn("push 10L;") shouldEqual new PushInsn(new LongConstant(10))
-    parseInsn("push java.lang.String.class;") shouldEqual new PushInsn(new ClassConstant(new ObjectType(Path.STRING)))
+    parseInsn("push 10;") match {
+      case insn: PushInsn => insn.getConstant shouldEqual new IntConstant(10)
+    }
+
+    parseInsn("push 10L;") match {
+      case insn: PushInsn => insn.getConstant shouldEqual new LongConstant(10)
+    }
+
+    parseInsn("push java.lang.String.class;") match {
+      case insn: PushInsn => insn.getConstant shouldEqual new ClassConstant(new ObjectType(Path.STRING))
+    }
   }
 
   it should "parse return instructions" in {
-    parseInsn("return;") shouldEqual new ReturnInsn()
-    parseInsn("return int;") shouldEqual new ReturnInsn(IntType.getInstance)
-    assert (parseInsn("return ref;").asInstanceOf[ReturnInsn].getType.get.isInstanceOf[RefType])
+    parseInsn("return;") match {
+      case insn: ReturnInsn => insn.getType shouldEqual Optional.empty
+    }
+
+    parseInsn("return int;") match {
+      case insn: ReturnInsn => insn.getType shouldEqual Optional.of(IntType.getInstance)
+    }
+
+    parseInsn("return ref;") match {
+      case insn: ReturnInsn => assert(insn.getType.get.isInstanceOf[RefType])
+    }
   }
 
   it should "parse throw instruction" in {
-    parseInsn("throw;") shouldEqual new ThrowInsn
-    parseInsn("throw ;") shouldEqual new ThrowInsn
+    assert(parseInsn("throw;").isInstanceOf[ThrowInsn])
+    assert(parseInsn("throw ;").isInstanceOf[ThrowInsn])
   }
 
   it should "parse swap instructions" in {
-    parseInsn("swap;") shouldEqual new SwapInsn
-    parseInsn("swap ;") shouldEqual new SwapInsn
+    assert(parseInsn("swap;").isInstanceOf[SwapInsn])
+    assert(parseInsn("swap ;").isInstanceOf[SwapInsn])
   }
 
   it should "parse pop instructions" in {
-    parseInsn("pop;") shouldEqual new PopInsn
-    parseInsn("pop ;") shouldEqual new PopInsn
+    assert(parseInsn("pop;").isInstanceOf[PopInsn])
+    assert(parseInsn("pop ;").isInstanceOf[PopInsn])
   }
 
   it should "parse all kinds of dup instructions" in {
-    parseInsn("dup;") shouldEqual new DupInsn
-    parseInsn("dup x1;") shouldEqual new DupX1Insn
-    parseInsn("dup x2;") shouldEqual new DupX2Insn
-    parseInsn("dup2;") shouldEqual new Dup2Insn
-    parseInsn("dup2 x1;") shouldEqual new Dup2X1Insn
-    parseInsn("dup2 x2;") shouldEqual new Dup2X2Insn
+    assert(parseInsn("dup;").isInstanceOf[DupInsn])
+    assert(parseInsn("dup x1;").isInstanceOf[DupX1Insn])
+    assert(parseInsn("dup x2;").isInstanceOf[DupX2Insn])
+    assert(parseInsn("dup2;").isInstanceOf[Dup2Insn])
+    assert(parseInsn("dup2 x1;").isInstanceOf[Dup2X1Insn])
+    assert(parseInsn("dup2 x2;").isInstanceOf[Dup2X2Insn])
   }
 }

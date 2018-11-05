@@ -32,7 +32,10 @@ class BodyTest extends FlatSpec with Matchers with PropertyChecks {
       """.stripMargin.trim)
 
     val body = method.getBody.get().asInstanceOf[StackBody]
-    body.getInstructions shouldEqual List(new PopInsn, new SwapInsn, new ReturnInsn).asJava
+    body.getInstructions.asScala match {
+      case Seq(_: PopInsn, _: SwapInsn, returnInsn: ReturnInsn) =>
+        returnInsn.getType shouldEqual Optional.empty
+    }
   }
 
   it should "parse labels" in {
