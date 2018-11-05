@@ -55,9 +55,9 @@ class BodyTest extends FlatSpec with Matchers with PropertyChecks {
         |}
       """.stripMargin.trim)
 
-    body.getStatements.asScala shouldEqual List(
-      new ReturnStmt()
-    )
+    body.getStatements.asScala match {
+      case Seq(stmt: ReturnStmt) => stmt.getValue shouldEqual Optional.empty
+    }
   }
 
   it should "parse method referencing the this local" in {
@@ -67,9 +67,10 @@ class BodyTest extends FlatSpec with Matchers with PropertyChecks {
         |}
       """.stripMargin.trim)
 
-    body.getStatements.asScala shouldEqual List(
-      new ReturnStmt(body.getThisLocal.get)
-    )
+    body.getStatements.asScala match {
+      case Seq(stmt: ReturnStmt) =>
+        stmt.getValue shouldEqual body.getThisLocal
+    }
   }
 
   it should "parse method referencing parameter locals" in {
@@ -80,10 +81,11 @@ class BodyTest extends FlatSpec with Matchers with PropertyChecks {
         |}
       """.stripMargin.trim)
 
-    body.getStatements.asScala shouldEqual List(
-      new ReturnStmt(body.getArgumentLocals.get(0)),
-      new ReturnStmt(body.getArgumentLocals.get(1))
-    )
+    body.getStatements.asScala match {
+      case Seq(stmt1: ReturnStmt, stmt2: ReturnStmt) =>
+        stmt1.getValue shouldEqual Optional.of(body.getArgumentLocals.get(0))
+        stmt2.getValue shouldEqual Optional.of(body.getArgumentLocals.get(1))
+    }
   }
 
   it should "parse methods with custom locals" in {
@@ -95,9 +97,10 @@ class BodyTest extends FlatSpec with Matchers with PropertyChecks {
         |}
       """.stripMargin.trim)
 
-    body.getStatements.asScala shouldEqual List(
-      new ReturnStmt(new AddExpr(body.getLocals.get(0), body.getLocals.get(1)))
-    )
+    body.getStatements.asScala match {
+      case Seq(stmt: ReturnStmt) =>
+        stmt.getValue shouldEqual Optional.of(new AddExpr(body.getLocals.get(0), body.getLocals.get(1)))
+    }
   }
 
   it should "parse methods with try/catch blocks" in {
