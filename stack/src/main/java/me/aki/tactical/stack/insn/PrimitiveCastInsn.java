@@ -64,19 +64,4 @@ public class PrimitiveCastInsn extends AbstractInstruction {
     public int getPopCount() {
         return 1;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        PrimitiveCastInsn that = (PrimitiveCastInsn) o;
-        return Objects.equals(fromType, that.fromType) &&
-                Objects.equals(toType, that.toType);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), fromType, toType);
-    }
 }

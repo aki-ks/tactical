@@ -35,18 +35,4 @@ public class NewInsn extends AbstractInstruction {
     public int getPopCount() {
         return 0;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        NewInsn newInsn = (NewInsn) o;
-        return Objects.equals(path, newInsn.path);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), path);
-    }
 }

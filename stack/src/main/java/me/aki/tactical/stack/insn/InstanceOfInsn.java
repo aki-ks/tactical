@@ -35,18 +35,4 @@ public class InstanceOfInsn extends AbstractInstruction {
     public int getPopCount() {
         return 1;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        InstanceOfInsn that = (InstanceOfInsn) o;
-        return Objects.equals(type, that.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), type);
-    }
 }

@@ -31,18 +31,4 @@ public class PushInsn extends AbstractInstruction {
     public int getPopCount() {
         return 0;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        PushInsn pushInsn = (PushInsn) o;
-        return Objects.equals(constant, pushInsn.constant);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), constant);
-    }
 }

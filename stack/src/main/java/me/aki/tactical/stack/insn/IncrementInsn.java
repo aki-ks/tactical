@@ -48,19 +48,4 @@ public class IncrementInsn extends AbstractInstruction {
     public int getPopCount() {
         return 0;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        IncrementInsn that = (IncrementInsn) o;
-        return value == that.value &&
-                Objects.equals(local, that.local);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), local, value);
-    }
 }
