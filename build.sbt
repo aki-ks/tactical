@@ -35,28 +35,28 @@ lazy val dex = (project in file("dex"))
   .settings(javaSettings)
 
 // TEXTIFIER & PARSER
-lazy val coreTextifier = (project in file ("textify-core"))
+lazy val coreTextifier = (project in file("textify/core"))
   .dependsOn(core)
   .settings(javaSettings)
 
-lazy val stackTextifier = (project in file ("textify-stack"))
+lazy val stackTextifier = (project in file ("textify/stack"))
   .dependsOn(stack, coreTextifier)
   .settings(javaSettings)
 
-lazy val refTextifier = (project in file ("textify-ref"))
+lazy val refTextifier = (project in file ("textify/ref"))
   .dependsOn(ref, coreTextifier)
   .settings(javaSettings)
 
-lazy val coreParser = (project in file ("parser-core"))
+lazy val coreParser = (project in file ("parser/core"))
   .dependsOn(core, coreTextifier % Test)
   .settings(parserSettings)
 
-lazy val stackParser = (project in file ("parser-stack"))
+lazy val stackParser = (project in file ("parser/stack"))
   .dependsOn(stack, coreParser, stackTextifier % Test)
   .settings(parserSettings)
 
-lazy val refParser = (project in file ("parser-ref"))
-  .dependsOn(ref, coreParser, refTextifier % Test)
+lazy val refParser = (project in file ("parser/ref"))
+  .dependsOn(ref, coreParser % "test->test;compile->compile", refTextifier % Test)
   .settings(parserSettings)
 
 // CONVERSION
