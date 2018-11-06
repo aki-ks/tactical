@@ -51,7 +51,7 @@ import me.aki.tactical.ref.expr.XorExpr;
 import me.aki.tactical.ref.invoke.AbstractInstanceInvoke;
 import me.aki.tactical.ref.invoke.AbstractInvoke;
 import me.aki.tactical.ref.invoke.InvokeStatic;
-import me.aki.tactical.ref.stmt.AssignStatement;
+import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.ref.stmt.GotoStmt;
 import me.aki.tactical.ref.stmt.IfStmt;
 import me.aki.tactical.ref.stmt.InvokeStmt;
@@ -316,7 +316,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
         convertOrElseMerge(List.of(value, index, array), () -> {
             ArrayBoxExpr expr = new ArrayBoxExpr(array.getValue(), index.getValue());
-            AssignStatement statement = new AssignStatement(expr, value.getValue());
+            AssignStmt statement = new AssignStmt(expr, value.getValue());
 
             array.addReference(expr.getArrayCell());
             index.addReference(expr.getIndexCell());
@@ -447,7 +447,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
         convertOrElseMerge(List.of(value), () -> {
             RefLocal refLocal = converter.getLocal(stackLocal);
-            AssignStatement statement = new AssignStatement(refLocal, value.getValue());
+            AssignStmt statement = new AssignStmt(refLocal, value.getValue());
 
             value.addReference(statement.getValueCell());
 
@@ -462,7 +462,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
     public void visitIncrement(StackLocal stackLocal, int value) {
         convertOrElseMerge(List.of(), () -> {
             RefLocal refLocal = converter.getLocal(stackLocal);
-            AssignStatement statement = new AssignStatement(refLocal, new AddExpr(refLocal, new ConstantExpr(new IntConstant(1))));
+            AssignStmt statement = new AssignStmt(refLocal, new AddExpr(refLocal, new ConstantExpr(new IntConstant(1))));
 
             converter.addStatement(instruction, statement);
             return Optional.empty();
@@ -615,7 +615,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
         if (isStatic) {
             convertOrElseMerge(List.of(value), () -> {
                 StaticFieldExpr expr = new StaticFieldExpr(fieldRef);
-                AssignStatement stmt = new AssignStatement(expr, value.getValue());
+                AssignStmt stmt = new AssignStmt(expr, value.getValue());
 
                 value.addReference(stmt.getValueCell());
 
@@ -627,7 +627,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
             convertOrElseMerge(List.of(value, instance), () -> {
                 InstanceFieldExpr expr = new InstanceFieldExpr(fieldRef, instance.getValue());
-                AssignStatement stmt = new AssignStatement(expr, value.getValue());
+                AssignStmt stmt = new AssignStmt(expr, value.getValue());
 
                 instance.addReference(expr.getInstanceCell());
                 value.addReference(stmt.getValueCell());
@@ -670,7 +670,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction> {
 
             if (descriptor.getReturnType().isPresent()) {
                 RefLocal local = converter.newLocal();
-                AssignStatement stmt = new AssignStatement(local, new InvokeExpr(refInvoke));
+                AssignStmt stmt = new AssignStmt(local, new InvokeExpr(refInvoke));
                 converter.addStatement(instruction, stmt);
                 return Optional.of(new StackValue(instruction, local));
             } else {

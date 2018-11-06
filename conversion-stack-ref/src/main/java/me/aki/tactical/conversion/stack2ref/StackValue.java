@@ -3,7 +3,7 @@ package me.aki.tactical.conversion.stack2ref;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefLocal;
-import me.aki.tactical.ref.stmt.AssignStatement;
+import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.stack.insn.Instruction;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class StackValue {
      */
     private Instruction instruction;
 
-    private Optional<AssignStatement> assignStatement = Optional.empty();
+    private Optional<AssignStmt> assignStatement = Optional.empty();
 
     /**
      * The actual value.
@@ -40,7 +40,7 @@ public class StackValue {
         return instruction;
     }
 
-    public Optional<AssignStatement> getAssignStatement() {
+    public Optional<AssignStmt> getAssignStatement() {
         return assignStatement;
     }
 
@@ -67,23 +67,23 @@ public class StackValue {
     }
 
     /**
-     * Create a {@link AssignStatement} that stores the expression in a local.
+     * Create a {@link AssignStmt} that stores the expression in a local.
      * All references to the expression will get replaced against the local.
      *
      * @param converter that currently converts the instructions
      * @param local that will get assigned to that statement
      * @return statement that stores the value in the local
      */
-    public AssignStatement storeInLocal(BodyConverter converter, RefLocal local) {
+    public AssignStmt storeInLocal(BodyConverter converter, RefLocal local) {
         Expression oldValue = this.value;
         this.setValue(local);
 
         if (this.assignStatement.isPresent()) {
-            AssignStatement assignStatement = this.assignStatement.get();
-            assignStatement.setVariable(local);
-            return assignStatement;
+            AssignStmt assignStmt = this.assignStatement.get();
+            assignStmt.setVariable(local);
+            return assignStmt;
         } else {
-            AssignStatement assignment = new AssignStatement(local, oldValue);
+            AssignStmt assignment = new AssignStmt(local, oldValue);
             this.assignStatement = Optional.of(assignment);
 
             converter.getConvertedStatements()

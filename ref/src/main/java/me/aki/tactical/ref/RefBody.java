@@ -6,7 +6,7 @@ import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.core.util.LinkedInsertList;
-import me.aki.tactical.ref.stmt.AssignStatement;
+import me.aki.tactical.ref.stmt.AssignStmt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +22,14 @@ public class RefBody implements Body {
     /**
      * Local that initially contains the "this" value for non-static method.
      *
-     * Note that other values can be assigned to these local with a {@link AssignStatement}.
+     * Note that other values can be assigned to these local with a {@link AssignStmt}.
      */
     private Optional<RefLocal> thisLocal = Optional.empty();
 
     /**
      * Locals that initially contain the parameter values.
      *
-     * Note that other values can be assigned to these local with a {@link AssignStatement}.
+     * Note that other values can be assigned to these local with a {@link AssignStmt}.
      */
     private List<RefLocal> argumentLocals = new ArrayList<>();
 

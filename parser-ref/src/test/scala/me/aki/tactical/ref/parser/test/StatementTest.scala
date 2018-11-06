@@ -56,7 +56,7 @@ class StatementTest extends AbstractUnresolvedCtxTest {
 
   it should "parse assignment statements" in {
     parseStmt(_.parse("local1 = local2;")) match {
-      case stmt: AssignStatement =>
+      case stmt: AssignStmt =>
         stmt.getVariable shouldEqual local1
         stmt.getValue shouldEqual local2
     }

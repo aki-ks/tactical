@@ -59,10 +59,10 @@ class GotoStatementParser(ctx: UnresolvedRefCtx) extends Parser[GotoStmt] {
     }
 }
 
-class AssignStatementParser(ctx: UnresolvedRefCtx) extends Parser[AssignStatement] {
-  val parser: P[AssignStatement] =
+class AssignStatementParser(ctx: UnresolvedRefCtx) extends Parser[AssignStmt] {
+  val parser: P[AssignStmt] =
     for ((variable, value) ← new VariableParser(ctx) ~ WS.? ~ "=" ~ WS.? ~ new ExpressionParser(ctx) ~ WS.? ~ ";")
-      yield new AssignStatement(variable, value)
+      yield new AssignStmt(variable, value)
 }
 
 class IfStatementParser(ctx: UnresolvedRefCtx) extends Parser[IfStmt] {

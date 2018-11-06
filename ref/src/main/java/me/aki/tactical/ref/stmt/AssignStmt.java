@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 /**
  * Assign a value to a variable
  */
-public class AssignStatement implements Statement {
+public class AssignStmt implements Statement {
     /**
      * Variable that will be reassigned
      */
@@ -25,7 +25,7 @@ public class AssignStatement implements Statement {
      */
     private Expression value;
 
-    public AssignStatement(Variable variable, Expression value) {
+    public AssignStmt(Variable variable, Expression value) {
         this.variable = variable;
         this.value = value;
     }

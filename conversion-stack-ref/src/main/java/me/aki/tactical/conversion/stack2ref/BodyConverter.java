@@ -13,7 +13,7 @@ import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
-import me.aki.tactical.ref.stmt.AssignStatement;
+import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.BranchInsn;
@@ -21,7 +21,6 @@ import me.aki.tactical.stack.insn.Instruction;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -325,7 +324,7 @@ public class BodyConverter {
      * Find the converted {@link Statement} that corresponds to an {@link Instruction}.
      *
      * If the instruction converted to an expression, that expression will be stored in a local
-     * and the {@link AssignStatement} is returned.
+     * and the {@link AssignStmt} is returned.
      *
      * If the instruction is neither a statement nor an expression, than the statement
      * corresponding to the next instruction is returned.

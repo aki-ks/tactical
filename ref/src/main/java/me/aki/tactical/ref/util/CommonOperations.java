@@ -6,7 +6,7 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
-import me.aki.tactical.ref.stmt.AssignStatement;
+import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
 import java.util.ArrayList;
@@ -125,12 +125,12 @@ public class CommonOperations {
      * @param body the body that contains all statements
      * @return locals zipped with corresponding assign statements
      */
-    public static Map<RefLocal, List<AssignStatement>> getLocalWriteMap(RefBody body) {
-        final Map<RefLocal, List<AssignStatement>> localWriteMap = new HashMap<>();
+    public static Map<RefLocal, List<AssignStmt>> getLocalWriteMap(RefBody body) {
+        final Map<RefLocal, List<AssignStmt>> localWriteMap = new HashMap<>();
         for (Statement statement : body.getStatements()) {
             statement.getWriteValues().ifPresent(variable -> {
                 if (variable instanceof RefLocal) {
-                    localWriteMap.computeIfAbsent((RefLocal) variable, x -> new ArrayList<>()).add((AssignStatement) statement);
+                    localWriteMap.computeIfAbsent((RefLocal) variable, x -> new ArrayList<>()).add((AssignStmt) statement);
                 }
             });
         }

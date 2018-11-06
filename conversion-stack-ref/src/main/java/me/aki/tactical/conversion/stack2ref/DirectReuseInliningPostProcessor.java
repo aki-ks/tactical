@@ -4,7 +4,7 @@ import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
-import me.aki.tactical.ref.stmt.AssignStatement;
+import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.ref.util.CommonOperations;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class DirectReuseInliningPostProcessor implements PostProcessor {
     public void process(RefBody body) {
         final InsertList<Statement> statements = body.getStatements();
         final Map<RefLocal, List<Statement>> localReadMap = CommonOperations.getLocalReadMap(body);
-        final Map<RefLocal, List<AssignStatement>> localWriteMap = CommonOperations.getLocalWriteMap(body);
+        final Map<RefLocal, List<AssignStmt>> localWriteMap = CommonOperations.getLocalWriteMap(body);
 
         localWriteMap.forEach((local, writingStatements) -> {
             List<Statement> readingStatements = localReadMap.get(local);
@@ -35,7 +35,7 @@ public class DirectReuseInliningPostProcessor implements PostProcessor {
             }
 
             Statement readingStatement = readingStatements.get(0);
-            AssignStatement writingStatement = writingStatements.get(0);
+            AssignStmt writingStatement = writingStatements.get(0);
             if (statements.getNext(writingStatement) != readingStatement) {
                 // The statement that reads from the local does not directly succeed the writing statements.
                 return;

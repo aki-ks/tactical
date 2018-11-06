@@ -12,8 +12,6 @@ import me.aki.tactical.ref.condition.LessThan;
 import me.aki.tactical.ref.condition.NonEqual;
 import me.aki.tactical.ref.stmt.*;
 
-import java.util.Objects;
-
 public class StatementTextifier implements CtxTextifier<Statement> {
     private static final StatementTextifier INSTANCE = new StatementTextifier();
 
@@ -73,7 +71,7 @@ public class StatementTextifier implements CtxTextifier<Statement> {
         printer.addText("};");
     };
 
-    public static final CtxTextifier<AssignStatement> ASSIGN = (printer, ctx, statement) -> {
+    public static final CtxTextifier<AssignStmt> ASSIGN = (printer, ctx, statement) -> {
         ExpressionTextifier.VARIABLE.textify(printer, ctx, statement.getVariable());
         printer.addText(" = ");
         ExpressionTextifier.getInstance().textify(printer, ctx, statement.getValue());
@@ -123,8 +121,8 @@ public class StatementTextifier implements CtxTextifier<Statement> {
             } else {
                 throw new AssertionError();
             }
-        } else if (statement instanceof AssignStatement) {
-            ASSIGN.textify(printer, ctx, (AssignStatement) statement);
+        } else if (statement instanceof AssignStmt) {
+            ASSIGN.textify(printer, ctx, (AssignStmt) statement);
         } else if (statement instanceof InvokeStmt) {
             INVOKE.textify(printer, ctx, (InvokeStmt) statement);
         } else if (statement instanceof ReturnStmt) {
