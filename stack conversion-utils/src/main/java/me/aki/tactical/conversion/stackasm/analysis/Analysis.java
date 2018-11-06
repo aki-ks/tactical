@@ -10,7 +10,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class Analysis {
     /**
      * Map instructions to the state of the stack before that instruction is executed.
      */
-    private final Map<Instruction, Stack.Immutable<JvmType>> stackMap = new IdentityHashMap<>();
+    private final Map<Instruction, Stack.Immutable<JvmType>> stackMap = new HashMap<>();
 
     /**
      * Was the analysis already started

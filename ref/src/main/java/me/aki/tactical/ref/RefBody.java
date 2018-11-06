@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.core.util.InsertList;
-import me.aki.tactical.core.util.LinkedIdentityInsertList;
+import me.aki.tactical.core.util.LinkedInsertList;
 import me.aki.tactical.ref.stmt.AssignStatement;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class RefBody implements Body {
     /**
      * The statements of this method.
      */
-    private InsertList<Statement> statements = new LinkedIdentityInsertList<>();
+    private InsertList<Statement> statements = new LinkedInsertList<>();
 
     /**
      * The try-catch-blocks of this method.

@@ -16,9 +16,7 @@ import me.aki.tactical.stack.TryCatchBlock;
 import me.aki.tactical.stack.insn.BranchInsn;
 import me.aki.tactical.stack.insn.Instruction;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -120,7 +118,7 @@ public class StackBodyTextifier implements BodyTextifier {
      * @return all referenced instructions
      */
     private Set<Instruction> getAllReferencedInstructions(StackBody body) {
-        Set<Instruction> insns = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<Instruction> insns = new HashSet<>();
 
         for (Instruction instruction : body.getInstructions()) {
             if (!instruction.getTypeAnnotations().isEmpty()) {

@@ -10,7 +10,7 @@ import me.aki.tactical.ref.stmt.AssignStatement;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -108,7 +108,7 @@ public class CommonOperations {
        * @return map locals to statements that read their value
      */
     public static Map<RefLocal, List<Statement>> getLocalReadMap(RefBody body) {
-        final Map<RefLocal, List<Statement>> localReadMap = new IdentityHashMap<>();
+        final Map<RefLocal, List<Statement>> localReadMap = new HashMap<>();
         for (Statement statement : body.getStatements()) {
             for (Expression expr : statement.getReadValues()) {
                 if (expr instanceof RefLocal) {
@@ -126,7 +126,7 @@ public class CommonOperations {
      * @return locals zipped with corresponding assign statements
      */
     public static Map<RefLocal, List<AssignStatement>> getLocalWriteMap(RefBody body) {
-        final Map<RefLocal, List<AssignStatement>> localWriteMap = new IdentityHashMap<>();
+        final Map<RefLocal, List<AssignStatement>> localWriteMap = new HashMap<>();
         for (Statement statement : body.getStatements()) {
             statement.getWriteValues().ifPresent(variable -> {
                 if (variable instanceof RefLocal) {

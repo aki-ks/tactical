@@ -8,9 +8,9 @@ import me.aki.tactical.ref.stmt.BranchStmt;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
  */
 public class CfgUnitGraph {
     private final RefBody body;
-    private final Map<Statement, Node> nodes = new IdentityHashMap<>();
+    private final Map<Statement, Node> nodes = new HashMap<>();
 
     public CfgUnitGraph(RefBody body) {
         this.body = body;
@@ -31,7 +31,7 @@ public class CfgUnitGraph {
     }
 
     private void analyze() {
-        Set<Statement> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<Statement> visited = new HashSet<>();
         InsertList<Statement> statements = body.getStatements();
 
         Deque<Node> worklist = new ArrayDeque<>();

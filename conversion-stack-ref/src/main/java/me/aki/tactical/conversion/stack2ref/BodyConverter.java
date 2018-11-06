@@ -22,8 +22,8 @@ import me.aki.tactical.stack.insn.Instruction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,19 +43,19 @@ public class BodyConverter {
     /**
      * Map locals in stack representation to the corresponding ref locals.
      */
-    private final Map<StackLocal, RefLocal> localMap = new IdentityHashMap<>();
+    private final Map<StackLocal, RefLocal> localMap = new HashMap<>();
 
     /**
      * Cells that should be assigned to the statement corresponding to a certain instructions.
      */
-    private final Map<Instruction, List<Cell<Statement>>> instructionReferences = new IdentityHashMap<>();
+    private final Map<Instruction, List<Cell<Statement>>> instructionReferences = new HashMap<>();
 
     /**
      * Map instructions to the statements that represent them.
      */
-    private final Map<Instruction, List<Statement>> convertedStatements = new IdentityHashMap<>();
+    private final Map<Instruction, List<Statement>> convertedStatements = new HashMap<>();
 
-    private final Map<Instruction, StackDelta> stackDeltaMap = new IdentityHashMap<>();
+    private final Map<Instruction, StackDelta> stackDeltaMap = new HashMap<>();
 
     private final Stack.Mutable<StackValue> stack = new Stack.Mutable<>();
 
@@ -244,7 +244,7 @@ public class BodyConverter {
         /**
          * Map an instruction to all instruction that branch to it and have already been visited.
          */
-        private Map<Instruction, Set<BranchInsn>> visited = new IdentityHashMap<>();
+        private Map<Instruction, Set<BranchInsn>> visited = new HashMap<>();
 
         /**
          * Check whether a branch from one instruction to another one was already visited.
@@ -265,7 +265,7 @@ public class BodyConverter {
          * @param target branch location
          */
         public void setVisited(BranchInsn cause, Instruction target) {
-            Set<BranchInsn> visitedCauses = visited.computeIfAbsent(target, x -> Collections.newSetFromMap(new IdentityHashMap<>()));
+            Set<BranchInsn> visitedCauses = visited.computeIfAbsent(target, x -> new HashSet<>());
             visitedCauses.add(cause);
         }
     }

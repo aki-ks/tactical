@@ -14,7 +14,8 @@ import me.aki.tactical.ref.TryCatchBlock;
 import me.aki.tactical.ref.stmt.BranchStmt;
 
 import java.util.Collections;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class RefBodyTextifier implements BodyTextifier {
      * @return map from locals to their names
      */
     private Map<RefLocal, String> getNamedLocals(RefBody body) {
-        Map<RefLocal, String> nameMap = new IdentityHashMap<>();
+        Map<RefLocal, String> nameMap = new HashMap<>();
 
         body.getThisLocal().ifPresent(thisLocal ->
                 nameMap.put(thisLocal, "this"));
@@ -91,7 +92,7 @@ public class RefBodyTextifier implements BodyTextifier {
      * Assign a label name to all instructions that are referenced somewhere in the method.
      */
     private Map<Statement, String> getLabels(RefBody body) {
-        Map<Statement, String> labels = new IdentityHashMap<>();
+        Map<Statement, String> labels = new HashMap<>();
         Set<Statement> referencedStatements = getReferencedStatements(body);
 
         int labelIndex = 0;
@@ -111,7 +112,7 @@ public class RefBodyTextifier implements BodyTextifier {
      * @return a set of all referenced statements
      */
     private Set<Statement> getReferencedStatements(RefBody body) {
-        Set<Statement> statements = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<Statement> statements = Collections.newSetFromMap(new HashMap<>());
 
         for (Statement statement : body.getStatements()) {
             if (statement instanceof BranchStmt) {
@@ -145,7 +146,7 @@ public class RefBodyTextifier implements BodyTextifier {
     }
 
     private void textifyLocals(Printer printer, TextifyCtx ctx, RefBody body) {
-        Set<RefLocal> syntheticLocals = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<RefLocal> syntheticLocals = new HashSet<>();
         body.getThisLocal().ifPresent(syntheticLocals::add);
         syntheticLocals.addAll(body.getArgumentLocals());
 

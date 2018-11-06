@@ -8,8 +8,8 @@ import me.aki.tactical.ref.stmt.BranchStmt;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class CfgBlockGraph {
     private Node entryNode;
     private Set<Node> handlerNodes = new HashSet<>();
     private Set<Node> nodes = new HashSet<>();
-    private Map<Statement, Node> nodeByStatement = new IdentityHashMap<>();
+    private Map<Statement, Node> nodeByStatement = new HashMap<>();
 
     private CfgBlockGraph() {}
 
@@ -154,7 +154,7 @@ public class CfgBlockGraph {
         private final RefBody body;
         private CfgBlockGraph graph;
 
-        private Map<Statement, Node> nodeByStatement = new IdentityHashMap<>();
+        private Map<Statement, Node> nodeByStatement = new HashMap<>();
 
         private Deque<WorkTask> worklist = new ArrayDeque<>();
 
