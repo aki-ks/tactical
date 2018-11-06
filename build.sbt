@@ -35,37 +35,37 @@ lazy val dex = (project in file("dex"))
   .settings(javaSettings)
 
 // TEXTIFIER & PARSER
-lazy val coreTextifier = (project in file("textify/core"))
+lazy val textifierCore = (project in file("textify/core"))
   .dependsOn(core)
   .settings(javaSettings)
 
-lazy val stackTextifier = (project in file ("textify/stack"))
-  .dependsOn(stack, coreTextifier)
+lazy val textifierStack = (project in file ("textify/stack"))
+  .dependsOn(stack, textifierCore)
   .settings(javaSettings)
 
-lazy val refTextifier = (project in file ("textify/ref"))
-  .dependsOn(ref, coreTextifier)
+lazy val textifierRef = (project in file ("textify/ref"))
+  .dependsOn(ref, textifierCore)
   .settings(javaSettings)
 
-lazy val coreParser = (project in file ("parser/core"))
-  .dependsOn(core, coreTextifier % Test)
+lazy val parserCore = (project in file ("parser/core"))
+  .dependsOn(core, textifierCore % Test)
   .settings(parserSettings)
 
-lazy val stackParser = (project in file ("parser/stack"))
-  .dependsOn(stack, coreParser, stackTextifier % Test)
+lazy val parserStack = (project in file ("parser/stack"))
+  .dependsOn(stack, parserCore, textifierStack % Test)
   .settings(parserSettings)
 
-lazy val refParser = (project in file ("parser/ref"))
-  .dependsOn(ref, coreParser % "test->test;compile->compile", refTextifier % Test)
+lazy val parserRef = (project in file ("parser/ref"))
+  .dependsOn(ref, parserCore % "test->test;compile->compile", textifierRef % Test)
   .settings(parserSettings)
 
 // CONVERSION
-lazy val stackConversionUtils = (project in file ("stack conversion-utils"))
+lazy val conversionStackUtils = (project in file ("conversion/stack-utils"))
   .dependsOn(stack)
   .settings(javaSettings)
 
-lazy val asmStackConversion = (project in file ("conversion-asm-stack"))
-  .dependsOn(stack, stackConversionUtils)
+lazy val conversionAsmStack = (project in file ("conversion/asm-stack"))
+  .dependsOn(stack, conversionStackUtils)
   .settings(javaSettings)
   .settings(
     libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
@@ -73,6 +73,6 @@ lazy val asmStackConversion = (project in file ("conversion-asm-stack"))
     libraryDependencies += "org.ow2.asm" % "asm-commons" % asmVersion
   )
 
-lazy val refStackConversion = (project in file ("conversion-stack-ref"))
-  .dependsOn(stack, ref, stackConversionUtils)
+lazy val conversionRefStack = (project in file ("conversion/stack-ref"))
+  .dependsOn(stack, ref, conversionStackUtils)
   .settings(javaSettings)

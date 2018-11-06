@@ -11,5 +11,4 @@
 /target/
 /project/
 /*/target/
-/parser/*/target
-/textify/*/target
+/*/*/target
