@@ -252,8 +252,8 @@ public class RefBody implements Body {
             return Objects.equals(name, that.name) &&
                     Objects.equals(type, that.type) &&
                     Objects.equals(signature, that.signature) &&
-                    start == that.start &&
-                    end == that.end &&
+                    Objects.equals(start, that.start) &&
+                    Objects.equals(end, that.end) &&
                     Objects.equals(local, that.local);
         }
 
@@ -374,8 +374,8 @@ public class RefBody implements Body {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Location location = (Location) o;
-                return start == location.start &&
-                        end == location.end &&
+                return Objects.equals(start, location.start) &&
+                        Objects.equals(end, location.end) &&
                         Objects.equals(local, location.local);
             }
 
@@ -431,7 +431,7 @@ public class RefBody implements Body {
             if (o == null || getClass() != o.getClass()) return false;
             LineNumber that = (LineNumber) o;
             return line == that.line &&
-                    statement == that.statement;
+                    Objects.equals(statement, that.statement);
         }
 
         @Override
