@@ -86,6 +86,10 @@ public class CfgUnitGraph {
         return node;
     }
 
+    public RefBody getBody() {
+        return body;
+    }
+
     /**
      * Get the node of the first statement of the method.
      *
