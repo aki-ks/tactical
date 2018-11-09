@@ -67,12 +67,19 @@ public class LocalStateAnalysis {
 
         private Map<State, Set<Statement>> stateToStmts;
 
+        /**
+         * Groups of states that are each independent of each other.
+         * Each group could get their own local without causing issues.
+         */
+        private List<Set<State>> groups;
+
         LocalStates(RefLocal local) {
             this.local = local;
             this.reads = new HashSet<>(localReadMap.getOrDefault(local, Collections.emptyList()));
             this.writes = new HashSet<>(localWriteMap.getOrDefault(local, Collections.emptyList()));
 
             buildStateMap();
+            buildAssignGroups();
         }
 
         /**
@@ -111,6 +118,15 @@ public class LocalStateAnalysis {
          */
         public Set<Statement> getStatement(State state) {
             return stateToStmts.getOrDefault(state, Collections.emptySet());
+        }
+
+        /**
+         * Get a groups of states that are independent of each other.
+         *
+         * @return groups of independent states
+         */
+        public List<Set<State>> getGroups() {
+            return groups;
         }
 
         private void buildStateMap() {
@@ -179,6 +195,44 @@ public class LocalStateAnalysis {
                     worklist.addAll(node.getSucceeding());
                 }
             }
+        }
+
+        private void buildAssignGroups() {
+            this.groups = new ArrayList<>();
+
+            // Maps local-writes to the group that they are currently in
+            Map<State, Set<State>> groupMap = new HashMap<>();
+
+            stmtToStates.forEach((stmt, assigns) -> {
+                Iterator<State> iterator = assigns.iterator();
+
+                // get or create the group for the first assign
+                final Set<State> group = groupMap.computeIfAbsent(iterator.next(), firstAssign -> {
+                    Set<State> newGroup = new HashSet<>(Collections.singleton(firstAssign));
+                    this.groups.add(newGroup);
+                    return newGroup;
+                });
+
+                // merge the first group with the groups of all other assigns if necessary
+                iterator.forEachRemaining(assign -> {
+                    if (!group.contains(assign)) {
+                        Set<State> oldGroup = groupMap.remove(assign);
+                        if (oldGroup == null) {
+                            // add to group
+                            group.add(assign);
+                            groupMap.put(assign, group);
+                        } else {
+                            // merge with other group
+                            for (State groupMember : oldGroup) {
+                                groupMap.put(groupMember, group);
+                                group.add(groupMember);
+                            }
+
+                            this.groups.remove(oldGroup);
+                        }
+                    }
+                });
+            });
         }
     }
 
