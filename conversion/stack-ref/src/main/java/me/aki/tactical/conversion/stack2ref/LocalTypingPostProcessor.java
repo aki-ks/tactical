@@ -34,29 +34,35 @@ public class LocalTypingPostProcessor implements PostProcessor {
         }
     }
 
+    /**
+     * Assign a type to local or merge it with the current type of the local.
+     *
+     * @param local the local whose type gets modified
+     * @param mergeType the type that the local should be able to store
+     */
     private void mergeType(RefLocal local, Type mergeType) {
-        Type currentType = getSimpleType(local.getType());
-        mergeType = getSimpleType(mergeType);
-
+        Type currentType = local.getType();
         if (currentType == null) {
             local.setType(mergeType);
-        } else {
-            if (mergeType instanceof PrimitiveType && currentType instanceof PrimitiveType) {
-                if (mergeType.equals(currentType)) {
-                    return;
-                }
-            }
+            return;
+        }
 
-            if (mergeType instanceof RefType && currentType instanceof RefType) {
+        if (mergeType.equals(currentType)) {
+            return;
+        }
+
+        if (mergeType instanceof PrimitiveType || currentType instanceof PrimitiveType) {
+            if (mergeType instanceof IntLikeType && currentType instanceof IntLikeType) {
+                // If we merge e.g. 'byte' and 'short', we will just set the type to int.
+                local.setType(IntType.getInstance());
                 return;
             }
 
             throw new AssertionError("Cannot merge types " + mergeType + " and " + currentType);
         }
-    }
 
-    private Type getSimpleType(Type type) {
-        return type instanceof RefType ? ObjectType.OBJECT :
-                type instanceof IntLikeType ? IntType.getInstance() : type;
+        // We have two different RefTypes, so we just set the type to 'java.lang.Object'.
+        // Computing the 'greatest' common supertype would require that we have all their superclasses e.g. on the classpath.
+        local.setType(ObjectType.OBJECT);
     }
 }
