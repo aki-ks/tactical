@@ -3,7 +3,6 @@ package me.aki.tactical.conversion.stack2ref;
 import me.aki.tactical.core.type.IntLikeType;
 import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.ObjectType;
-import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.ref.RefBody;
@@ -13,6 +12,7 @@ import me.aki.tactical.ref.stmt.AssignStmt;
 
 /**
  * Compute and assign types to all locals.
+ * Unused locals cannot be typed and will therefore be removed.
  *
  * Since one JVM local may have multiple types at different locations in code,
  * the {@link LocalPartitioningPostProcessor} should be run first.
@@ -32,6 +32,8 @@ public class LocalTypingPostProcessor implements PostProcessor {
                 }
             }
         }
+
+        body.getLocals().removeIf(local -> local.getType() == null);
     }
 
     /**
@@ -51,18 +53,18 @@ public class LocalTypingPostProcessor implements PostProcessor {
             return;
         }
 
-        if (mergeType instanceof PrimitiveType || currentType instanceof PrimitiveType) {
-            if (mergeType instanceof IntLikeType && currentType instanceof IntLikeType) {
-                // If we merge e.g. 'byte' and 'short', we will just set the type to int.
-                local.setType(IntType.getInstance());
-                return;
-            }
-
-            throw new AssertionError("Cannot merge types " + mergeType + " and " + currentType);
+        if (mergeType instanceof RefType && currentType instanceof RefType) {
+            // We have two different RefTypes, so we just set the type to 'java.lang.Object'.
+            // Computing the 'greatest' common supertype would require that we have all their superclasses e.g. on the classpath.
+            local.setType(ObjectType.OBJECT);
+            return;
         }
 
-        // We have two different RefTypes, so we just set the type to 'java.lang.Object'.
-        // Computing the 'greatest' common supertype would require that we have all their superclasses e.g. on the classpath.
-        local.setType(ObjectType.OBJECT);
+        if (mergeType instanceof IntLikeType && currentType instanceof IntLikeType) {
+            local.setType(IntType.getInstance());
+            return;
+        }
+
+        throw new AssertionError("Cannot merge types " + mergeType + " and " + currentType);
     }
 }
