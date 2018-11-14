@@ -70,6 +70,10 @@ lazy val conversionStackUtils = (project in file ("conversion/stack-utils"))
   .dependsOn(stack)
   .settings(javaSettings(Compile))
 
+lazy val conversionRefUtils = (project in file ("conversion/ref-utils"))
+  .dependsOn(ref)
+  .settings(javaSettings(Compile))
+
 lazy val conversionAsmStack = (project in file ("conversion/asm-stack"))
   .dependsOn(stack, conversionStackUtils)
   .settings(javaSettings(Compile))
@@ -80,6 +84,6 @@ lazy val conversionAsmStack = (project in file ("conversion/asm-stack"))
   )
 
 lazy val conversionRefStack = (project in file ("conversion/stack-ref"))
-  .dependsOn(stack, ref, conversionStackUtils)
+  .dependsOn(stack, ref, conversionStackUtils, conversionRefUtils)
   .settings(javaSettings(Compile))
   .settings(scalaTest)
