@@ -18,29 +18,29 @@ public class InvokeExpr implements Expression {
     /**
      * Invocation whose result in captured
      */
-    private AbstractInvoke invocation;
+    private AbstractInvoke invoke;
 
-    public InvokeExpr(AbstractInvoke invocation) {
-        this.invocation = invocation;
+    public InvokeExpr(AbstractInvoke invoke) {
+        this.invoke = invoke;
     }
 
-    public AbstractInvoke getInvocation() {
-        return invocation;
+    public AbstractInvoke getInvoke() {
+        return invoke;
     }
 
-    public void setInvocation(AbstractInvoke invocation) {
-        this.invocation = invocation;
+    public void setInvoke(AbstractInvoke invoke) {
+        this.invoke = invoke;
     }
 
     @Override
     public Type getType() {
-        return invocation.getMethodDescriptor().getReturnType()
+        return invoke.getMethodDescriptor().getReturnType()
                 .orElseThrow(() -> new IllegalStateException("Void in InvokeExpr"));
     }
 
     @Override
     public List<Cell<Expression>> getReferencedValueCells() {
-        return invocation.getReferencedValueCells();
+        return invoke.getReferencedValueCells();
     }
 
     @Override
@@ -48,11 +48,11 @@ public class InvokeExpr implements Expression {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InvokeExpr that = (InvokeExpr) o;
-        return Objects.equals(invocation, that.invocation);
+        return Objects.equals(invoke, that.invoke);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(invocation);
+        return Objects.hash(invoke);
     }
 }

@@ -140,7 +140,7 @@ public class ExpressionTextifier implements CtxTextifier<Expression> {
     };
 
     public static final CtxTextifier<InvokeExpr> INVOKE = (printer, ctx, expr) -> {
-        AbstractInvoke invokation = expr.getInvocation();
+        AbstractInvoke invokation = expr.getInvoke();
         InvokeTextifier.getInstance().textify(printer, ctx, invokation);
     };
 

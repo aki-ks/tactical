@@ -12,6 +12,11 @@ import me.aki.tactical.core.type.Type;
  * The value will be stored in the array at the index.
  */
 public class ArrayStoreInsn extends AbstractTypeInsn {
+    /**
+     * Create an array store instruction
+     *
+     * @param type the type of the value that gets stored in the array
+     */
     public ArrayStoreInsn(Type type) {
         super(type);
     }
