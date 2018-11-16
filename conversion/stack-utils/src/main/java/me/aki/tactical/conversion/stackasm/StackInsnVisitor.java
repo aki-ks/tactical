@@ -9,15 +9,16 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.IfInsn;
+import me.aki.tactical.stack.insn.Instruction;
 import me.aki.tactical.stack.invoke.Invoke;
 
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * Visitor that visits instructions in a way similar to the stack intermediation instructions.
+ * Visitor that visits instructions in a way similar to the stack {@link Instruction instructions}.
  *
- * @param <T> Type of instruction references
+ * @param <T> A representation of a reference to an instruction
  */
 public class StackInsnVisitor<T> {
     private StackInsnVisitor<T> iv;

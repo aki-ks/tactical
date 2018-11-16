@@ -14,7 +14,22 @@ import java.util.stream.Stream;
  */
 public class Stack<T> {
     public static class Mutable<T> extends Stack<T> {
-        public Mutable() {}
+        public Mutable() {
+            this(Optional.empty(), 0);
+        }
+
+        /**
+         * Create a stack from a list of elements.
+         * The first provided element is the first element to be popped.
+         *
+         * @param values the values on the stack
+         */
+        public Mutable(T... values) {
+            this(Optional.empty(), values.length);
+            for (int i = values.length - 1; i >= 0; i--) {
+                this.head = Optional.of(new Stack<T>.Node(values[i], this.head));
+            }
+        }
 
         public Mutable(Optional<Stack<T>.Node> head, int size) {
             super(head, size);
@@ -66,7 +81,22 @@ public class Stack<T> {
      * A immutable snapshot of a stack state
      */
     public static class Immutable<T> extends Stack<T> {
-        public Immutable() {}
+        public Immutable() {
+            this(Optional.empty(), 0);
+        }
+
+        /**
+         * Create a stack from a list of elements.
+         * The first provided element is the first element to be popped.
+         *
+         * @param values the values on the stack
+         */
+        public Immutable(T... values) {
+            this(Optional.empty(), values.length);
+            for (int i = values.length - 1; i >= 0; i--) {
+                this.head = Optional.of(new Stack<T>.Node(values[i], this.head));
+            }
+        }
 
         public Immutable(Optional<Stack<T>.Node> head, int size) {
             super(head, size);
@@ -82,13 +112,6 @@ public class Stack<T> {
      * amount of values on the stack
      */
     protected int size;
-
-    /**
-     * Create an empty stack
-     */
-    public Stack() {
-        this(Optional.empty(), 0);
-    }
 
     private Stack(Optional<Node> head, int size) {
         this.head = head;

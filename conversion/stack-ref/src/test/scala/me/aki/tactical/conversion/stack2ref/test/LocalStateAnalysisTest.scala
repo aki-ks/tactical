@@ -3,7 +3,7 @@ package me.aki.tactical.conversion.stack2ref.test
 import java.util.Optional
 
 import scala.collection.JavaConverters._
-import me.aki.tactical.conversion.stack2ref.{CfgUnitGraph, LocalStateAnalysis}
+import me.aki.tactical.conversion.stack2ref.LocalStateAnalysis
 import me.aki.tactical.conversion.stack2ref.LocalStateAnalysis.State
 import me.aki.tactical.core.`type`.{IntType, ObjectType, Type}
 import me.aki.tactical.core.{MethodRef, Path}
