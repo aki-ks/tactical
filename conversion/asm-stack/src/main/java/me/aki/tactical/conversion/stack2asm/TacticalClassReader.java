@@ -211,7 +211,7 @@ public class TacticalClassReader {
             int access = AccessConverter.method.toBitMap(method.getFlags());
             String name = method.getName();
             String descriptor = AsmUtil.methodDescriptorToString(method.getReturnType(), method.getParameterTypes());
-            String signature = method.getSignature().orElse(name);
+            String signature = method.getSignature().orElse(null);
             String[] exceptions = method.getExceptions().stream()
                     .map(AsmUtil::toInternalName)
                     .toArray(String[]::new);
