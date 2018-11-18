@@ -2,17 +2,23 @@ package me.aki.tactical.conversion.ref2stack;
 
 import me.aki.tactical.conversion.refutils.CfgUnitGraph;
 import me.aki.tactical.conversion.stackasm.analysis.Stack;
+import me.aki.tactical.core.Path;
+import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
+import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
+import me.aki.tactical.stack.insn.GotoInsn;
 import me.aki.tactical.stack.insn.Instruction;
+import me.aki.tactical.stack.insn.StoreInsn;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -26,12 +32,10 @@ import java.util.stream.Collectors;
 public class BodyConverter {
     private final RefBody refBody;
     private final StackBody stackBody;
+    private final CfgUnitGraph graph;
 
-    private final ConversionContext ctx = new ConversionContext();
-
-    private final Map<Statement, List<Instruction>> convertedStatements = new HashMap<>();
-
-    private Stack.Mutable<Type> stackState = new Stack.Mutable<>();
+    private ConversionContext ctx;
+    private Map<Statement, List<Instruction>> convertedStatements;
 
     public BodyConverter(RefBody refBody) {
         this(refBody, new StackBody());
@@ -40,6 +44,7 @@ public class BodyConverter {
     public BodyConverter(RefBody refBody, StackBody stackBody) {
         this.refBody = refBody;
         this.stackBody = stackBody;
+        this.graph = new CfgUnitGraph(refBody);
     }
 
     public StackBody getStackBody() {
@@ -51,11 +56,16 @@ public class BodyConverter {
     }
 
     public void convert() {
+        this.ctx = new ConversionContext();
+        this.convertedStatements = new HashMap<>();
+
         convertLocals();
 
         convertInstructions();
         resolveInsnReferences();
         insertConvertedInstructions();
+
+        convertTryCatchBlocks();
     }
 
     private void convertLocals() {
@@ -77,7 +87,6 @@ public class BodyConverter {
     }
 
     private void convertInstructions() {
-        CfgUnitGraph graph = new CfgUnitGraph(refBody);
         Deque<CfgUnitGraph.Node> worklist = new ArrayDeque<>();
         Set<CfgUnitGraph.Node> visited = new HashSet<>();
 
@@ -117,6 +126,67 @@ public class BodyConverter {
         for (Statement statement : refBody.getStatements()) {
             List<Instruction> instructions = convertedStatements.getOrDefault(statement, Collections.emptyList());
             stackBody.getInstructions().addAll(instructions);
+        }
+    }
+
+    /**
+     * Find the {@link Instruction} that is equivalent to a {@link Statement}.
+     *
+     * @param statement the {@link Statement}
+     * @return the equivalent {@link Instruction}
+     */
+    private Instruction getInstruction(Statement statement) {
+        return this.convertedStatements.get(statement).get(0);
+    }
+
+    private void convertTryCatchBlocks() {
+        // In the ref intermediation caught exceptions a stored in locals while they are put onto
+        // the stack in the stack intermediation. Therefore a StoreInsn that pops the caught exception
+        // from the stack and stores it in the corresponding local has to be inserted for each handler.
+
+        refBody.getTryCatchBlocks().stream()
+                .collect(Collectors.groupingBy(TryCatchBlock::getHandler))
+                .forEach((handler, blocksForHandler) -> {
+            Instruction handlerInsn = getInstruction(handler);
+            Map<RefLocal, List<TryCatchBlock>> handlersByLocal = blocksForHandler.stream()
+                    .collect(Collectors.groupingBy(TryCatchBlock::getExceptionLocal));
+
+            CfgUnitGraph.Node handlerNode = graph.getNode(handler);
+            if (handlersByLocal.size() == 1 && handlerNode.getSucceeding().isEmpty()) {
+                // Since each try/catch blocks pointing at this handler instructions has the same local,
+                // we will insert the StoreInsn directly before the actual handler instruction.
+
+                Map.Entry<RefLocal, List<TryCatchBlock>> onlyEntry = handlersByLocal.entrySet().iterator().next();
+                RefLocal local = onlyEntry.getKey();
+                List<TryCatchBlock> blocks = onlyEntry.getValue();
+
+                StoreInsn assignInsn = new StoreInsn(ObjectType.OBJECT, ctx.getStackLocal(local));
+                stackBody.getInstructions().insertBefore(handlerInsn, assignInsn);
+
+                convertTryCatchBlocks(blocks, assignInsn);
+            } else {
+                // There are multiple try/catch blocks pointing at this handler instruction each
+                // having different locals. We will append the corresponding StoreInsn at the end of
+                // the method followed by a goto to the actual handler instruction.
+
+                handlersByLocal.forEach((local, blocksForLocal) -> {
+                    StoreInsn assignInsn = new StoreInsn(ObjectType.OBJECT, ctx.getStackLocal(local));
+                    GotoInsn gotoInsn = new GotoInsn(handlerInsn);
+                    stackBody.getInstructions().addAll(List.of(assignInsn, gotoInsn));
+
+                    convertTryCatchBlocks(blocksForLocal, assignInsn);
+                });
+            }
+        });
+    }
+
+    private void convertTryCatchBlocks(List<TryCatchBlock> blocks, StoreInsn handlerInsn) {
+        for (TryCatchBlock refBlock : blocks) {
+            Instruction firstInsn = getInstruction(refBlock.getFirst());
+            Instruction lastInsn = getInstruction(refBlock.getLast());
+            Optional<Path> exception = refBlock.getException();
+
+            stackBody.getTryCatchBlocks().add(new me.aki.tactical.stack.TryCatchBlock(firstInsn, lastInsn, handlerInsn, exception));
         }
     }
 }
