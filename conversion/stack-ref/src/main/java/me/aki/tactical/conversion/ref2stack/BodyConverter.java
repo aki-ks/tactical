@@ -1,15 +1,14 @@
 package me.aki.tactical.conversion.ref2stack;
 
 import me.aki.tactical.conversion.refutils.CfgUnitGraph;
-import me.aki.tactical.conversion.stackasm.analysis.Stack;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
-import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.GotoInsn;
@@ -18,7 +17,6 @@ import me.aki.tactical.stack.insn.StoreInsn;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -66,6 +64,7 @@ public class BodyConverter {
         insertConvertedInstructions();
 
         convertTryCatchBlocks();
+        convertLocalVariables();
     }
 
     private void convertLocals() {
@@ -187,6 +186,19 @@ public class BodyConverter {
             Optional<Path> exception = refBlock.getException();
 
             stackBody.getTryCatchBlocks().add(new me.aki.tactical.stack.TryCatchBlock(firstInsn, lastInsn, handlerInsn, exception));
+        }
+    }
+
+    private void convertLocalVariables() {
+        for (RefBody.LocalVariable refVar : refBody.getLocalVariables()) {
+            String name = refVar.getName();
+            Type type = refVar.getType();
+            Optional<String> signature = refVar.getSignature();
+            Instruction start = getInstruction(refVar.getStart());
+            Instruction end = getInstruction(refVar.getEnd());
+            StackLocal local = ctx.getStackLocal(refVar.getLocal());
+
+            stackBody.getLocalVariables().add(new StackBody.LocalVariable(name, type, signature, start, end, local));
         }
     }
 }
