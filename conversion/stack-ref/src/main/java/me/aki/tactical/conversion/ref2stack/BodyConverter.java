@@ -65,6 +65,7 @@ public class BodyConverter {
 
         convertTryCatchBlocks();
         convertLocalVariables();
+        convertLocalVariableAnnotations();
     }
 
     private void convertLocals() {
@@ -199,6 +200,21 @@ public class BodyConverter {
             StackLocal local = ctx.getStackLocal(refVar.getLocal());
 
             stackBody.getLocalVariables().add(new StackBody.LocalVariable(name, type, signature, start, end, local));
+        }
+    }
+
+    private void convertLocalVariableAnnotations() {
+        for (RefBody.LocalVariableAnnotation refVarAnno : refBody.getLocalVariableAnnotations()) {
+            LocalVariableTypeAnnotation annotation = refVarAnno.getAnnotation();
+            List<StackBody.LocalVariableAnnotation.Location> stackLocations = refVarAnno.getLocations().stream()
+                    .map(location -> {
+                        Instruction start = getInstruction(location.getStart());
+                        Instruction end = getInstruction(location.getEnd());
+                        StackLocal local = ctx.getStackLocal(location.getLocal());
+                        return new StackBody.LocalVariableAnnotation.Location(start, end, local);
+                    }).collect(Collectors.toList());
+
+            stackBody.getLocalVariableAnnotations().add(new StackBody.LocalVariableAnnotation(annotation, stackLocations));
         }
     }
 }
