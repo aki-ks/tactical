@@ -66,6 +66,7 @@ public class BodyConverter {
         convertTryCatchBlocks();
         convertLocalVariables();
         convertLocalVariableAnnotations();
+        convertLineNumbers();
     }
 
     private void convertLocals() {
@@ -215,6 +216,15 @@ public class BodyConverter {
                     }).collect(Collectors.toList());
 
             stackBody.getLocalVariableAnnotations().add(new StackBody.LocalVariableAnnotation(annotation, stackLocations));
+        }
+    }
+
+    private void convertLineNumbers() {
+        for (RefBody.LineNumber lineNumber : refBody.getLineNumbers()) {
+            int line = lineNumber.getLine();
+            Instruction instruction = getInstruction(lineNumber.getStatement());
+
+            stackBody.getLineNumbers().add(new StackBody.LineNumber(line, instruction));
         }
     }
 }
