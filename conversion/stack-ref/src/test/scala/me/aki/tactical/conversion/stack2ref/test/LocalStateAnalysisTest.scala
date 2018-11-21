@@ -5,14 +5,15 @@ import java.util.Optional
 import scala.collection.JavaConverters._
 import me.aki.tactical.conversion.stack2ref.LocalStateAnalysis
 import me.aki.tactical.conversion.stack2ref.LocalStateAnalysis.State
-import me.aki.tactical.core.`type`.{IntType, ObjectType, Type}
+import me.aki.tactical.conversion.refutils.CfgUnitGraph
 import me.aki.tactical.core.{MethodRef, Path}
+import me.aki.tactical.core.`type`.{IntType, ObjectType, Type}
 import me.aki.tactical.core.constant.{IntConstant, StringConstant}
+import me.aki.tactical.ref.{Expression, RefBody, RefLocal}
 import me.aki.tactical.ref.condition.Equal
 import me.aki.tactical.ref.expr.ConstantExpr
 import me.aki.tactical.ref.invoke.InvokeStatic
 import me.aki.tactical.ref.stmt.{AssignStmt, IfStmt, InvokeStmt, ReturnStmt}
-import me.aki.tactical.ref.{Expression, RefBody, RefLocal}
 import org.scalatest.{FlatSpec, Matchers}
 
 class LocalStateAnalysisTest extends FlatSpec with Matchers {

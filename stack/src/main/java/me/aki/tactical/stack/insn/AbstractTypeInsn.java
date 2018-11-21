@@ -23,7 +23,7 @@ public abstract class AbstractTypeInsn extends AbstractInstruction {
 
     public void setType(Type type) {
         if (!isTypeSupported(type)) {
-            throw new IllegalArgumentException(type + "is not supported by this instruction");
+            throw new IllegalArgumentException(type + " is not supported by this instruction");
         }
 
         this.type = type;
