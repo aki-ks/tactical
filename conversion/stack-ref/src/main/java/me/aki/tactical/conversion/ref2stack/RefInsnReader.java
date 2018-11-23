@@ -365,10 +365,10 @@ public class RefInsnReader {
         if (expression instanceof InstanceFieldExpr) {
             InstanceFieldExpr fieldExpr = (InstanceFieldExpr) expression;
             accept(fieldExpr.getInstance());
-            iv.visitFieldGet(fieldExpr.getField(), true);
+            iv.visitFieldGet(fieldExpr.getField(), false);
         } else if (expression instanceof StaticFieldExpr) {
             StaticFieldExpr fieldExpr = (StaticFieldExpr) expression;
-            iv.visitFieldGet(fieldExpr.getField(), false);
+            iv.visitFieldGet(fieldExpr.getField(), true);
         } else if (expression instanceof ArrayBoxExpr) {
             ArrayBoxExpr arrayBoxExpr = (ArrayBoxExpr) expression;
             accept(arrayBoxExpr.getArray());
