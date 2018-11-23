@@ -3,6 +3,7 @@ package me.aki.tactical.conversion.stack2ref;
 import me.aki.tactical.conversion.stackasm.StackInsnReader;
 import me.aki.tactical.conversion.stackasm.analysis.Analysis;
 import me.aki.tactical.conversion.stackasm.analysis.Stack;
+import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
  * Utility that builds a {@link RefBody} from a {@link StackBody}.
  */
 public class BodyConverter {
+    private final Path thisType;
+    private final Method method;
     private final StackBody stackBody;
     private final RefBody refBody;
     private Analysis analysis;
@@ -58,7 +61,9 @@ public class BodyConverter {
 
     private final Stack.Mutable<StackValue> stack = new Stack.Mutable<>();
 
-    public BodyConverter(StackBody stackBody) {
+    public BodyConverter(Path thisType, Method method, StackBody stackBody) {
+        this.thisType = thisType;
+        this.method = method;
         this.stackBody = stackBody;
         this.refBody = new RefBody();
     }
@@ -125,7 +130,6 @@ public class BodyConverter {
         convertLocals();
 
         convertInsns();
-
         resolveInsnsRefs();
 
         convertLocalVariables();
@@ -142,10 +146,19 @@ public class BodyConverter {
             localMap.put(stackLocal, refLocal);
         }
 
-        refBody.setThisLocal(stackBody.getThisLocal().map(this::getLocal));
-        refBody.setArgumentLocals(stackBody.getParameterLocals().stream()
-                .map(this::getLocal)
-                .collect(Collectors.toList()));
+        stackBody.getThisLocal().ifPresent(stackLocal -> {
+            RefLocal refLocal = getLocal(stackLocal);
+            refLocal.setType(new ObjectType(thisType));
+            refBody.setThisLocal(Optional.of(refLocal));
+        });
+
+        Iterator<Type> argTypeIter = method.getParameterTypes().iterator();
+        Iterator<StackLocal> argLocalIter = stackBody.getParameterLocals().iterator();
+        while (argTypeIter.hasNext()) {
+            RefLocal refLocal = getLocal(argLocalIter.next());
+            refLocal.setType(argTypeIter.next());
+            refBody.getArgumentLocals().add(refLocal);
+        }
     }
 
     private void convertInsns() {

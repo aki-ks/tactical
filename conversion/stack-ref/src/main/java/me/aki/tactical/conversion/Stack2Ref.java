@@ -31,7 +31,7 @@ public class Stack2Ref {
         for (Method method : classfile.getMethods()) {
             method.getBody().ifPresent(body -> {
                 if (body instanceof StackBody) {
-                    method.setBody(Optional.of(convert((StackBody) body)));
+                    method.setBody(Optional.of(convert(classfile, method, (StackBody) body)));
                 } else {
                     throw new IllegalArgumentException("Class contains a " + body.getClass().getSimpleName() + " expected only StackBodies");
                 }
@@ -42,11 +42,13 @@ public class Stack2Ref {
     /**
      * Build a {@link RefBody} from a {@link StackBody}.
      *
+     * @param classfile the classfile that contains the method and body
+     * @param method the method contains the body
      * @param stackBody the stackbody to be converted
      * @return the converted ref body
      */
-    public static RefBody convert(StackBody stackBody) {
-        BodyConverter bodyConverter = new BodyConverter(stackBody);
+    public static RefBody convert(Classfile classfile, Method method, StackBody stackBody) {
+        BodyConverter bodyConverter = new BodyConverter(classfile.getName(), method, stackBody);
         bodyConverter.convert();
         RefBody refBody = bodyConverter.getRefBody();
 
