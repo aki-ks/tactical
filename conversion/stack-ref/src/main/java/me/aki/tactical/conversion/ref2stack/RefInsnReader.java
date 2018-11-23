@@ -133,12 +133,14 @@ public class RefInsnReader {
         Condition refCondition = statement.getCondition();
         Expression value1 = refCondition.getValue1();
         Expression value2 = refCondition.getValue2();
+        Type type1 = value1.getType();
+        Type type2 = value2.getType();
 
         accept(value1);
 
         IfInsn.Condition stackCondition;
-        if (value1 instanceof IntLikeType) {
-            if (!(value2 instanceof IntLikeType)) {
+        if (type1 instanceof IntLikeType) {
+            if (!(type2 instanceof IntLikeType)) {
                 throw new IllegalStateException();
             }
 
@@ -151,15 +153,15 @@ public class RefInsnReader {
                     refCondition instanceof LessThan ? IfInsn.LT.getInstance() :
                     assertionError();
 
-            boolean isZeroCompare = value2 instanceof ConstantExpr && ((ConstantExpr) value2).getConstant().equals(new IntConstant(0));
+            boolean isZeroCompare = type2 instanceof ConstantExpr && ((ConstantExpr) type2).getConstant().equals(new IntConstant(0));
             IfInsn.IntCompareValue compareValue = isZeroCompare ? IfInsn.ZeroValue.getInstance() : IfInsn.StackValue.getInstance();
 
             if (!isZeroCompare) {
                 accept(value2);
             }
             stackCondition = new IfInsn.IntCondition(comparison, compareValue);
-        } else if (value1 instanceof RefType) {
-            if (!(value2 instanceof RefType)) {
+        } else if (type1 instanceof RefType) {
+            if (!(type2 instanceof RefType)) {
                 throw new IllegalStateException();
             }
 
@@ -168,7 +170,7 @@ public class RefInsnReader {
                     refCondition instanceof NonEqual ? IfInsn.NE.getInstance() :
                     assertionError();
 
-            boolean isNullCompare = value2 instanceof ConstantExpr && ((ConstantExpr) value2).getConstant() == NullConstant.getInstance();
+            boolean isNullCompare = type2 instanceof ConstantExpr && ((ConstantExpr) type2).getConstant() == NullConstant.getInstance();
             IfInsn.ReferenceCompareValue compareValue = isNullCompare ? IfInsn.NullValue.getInstance() : IfInsn.StackValue.getInstance();
 
             if (!isNullCompare) {
