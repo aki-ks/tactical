@@ -107,9 +107,7 @@ public class RefInsnReader {
         } else if (statement instanceof AssignStmt) {
             convertAssignStatement((AssignStmt) statement);
         } else if (statement instanceof InvokeStmt) {
-            convertInvoke(((InvokeStmt) statement).getInvoke());
-            // the returned value of the invoke expressions is not used.
-            iv.visitPop();
+            convertInvokeStatement((InvokeStmt) statement);
         } else if (statement instanceof ReturnStmt) {
             convertReturnStatement((ReturnStmt) statement);
         } else if (statement instanceof ThrowStmt) {
@@ -205,6 +203,16 @@ public class RefInsnReader {
             iv.visitFieldSet(fieldExpr.getField(), isStatic);
         } else {
             throw new AssertionError();
+        }
+    }
+
+    private void convertInvokeStatement(InvokeStmt statement) {
+        convertInvoke(statement.getInvoke());
+
+        Optional<Type> returnType = statement.getInvoke().getMethodDescriptor().getReturnType();
+        if (returnType.isPresent()) {
+            // the returned value of the invoke expressions is not used.
+            iv.visitPop();
         }
     }
 
