@@ -151,7 +151,7 @@ public class RefInsnReader {
                     refCondition instanceof LessThan ? IfInsn.LT.getInstance() :
                     assertionError();
 
-            boolean isZeroCompare = type2 instanceof ConstantExpr && ((ConstantExpr) type2).getConstant().equals(new IntConstant(0));
+            boolean isZeroCompare = value2 instanceof ConstantExpr && ((ConstantExpr) value2).getConstant().equals(new IntConstant(0));
             IfInsn.IntCompareValue compareValue = isZeroCompare ? IfInsn.ZeroValue.getInstance() : IfInsn.StackValue.getInstance();
 
             if (!isZeroCompare) {
@@ -168,7 +168,7 @@ public class RefInsnReader {
                     refCondition instanceof NonEqual ? IfInsn.NE.getInstance() :
                     assertionError();
 
-            boolean isNullCompare = type2 instanceof ConstantExpr && ((ConstantExpr) type2).getConstant() == NullConstant.getInstance();
+            boolean isNullCompare = value2 instanceof ConstantExpr && ((ConstantExpr) value2).getConstant() == NullConstant.getInstance();
             IfInsn.ReferenceCompareValue compareValue = isNullCompare ? IfInsn.NullValue.getInstance() : IfInsn.StackValue.getInstance();
 
             if (!isNullCompare) {
