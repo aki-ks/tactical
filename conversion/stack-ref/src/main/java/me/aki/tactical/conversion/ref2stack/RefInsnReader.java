@@ -1,8 +1,10 @@
 package me.aki.tactical.conversion.ref2stack;
 
 import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
+import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.NullConstant;
+import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.type.IntLikeType;
 import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
@@ -190,8 +192,7 @@ public class RefInsnReader {
             accept(value);
             iv.visitArrayStore(value.getType());
         } else if (variable instanceof RefLocal) {
-            accept(value);
-            iv.visitStore(value.getType(), ctx.getStackLocal((RefLocal) variable));
+            convertVariableAssignment((RefLocal) variable, value);
         } else if (variable instanceof AbstractFieldExpr) {
             AbstractFieldExpr fieldExpr = (AbstractFieldExpr) variable;
             boolean isStatic = value instanceof StaticFieldExpr;
@@ -204,6 +205,46 @@ public class RefInsnReader {
         } else {
             throw new AssertionError();
         }
+    }
+
+    private void convertVariableAssignment(RefLocal variable, Expression value) {
+        StackLocal stackLocal = ctx.getStackLocal(variable);
+
+        // Try to generate an increment instruction if possible
+        if (value.getType() instanceof IntLikeType) {
+            if (value instanceof AddExpr) {
+                AddExpr add = (AddExpr) value;
+
+                if (add.getValue1() == variable && add.getValue2() instanceof ConstantExpr) {
+                    PushableConstant constant = ((ConstantExpr) add.getValue2()).getConstant();
+                    if (constant instanceof IntConstant) {
+                        iv.visitIncrement(stackLocal, ((IntConstant) constant).getValue());
+                        return;
+                    }
+                }
+
+                if (add.getValue2() == variable && add.getValue1() instanceof ConstantExpr) {
+                    PushableConstant constant = ((ConstantExpr) add.getValue1()).getConstant();
+                    if (constant instanceof IntConstant) {
+                        iv.visitIncrement(stackLocal, ((IntConstant) constant).getValue());
+                        return;
+                    }
+                }
+            } else if (value instanceof SubExpr) {
+                SubExpr sub = (SubExpr) value;
+
+                if (sub.getValue1() == value && sub.getValue2() instanceof ConstantExpr) {
+                    PushableConstant constant = ((ConstantExpr) sub.getValue2()).getConstant();
+                    if (constant instanceof IntConstant) {
+                        iv.visitIncrement(stackLocal, -(((IntConstant) constant).getValue()));
+                        return;
+                    }
+                }
+            }
+        }
+
+        accept(value);
+        iv.visitStore(value.getType(), stackLocal);
     }
 
     private void convertInvokeStatement(InvokeStmt statement) {
