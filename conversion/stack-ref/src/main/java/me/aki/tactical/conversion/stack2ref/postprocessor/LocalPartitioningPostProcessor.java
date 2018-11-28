@@ -1,6 +1,7 @@
-package me.aki.tactical.conversion.stack2ref;
+package me.aki.tactical.conversion.stack2ref.postprocessor;
 
 import me.aki.tactical.conversion.refutils.CfgUnitGraph;
+import me.aki.tactical.conversion.stack2ref.LocalStateAnalysis;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;

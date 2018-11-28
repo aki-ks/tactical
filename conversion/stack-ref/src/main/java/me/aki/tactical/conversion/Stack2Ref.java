@@ -1,10 +1,10 @@
 package me.aki.tactical.conversion;
 
 import me.aki.tactical.conversion.stack2ref.BodyConverter;
-import me.aki.tactical.conversion.stack2ref.DirectReuseInliningPostProcessor;
-import me.aki.tactical.conversion.stack2ref.LocalPartitioningPostProcessor;
-import me.aki.tactical.conversion.stack2ref.LocalTypingPostProcessor;
-import me.aki.tactical.conversion.stack2ref.PostProcessor;
+import me.aki.tactical.conversion.stack2ref.postprocessor.DirectReuseInliningPostProcessor;
+import me.aki.tactical.conversion.stack2ref.postprocessor.LocalPartitioningPostProcessor;
+import me.aki.tactical.conversion.stack2ref.postprocessor.LocalTypingPostProcessor;
+import me.aki.tactical.conversion.stack2ref.postprocessor.PostProcessor;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.ref.RefBody;
@@ -19,7 +19,7 @@ public class Stack2Ref {
     private static PostProcessor[] POST_PROCESSORS = {
             new DirectReuseInliningPostProcessor(),
             new LocalPartitioningPostProcessor(),
-            new LocalTypingPostProcessor(),
+            new LocalTypingPostProcessor()
     };
 
     /**
