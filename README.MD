@@ -11,6 +11,15 @@ Building a referenced based intermediation for java bytecode is the main objecti
 - `long` and `double` values require only one slot on the stack.
   The DUP2 instruction for instance does always duplicate two values.
   In JVM bytecode it may duplicate either one or two values depending on their type.
+- Dead code will be dropped during the conversion
+
+# Ref
+- The `ref` intermediation drops the concept of operating on a stack and uses references instead.
+- Instructions have been replaced against the concept of statements and expressions.
+- The instruction set was thereby further reduced.
+- It is a statically typed language - locals have types.
+- Dead code will be dropped and debug information such as line numbers might be lost or altered during the conversion.
+
 
 # Objectives
 * [X] implement basic classfile structure shared between all intermediations
