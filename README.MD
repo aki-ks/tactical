@@ -4,6 +4,14 @@ This project aims to simplify working with JVM bytecode.
 
 Building a referenced based intermediation for java bytecode is the main objective.
 
+# Stack
+- The `stack` intermediation represents bytecode close to JVM bytecode.
+- Instructions that serve the sole purpose of saving diskspace have been removed.
+  E.g. `bipush`, `sipush`, `ldc`, `ldc2`, `iconst_0`, `iconst_1` and many more are all represented by the `PushInsn`.
+- `long` and `double` values require only one slot on the stack.
+  The DUP2 instruction for instance does always duplicate two values.
+  In JVM bytecode it may duplicate either one or two values depending on their type.
+
 # Objectives
 * [X] implement basic classfile structure shared between all intermediations
 * [X] build stack intermediation
