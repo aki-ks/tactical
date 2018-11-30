@@ -88,7 +88,7 @@ public class LocalPartitioningPostProcessor implements PostProcessor {
             }
         }
 
-        // Removes the old local if we just created a new local.
+        // Removes the old local if it no longer used.
         CommonOperations.removeLocal(body, local);
     }
 

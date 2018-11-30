@@ -18,8 +18,7 @@ Building a referenced based intermediation for java bytecode is the main objecti
 - Instructions have been replaced against the concept of statements and expressions.
 - The instruction set was thereby further reduced.
 - It is a statically typed language - locals have types.
-- Dead code will be dropped and debug information such as line numbers might be lost or altered during the conversion.
-
+- Dead code will be dropped. Local variable debug information get lost during conversion from stack to ref.
 
 # Objectives
 * [X] implement basic classfile structure shared between all intermediations

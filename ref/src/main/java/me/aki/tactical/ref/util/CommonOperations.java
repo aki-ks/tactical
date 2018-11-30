@@ -79,26 +79,17 @@ public class CommonOperations {
     }
 
     /**
-     * Remove a local from a RefBody except is is the 'this' or a parameter local.
+     * Remove a local from a RefBody if it is no longer used anywhere within its body.
      *
      * @param body the body containing the local
      * @param local the local to be removed
      * @return was the local actually removed
      */
     public static boolean removeLocal(RefBody body, RefLocal local) {
-        for (RefLocal argumentLocal : body.getArgumentLocals()) {
-            if (argumentLocal == local) {
-                return false;
-            }
-        }
-
-        Optional<RefLocal> thisLocal = body.getThisLocal();
-        if (thisLocal.isPresent() && thisLocal.get() == local) {
+        if (RefUtils.getExpressionCells(body).anyMatch(cell -> cell.get() == local)) {
             return false;
         }
-
-        body.getLocals().remove(local);
-        return true;
+        return body.getLocals().remove(local);
     }
 
     /**

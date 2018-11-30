@@ -132,8 +132,6 @@ public class BodyConverter {
         convertInsns();
         resolveInsnsRefs();
 
-        convertLocalVariables();
-        convertLocalVariableAnnotations();
         convertLineNumbers();
 
         insertConvertedStatements();
@@ -367,46 +365,14 @@ public class BodyConverter {
             StackDelta delta = this.stackDeltaMap.get(instruction);
 
             if (delta != null && delta.getPush().isPresent()) {
+                // This instruction converted into an expression.
+                // If we store it in a local, that AssignStatement can be returned.
                 StackValue push = delta.getPush().get();
                 return Optional.of(push.storeInLocal(this, newLocal()));
             } else {
-                // This instruction converts neither to a statement, not does it push a value.
-                // Therefore there cannot be a corresponding stmt.
+                // This instruction converts neither to a statement, nor does it push a value.
+                // Therefore there cannot be a corresponding statement.
                 return Optional.empty();
-            }
-        }
-    }
-
-    private void convertLocalVariables() {
-        for (StackBody.LocalVariable stackLocalVariable : stackBody.getLocalVariables()) {
-            if (isRangeEmpty(stackLocalVariable.getStart(), stackLocalVariable.getEnd())) {
-                continue;
-            }
-
-            String name = stackLocalVariable.getName();
-            Type type = stackLocalVariable.getType();
-            Optional<String> signature = stackLocalVariable.getSignature();
-            Statement start = getCorrespondingStmt(stackLocalVariable.getStart());
-            Statement end = getCorrespondingStmt(stackLocalVariable.getEnd());
-            RefLocal local = getLocal(stackLocalVariable.getLocal());
-
-            refBody.getLocalVariables().add(new RefBody.LocalVariable(name, type, signature, start, end, local));
-        }
-    }
-
-    private void convertLocalVariableAnnotations() {
-        for (StackBody.LocalVariableAnnotation localVarAnno : stackBody.getLocalVariableAnnotations()) {
-            LocalVariableTypeAnnotation annotation = localVarAnno.getAnnotation();
-            List<RefBody.LocalVariableAnnotation.Location> locations = localVarAnno.getLocations().stream()
-                    .filter(location -> !isRangeEmpty(location.getStart(), location.getEnd()))
-                    .map(location -> new RefBody.LocalVariableAnnotation.Location(
-                            getCorrespondingStmt(location.getStart()),
-                            getCorrespondingStmt(location.getEnd()),
-                            getLocal(location.getLocal())))
-                    .collect(Collectors.toList());
-
-            if (!locations.isEmpty()) {
-                refBody.getLocalVariableAnnotations().add(new RefBody.LocalVariableAnnotation(annotation, locations));
             }
         }
     }
