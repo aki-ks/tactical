@@ -4,22 +4,30 @@ description := "Referenced based java bytecode intermediation"
 ThisBuild / organization := "me.aki.tactical"
 ThisBuild / version := "0.1"
 
+val javaVersion = "1.10"
+
+val asmVersion = "6.2.1"
+val smaliVersion = "2.2.5"
+
+val fastparseVersion = "1.0.0"
+
+val scalaTestVersion = "3.0.5"
+val scalaCheckVersion = "1.14.0"
+
 def javaSettings(config: Configuration) = Seq(
   config / crossPaths := false, // do not append scala version to artifact names
   config / autoScalaLibrary := false, // do not use scala runtime dependency
-  config / javacOptions ++= Seq("-source", "1.10", "-target", "1.10", "-Xlint")
+  config / javacOptions ++= Seq("-source", javaVersion, "-target", javaVersion, "-Xlint")
 )
 
 lazy val parserSettings = Seq(
-  libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.0.0"
+  libraryDependencies += "com.lihaoyi" %% "fastparse" % fastparseVersion
 )
 
 lazy val scalaTest = Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-  libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+  libraryDependencies += "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
+  libraryDependencies += "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
 )
-
-val asmVersion = "6.2.1"
 
 // INTERMEDIATIONS
 lazy val core = (project in file ("core"))
@@ -87,3 +95,10 @@ lazy val conversionRefStack = (project in file ("conversion/stack-ref"))
   .dependsOn(stack, ref, conversionStackUtils, conversionRefUtils)
   .settings(javaSettings(Compile))
   .settings(scalaTest)
+
+lazy val conversionSmaliDex = (project in file ("conversion/smali-dex"))
+  .dependsOn(dex)
+  .settings(javaSettings(Compile))
+  .settings(
+    libraryDependencies += "org.smali" % "dexlib2" % smaliVersion
+  )
