@@ -42,7 +42,6 @@ public class ArrayLengthStatement implements Statement {
         this.result = result;
     }
 
-
     @Override
     public List<Register> getReadRegisters() {
         return List.of(array);
