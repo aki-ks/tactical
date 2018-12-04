@@ -2,6 +2,8 @@ package me.aki.tactical.conversion.smali2dex;
 
 import me.aki.tactical.conversion.smalidex.FlagConverter;
 import me.aki.tactical.conversion.smalidex.DexUtils;
+import me.aki.tactical.conversion.smalidex.VersionVisitor;
+import me.aki.tactical.core.Body;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Method;
@@ -14,6 +16,11 @@ import me.aki.tactical.core.constant.LongConstant;
 import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.dex.DexBody;
+import me.aki.tactical.dex.invoke.Invoke;
+import me.aki.tactical.dex.invoke.InvokeCustom;
+import me.aki.tactical.dex.invoke.InvokePolymorphic;
+import me.aki.tactical.dex.statement.InvokeStatement;
+import me.aki.tactical.dex.statement.Statement;
 import org.jf.dexlib2.ValueType;
 import org.jf.dexlib2.iface.ClassDef;
 import org.jf.dexlib2.iface.MethodImplementation;
@@ -69,12 +76,9 @@ public class ClassFileConverter {
      * @return the computed jvm version
      */
     private Classfile.Version computeJvmVersion() {
-        // API 26 / 038 => Add invoke-custom (= invoke-dynamic) and invoke-polymorphic (for MethodHandle API)
-        // API 24 / 037 => Add default and static interface methods
-        // API 13 / 035 => Used by most version prior to Android 7.0
-
-        //TODO IMPLEMENT CONVERSION
-        return new Classfile.Version(Classfile.Version.MAJOR_JDK_8, 0);
+        VersionVisitor.JvmVersionCompute jvmVersionCompute = new VersionVisitor.JvmVersionCompute();
+        VersionVisitor.accept(jvmVersionCompute, tacticalClass);
+        return jvmVersionCompute.getVersion();
     }
 
     private void convertFields() {
