@@ -8,17 +8,28 @@ import org.objectweb.asm.tree.LabelNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ConversionContext {
-    private final StackBody body;
     private final List<StackLocal> locals;
     private final Map<Instruction, List<Cell<LabelNode>>> convertedLabels = new HashMap<>();
 
     public ConversionContext(StackBody body) {
-        this.body = body;
-        this.locals = new ArrayList<>(body.getLocals());
+        List<StackLocal> allLocals = body.getLocals();
+        this.locals = new ArrayList<>(allLocals.size());
+
+        body.getThisLocal().ifPresent(this.locals::add);
+        this.locals.addAll(body.getParameterLocals());
+
+        Set<StackLocal> refAndThisLocal = new HashSet<>(this.locals);
+        for (StackLocal local : allLocals) {
+            if (!refAndThisLocal.contains(local)) {
+                this.locals.add(local);
+            }
+        }
     }
 
     /**
