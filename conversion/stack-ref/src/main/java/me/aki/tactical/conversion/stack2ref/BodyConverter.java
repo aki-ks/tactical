@@ -1,13 +1,12 @@
 package me.aki.tactical.conversion.stack2ref;
 
-import me.aki.tactical.conversion.stackasm.StackInsnReader;
-import me.aki.tactical.conversion.stackasm.analysis.Analysis;
-import me.aki.tactical.conversion.stackasm.analysis.Stack;
+import me.aki.tactical.stack.utils.StackInsnReader;
+import me.aki.tactical.stack.utils.analysis.Analysis;
+import me.aki.tactical.stack.utils.analysis.Stack;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.ref.RefBody;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Utility that builds a {@link RefBody} from a {@link StackBody}.

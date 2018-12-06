@@ -1,5 +1,7 @@
 package me.aki.tactical.conversion.asm2stack;
 
+import me.aki.tactical.conversion.asmutils.AsmInsnReader;
+import me.aki.tactical.conversion.asmutils.AsmStackInsnWriter;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
@@ -97,7 +99,7 @@ public class BodyConverter {
     }
 
     private void convertInsns() {
-        StackInsnWriter iw = new StackInsnWriter(ctx);
+        AsmStackInsnWriter iw = new AsmStackInsnWriter(ctx);
         AsmInsnReader reader = new AsmInsnReader(iw, ctx);
 
         InsnList instructions = mn.instructions;

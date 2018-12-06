@@ -3,6 +3,7 @@ package me.aki.tactical.dex;
 import me.aki.tactical.core.Body;
 import me.aki.tactical.dex.statement.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,7 +34,12 @@ public class DexBody implements Body {
      */
     private List<TryCatchBlock> tryCatchBlocks;
 
-    public DexBody(List<Register> registers, Optional<Register> thisRegister, List<Register> parameterRegisters, List<Statement> statements, List<TryCatchBlock> tryCatchBlocks) {
+    public DexBody() {
+        this(new ArrayList<>(), Optional.empty(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    }
+
+    public DexBody(List<Register> registers, Optional<Register> thisRegister, List<Register> parameterRegisters,
+                   List<Statement> statements, List<TryCatchBlock> tryCatchBlocks) {
         this.registers = registers;
         this.thisRegister = thisRegister;
         this.parameterRegisters = parameterRegisters;

@@ -1,72 +1,14 @@
 package me.aki.tactical.conversion.ref2stack;
 
-import me.aki.tactical.conversion.stackasm.StackInsnVisitor;
-import me.aki.tactical.core.constant.Constant;
 import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.NullConstant;
 import me.aki.tactical.core.constant.PushableConstant;
-import me.aki.tactical.core.type.IntLikeType;
-import me.aki.tactical.core.type.IntType;
-import me.aki.tactical.core.type.LongType;
-import me.aki.tactical.core.type.PrimitiveType;
-import me.aki.tactical.core.type.RefType;
-import me.aki.tactical.core.type.Type;
-import me.aki.tactical.ref.Expression;
-import me.aki.tactical.ref.RefLocal;
-import me.aki.tactical.ref.Statement;
-import me.aki.tactical.ref.Variable;
-import me.aki.tactical.ref.condition.Condition;
-import me.aki.tactical.ref.condition.Equal;
-import me.aki.tactical.ref.condition.GreaterEqual;
-import me.aki.tactical.ref.condition.GreaterThan;
-import me.aki.tactical.ref.condition.LessEqual;
-import me.aki.tactical.ref.condition.LessThan;
-import me.aki.tactical.ref.condition.NonEqual;
-import me.aki.tactical.ref.expr.AbstractBinaryExpr;
-import me.aki.tactical.ref.expr.AbstractFieldExpr;
-import me.aki.tactical.ref.expr.AddExpr;
-import me.aki.tactical.ref.expr.AndExpr;
-import me.aki.tactical.ref.expr.ArrayBoxExpr;
-import me.aki.tactical.ref.expr.ArrayLengthExpr;
-import me.aki.tactical.ref.expr.CastExpr;
-import me.aki.tactical.ref.expr.CmpExpr;
-import me.aki.tactical.ref.expr.CmpgExpr;
-import me.aki.tactical.ref.expr.CmplExpr;
-import me.aki.tactical.ref.expr.ConstantExpr;
-import me.aki.tactical.ref.expr.DivExpr;
-import me.aki.tactical.ref.expr.InstanceFieldExpr;
-import me.aki.tactical.ref.expr.InstanceOfExpr;
-import me.aki.tactical.ref.expr.InvokeExpr;
-import me.aki.tactical.ref.expr.ModExpr;
-import me.aki.tactical.ref.expr.MulExpr;
-import me.aki.tactical.ref.expr.NegExpr;
-import me.aki.tactical.ref.expr.NewArrayExpr;
-import me.aki.tactical.ref.expr.NewExpr;
-import me.aki.tactical.ref.expr.OrExpr;
-import me.aki.tactical.ref.expr.ShlExpr;
-import me.aki.tactical.ref.expr.ShrExpr;
-import me.aki.tactical.ref.expr.StaticFieldExpr;
-import me.aki.tactical.ref.expr.SubExpr;
-import me.aki.tactical.ref.expr.UShrExpr;
-import me.aki.tactical.ref.expr.XorExpr;
-import me.aki.tactical.ref.invoke.AbstractInstanceInvoke;
-import me.aki.tactical.ref.invoke.AbstractInvoke;
-import me.aki.tactical.ref.invoke.InvokeDynamic;
-import me.aki.tactical.ref.invoke.InvokeInterface;
-import me.aki.tactical.ref.invoke.InvokeSpecial;
-import me.aki.tactical.ref.invoke.InvokeStatic;
-import me.aki.tactical.ref.invoke.InvokeVirtual;
-import me.aki.tactical.ref.stmt.AssignStmt;
-import me.aki.tactical.ref.stmt.BranchStmt;
-import me.aki.tactical.ref.stmt.GotoStmt;
-import me.aki.tactical.ref.stmt.IfStmt;
-import me.aki.tactical.ref.stmt.InvokeStmt;
-import me.aki.tactical.ref.stmt.MonitorEnterStmt;
-import me.aki.tactical.ref.stmt.MonitorExitStmt;
-import me.aki.tactical.ref.stmt.ReturnStmt;
-import me.aki.tactical.ref.stmt.SwitchStmt;
-import me.aki.tactical.ref.stmt.ThrowStmt;
-import me.aki.tactical.stack.StackLocal;
+import me.aki.tactical.core.type.*;
+import me.aki.tactical.ref.*;
+import me.aki.tactical.ref.condition.*;
+import me.aki.tactical.ref.expr.*;
+import me.aki.tactical.ref.invoke.*;
+import me.aki.tactical.ref.stmt.*;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.invoke.DynamicInvoke;
 import me.aki.tactical.stack.invoke.InterfaceInvoke;
@@ -74,6 +16,7 @@ import me.aki.tactical.stack.invoke.Invoke;
 import me.aki.tactical.stack.invoke.SpecialInvoke;
 import me.aki.tactical.stack.invoke.StaticInvoke;
 import me.aki.tactical.stack.invoke.VirtualInvoke;
+import me.aki.tactical.stack.utils.StackInsnVisitor;
 
 import java.util.List;
 import java.util.Optional;
@@ -83,15 +26,13 @@ import java.util.Optional;
  * {@link Expression Expressions} on a {@link StackInsnVisitor}.
  */
 public class RefInsnReader {
-    private final ConversionContext ctx;
-    private final StackInsnVisitor<Statement> iv;
+    private final StackInsnVisitor<Statement, RefLocal> iv;
 
     private static <T> T assertionError() {
         throw new AssertionError();
     }
 
-    public RefInsnReader(ConversionContext ctx, StackInsnVisitor<Statement> iv) {
-        this.ctx = ctx;
+    public RefInsnReader(StackInsnVisitor<Statement, RefLocal> iv) {
         this.iv = iv;
     }
 
@@ -208,8 +149,6 @@ public class RefInsnReader {
     }
 
     private void convertVariableAssignment(RefLocal variable, Expression value) {
-        StackLocal stackLocal = ctx.getStackLocal(variable);
-
         // Try to generate an increment instruction if possible
         if (value.getType() instanceof IntLikeType) {
             if (value instanceof AddExpr) {
@@ -218,7 +157,7 @@ public class RefInsnReader {
                 if (add.getValue1() == variable && add.getValue2() instanceof ConstantExpr) {
                     PushableConstant constant = ((ConstantExpr) add.getValue2()).getConstant();
                     if (constant instanceof IntConstant) {
-                        iv.visitIncrement(stackLocal, ((IntConstant) constant).getValue());
+                        iv.visitIncrement(variable, ((IntConstant) constant).getValue());
                         return;
                     }
                 }
@@ -226,7 +165,7 @@ public class RefInsnReader {
                 if (add.getValue2() == variable && add.getValue1() instanceof ConstantExpr) {
                     PushableConstant constant = ((ConstantExpr) add.getValue1()).getConstant();
                     if (constant instanceof IntConstant) {
-                        iv.visitIncrement(stackLocal, ((IntConstant) constant).getValue());
+                        iv.visitIncrement(variable, ((IntConstant) constant).getValue());
                         return;
                     }
                 }
@@ -236,7 +175,7 @@ public class RefInsnReader {
                 if (sub.getValue1() == value && sub.getValue2() instanceof ConstantExpr) {
                     PushableConstant constant = ((ConstantExpr) sub.getValue2()).getConstant();
                     if (constant instanceof IntConstant) {
-                        iv.visitIncrement(stackLocal, -(((IntConstant) constant).getValue()));
+                        iv.visitIncrement(variable, -(((IntConstant) constant).getValue()));
                         return;
                     }
                 }
@@ -244,7 +183,7 @@ public class RefInsnReader {
         }
 
         accept(value);
-        iv.visitStore(value.getType(), stackLocal);
+        iv.visitStore(value.getType(), variable);
     }
 
     private void convertInvokeStatement(InvokeStmt statement) {
@@ -424,8 +363,7 @@ public class RefInsnReader {
             accept(arrayBoxExpr.getIndex());
             iv.visitArrayLoad(arrayBoxExpr.getType());
         } else if (expression instanceof RefLocal) {
-            StackLocal local = ctx.getStackLocal((RefLocal) expression);
-            iv.visitLoad(expression.getType(), local);
+            iv.visitLoad(expression.getType(), (RefLocal) expression);
         } else {
             throw new AssertionError();
         }

@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.conversion.asmutils.AccessConverter;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
@@ -9,7 +9,6 @@ import me.aki.tactical.core.typeannotation.MethodTypeAnnotation;
 import me.aki.tactical.core.typeannotation.TargetType;
 import me.aki.tactical.stack.StackBody;
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
@@ -40,7 +39,7 @@ public class MethodConvertVisitor extends JSRInlinerAdapter {
 
         Method.Parameter parameter = new Method.Parameter();
         parameter.setName(Optional.ofNullable(name));
-        parameter.setFlags(AccessConverter.parameter.fromBitMap(access));
+        parameter.setFlags(AccessConverter.PARAMETER.fromBitMap(access));
 
         this.method.getParameterInfo().add(parameter);
     }

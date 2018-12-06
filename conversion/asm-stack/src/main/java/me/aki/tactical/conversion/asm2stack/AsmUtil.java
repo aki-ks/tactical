@@ -24,6 +24,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A collection of utility methods for conversion from 'asm' data structures to their 'stack' representation.
+ *
+ * @see me.aki.tactical.conversion.stack2asm.AsmUtil conversions in the other direction
+ */
 public class AsmUtil {
     private static Field attributeDataField;
 

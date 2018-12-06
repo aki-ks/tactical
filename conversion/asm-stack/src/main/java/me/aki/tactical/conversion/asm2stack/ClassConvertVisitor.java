@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.conversion.asmutils.AccessConverter;
 import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
@@ -60,7 +60,7 @@ public class ClassConvertVisitor extends ClassVisitor {
 
         this.classfile = new Classfile(convertedVersion, AsmUtil.pathFromInternalName(name), convertedSuperType, convertedInterfaces);
         this.classfile.setSignature(Optional.ofNullable(signature));
-        this.classfile.getFlags().addAll(AccessConverter.classfile.fromBitMap(access));
+        this.classfile.getFlags().addAll(AccessConverter.CLASSFILE.fromBitMap(access));
     }
 
     private Classfile.Version parseVersion(int version) {
@@ -81,7 +81,7 @@ public class ClassConvertVisitor extends ClassVisitor {
     public ModuleVisitor visitModule(String name, int access, String version) {
         Module module = new Module(AsmUtil.pathFromModuleName(name));
         module.setVersion(Optional.ofNullable(version));
-        module.getAccessFlags().addAll(AccessConverter.module.fromBitMap(access));
+        module.getAccessFlags().addAll(AccessConverter.MODULE.fromBitMap(access));
         this.classfile.setModule(Optional.of(module));
 
         ModuleVisitor mv = super.visitModule(name, access, version);
@@ -167,13 +167,13 @@ public class ClassConvertVisitor extends ClassVisitor {
                 AsmUtil.pathFromInternalName(name),
                 Optional.ofNullable(outerName).map(AsmUtil::pathFromInternalName),
                 Optional.ofNullable(innerName),
-                AccessConverter.innerClass.fromBitMap(access)));
+                AccessConverter.INNER_CLASS.fromBitMap(access)));
     }
 
     @Override
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
         Field field = new Field(name, AsmUtil.fromAsmType(Type.getType(descriptor)));
-        field.getFlags().addAll(AccessConverter.field.fromBitMap(access));
+        field.getFlags().addAll(AccessConverter.FIELD.fromBitMap(access));
         field.setSignature(Optional.ofNullable(signature));
         field.setValue(Optional.ofNullable(value).map(this::convertFieldValue));
 
@@ -204,7 +204,7 @@ public class ClassConvertVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodDescriptor desc = AsmUtil.parseMethodDescriptor(descriptor);
         Method method = new Method(name, desc.getParameterTypes(), desc.getReturnType());
-        method.getFlags().addAll(AccessConverter.method.fromBitMap(access));
+        method.getFlags().addAll(AccessConverter.METHOD.fromBitMap(access));
         method.setSignature(Optional.ofNullable(signature));
 
         (exceptions == null ? Stream.<String>empty() : Arrays.stream(exceptions))

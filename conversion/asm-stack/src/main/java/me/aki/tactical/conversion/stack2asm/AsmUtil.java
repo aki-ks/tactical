@@ -20,6 +20,11 @@ import me.aki.tactical.core.typeannotation.TypePath;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A collection of utility methods for conversion from 'stack' data structures to their 'asm' representation.
+ *
+ * @see me.aki.tactical.conversion.asm2stack.AsmUtil conversions in the other direction
+ */
 public class AsmUtil {
     public static org.objectweb.asm.Type toAsmReturnType(Optional<Type> type) {
         return type.map(AsmUtil::toAsmType).orElse(org.objectweb.asm.Type.VOID_TYPE);
@@ -27,7 +32,7 @@ public class AsmUtil {
 
     public static org.objectweb.asm.Type toAsmType(Type type) {
         if (type instanceof PrimitiveType) {
-            // most used primitive types
+            // most used primitive types first
             if (type instanceof IntType) {
                 return org.objectweb.asm.Type.INT_TYPE;
             } else if (type instanceof LongType) {
@@ -70,6 +75,10 @@ public class AsmUtil {
         throw new AssertionError();
     }
 
+    public static String toModuleName(Path path) {
+        return path.join('.');
+    }
+
     public static String toInternalName(Path path) {
         return path.join('/');
     }
@@ -95,8 +104,7 @@ public class AsmUtil {
     }
 
     public static org.objectweb.asm.Type methodDescriptorToType(Optional<Type> returnType, List<Type> parameterTypes) {
-        org.objectweb.asm.Type asmReturnType = returnType.map(AsmUtil::toAsmType)
-                .orElse(org.objectweb.asm.Type.VOID_TYPE);
+        org.objectweb.asm.Type asmReturnType = AsmUtil.toAsmReturnType(returnType);
 
         org.objectweb.asm.Type[] asmParameterTypes = parameterTypes.stream()
                 .map(AsmUtil::toAsmType)

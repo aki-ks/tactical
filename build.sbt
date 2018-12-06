@@ -17,7 +17,8 @@ val scalaCheckVersion = "1.14.0"
 def javaSettings(config: Configuration) = Seq(
   config / crossPaths := false, // do not append scala version to artifact names
   config / autoScalaLibrary := false, // do not use scala runtime dependency
-  config / javacOptions ++= Seq("-source", javaVersion, "-target", javaVersion, "-Xlint")
+  config / javacOptions ++= Seq("-source", javaVersion),
+  config / compile / javacOptions ++= Seq("-target", javaVersion, "-Xlint")
 )
 
 lazy val parserSettings = Seq(
@@ -74,16 +75,8 @@ lazy val parserRef = (project in file ("parser/ref"))
   .settings(scalaTest)
 
 // CONVERSION
-lazy val conversionStackUtils = (project in file ("conversion/stack-utils"))
-  .dependsOn(stack)
-  .settings(javaSettings(Compile))
-
-lazy val conversionRefUtils = (project in file ("conversion/ref-utils"))
-  .dependsOn(ref)
-  .settings(javaSettings(Compile))
-
 lazy val conversionAsmStack = (project in file ("conversion/asm-stack"))
-  .dependsOn(stack, conversionStackUtils)
+  .dependsOn(stack, utilsStack)
   .settings(javaSettings(Compile))
   .settings(
     libraryDependencies += "org.ow2.asm" % "asm" % asmVersion,
@@ -92,13 +85,30 @@ lazy val conversionAsmStack = (project in file ("conversion/asm-stack"))
   )
 
 lazy val conversionRefStack = (project in file ("conversion/stack-ref"))
-  .dependsOn(stack, ref, conversionStackUtils, conversionRefUtils)
+  .dependsOn(stack, ref, utilsStack, utilsRef)
   .settings(javaSettings(Compile))
   .settings(scalaTest)
 
 lazy val conversionSmaliDex = (project in file ("conversion/smali-dex"))
-  .dependsOn(dex)
+  .dependsOn(dex, utilsDex)
   .settings(javaSettings(Compile))
   .settings(
     libraryDependencies += "org.smali" % "dexlib2" % smaliVersion
   )
+
+// UTILITIES
+lazy val utilsCore = (project in file ("utils/core"))
+  .dependsOn(core)
+  .settings(javaSettings(Compile))
+
+lazy val utilsStack = (project in file ("utils/stack"))
+  .dependsOn(utilsCore, stack)
+  .settings(javaSettings(Compile))
+
+lazy val utilsRef = (project in file ("utils/ref"))
+  .dependsOn(utilsCore, ref)
+  .settings(javaSettings(Compile))
+
+lazy val utilsDex = (project in file ("utils/dex"))
+  .dependsOn(utilsCore, dex)
+  .settings(javaSettings(Compile))

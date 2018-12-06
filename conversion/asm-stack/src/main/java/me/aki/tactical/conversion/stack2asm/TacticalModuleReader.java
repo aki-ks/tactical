@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.stack2asm;
 
-import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.conversion.asmutils.AccessConverter;
 import me.aki.tactical.core.Module;
 import org.objectweb.asm.ModuleVisitor;
 
@@ -36,8 +36,8 @@ public class TacticalModuleReader {
 
     private void visitRequires(ModuleVisitor mv) {
         for (Module.Require require : module.getRequires()) {
-            String name = require.getName().join('.');
-            int access = AccessConverter.moduleRequire.toBitMap(require.getFlags());
+            String name = AsmUtil.toModuleName(require.getName());
+            int access = AccessConverter.MODULE_REQUIRE.toBitMap(require.getFlags());
             String version = require.getVersion().orElse(null);
 
             mv.visitRequire(name, access, version);
@@ -47,9 +47,9 @@ public class TacticalModuleReader {
     private void visitExports(ModuleVisitor mv) {
         for (Module.Export export : module.getExports()) {
             String pkg = AsmUtil.toInternalName(export.getName());
-            int access = AccessConverter.moduleExport.toBitMap(export.getFlags());
+            int access = AccessConverter.MODULE_EXPORT.toBitMap(export.getFlags());
             String[] modules = export.getModules().stream()
-                    .map(module -> module.join('.'))
+                    .map(AsmUtil::toModuleName)
                     .toArray(String[]::new);
 
             mv.visitExport(pkg, access, modules);
@@ -59,9 +59,9 @@ public class TacticalModuleReader {
     private void visitOpens(ModuleVisitor mv) {
         for (Module.Open open : module.getOpens()) {
             String pkg = AsmUtil.toInternalName(open.getName());
-            int access = AccessConverter.moduleOpen.toBitMap(open.getFlags());
+            int access = AccessConverter.MODULE_OPEN.toBitMap(open.getFlags());
             String[] modules = open.getModules().stream()
-                    .map(module -> module.join('.'))
+                    .map(AsmUtil::toModuleName)
                     .toArray(String[]::new);
 
             mv.visitOpen(pkg, access, modules);

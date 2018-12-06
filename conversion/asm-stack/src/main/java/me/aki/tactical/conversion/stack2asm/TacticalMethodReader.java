@@ -1,8 +1,9 @@
 package me.aki.tactical.conversion.stack2asm;
 
-import me.aki.tactical.conversion.stackasm.analysis.Analysis;
-import me.aki.tactical.conversion.stackasm.AccessConverter;
-import me.aki.tactical.conversion.stackasm.StackInsnReader;
+import me.aki.tactical.stack.utils.analysis.Analysis;
+import me.aki.tactical.conversion.asmutils.AccessConverter;
+import me.aki.tactical.conversion.asmutils.AsmInsnNodeWriter;
+import me.aki.tactical.stack.utils.StackInsnReader;
 import me.aki.tactical.core.Attribute;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
@@ -60,7 +61,7 @@ public class TacticalMethodReader {
     private void visitParameters(MethodVisitor mv) {
         for (Method.Parameter parameter : method.getParameterInfo()) {
             String name = parameter.getName().orElse(null);
-            int access = AccessConverter.parameter.toBitMap(parameter.getFlags());
+            int access = AccessConverter.PARAMETER.toBitMap(parameter.getFlags());
 
             mv.visitParameter(name, access);
         }
@@ -175,7 +176,7 @@ public class TacticalMethodReader {
         Map<Instruction, List<AbstractInsnNode>> convertedInsns = new HashMap<>();
         ConversionContext ctx = new ConversionContext(body);
 
-        AsmInsnWriter insnWriter = new AsmInsnWriter(ctx);
+        AsmInsnNodeWriter insnWriter = new AsmInsnNodeWriter(ctx);
         StackInsnReader insnReader = new StackInsnReader(insnWriter);
 
         for (Instruction instruction : body.getInstructions()) {

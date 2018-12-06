@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.asm2stack;
 
-import me.aki.tactical.conversion.stackasm.AccessConverter;
+import me.aki.tactical.conversion.asmutils.AccessConverter;
 import me.aki.tactical.core.Module;
 import me.aki.tactical.core.Path;
 import org.objectweb.asm.ModuleVisitor;
@@ -40,7 +40,7 @@ public class ModuleConvertVisitor extends ModuleVisitor {
         super.visitRequire(module, access, version);
 
         Path modulePath = AsmUtil.pathFromModuleName(module);
-        Set<Module.Require.Flag> flags = AccessConverter.moduleRequire.fromBitMap(access);
+        Set<Module.Require.Flag> flags = AccessConverter.MODULE_REQUIRE.fromBitMap(access);
 
         this.module.getRequires().add(new Module.Require(modulePath, flags, Optional.ofNullable(version)));
     }
@@ -50,7 +50,7 @@ public class ModuleConvertVisitor extends ModuleVisitor {
         super.visitExport(packaze, access, modules);
 
         Path packageName = AsmUtil.pathFromInternalName(packaze);
-        Set<Module.Export.Flag> flags = AccessConverter.moduleExport.fromBitMap(access);
+        Set<Module.Export.Flag> flags = AccessConverter.MODULE_EXPORT.fromBitMap(access);
         List<Path> moduleList = (module == null ? Stream.<String>empty() : Arrays.stream(modules))
                 .map(AsmUtil::pathFromModuleName)
                 .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class ModuleConvertVisitor extends ModuleVisitor {
         super.visitOpen(packaze, access, modules);
 
         Path packageName = AsmUtil.pathFromInternalName(packaze);
-        Set<Module.Open.Flag> flags = AccessConverter.moduleOpen.fromBitMap(access);
+        Set<Module.Open.Flag> flags = AccessConverter.MODULE_OPEN.fromBitMap(access);
         List<Path> moduleList = (module == null ? Stream.<String>empty() : Arrays.stream(modules))
                 .map(AsmUtil::pathFromModuleName)
                 .collect(Collectors.toList());

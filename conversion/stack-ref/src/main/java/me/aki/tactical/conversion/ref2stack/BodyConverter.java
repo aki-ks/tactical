@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.ref2stack;
 
-import me.aki.tactical.conversion.refutils.CfgUnitGraph;
+import me.aki.tactical.ref.utils.CfgUnitGraph;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
@@ -72,6 +72,7 @@ public class BodyConverter {
     private void convertLocals() {
         Map<RefLocal, StackLocal> localMap = ctx.getLocalMap();
         List<StackLocal> locals = this.stackBody.getLocals();
+
         for (RefLocal refLocal : refBody.getLocals()) {
             StackLocal stackLocal = new StackLocal();
             localMap.put(refLocal, stackLocal);
@@ -97,7 +98,7 @@ public class BodyConverter {
         }
 
         StackInsnWriter writer = new StackInsnWriter(ctx);
-        RefInsnReader reader = new RefInsnReader(ctx, writer);
+        RefInsnReader reader = new RefInsnReader(writer);
 
         CfgUnitGraph.Node node;
         while ((node = worklist.poll()) != null) {
