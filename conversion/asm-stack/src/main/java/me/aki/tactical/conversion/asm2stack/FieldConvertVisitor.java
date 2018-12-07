@@ -16,7 +16,7 @@ public class FieldConvertVisitor extends FieldVisitor {
     private final Field field;
 
     public FieldConvertVisitor(FieldVisitor fieldVisitor, Field field) {
-        super(Opcodes.ASM7_EXPERIMENTAL, fieldVisitor);
+        super(Opcodes.ASM7, fieldVisitor);
         this.field = field;
     }
 

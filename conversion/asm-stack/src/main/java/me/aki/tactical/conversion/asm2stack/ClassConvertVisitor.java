@@ -40,7 +40,7 @@ public class ClassConvertVisitor extends ClassVisitor {
     private Classfile classfile;
 
     public ClassConvertVisitor() {
-        super(Opcodes.ASM7_EXPERIMENTAL);
+        super(Opcodes.ASM7);
     }
 
     public Classfile getClassfile() {
@@ -90,8 +90,8 @@ public class ClassConvertVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visitNestHostExperimental(String nestHost) {
-        super.visitNestHostExperimental(nestHost);
+    public void visitNestHost(String nestHost) {
+        super.visitNestHost(nestHost);
 
         this.classfile.setNestHost(Optional.of(AsmUtil.pathFromInternalName(nestHost)));
     }
@@ -153,8 +153,8 @@ public class ClassConvertVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visitNestMemberExperimental(String nestMember) {
-        super.visitNestMemberExperimental(nestMember);
+    public void visitNestMember(String nestMember) {
+        super.visitNestMember(nestMember);
 
         this.classfile.getNestMembers().add(AsmUtil.pathFromInternalName(nestMember));
     }

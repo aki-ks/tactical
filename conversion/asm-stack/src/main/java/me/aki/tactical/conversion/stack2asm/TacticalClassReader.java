@@ -92,7 +92,7 @@ public class TacticalClassReader {
 
     private void visitNestHost(ClassVisitor cv) {
         classfile.getNestHost().ifPresent(nestHost ->
-            cv.visitNestHostExperimental(AsmUtil.toInternalName(nestHost)));
+            cv.visitNestHost(AsmUtil.toInternalName(nestHost)));
     }
 
     private void visitOuterClass(ClassVisitor cv) {
@@ -161,7 +161,7 @@ public class TacticalClassReader {
     private void visitNestMembers(ClassVisitor cv) {
         classfile.getNestMembers().stream()
                 .map(AsmUtil::toInternalName)
-                .forEach(cv::visitNestMemberExperimental);
+                .forEach(cv::visitNestMember);
     }
 
     private void visitInnerClasses(ClassVisitor cv) {

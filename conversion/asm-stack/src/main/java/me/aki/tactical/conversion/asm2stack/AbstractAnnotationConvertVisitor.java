@@ -27,7 +27,7 @@ import java.util.List;
  */
 public abstract class AbstractAnnotationConvertVisitor extends AnnotationVisitor {
     public AbstractAnnotationConvertVisitor(AnnotationVisitor annotationVisitor) {
-        super(Opcodes.ASM7_EXPERIMENTAL, annotationVisitor);
+        super(Opcodes.ASM7, annotationVisitor);
     }
 
     /**

@@ -77,6 +77,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Utility that calls events of {@link StackInsnVisitor} based on asm {@link AbstractInsnNode}.
@@ -941,7 +942,8 @@ public class AsmInsnReader {
             String name = constantDynamic.getName();
             Type type = me.aki.tactical.conversion.asm2stack.AsmUtil.fromDescriptor(constantDynamic.getDescriptor());
             Handle bootstrapMethod = convertMethodHandle(constantDynamic.getBootstrapMethod());
-            List<BootstrapConstant> bootstrapArguments = Arrays.stream(constantDynamic.getBootstrapMethodArguments())
+            List<BootstrapConstant> bootstrapArguments = IntStream.range(0, constantDynamic.getBootstrapMethodArgumentCount())
+                    .mapToObj(constantDynamic::getBootstrapMethodArgument)
                     .map(this::convertBootstrapArgument)
                     .collect(Collectors.toList());
 

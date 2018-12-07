@@ -17,7 +17,7 @@ public class ModuleConvertVisitor extends ModuleVisitor {
     private final Module module;
 
     public ModuleConvertVisitor(Module module, ModuleVisitor mv) {
-        super(Opcodes.ASM7_EXPERIMENTAL, mv);
+        super(Opcodes.ASM7, mv);
         this.module = module;
     }
 

@@ -6,7 +6,7 @@ ThisBuild / version := "0.1"
 
 val javaVersion = "1.10"
 
-val asmVersion = "6.2.1"
+val asmVersion = "7.0"
 val smaliVersion = "2.2.5"
 
 val fastparseVersion = "1.0.0"

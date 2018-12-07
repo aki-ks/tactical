@@ -28,7 +28,7 @@ public class MethodConvertVisitor extends JSRInlinerAdapter {
     private StackBody body;
 
     public MethodConvertVisitor(MethodVisitor methodVisitor, Classfile classfile, Method method, int access, String name, String descriptor, String signature, String[] exceptions) {
-        super(Opcodes.ASM7_EXPERIMENTAL, methodVisitor, access, name, descriptor, signature, exceptions);
+        super(Opcodes.ASM7, methodVisitor, access, name, descriptor, signature, exceptions);
         this.method = method;
         this.classfile = classfile;
     }
