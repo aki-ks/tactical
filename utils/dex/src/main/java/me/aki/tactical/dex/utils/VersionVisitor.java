@@ -5,11 +5,11 @@ import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.DexVersion;
+import me.aki.tactical.dex.insn.InvokeInstruction;
 import me.aki.tactical.dex.invoke.Invoke;
 import me.aki.tactical.dex.invoke.InvokeCustom;
 import me.aki.tactical.dex.invoke.InvokePolymorphic;
-import me.aki.tactical.dex.statement.InvokeStatement;
-import me.aki.tactical.dex.statement.Statement;
+import me.aki.tactical.dex.insn.Instruction;
 
 import java.util.Optional;
 
@@ -72,9 +72,9 @@ public class VersionVisitor {
 
                 if (bodyOpt.isPresent()) {
                     DexBody body = (DexBody) bodyOpt.get();
-                    for (Statement statement : body.getStatements()) {
-                        if (statement instanceof InvokeStatement) {
-                            Invoke invoke = ((InvokeStatement) statement).getInvoke();
+                    for (Instruction instruction : body.getInstructions()) {
+                        if (instruction instanceof InvokeInstruction) {
+                            Invoke invoke = ((InvokeInstruction) instruction).getInvoke();
                             if (!foundInvokePolymorphic && invoke instanceof InvokePolymorphic) {
                                 vv.visitInvokePolymorphic();
                                 foundInvokePolymorphic = true;

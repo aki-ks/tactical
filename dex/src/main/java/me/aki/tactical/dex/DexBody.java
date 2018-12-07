@@ -1,7 +1,7 @@
 package me.aki.tactical.dex;
 
 import me.aki.tactical.core.Body;
-import me.aki.tactical.dex.statement.Statement;
+import me.aki.tactical.dex.insn.Instruction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ public class DexBody implements Body {
     private List<Register> parameterRegisters;
 
     /**
-     * All statements of this method.
+     * All instructions of this method.
      */
-    private List<Statement> statements;
+    private List<Instruction> instructions;
 
     /**
      * The try/catch blocks of this method that catch and handle exceptions.
@@ -39,11 +39,11 @@ public class DexBody implements Body {
     }
 
     public DexBody(List<Register> registers, Optional<Register> thisRegister, List<Register> parameterRegisters,
-                   List<Statement> statements, List<TryCatchBlock> tryCatchBlocks) {
+                   List<Instruction> instructions, List<TryCatchBlock> tryCatchBlocks) {
         this.registers = registers;
         this.thisRegister = thisRegister;
         this.parameterRegisters = parameterRegisters;
-        this.statements = statements;
+        this.instructions = instructions;
         this.tryCatchBlocks = tryCatchBlocks;
     }
 
@@ -71,12 +71,12 @@ public class DexBody implements Body {
         this.parameterRegisters = parameterRegisters;
     }
 
-    public List<Statement> getStatements() {
-        return statements;
+    public List<Instruction> getInstructions() {
+        return instructions;
     }
 
-    public void setStatements(List<Statement> statements) {
-        this.statements = statements;
+    public void setInstructions(List<Instruction> instructions) {
+        this.instructions = instructions;
     }
 
     public List<TryCatchBlock> getTryCatchBlocks() {
@@ -95,12 +95,12 @@ public class DexBody implements Body {
         return Objects.equals(registers, dexBody.registers) &&
                 Objects.equals(thisRegister, dexBody.thisRegister) &&
                 Objects.equals(parameterRegisters, dexBody.parameterRegisters) &&
-                Objects.equals(statements, dexBody.statements) &&
+                Objects.equals(instructions, dexBody.instructions) &&
                 Objects.equals(tryCatchBlocks, dexBody.tryCatchBlocks);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registers, thisRegister, parameterRegisters, statements, tryCatchBlocks);
+        return Objects.hash(registers, thisRegister, parameterRegisters, instructions, tryCatchBlocks);
     }
 }

@@ -1,52 +1,52 @@
 package me.aki.tactical.dex;
 
 import me.aki.tactical.core.Path;
-import me.aki.tactical.dex.statement.MoveExceptionStatement;
-import me.aki.tactical.dex.statement.Statement;
+import me.aki.tactical.dex.insn.Instruction;
+import me.aki.tactical.dex.insn.MoveExceptionInstruction;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Catch exceptions within a range of instructions and branch to certain {@link Statement Statements}
+ * Catch exceptions within a range of instructions and branch to certain {@link Instruction Instructions}
  * depending on the kind of the caught exception.
  */
 public class TryCatchBlock {
     /**
      * The start of a instruction range within this try/catch block catches exception.
      */
-    private Statement start;
+    private Instruction start;
 
     /**
      * The (inclusive) end of a instruction range within this try/catch block catches exception.
      */
-    private Statement end;
+    private Instruction end;
 
     /**
      * The kind of exceptions that get caught and how they are handled
      */
     private List<Handler> handlers;
 
-    public TryCatchBlock(Statement start, Statement end, List<Handler> handlers) {
+    public TryCatchBlock(Instruction start, Instruction end, List<Handler> handlers) {
         this.start = start;
         this.end = end;
         this.handlers = handlers;
     }
 
-    public Statement getStart() {
+    public Instruction getStart() {
         return start;
     }
 
-    public void setStart(Statement start) {
+    public void setStart(Instruction start) {
         this.start = start;
     }
 
-    public Statement getEnd() {
+    public Instruction getEnd() {
         return end;
     }
 
-    public void setEnd(Statement end) {
+    public void setEnd(Instruction end) {
         this.end = end;
     }
 
@@ -84,11 +84,11 @@ public class TryCatchBlock {
 
         /**
          * Start of the code that handles caught exceptions.
-         * This is either a {@link MoveExceptionStatement} or the exception is ignored.
+         * This is either a {@link MoveExceptionInstruction} or the exception is ignored.
          */
-        private Statement handler;
+        private Instruction handler;
 
-        public Handler(Optional<Path> exception, Statement handler) {
+        public Handler(Optional<Path> exception, Instruction handler) {
             this.exception = exception;
             this.handler = handler;
         }
@@ -101,11 +101,11 @@ public class TryCatchBlock {
             this.exception = exception;
         }
 
-        public Statement getHandler() {
+        public Instruction getHandler() {
             return handler;
         }
 
-        public void setHandler(Statement handler) {
+        public void setHandler(Instruction handler) {
             this.handler = handler;
         }
 
