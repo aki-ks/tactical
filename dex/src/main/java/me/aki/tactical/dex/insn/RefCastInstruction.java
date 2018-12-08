@@ -8,6 +8,7 @@ import java.util.Optional;
 
 /**
  * Ensure that an object value within a {@link Register} is of a certain type.
+ * If not, a {@link ClassCastException} is thrown.
  */
 public class RefCastInstruction implements Instruction {
     /**
@@ -19,6 +20,11 @@ public class RefCastInstruction implements Instruction {
      * Register whose value is checked.
      */
     private Register register;
+
+    public RefCastInstruction(RefType type, Register register) {
+        this.type = type;
+        this.register = register;
+    }
 
     public RefType getType() {
         return type;
