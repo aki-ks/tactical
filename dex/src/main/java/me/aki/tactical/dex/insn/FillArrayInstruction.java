@@ -7,18 +7,30 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Create a new array filled with numeric constants.
- *
- * The created array is required by a {@link MoveResultInstruction} that follows this instruction.
+ * Fill an array with numeric constants.
  */
-public class NewConstantFilledArrayInstruction implements Instruction {
+public class FillArrayInstruction implements Instruction {
     /**
-     * The numbers contained within the new array.
+     * Register containing the array that should be filled.
+     */
+    private Register array;
+
+    /**
+     * The numbers that should be stored in the array.
      */
     private List<DexNumberConstant> values;
 
-    public NewConstantFilledArrayInstruction(List<DexNumberConstant> values) {
+    public FillArrayInstruction(Register array, List<DexNumberConstant> values) {
+        this.array = array;
         this.values = values;
+    }
+
+    public Register getArray() {
+        return array;
+    }
+
+    public void setArray(Register array) {
+        this.array = array;
     }
 
     public List<DexNumberConstant> getValues() {
