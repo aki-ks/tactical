@@ -8,15 +8,11 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.dex.Register;
 
 /**
- * Replace a value within a {@link Register} against the remainder of the current value divided by
- * the value of another {@link Register}.
- *
- * Can be expressed as:
- * <code>op1 = op1 % op2;</code>
+ * Calculate the remainder of the value of one register divided by the value of another one.
  */
 public class ModInstruction extends AbstractBinaryMathInstruction {
-    public ModInstruction(PrimitiveType type, Register op1, Register op2) {
-        super(type, op1, op2);
+    public ModInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
+        super(type, op1, op2, result);
     }
 
     @Override

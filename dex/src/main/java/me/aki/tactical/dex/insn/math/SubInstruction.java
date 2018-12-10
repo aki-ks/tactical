@@ -8,14 +8,11 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.dex.Register;
 
 /**
- * Decrease the value of a {@link Register} by the value of another one.
- *
- * Can be expressed as:
- * <code>op1 = op1 - op2;</code>
+ * Calculate the difference between the values in two registers.
  */
 public class SubInstruction extends AbstractBinaryMathInstruction {
-    public SubInstruction(PrimitiveType type, Register op1, Register op2) {
-        super(type, op1, op2);
+    public SubInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
+        super(type, op1, op2, result);
     }
 
     @Override

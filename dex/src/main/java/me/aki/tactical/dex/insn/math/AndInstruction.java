@@ -8,14 +8,11 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.dex.Register;
 
 /**
- * Calculate the bitwise <tt>and</tt> of one {@link Register} and the value of another one.
- *
- * Can be expressed as:
- * <code>op1 = op1 & op2;</code>
+ * Calculate the bitwise <tt>and</tt> of the value in two registers and storing the result in another register.
  */
 public class AndInstruction extends AbstractBinaryMathInstruction {
-    public AndInstruction(PrimitiveType type, Register op1, Register op2) {
-        super(type, op1, op2);
+    public AndInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
+        super(type, op1, op2, result);
     }
 
     @Override

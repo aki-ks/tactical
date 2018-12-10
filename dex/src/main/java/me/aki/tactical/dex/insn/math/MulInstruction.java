@@ -8,14 +8,11 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.dex.Register;
 
 /**
- * Multiplies the content of one {@link Register} by the value of another one.
- *
- * Can be expressed as:
- * <code>op1 = op1 * op2;</code>
+ * Multiply the value of two registers storing them in another register.
  */
 public class MulInstruction extends AbstractBinaryMathInstruction {
-    public MulInstruction(PrimitiveType type, Register op1, Register op2) {
-        super(type, op1, op2);
+    public MulInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
+        super(type, op1, op2, result);
     }
 
     @Override

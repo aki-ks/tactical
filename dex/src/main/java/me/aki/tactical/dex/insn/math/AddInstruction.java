@@ -8,14 +8,11 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.dex.Register;
 
 /**
- * Increment a {@link Register} by the value of another one.
- *
- * Can be expressed as:
- * <code>op1 = op1 + op2;</code>
+ * Add the value of two registers and store it in another one.
  */
 public class AddInstruction extends AbstractBinaryMathInstruction {
-    public AddInstruction(PrimitiveType type, Register op1, Register op2) {
-        super(type, op1, op2);
+    public AddInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
+        super(type, op1, op2, result);
     }
 
     @Override

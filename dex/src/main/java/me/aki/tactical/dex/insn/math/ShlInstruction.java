@@ -6,14 +6,11 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.dex.Register;
 
 /**
- * Shift the value within a {@link Register} by the value of another one to the left.
- *
- * Can be expressed as:
- * <code>op1 = op1 << op2;</code>
+ * Shift the value of a by the value of another one to the left.
  */
 public class ShlInstruction extends AbstractBinaryMathInstruction {
-    public ShlInstruction(PrimitiveType type, Register op1, Register op2) {
-        super(type, op1, op2);
+    public ShlInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
+        super(type, op1, op2, result);
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Math operation that operates on two registers.
+ * Math operation that operates on two registers and stores the result in another register.
  */
 public abstract class AbstractBinaryMathInstruction implements Instruction {
     /**
@@ -18,7 +18,6 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
 
     /**
      * First operator of the mathematical operation.
-     * The result gets stored in this register.
      */
     private Register op1;
 
@@ -27,9 +26,15 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
      */
     private Register op2;
 
-    public AbstractBinaryMathInstruction(PrimitiveType type, Register op1, Register op2) {
+    /**
+     * The result of the operation gets stored in this register.
+     */
+    private Register result;
+
+    public AbstractBinaryMathInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
         this.op1 = op1;
         this.op2 = op2;
+        this.result = result;
         setType(type);
     }
 
@@ -59,6 +64,14 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
 
     public void setOp2(Register op2) {
         this.op2 = op2;
+    }
+
+    public Register getResult() {
+        return result;
+    }
+
+    public void setResult(Register result) {
+        this.result = result;
     }
 
     protected abstract boolean isTypeSupported(PrimitiveType type);
