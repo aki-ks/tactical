@@ -38,137 +38,137 @@ public class DexInsnVisitor<I, R> {
 
     // MATH
 
-    public void visitAdd(PrimitiveType type, R op1, R op2) {
+    public void visitAdd(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitAdd(type, op1, op2);
+            iv.visitAdd(type, op1, op2, result);
         }
     }
 
-    public void visitSub(PrimitiveType type, R op1, R op2) {
+    public void visitSub(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitSub(type, op1, op2);
+            iv.visitSub(type, op1, op2, result);
         }
     }
 
-    public void visitMul(PrimitiveType type, R op1, R op2) {
+    public void visitMul(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitMul(type, op1, op2);
+            iv.visitMul(type, op1, op2, result);
         }
     }
 
-    public void visitDiv(PrimitiveType type, R op1, R op2) {
+    public void visitDiv(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitDiv(type, op1, op2);
+            iv.visitDiv(type, op1, op2, result);
         }
     }
 
-    public void visitMod(PrimitiveType type, R op1, R op2) {
+    public void visitMod(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitMod(type, op1, op2);
+            iv.visitMod(type, op1, op2, result);
         }
     }
 
-    public void visitAnd(PrimitiveType type, R op1, R op2) {
+    public void visitAnd(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitAnd(type, op1, op2);
+            iv.visitAnd(type, op1, op2, result);
         }
     }
 
-    public void visitOr(PrimitiveType type, R op1, R op2) {
+    public void visitOr(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitOr(type, op1, op2);
+            iv.visitOr(type, op1, op2, result);
         }
     }
 
-    public void visitXor(PrimitiveType type, R op1, R op2) {
+    public void visitXor(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitXor(type, op1, op2);
+            iv.visitXor(type, op1, op2, result);
         }
     }
 
-    public void visitShl(PrimitiveType type, R op1, R op2) {
+    public void visitShl(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitShl(type, op1, op2);
+            iv.visitShl(type, op1, op2, result);
         }
     }
 
-    public void visitShr(PrimitiveType type, R op1, R op2) {
+    public void visitShr(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitShr(type, op1, op2);
+            iv.visitShr(type, op1, op2, result);
         }
     }
 
-    public void visitUShr(PrimitiveType type, R op1, R op2) {
+    public void visitUShr(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitUShr(type, op1, op2);
+            iv.visitUShr(type, op1, op2, result);
         }
     }
 
     // LITERAL MATH
 
-    public void visitLitAdd(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitAdd(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitAdd(type, op1, op2, result);
+            iv.visitLitAdd(op1, op2, result);
         }
     }
 
-    public void visitLitRSub(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitRSub(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitRSub(type, op1, op2, result);
+            iv.visitLitRSub(op1, op2, result);
         }
     }
 
-    public void visitLitMul(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitMul(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitMul(type, op1, op2, result);
+            iv.visitLitMul(op1, op2, result);
         }
     }
 
-    public void visitLitDiv(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitDiv(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitDiv(type, op1, op2, result);
+            iv.visitLitDiv(op1, op2, result);
         }
     }
 
-    public void visitLitMod(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitMod(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitMod(type, op1, op2, result);
+            iv.visitLitMod(op1, op2, result);
         }
     }
 
-    public void visitLitAnd(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitAnd(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitAnd(type, op1, op2, result);
+            iv.visitLitAnd(op1, op2, result);
         }
     }
 
-    public void visitLitOr(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitOr(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitOr(type, op1, op2, result);
+            iv.visitLitOr(op1, op2, result);
         }
     }
 
-    public void visitLitXor(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitXor(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitXor(type, op1, op2, result);
+            iv.visitLitXor(op1, op2, result);
         }
     }
 
-    public void visitLitShl(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitShl(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitShl(type, op1, op2, result);
+            iv.visitLitShl(op1, op2, result);
         }
     }
 
-    public void visitLitShr(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitShr(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitShr(type, op1, op2, result);
+            iv.visitLitShr(op1, op2, result);
         }
     }
 
-    public void visitLitUShr(PrimitiveType type, R op1, int op2, R result) {
+    public void visitLitUShr(R op1, int op2, R result) {
         if (iv != null) {
-            iv.visitLitUShr(type, op1, op2, result);
+            iv.visitLitUShr(op1, op2, result);
         }
     }
 
