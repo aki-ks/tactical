@@ -16,6 +16,14 @@ public class ConstInstruction implements Instruction {
         this.constant = constant;
     }
 
+    public DexConstant getConstant() {
+        return constant;
+    }
+
+    public void setConstant(DexConstant constant) {
+        this.constant = constant;
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return List.of();

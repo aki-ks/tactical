@@ -18,6 +18,14 @@ public class GotoInstruction implements BranchInstruction {
         this.location = location;
     }
 
+    public Instruction getLocation() {
+        return location;
+    }
+
+    public void setLocation(Instruction location) {
+        this.location = location;
+    }
+
     @Override
     public List<Instruction> getBranchTargets() {
         return List.of(location);
