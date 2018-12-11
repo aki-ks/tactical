@@ -30,9 +30,9 @@ public class DexInsnVisitor<I, R> {
         this.iv = iv;
     }
 
-    public void visitConst(DexConstant constant) {
+    public void visitConstant(DexConstant constant) {
         if (iv != null) {
-            iv.visitConst(constant);
+            iv.visitConstant(constant);
         }
     }
 
@@ -348,13 +348,13 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitIf(IfInstruction.Comparison comparison, R op1, Optional<R> op2, Instruction target) {
+    public void visitIf(IfInstruction.Comparison comparison, R op1, Optional<R> op2, I target) {
         if (iv != null) {
             iv.visitIf(comparison, op1, op2, target);
         }
     }
 
-    public void visitSwitch(R value, LinkedHashMap<Integer, Instruction> branchTable, Instruction defaultBranch) {
+    public void visitSwitch(R value, LinkedHashMap<Integer, I> branchTable, I defaultBranch) {
         if (iv != null) {
             iv.visitSwitch(value, branchTable, defaultBranch);
         }
