@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -72,9 +73,18 @@ public class IfInstruction implements BranchInstruction {
         this.target = target;
     }
 
+    public Cell<Instruction> getTargetCell() {
+        return Cell.of(this::getTarget, this::setTarget, Instruction.class);
+    }
+
     @Override
     public List<Instruction> getBranchTargets() {
         return List.of(target);
+    }
+
+    @Override
+    public List<Cell<Instruction>> getBranchTargetCells() {
+        return List.of(getTargetCell());
     }
 
     @Override

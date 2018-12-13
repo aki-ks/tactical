@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -26,9 +27,18 @@ public class GotoInstruction implements BranchInstruction {
         this.location = location;
     }
 
+    public Cell<Instruction> getLocationCell() {
+        return Cell.of(this::getLocation, this::setLocation, Instruction.class);
+    }
+
     @Override
     public List<Instruction> getBranchTargets() {
         return List.of(location);
+    }
+
+    @Override
+    public List<Cell<Instruction>> getBranchTargetCells() {
+        return List.of(getLocationCell());
     }
 
     @Override

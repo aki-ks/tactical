@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.dex.Register;
 
 import java.util.LinkedHashMap;
@@ -59,9 +60,22 @@ public class SwitchInstruction implements BranchInstruction {
         this.defaultBranch = defaultBranch;
     }
 
+    public Cell<Instruction> getDefaultBranchCell() {
+        return Cell.of(this::getDefaultBranch, this::setDefaultBranch, Instruction.class);
+    }
+
     @Override
     public List<Instruction> getBranchTargets() {
         return Stream.concat(branchTable.values().stream(), Stream.of(defaultBranch))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<Cell<Instruction>> getBranchTargetCells() {
+        Stream<Cell<Instruction>> branchTableCells = branchTable.keySet().stream()
+                .map(key -> Cell.ofMap(key, branchTable, Instruction.class));
+
+        return Stream.concat(branchTableCells, Stream.of(getDefaultBranchCell()))
                 .collect(Collectors.toUnmodifiableList());
     }
 
