@@ -73,10 +73,19 @@ public interface InsertList<T> extends List<T> {
     void insertBefore(T location, Collection<T> elements);
 
     /**
-     * Iterator that starts with at a certain element.
+     * Iterator that starts with a certain element.
      *
      * @param element start iterating from this element (inclusive)
      * @return iterator that starts at a certain element
      */
     Iterator<T> iterator(T element);
+
+    /**
+     * Iterator that iterates over a certain range of instructions.
+     *
+     * @param start the first element returned by the iterator
+     * @param end the last element returned by the iterator
+     * @return iterator over a range of instructions
+     */
+    Iterator<T> iterator(T start, T end);
 }

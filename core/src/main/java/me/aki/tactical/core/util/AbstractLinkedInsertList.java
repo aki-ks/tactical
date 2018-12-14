@@ -284,6 +284,11 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
     }
 
     @Override
+    public Iterator<T> iterator(T start, T end) {
+        return new RangeIter(nodeByElement(start), nodeByElement(end));
+    }
+
+    @Override
     public ListIterator<T> listIterator() {
         return new ListIter(0, first);
     }
@@ -414,6 +419,35 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
         public T next() {
             T element = node.element;
             node = node.next;
+            return element;
+        }
+    }
+
+    private class RangeIter implements Iterator<T> {
+        private Node node;
+        private final Node end;
+
+        public RangeIter(Node start, Node end) {
+            this.node = start;
+            this.end = end;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return node != null;
+        }
+
+        @Override
+        public T next() {
+            T element = node.element;
+
+            if (node == end) {
+                node = null;
+            } else if ((node = node.next) == null) {
+                // We've reached the last element of the list but did not yet see the 'end' node.
+                throw new IllegalStateException("Illegal Range");
+            }
+
             return element;
         }
     }
