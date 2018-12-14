@@ -1,6 +1,5 @@
 package me.aki.tactical.conversion.ref2stack;
 
-import me.aki.tactical.ref.utils.CfgUnitGraph;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
@@ -9,6 +8,7 @@ import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.TryCatchBlock;
+import me.aki.tactical.ref.utils.RefCfgGraph;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.GotoInsn;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class BodyConverter {
     private final RefBody refBody;
     private final StackBody stackBody;
-    private final CfgUnitGraph graph;
+    private final RefCfgGraph graph;
 
     private ConversionContext ctx;
     private Map<Statement, List<Instruction>> convertedStatements;
@@ -42,7 +42,7 @@ public class BodyConverter {
     public BodyConverter(RefBody refBody, StackBody stackBody) {
         this.refBody = refBody;
         this.stackBody = stackBody;
-        this.graph = new CfgUnitGraph(refBody);
+        this.graph = new RefCfgGraph(refBody);
     }
 
     public StackBody getStackBody() {
@@ -89,8 +89,8 @@ public class BodyConverter {
     }
 
     private void convertInstructions() {
-        Deque<CfgUnitGraph.Node> worklist = new ArrayDeque<>();
-        Set<CfgUnitGraph.Node> visited = new HashSet<>();
+        Deque<RefCfgGraph.Node> worklist = new ArrayDeque<>();
+        Set<RefCfgGraph.Node> visited = new HashSet<>();
 
         worklist.add(graph.getNode(refBody.getStatements().getFirst()));
         for (TryCatchBlock tryCatchBlock : refBody.getTryCatchBlocks()) {
@@ -100,9 +100,9 @@ public class BodyConverter {
         StackInsnWriter writer = new StackInsnWriter(ctx);
         RefInsnReader reader = new RefInsnReader(writer);
 
-        CfgUnitGraph.Node node;
+        RefCfgGraph.Node node;
         while ((node = worklist.poll()) != null) {
-            Statement statement = node.getStatement();
+            Statement statement = node.getInstruction();
 
             if (!visited.add(node)) {
                 continue;
@@ -153,7 +153,7 @@ public class BodyConverter {
             Map<RefLocal, List<TryCatchBlock>> handlersByLocal = blocksForHandler.stream()
                     .collect(Collectors.groupingBy(TryCatchBlock::getExceptionLocal));
 
-            CfgUnitGraph.Node handlerNode = graph.getNode(handler);
+            RefCfgGraph.Node handlerNode = graph.getNode(handler);
             if (handlersByLocal.size() == 1 && handlerNode.getSucceeding().isEmpty()) {
                 // Since each try/catch blocks pointing at this handler instructions has the same local,
                 // we will insert the StoreInsn directly before the actual handler instruction.

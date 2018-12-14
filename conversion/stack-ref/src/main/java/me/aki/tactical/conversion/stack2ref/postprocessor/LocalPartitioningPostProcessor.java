@@ -1,6 +1,5 @@
 package me.aki.tactical.conversion.stack2ref.postprocessor;
 
-import me.aki.tactical.ref.utils.CfgUnitGraph;
 import me.aki.tactical.ref.utils.LocalStateAnalysis;
 import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
@@ -9,6 +8,7 @@ import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.stmt.AssignStmt;
 import me.aki.tactical.ref.util.CommonOperations;
+import me.aki.tactical.ref.utils.RefCfgGraph;
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import java.util.*;
 public class LocalPartitioningPostProcessor implements PostProcessor {
     @Override
     public void process(RefBody body) {
-        CfgUnitGraph graph = new CfgUnitGraph(body);
+        RefCfgGraph graph = new RefCfgGraph(body);
         LocalStateAnalysis stateAnalysis = new LocalStateAnalysis(graph);
 
         for (RefLocal local : new ArrayList<>(body.getLocals())) {

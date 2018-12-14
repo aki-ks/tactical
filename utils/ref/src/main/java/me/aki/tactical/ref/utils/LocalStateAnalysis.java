@@ -1,6 +1,5 @@
 package me.aki.tactical.ref.utils;
 
-import me.aki.tactical.ref.utils.CfgUnitGraph;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
@@ -26,16 +25,16 @@ import java.util.stream.Collectors;
  */
 public class LocalStateAnalysis {
     private final RefBody body;
-    private final CfgUnitGraph graph;
+    private final RefCfgGraph graph;
     private final Map<RefLocal, LocalStates> locals;
     private final Map<RefLocal, List<Statement>> localReadMap;
     private final Map<RefLocal, List<AssignStmt>> localWriteMap;
 
-    public LocalStateAnalysis(CfgUnitGraph graph) {
+    public LocalStateAnalysis(RefCfgGraph graph) {
         this(graph, CommonOperations.getLocalReadMap(graph.getBody()), CommonOperations.getLocalWriteMap(graph.getBody()));
     }
 
-    public LocalStateAnalysis(CfgUnitGraph graph, Map<RefLocal, List<Statement>> localReadMap, Map<RefLocal, List<AssignStmt>> localWriteMap) {
+    public LocalStateAnalysis(RefCfgGraph graph, Map<RefLocal, List<Statement>> localReadMap, Map<RefLocal, List<AssignStmt>> localWriteMap) {
         this.graph  = graph;
         this.body = graph.getBody();
 
@@ -136,7 +135,7 @@ public class LocalStateAnalysis {
 
             for (State assign : getLocalStates(body, local, graph, writes)) {
                 analyzeCfgForward(assign.getNode(), node -> {
-                    Statement stmt = node.getStatement();
+                    Statement stmt = node.getInstruction();
                     this.stmtToStates.computeIfAbsent(stmt, x -> new HashSet<>()).add(assign);
                     this.stateToStmts.computeIfAbsent(assign, x -> new HashSet<>()).add(stmt);
 
@@ -145,7 +144,7 @@ public class LocalStateAnalysis {
             }
         }
 
-        private List<State> getLocalStates(RefBody body, RefLocal local, CfgUnitGraph graph, Set<AssignStmt> writes) {
+        private List<State> getLocalStates(RefBody body, RefLocal local, RefCfgGraph graph, Set<AssignStmt> writes) {
             final List<State> assign = new ArrayList<>();
 
             body.getThisLocal().ifPresent(thisLocal -> {
@@ -179,13 +178,13 @@ public class LocalStateAnalysis {
          * @param start start the analysis from that node
          * @param visit the function that is evaluated for each visited node
          */
-        private void analyzeCfgForward(CfgUnitGraph.Node start, Function<CfgUnitGraph.Node, Boolean> visit) {
-            Deque<CfgUnitGraph.Node> worklist = new ArrayDeque<>();
-            Set<CfgUnitGraph.Node> visited = new HashSet<>();
+        private void analyzeCfgForward(RefCfgGraph.Node start, Function<RefCfgGraph.Node, Boolean> visit) {
+            Deque<RefCfgGraph.Node> worklist = new ArrayDeque<>();
+            Set<RefCfgGraph.Node> visited = new HashSet<>();
             worklist.add(start);
 
             while (!worklist.isEmpty()) {
-                CfgUnitGraph.Node node = worklist.poll();
+                RefCfgGraph.Node node = worklist.poll();
 
                 boolean alreadyVisited = !visited.add(node);
                 if (alreadyVisited) {
@@ -246,21 +245,21 @@ public class LocalStateAnalysis {
          *
          * @return node where the assignment of the state occurs
          */
-        CfgUnitGraph.Node getNode();
+        RefCfgGraph.Node getNode();
 
         /**
          * Represents that a local has the this value assigned.
          * Therefore it must be the {@link RefBody#getThisLocal() this local}.
          */
         public static class This implements State {
-            private final CfgUnitGraph.Node headNode;
+            private final RefCfgGraph.Node headNode;
 
-            public This(CfgUnitGraph.Node headNode) {
+            public This(RefCfgGraph.Node headNode) {
                 this.headNode = headNode;
             }
 
             @Override
-            public CfgUnitGraph.Node getNode() {
+            public RefCfgGraph.Node getNode() {
                 return headNode;
             }
 
@@ -290,16 +289,16 @@ public class LocalStateAnalysis {
          * Therefore it must be a {@link RefBody#getArgumentLocals() parameter local}.
          */
         public static class Parameter implements State {
-            private final CfgUnitGraph.Node headNode;
+            private final RefCfgGraph.Node headNode;
             private final int index;
 
-            public Parameter(CfgUnitGraph.Node headNode, int index) {
+            public Parameter(RefCfgGraph.Node headNode, int index) {
                 this.headNode = headNode;
                 this.index = index;
             }
 
             @Override
-            public CfgUnitGraph.Node getNode() {
+            public RefCfgGraph.Node getNode() {
                 return headNode;
             }
 
@@ -338,20 +337,20 @@ public class LocalStateAnalysis {
              * The node of the instruction <tt>succeeding</tt> the assign statement.
              * From there the local has the just assigned value.
              */
-            private final CfgUnitGraph.Node node;
+            private final RefCfgGraph.Node node;
 
             /**
              * The assign statement that writes to the local.
              */
             private final AssignStmt assign;
 
-            public Stmt(CfgUnitGraph.Node node, AssignStmt assign) {
+            public Stmt(RefCfgGraph.Node node, AssignStmt assign) {
                 this.node = node;
                 this.assign = assign;
             }
 
             @Override
-            public CfgUnitGraph.Node getNode() {
+            public RefCfgGraph.Node getNode() {
                 return node;
             }
 

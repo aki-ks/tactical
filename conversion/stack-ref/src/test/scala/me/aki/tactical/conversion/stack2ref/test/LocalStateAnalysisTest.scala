@@ -12,7 +12,7 @@ import me.aki.tactical.ref.expr.ConstantExpr
 import me.aki.tactical.ref.invoke.InvokeStatic
 import me.aki.tactical.ref.stmt.{AssignStmt, IfStmt, InvokeStmt, ReturnStmt}
 import me.aki.tactical.ref.utils.LocalStateAnalysis.State
-import me.aki.tactical.ref.utils.{CfgUnitGraph, LocalStateAnalysis}
+import me.aki.tactical.ref.utils.{LocalStateAnalysis, RefCfgGraph}
 import org.scalatest.{FlatSpec, Matchers}
 
 class LocalStateAnalysisTest extends FlatSpec with Matchers {
@@ -34,7 +34,7 @@ class LocalStateAnalysisTest extends FlatSpec with Matchers {
     body.getStatements.addAll(stmt1 :: stmt2 :: stmt3 :: stmt4 :: stmt5 :: stmt6 :: stmt7 :: Nil asJava)
     body.getLocals.add(local1)
 
-    val graph = new CfgUnitGraph(body)
+    val graph = new RefCfgGraph(body)
     val analysis = new LocalStateAnalysis(graph).getLocalStates(local1)
     def stmtState(stmt: AssignStmt) = new State.Stmt(graph.getNode(body.getStatements.getNext(stmt)), stmt)
 
@@ -65,7 +65,7 @@ class LocalStateAnalysisTest extends FlatSpec with Matchers {
     body.getArgumentLocals.add(local1)
     body.getLocals.add(local1)
 
-    val graph = new CfgUnitGraph(body)
+    val graph = new RefCfgGraph(body)
     val analysis = new LocalStateAnalysis(graph).getLocalStates(local1)
     def stmtState(stmt: AssignStmt) = new State.Stmt(graph.getNode(body.getStatements.getNext(stmt)), stmt)
     def paramState(i: Int) = new State.Parameter(graph.getHead, i)
@@ -98,7 +98,7 @@ class LocalStateAnalysisTest extends FlatSpec with Matchers {
     body.getArgumentLocals.add(local1)
     body.getLocals.addAll(local1 :: local2 :: Nil asJava)
 
-    val graph = new CfgUnitGraph(body)
+    val graph = new RefCfgGraph(body)
     val analysis = new LocalStateAnalysis(graph).getLocalStates(local1)
     def stmtState(stmt: AssignStmt) = new State.Stmt(graph.getNode(body.getStatements.getNext(stmt)), stmt)
     def paramState(i: Int) = new State.Parameter(graph.getHead, i)
