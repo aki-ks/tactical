@@ -13,7 +13,7 @@ public class LinkedInsertList<T> extends AbstractLinkedInsertList<T> {
         super(new HashMap<>());
     }
 
-    public LinkedInsertList(Iterable<T> elements) {
+    public LinkedInsertList(Iterable<? extends T> elements) {
         super(new HashMap<>(), elements);
     }
 }

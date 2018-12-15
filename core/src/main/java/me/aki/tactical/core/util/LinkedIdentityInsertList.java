@@ -13,7 +13,7 @@ public class LinkedIdentityInsertList<T> extends AbstractLinkedInsertList<T> {
         super(new IdentityHashMap<>());
     }
 
-    public LinkedIdentityInsertList(Iterable<T> elements) {
+    public LinkedIdentityInsertList(Iterable<? extends T> elements) {
         super(new IdentityHashMap<>(), elements);
     }
 }

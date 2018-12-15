@@ -36,11 +36,11 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
         this.last = null;
     }
 
-    AbstractLinkedInsertList(Map<T, Node> nodeMap, Iterable<T> elements) {
+    AbstractLinkedInsertList(Map<T, Node> nodeMap, Iterable<? extends T> elements) {
         this.nodes = nodeMap;
         Node node = null;
 
-        Iterator<T> iterator = elements.iterator();
+        Iterator<? extends T> iterator = elements.iterator();
         if (iterator.hasNext()) {
             T element = iterator.next();
             this.first = node = new Node(element, null, null);
