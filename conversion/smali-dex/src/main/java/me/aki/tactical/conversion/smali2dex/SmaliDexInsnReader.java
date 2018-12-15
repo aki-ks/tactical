@@ -68,10 +68,27 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case RETURN_VOID:
-            case RETURN:
-            case RETURN_WIDE:
-            case RETURN_OBJECT:
+            case RETURN_VOID: {
+                iv.visitReturnVoid();
+                break;
+            }
+
+            case RETURN: {
+                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                iv.visitReturn(DexType.NORMAL, insn.getRegisterA());
+                break;
+            }
+            case RETURN_WIDE: {
+                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                iv.visitReturn(DexType.WIDE, insn.getRegisterA());
+                break;
+            }
+            case RETURN_OBJECT: {
+                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                iv.visitReturn(DexType.OBJECT, insn.getRegisterA());
+                break;
+            }
+
             case CONST_4:
             case CONST_16:
             case CONST:
