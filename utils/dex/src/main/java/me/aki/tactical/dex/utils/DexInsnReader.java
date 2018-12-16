@@ -117,7 +117,7 @@ public class DexInsnReader {
             }
         } else if (instruction instanceof ConstInstruction) {
             ConstInstruction constInsn = (ConstInstruction) instruction;
-            iv.visitConstant(constInsn.getConstant());
+            iv.visitConstant(constInsn.getConstant(), constInsn.getRegister());
         } else if (instruction instanceof ArrayLengthInstruction) {
             ArrayLengthInstruction lengthInsn = (ArrayLengthInstruction) instruction;
             iv.visitArrayLength(lengthInsn.getArray(), lengthInsn.getResult());

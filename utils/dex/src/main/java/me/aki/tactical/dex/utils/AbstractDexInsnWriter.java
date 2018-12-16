@@ -101,8 +101,8 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     public abstract void registerReference(I instruction, Cell<Instruction> insnCell);
 
     @Override
-    public void visitConstant(DexConstant constant) {
-        visitInstruction(new ConstInstruction(constant));
+    public void visitConstant(DexConstant constant, R target) {
+        visitInstruction(new ConstInstruction(constant, convertRegister(target)));
     }
 
     @Override

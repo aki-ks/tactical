@@ -30,9 +30,9 @@ public class DexInsnVisitor<I, R> {
         this.iv = iv;
     }
 
-    public void visitConstant(DexConstant constant) {
+    public void visitConstant(DexConstant constant, R target) {
         if (iv != null) {
-            iv.visitConstant(constant);
+            iv.visitConstant(constant, target);
         }
     }
 
