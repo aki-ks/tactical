@@ -1,12 +1,27 @@
 package me.aki.tactical.conversion.smali2dex;
 
+import me.aki.tactical.conversion.smalidex.DexUtils;
+import me.aki.tactical.core.constant.ClassConstant;
+import me.aki.tactical.core.constant.DexNumberConstant;
+import me.aki.tactical.core.constant.StringConstant;
+import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.MoveInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.OneRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
+import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11x;
+import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
+import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
+import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
+import org.jf.dexlib2.iface.instruction.formats.Instruction21s;
+import org.jf.dexlib2.iface.instruction.formats.Instruction31c;
+import org.jf.dexlib2.iface.instruction.formats.Instruction31i;
+import org.jf.dexlib2.iface.instruction.formats.Instruction51l;
+import org.jf.dexlib2.iface.reference.StringReference;
+import org.jf.dexlib2.iface.reference.TypeReference;
 
 public class SmaliDexInsnReader {
     private final DexInsnVisitor<Instruction, Integer> iv;
@@ -89,17 +104,66 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case CONST_4:
-            case CONST_16:
-            case CONST:
-            case CONST_HIGH16:
-            case CONST_WIDE_16:
-            case CONST_WIDE_32:
-            case CONST_WIDE:
-            case CONST_WIDE_HIGH16:
-            case CONST_STRING:
-            case CONST_STRING_JUMBO:
-            case CONST_CLASS:
+            case CONST_4: {
+                Instruction11n insn = (Instruction11n) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST_16: {
+                Instruction21s insn = (Instruction21s) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST: {
+                Instruction31i insn = (Instruction31i) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST_HIGH16: {
+                Instruction21ih insn = (Instruction21ih) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST_WIDE_16: {
+                Instruction21s insn = (Instruction21s) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST_WIDE_32: {
+                Instruction31i insn = (Instruction31i) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST_WIDE: {
+                Instruction51l insn = (Instruction51l) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST_WIDE_HIGH16: {
+                Instruction21lh insn = (Instruction21lh) instruction;
+                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                break;
+            }
+            case CONST_STRING: {
+                Instruction21c insn = (Instruction21c) instruction;
+                String string = ((StringReference) insn.getReference()).getString();
+                iv.visitConstant(new StringConstant(string), insn.getRegisterA());
+                break;
+            }
+            case CONST_STRING_JUMBO: {
+                Instruction31c insn = (Instruction31c) instruction;
+                String string = ((StringReference) insn.getReference()).getString();
+                iv.visitConstant(new StringConstant(string), insn.getRegisterA());
+                break;
+            }
+            case CONST_CLASS: {
+                Instruction21c insn = (Instruction21c) instruction;
+                String descriptor = ((TypeReference) insn.getReference()).getType();
+                RefType type = (RefType) DexUtils.parseDescriptor(descriptor);
+                iv.visitConstant(new ClassConstant(type), insn.getRegisterA());
+                break;
+            }
+
             case MONITOR_ENTER:
             case MONITOR_EXIT:
             case CHECK_CAST:
