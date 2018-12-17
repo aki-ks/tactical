@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.smali2dex;
 
 import me.aki.tactical.conversion.smalidex.DexUtils;
+import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.ClassConstant;
 import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.constant.StringConstant;
@@ -11,10 +12,12 @@ import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.OneRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
+import org.jf.dexlib2.iface.instruction.formats.Instruction12x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21s;
+import org.jf.dexlib2.iface.instruction.formats.Instruction22c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31i;
 import org.jf.dexlib2.iface.instruction.formats.Instruction51l;
@@ -173,10 +176,29 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case CHECK_CAST:
-            case INSTANCE_OF:
+            case CHECK_CAST: {
+                Instruction21c insn = (Instruction21c) instruction;
+                String descriptor = ((TypeReference) insn.getReference()).getType();
+                RefType type = (RefType) DexUtils.parseDescriptor(descriptor);
+                iv.visitRefCast(type, insn.getRegisterA());
+                break;
+            }
+            case INSTANCE_OF: {
+                Instruction22c insn = (Instruction22c) instruction;
+                String descriptor = ((TypeReference) insn.getReference()).getType();
+                RefType type = (RefType) DexUtils.parseDescriptor(descriptor);
+                iv.visitInstanceOf(type, insn.getRegisterB(), insn.getRegisterA());
+                break;
+            }
+            case NEW_INSTANCE: {
+                Instruction21c insn = (Instruction21c) instruction;
+                String descriptor = ((TypeReference) insn.getReference()).getType();
+                Path path = DexUtils.parseObjectDescriptor(descriptor);
+                iv.visitNew(path, insn.getRegisterA());
+                break;
+            }
+
             case ARRAY_LENGTH:
-            case NEW_INSTANCE:
             case NEW_ARRAY:
             case FILLED_NEW_ARRAY:
             case FILLED_NEW_ARRAY_RANGE:
