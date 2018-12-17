@@ -144,10 +144,10 @@ public class DexInsnReader {
             iv.visitInvoke(invokeInsn.getInvoke());
         } else if (instruction instanceof MonitorEnterInstruction) {
             MonitorEnterInstruction monitorEnter = (MonitorEnterInstruction) instruction;
-            iv.visitMonitorEnterInstruction(monitorEnter.getRegister());
+            iv.visitMonitorEnter(monitorEnter.getRegister());
         } else if (instruction instanceof MonitorExitInstruction) {
             MonitorExitInstruction monitorInsn = (MonitorExitInstruction) instruction;
-            iv.visitMonitorExitInstruction(monitorInsn.getRegister());
+            iv.visitMonitorExit(monitorInsn.getRegister());
         } else if (instruction instanceof MoveExceptionInstruction) {
             MoveExceptionInstruction moveInsn = (MoveExceptionInstruction) instruction;
             iv.visitMoveException(moveInsn.getRegister());

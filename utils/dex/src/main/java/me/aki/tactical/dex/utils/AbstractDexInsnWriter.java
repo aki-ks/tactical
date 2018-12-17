@@ -280,12 +280,12 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitMonitorEnterInstruction(R value) {
+    public void visitMonitorEnter(R value) {
         visitInstruction(new MonitorEnterInstruction(convertRegister(value)));
     }
 
     @Override
-    public void visitMonitorExitInstruction(R value) {
+    public void visitMonitorExit(R value) {
         visitInstruction(new MonitorExitInstruction(convertRegister(value)));
     }
 

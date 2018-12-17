@@ -252,15 +252,15 @@ public class DexInsnVisitor<I, R> {
 
     // MONITOR INSTRUCTIONS
 
-    public void visitMonitorEnterInstruction(R value) {
+    public void visitMonitorEnter(R value) {
         if (iv != null) {
-            iv.visitMonitorEnterInstruction(value);
+            iv.visitMonitorEnter(value);
         }
     }
 
-    public void visitMonitorExitInstruction(R value) {
+    public void visitMonitorExit(R value) {
         if (iv != null) {
-            iv.visitMonitorExitInstruction(value);
+            iv.visitMonitorExit(value);
         }
     }
 

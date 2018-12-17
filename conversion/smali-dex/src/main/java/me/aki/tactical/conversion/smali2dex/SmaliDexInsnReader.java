@@ -6,13 +6,11 @@ import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DexType;
-import me.aki.tactical.dex.insn.MoveInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.OneRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
-import org.jf.dexlib2.iface.instruction.formats.Instruction11x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
@@ -164,8 +162,17 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case MONITOR_ENTER:
-            case MONITOR_EXIT:
+            case MONITOR_ENTER: {
+                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                iv.visitMonitorEnter(insn.getRegisterA());
+                break;
+            }
+            case MONITOR_EXIT: {
+                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                iv.visitMonitorExit(insn.getRegisterA());
+                break;
+            }
+
             case CHECK_CAST:
             case INSTANCE_OF:
             case ARRAY_LENGTH:
