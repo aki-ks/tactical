@@ -160,6 +160,9 @@ public class DexInsnReader {
         } else if (instruction instanceof NegInstruction) {
             NegInstruction newInsn = (NegInstruction) instruction;
             iv.visitNeg(newInsn.getType(), newInsn.getValue(), newInsn.getResult());
+        } else if (instruction instanceof NewArrayInstruction) {
+            NewArrayInstruction newArrayInsn = (NewArrayInstruction) instruction;
+            iv.visitNewArray(newArrayInsn.getArrayType(), newArrayInsn.getSize(), newArrayInsn.getResult());
         } else if (instruction instanceof NewFilledArrayInstruction) {
             NewFilledArrayInstruction filledArrayInsn = (NewFilledArrayInstruction) instruction;
             iv.visitNewFilledArray(filledArrayInsn.getType(), filledArrayInsn.getRegisters());

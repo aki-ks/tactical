@@ -32,6 +32,7 @@ import me.aki.tactical.dex.insn.MoveExceptionInstruction;
 import me.aki.tactical.dex.insn.MoveInstruction;
 import me.aki.tactical.dex.insn.MoveResultInstruction;
 import me.aki.tactical.dex.insn.NegInstruction;
+import me.aki.tactical.dex.insn.NewArrayInstruction;
 import me.aki.tactical.dex.insn.NewFilledArrayInstruction;
 import me.aki.tactical.dex.insn.NewInstanceInstruction;
 import me.aki.tactical.dex.insn.NotInstruction;
@@ -258,6 +259,11 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     @Override
     public void visitFillArray(R array, List<DexNumberConstant> values) {
         visitInstruction(new FillArrayInstruction(convertRegister(array), values));
+    }
+
+    @Override
+    public void visitNewArray(ArrayType type, R size, R result) {
+        visitInstruction(new NewArrayInstruction(type, convertRegister(size), convertRegister(result)));
     }
 
     @Override

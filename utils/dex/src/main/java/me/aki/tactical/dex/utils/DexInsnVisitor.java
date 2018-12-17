@@ -230,6 +230,12 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
+    public void visitNewArray(ArrayType type, R size, R result) {
+        if (iv != null) {
+            iv.visitNewArray(type, size, result);
+        }
+    }
+
     public void visitNewFilledArray(ArrayType type, List<R> registers) {
         if (iv != null) {
             iv.visitNewFilledArray(type, registers);
