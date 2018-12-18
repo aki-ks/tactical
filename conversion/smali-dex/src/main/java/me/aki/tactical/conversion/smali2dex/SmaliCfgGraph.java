@@ -63,15 +63,15 @@ public class SmaliCfgGraph extends AbstractCfgGraph<Instruction> {
         switch (instruction.getOpcode()) {
             case GOTO:
                 Instruction10t insn10t = (Instruction10t) instruction;
-                return Stream.of(insnIndex.getInstructionByCodeUnit(insn10t.getCodeOffset()));
+                return Stream.of(insnIndex.getOffsetInstruction(instruction, insn10t.getCodeOffset()));
 
             case GOTO_16:
                 Instruction20t insn20t = (Instruction20t) instruction;
-                return Stream.of(insnIndex.getInstructionByCodeUnit(insn20t.getCodeOffset()));
+                return Stream.of(insnIndex.getOffsetInstruction(instruction, insn20t.getCodeOffset()));
 
             case GOTO_32:
                 Instruction30t insn30t = (Instruction30t) instruction;
-                return Stream.of(insnIndex.getInstructionByCodeUnit(insn30t.getCodeOffset()));
+                return Stream.of(insnIndex.getOffsetInstruction(instruction, insn30t.getCodeOffset()));
 
             case IF_EQ:
             case IF_NE:
@@ -80,7 +80,7 @@ public class SmaliCfgGraph extends AbstractCfgGraph<Instruction> {
             case IF_GE:
             case IF_GT:
                 Instruction22t insn22t = (Instruction22t) instruction;
-                return Stream.of(insnIndex.getInstructionByCodeUnit(insn22t.getCodeOffset()));
+                return Stream.of(insnIndex.getOffsetInstruction(instruction, insn22t.getCodeOffset()));
 
             case IF_EQZ:
             case IF_NEZ:
@@ -89,14 +89,14 @@ public class SmaliCfgGraph extends AbstractCfgGraph<Instruction> {
             case IF_GEZ:
             case IF_GTZ:
                 Instruction21t insn21t = (Instruction21t) instruction;
-                return Stream.of(insnIndex.getInstructionByCodeUnit(insn21t.getCodeOffset()));
+                return Stream.of(insnIndex.getOffsetInstruction(instruction, insn21t.getCodeOffset()));
 
             case PACKED_SWITCH:
             case SPARSE_SWITCH:
                 Instruction31t insn31t = (Instruction31t) instruction;
-                SwitchPayload switchPayload = (SwitchPayload) insnIndex.getInstructionByCodeUnit(insn31t.getCodeOffset());
+                SwitchPayload switchPayload = (SwitchPayload) insnIndex.getOffsetInstruction(instruction, insn31t.getCodeOffset());
                 return switchPayload.getSwitchElements().stream()
-                        .map(element -> insnIndex.getInstructionByCodeUnit(element.getOffset()));
+                        .map(element -> insnIndex.getOffsetInstruction(instruction, element.getOffset()));
 
             default:
                 return Stream.empty();
