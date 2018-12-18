@@ -47,4 +47,14 @@ public class DexNumberConstant implements DexConstant, Constant {
         // We just know that this is some kind of PrimitiveType.
         return null;
     }
+
+    @Override
+    public String toString() {
+        return DexNumberConstant.class.getSimpleName() + '{' +
+                "intValue()=" + intValue() +
+                ", longValue()=" + longValue() +
+                ", floatValue()=" + floatValue() +
+                ", doubleValue()=" + doubleValue() +
+                '}';
+    }
 }

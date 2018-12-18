@@ -5,12 +5,14 @@ import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.ClassConstant;
 import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.constant.StringConstant;
+import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.OneRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
+import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
 import org.jf.dexlib2.iface.instruction.formats.Instruction12x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
@@ -20,14 +22,24 @@ import org.jf.dexlib2.iface.instruction.formats.Instruction21s;
 import org.jf.dexlib2.iface.instruction.formats.Instruction22c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31i;
+import org.jf.dexlib2.iface.instruction.formats.Instruction31t;
+import org.jf.dexlib2.iface.instruction.formats.Instruction35c;
+import org.jf.dexlib2.iface.instruction.formats.Instruction3rc;
 import org.jf.dexlib2.iface.instruction.formats.Instruction51l;
 import org.jf.dexlib2.iface.reference.StringReference;
 import org.jf.dexlib2.iface.reference.TypeReference;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class SmaliDexInsnReader {
+    private final InstructionIndex insnIndex;
     private final DexInsnVisitor<Instruction, Integer> iv;
 
-    public SmaliDexInsnReader(DexInsnVisitor<Instruction, Integer> iv) {
+    public SmaliDexInsnReader(InstructionIndex insnIndex, DexInsnVisitor<Instruction, Integer> iv) {
+        this.insnIndex = insnIndex;
         this.iv = iv;
     }
 
@@ -198,11 +210,58 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case ARRAY_LENGTH:
-            case NEW_ARRAY:
-            case FILLED_NEW_ARRAY:
-            case FILLED_NEW_ARRAY_RANGE:
-            case FILL_ARRAY_DATA:
+            case ARRAY_LENGTH: {
+                Instruction12x insn = (Instruction12x) instruction;
+                iv.visitArrayLength(insn.getRegisterB(), insn.getRegisterA());
+                break;
+            }
+            case NEW_ARRAY: {
+                Instruction22c insn = (Instruction22c) instruction;
+                String descriptor = ((TypeReference) insn.getReference()).getType();
+                ArrayType type = (ArrayType) DexUtils.parseDescriptor(descriptor);
+                iv.visitNewArray(type, insn.getRegisterB(), insn.getRegisterA());
+                break;
+            }
+            case FILLED_NEW_ARRAY: {
+                Instruction35c insn = (Instruction35c) instruction;
+
+                String descriptor = ((TypeReference) insn.getReference()).getType();
+                ArrayType type = (ArrayType) DexUtils.parseDescriptor(descriptor);
+
+                List<Integer> registers = Stream.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF(), insn.getRegisterG())
+                        .limit(insn.getRegisterCount())
+                        .collect(Collectors.toList());
+
+                iv.visitNewFilledArray(type, registers);
+                break;
+            }
+            case FILLED_NEW_ARRAY_RANGE: {
+                Instruction3rc insn = (Instruction3rc) instruction;
+
+                String descriptor = ((TypeReference) insn.getReference()).getType();
+                ArrayType type = (ArrayType) DexUtils.parseDescriptor(descriptor);
+
+                List<Integer> registers = new ArrayList<>();
+                for (int register = insn.getStartRegister(); register < insn.getRegisterCount(); register++) {
+                    registers.add(register);
+                }
+
+                iv.visitNewFilledArray(type, registers);
+                break;
+            }
+            case FILL_ARRAY_DATA: {
+                Instruction31t insn = (Instruction31t) instruction;
+                ArrayPayload payload = (ArrayPayload) insnIndex.getOffsetInstruction(insn, insn.getCodeOffset());
+
+                List<DexNumberConstant> numbers = payload.getArrayElements().stream()
+                        .map(Number::longValue)
+                        .map(DexNumberConstant::new)
+                        .collect(Collectors.toList());
+
+                iv.visitFillArray(insn.getRegisterA(), numbers);
+                break;
+            }
+
             case THROW:
             case GOTO:
             case GOTO_16:
@@ -429,7 +488,7 @@ public class SmaliDexInsnReader {
             case CONST_METHOD_HANDLE:
             case CONST_METHOD_TYPE:
             default:
-                throw new RuntimeException("NOT YET IMPLEMENTED");
+//                throw new RuntimeException("NOT YET IMPLEMENTED");
         }
     }
 }
