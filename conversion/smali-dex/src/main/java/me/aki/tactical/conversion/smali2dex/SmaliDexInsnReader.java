@@ -10,10 +10,10 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.iface.instruction.Instruction;
-import org.jf.dexlib2.iface.instruction.OneRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
+import org.jf.dexlib2.iface.instruction.formats.Instruction11x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction12x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
@@ -73,25 +73,25 @@ public class SmaliDexInsnReader {
             }
 
             case MOVE_RESULT: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitMoveResult(DexType.NORMAL, insn.getRegisterA());
                 break;
             }
 
             case MOVE_RESULT_WIDE: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitMoveResult(DexType.WIDE, insn.getRegisterA());
                 break;
             }
 
             case MOVE_RESULT_OBJECT: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitMoveResult(DexType.OBJECT, insn.getRegisterA());
                 break;
             }
 
             case MOVE_EXCEPTION: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitMoveException(insn.getRegisterA());
                 break;
             }
@@ -102,17 +102,17 @@ public class SmaliDexInsnReader {
             }
 
             case RETURN: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitReturn(DexType.NORMAL, insn.getRegisterA());
                 break;
             }
             case RETURN_WIDE: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitReturn(DexType.WIDE, insn.getRegisterA());
                 break;
             }
             case RETURN_OBJECT: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitReturn(DexType.OBJECT, insn.getRegisterA());
                 break;
             }
@@ -178,12 +178,12 @@ public class SmaliDexInsnReader {
             }
 
             case MONITOR_ENTER: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitMonitorEnter(insn.getRegisterA());
                 break;
             }
             case MONITOR_EXIT: {
-                OneRegisterInstruction insn = (OneRegisterInstruction) instruction;
+                Instruction11x insn = (Instruction11x) instruction;
                 iv.visitMonitorExit(insn.getRegisterA());
                 break;
             }
@@ -262,7 +262,12 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case THROW:
+            case THROW: {
+                Instruction11x insn = (Instruction11x) instruction;
+                iv.visitThrow(insn.getRegisterA());
+                break;
+            }
+
             case GOTO:
             case GOTO_16:
             case GOTO_32:
