@@ -10,11 +10,14 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.iface.instruction.Instruction;
+import org.jf.dexlib2.iface.instruction.OffsetInstruction;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
+import org.jf.dexlib2.iface.instruction.formats.Instruction10t;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction12x;
+import org.jf.dexlib2.iface.instruction.formats.Instruction20t;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
@@ -270,7 +273,12 @@ public class SmaliDexInsnReader {
 
             case GOTO:
             case GOTO_16:
-            case GOTO_32:
+            case GOTO_32: {
+                OffsetInstruction insn = (OffsetInstruction) instruction;
+                iv.visitGoto(insnIndex.getOffsetInstruction(insn, insn.getCodeOffset()));
+                break;
+            }
+
             case PACKED_SWITCH:
             case SPARSE_SWITCH:
             case CMPL_FLOAT:
