@@ -11,6 +11,8 @@ import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.OffsetInstruction;
+import org.jf.dexlib2.iface.instruction.SwitchElement;
+import org.jf.dexlib2.iface.instruction.SwitchPayload;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
 import org.jf.dexlib2.iface.instruction.formats.Instruction10t;
@@ -33,6 +35,7 @@ import org.jf.dexlib2.iface.reference.StringReference;
 import org.jf.dexlib2.iface.reference.TypeReference;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -280,7 +283,19 @@ public class SmaliDexInsnReader {
             }
 
             case PACKED_SWITCH:
-            case SPARSE_SWITCH:
+            case SPARSE_SWITCH: {
+                Instruction31t insn = (Instruction31t) instruction;
+                SwitchPayload payload = (SwitchPayload) insnIndex.getOffsetInstruction(insn, insn.getCodeOffset());
+
+                LinkedHashMap<Integer, Instruction> branchTable = new LinkedHashMap<>();
+                for (SwitchElement element : payload.getSwitchElements()) {
+                    branchTable.put(element.getKey(), insnIndex.getOffsetInstruction(insn, element.getOffset()));
+                }
+
+                iv.visitSwitch(insn.getRegisterA(), branchTable);
+                break;
+            }
+
             case CMPL_FLOAT:
             case CMPG_FLOAT:
             case CMPL_DOUBLE:
