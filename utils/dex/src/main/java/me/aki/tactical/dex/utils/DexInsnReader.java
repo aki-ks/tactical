@@ -111,7 +111,7 @@ public class DexInsnReader {
                 iv.visitIf(ifInsn.getComparison(), ifInsn.getOp1(), ifInsn.getOp2(), ifInsn.getTarget());
             } else if (instruction instanceof SwitchInstruction) {
                 SwitchInstruction switchInsn = (SwitchInstruction) instruction;
-                iv.visitSwitch(switchInsn.getValue(), switchInsn.getBranchTable(), switchInsn.getDefaultBranch());
+                iv.visitSwitch(switchInsn.getValue(), switchInsn.getBranchTable());
             } else {
                 throw new AssertionError();
             }

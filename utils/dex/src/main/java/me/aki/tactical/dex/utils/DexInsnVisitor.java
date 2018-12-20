@@ -360,9 +360,9 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitSwitch(R value, LinkedHashMap<Integer, I> branchTable, I defaultBranch) {
+    public void visitSwitch(R value, LinkedHashMap<Integer, I> branchTable) {
         if (iv != null) {
-            iv.visitSwitch(value, branchTable, defaultBranch);
+            iv.visitSwitch(value, branchTable);
         }
     }
 }

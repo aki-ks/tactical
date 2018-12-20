@@ -25,15 +25,9 @@ public class SwitchInstruction implements BranchInstruction {
      */
     private LinkedHashMap<Integer, Instruction> branchTable;
 
-    /**
-     * Branch to this location if the branchTable defined no target for the value.
-     */
-    private Instruction defaultBranch;
-
-    public SwitchInstruction(Register value, LinkedHashMap<Integer, Instruction> branchTable, Instruction defaultBranch) {
+    public SwitchInstruction(Register value, LinkedHashMap<Integer, Instruction> branchTable) {
         this.value = value;
         this.branchTable = branchTable;
-        this.defaultBranch = defaultBranch;
     }
 
     public Register getValue() {
@@ -52,30 +46,15 @@ public class SwitchInstruction implements BranchInstruction {
         this.branchTable = branchTable;
     }
 
-    public Instruction getDefaultBranch() {
-        return defaultBranch;
-    }
-
-    public void setDefaultBranch(Instruction defaultBranch) {
-        this.defaultBranch = defaultBranch;
-    }
-
-    public Cell<Instruction> getDefaultBranchCell() {
-        return Cell.of(this::getDefaultBranch, this::setDefaultBranch, Instruction.class);
-    }
-
     @Override
     public List<Instruction> getBranchTargets() {
-        return Stream.concat(branchTable.values().stream(), Stream.of(defaultBranch))
-                .collect(Collectors.toUnmodifiableList());
+        return List.copyOf(branchTable.values());
     }
 
     @Override
     public List<Cell<Instruction>> getBranchTargetCells() {
-        Stream<Cell<Instruction>> branchTableCells = branchTable.keySet().stream()
-                .map(key -> Cell.ofMap(key, branchTable, Instruction.class));
-
-        return Stream.concat(branchTableCells, Stream.of(getDefaultBranchCell()))
+        return branchTable.keySet().stream()
+                .map(key -> Cell.ofMap(key, branchTable, Instruction.class))
                 .collect(Collectors.toUnmodifiableList());
     }
 

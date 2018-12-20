@@ -369,15 +369,14 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitSwitch(R value, LinkedHashMap<Integer, I> branchTable, I defaultBranch) {
+    public void visitSwitch(R value, LinkedHashMap<Integer, I> branchTable) {
         LinkedHashMap<Integer, Instruction> table = new LinkedHashMap<>();
-        SwitchInstruction instruction = new SwitchInstruction(convertRegister(value), table, null);
+        SwitchInstruction instruction = new SwitchInstruction(convertRegister(value), table);
 
         branchTable.keySet().forEach(key -> {
             table.put(key, null);
             registerReference(branchTable.get(key), Cell.ofMap(key, table, Instruction.class));
         });
-        registerReference(defaultBranch, instruction.getDefaultBranchCell());
 
         visitInstruction(instruction);
     }
