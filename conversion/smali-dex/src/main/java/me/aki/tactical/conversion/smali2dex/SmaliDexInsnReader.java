@@ -10,7 +10,9 @@ import me.aki.tactical.core.type.DoubleType;
 import me.aki.tactical.core.type.FloatType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DexType;
+import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
+import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.OffsetInstruction;
 import org.jf.dexlib2.iface.instruction.SwitchElement;
@@ -26,7 +28,9 @@ import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21s;
+import org.jf.dexlib2.iface.instruction.formats.Instruction21t;
 import org.jf.dexlib2.iface.instruction.formats.Instruction22c;
+import org.jf.dexlib2.iface.instruction.formats.Instruction22t;
 import org.jf.dexlib2.iface.instruction.formats.Instruction23x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31i;
@@ -40,6 +44,7 @@ import org.jf.dexlib2.iface.reference.TypeReference;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -331,12 +336,18 @@ public class SmaliDexInsnReader {
             case IF_GE:
             case IF_GT:
             case IF_LE:
+                visitIfInstruction((Instruction22t) instruction);
+                break;
+
             case IF_EQZ:
             case IF_NEZ:
             case IF_LTZ:
             case IF_GEZ:
             case IF_GTZ:
             case IF_LEZ:
+                visitIfZeroInstruction((Instruction21t) instruction);
+                break;
+
             case AGET:
             case AGET_WIDE:
             case AGET_OBJECT:
@@ -541,6 +552,47 @@ public class SmaliDexInsnReader {
             case CONST_METHOD_TYPE:
             default:
 //                throw new RuntimeException("NOT YET IMPLEMENTED");
+        }
+    }
+
+    private void visitIfInstruction(Instruction22t instruction) {
+        Instruction target = insnIndex.getOffsetInstruction(instruction, instruction.getCodeOffset());
+        iv.visitIf(getComparison(instruction.getOpcode()), instruction.getRegisterA(), Optional.of(instruction.getRegisterB()), target);
+    }
+
+    private void visitIfZeroInstruction(Instruction21t instruction) {
+        Instruction target = insnIndex.getOffsetInstruction(instruction, instruction.getCodeOffset());
+        iv.visitIf(getComparison(instruction.getOpcode()), instruction.getRegisterA(), Optional.empty(), target);
+    }
+
+    private IfInstruction.Comparison getComparison(Opcode opcode) {
+        switch (opcode) {
+            case IF_EQ:
+            case IF_EQZ:
+                return IfInstruction.Comparison.EQUAL;
+
+            case IF_NE:
+            case IF_NEZ:
+                return IfInstruction.Comparison.NON_EQUAL;
+
+            case IF_LT:
+            case IF_LTZ:
+                return IfInstruction.Comparison.LESS_THAN;
+
+            case IF_GE:
+            case IF_GEZ:
+                return IfInstruction.Comparison.GREATER_EQUAL;
+
+            case IF_GT:
+            case IF_GTZ:
+                return IfInstruction.Comparison.GREATER_THAN;
+
+            case IF_LE:
+            case IF_LEZ:
+                return IfInstruction.Comparison.LESS_EQUAL;
+
+            default:
+                throw new AssertionError();
         }
     }
 }
