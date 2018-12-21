@@ -6,6 +6,8 @@ import me.aki.tactical.core.constant.ClassConstant;
 import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.type.ArrayType;
+import me.aki.tactical.core.type.DoubleType;
+import me.aki.tactical.core.type.FloatType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
@@ -25,6 +27,7 @@ import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21s;
 import org.jf.dexlib2.iface.instruction.formats.Instruction22c;
+import org.jf.dexlib2.iface.instruction.formats.Instruction23x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31i;
 import org.jf.dexlib2.iface.instruction.formats.Instruction31t;
@@ -296,11 +299,32 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case CMPL_FLOAT:
-            case CMPG_FLOAT:
-            case CMPL_DOUBLE:
-            case CMPG_DOUBLE:
-            case CMP_LONG:
+            case CMPL_FLOAT: {
+                Instruction23x insn = (Instruction23x) instruction;
+                iv.visitCmpl(FloatType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                break;
+            }
+            case CMPG_FLOAT: {
+                Instruction23x insn = (Instruction23x) instruction;
+                iv.visitCmpg(FloatType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                break;
+            }
+            case CMPL_DOUBLE: {
+                Instruction23x insn = (Instruction23x) instruction;
+                iv.visitCmpl(DoubleType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                break;
+            }
+            case CMPG_DOUBLE: {
+                Instruction23x insn = (Instruction23x) instruction;
+                iv.visitCmpg(DoubleType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                break;
+            }
+            case CMP_LONG: {
+                Instruction23x insn = (Instruction23x) instruction;
+                iv.visitCmp(insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                break;
+            }
+
             case IF_EQ:
             case IF_NE:
             case IF_LT:
