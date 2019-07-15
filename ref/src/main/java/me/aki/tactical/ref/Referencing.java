@@ -1,6 +1,7 @@
 package me.aki.tactical.ref;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ public interface Referencing {
      *
      * @return cells of all referenced expressions
      */
-    List<Cell<Expression>> getReferencedValueCells();
+    List<RCell<Expression>> getReferencedValueCells();
 
     /**
      * Get all expressions referenced by this entity.
@@ -24,7 +25,7 @@ public interface Referencing {
      */
     default List<Expression> getReferencedValues() {
         return getReferencedValueCells().stream()
-                .map(Cell::get)
+                .map(RCell::get)
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -39,7 +40,7 @@ public interface Referencing {
 
     private Stream<Expression> getRecursiveReferencedValueStream() {
         return getReferencedValueCells().stream()
-                .map(Cell::get)
+                .map(RCell::get)
                 .flatMap(expr -> Stream.concat(Stream.of(expr), ((Referencing) expr).getRecursiveReferencedValueStream()));
     }
 
@@ -48,11 +49,11 @@ public interface Referencing {
      *
      * @return cells of all (recursive collected) referenced expressions
      */
-    default List<Cell<Expression>> getRecursiveReferencedValueCells() {
+    default List<RCell<Expression>> getRecursiveReferencedValueCells() {
         return getRecursiveReferencedValueCellStream().collect(Collectors.toUnmodifiableList());
     }
 
-    private Stream<Cell<Expression>> getRecursiveReferencedValueCellStream() {
+    private Stream<RCell<Expression>> getRecursiveReferencedValueCellStream() {
         return getReferencedValueCells().stream()
                 .flatMap(refCell -> Stream.concat(Stream.of(refCell), ((Referencing) refCell.get()).getRecursiveReferencedValueCellStream()));
     }

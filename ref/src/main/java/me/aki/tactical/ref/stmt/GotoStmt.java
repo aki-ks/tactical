@@ -1,11 +1,11 @@
 package me.aki.tactical.ref.stmt;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Unconditionally branch to another statement.
@@ -28,12 +28,12 @@ public class GotoStmt implements BranchStmt {
         this.target = target;
     }
 
-    public Cell<Statement> getTargetCell() {
-        return Cell.of(this::getTarget, this::setTarget, Statement.class);
+    public RWCell<Statement> getTargetCell() {
+        return RWCell.of(this::getTarget, this::setTarget, Statement.class);
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.of();
     }
 
@@ -43,7 +43,7 @@ public class GotoStmt implements BranchStmt {
     }
 
     @Override
-    public List<Cell<Statement>> getBranchTargetsCells() {
+    public List<RWCell<Statement>> getBranchTargetsCells() {
         return List.of(getTargetCell());
     }
 

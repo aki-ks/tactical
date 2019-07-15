@@ -1,7 +1,8 @@
 package me.aki.tactical.conversion.stack2ref.postprocessor;
 
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.utils.LocalStateAnalysis;
-import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
@@ -80,9 +81,9 @@ public class LocalPartitioningPostProcessor implements PostProcessor {
         // Update all references within the group that read from the local
         for (LocalStateAnalysis.State state : group) {
             for (Statement statement : localState.getStatement(state)) {
-                for (Cell<Expression> cell : statement.getReadValueCells()) {
+                for (RCell<Expression> cell : statement.getReadValueCells()) {
                     if (cell.get() == local) {
-                        cell.set(newLocal);
+                        cell.w(RefLocal.class).set(newLocal);
                     }
                 }
             }

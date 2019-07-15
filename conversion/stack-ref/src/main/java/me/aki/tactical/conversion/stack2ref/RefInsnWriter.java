@@ -1,12 +1,13 @@
 package me.aki.tactical.conversion.stack2ref;
 
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.stack.utils.StackInsnVisitor;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.*;
 import me.aki.tactical.core.type.*;
-import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
@@ -62,7 +63,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction, StackLocal> {
         }
 
         for (StackValue pop : pops) {
-            List<Cell<Expression>> references = pop.getReferences();
+            List<RWCell<Expression>> references = pop.getReferences();
 
             // if a value is referenced multiple times, move it to a local.
             if (references.size() > 1) {
@@ -216,7 +217,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction, StackLocal> {
             NewArrayExpr expr = new NewArrayExpr(type, dimensionSizes);
 
             Iterator<StackValue> valueIter = dimensions.iterator();
-            Iterator<Cell<Expression>> cellIter = expr.getDimensionSizeCells().iterator();
+            Iterator<RWCell<Expression>> cellIter = expr.getDimensionSizeCells().iterator();
             while(valueIter.hasNext()) {
                 valueIter.next().addReference(cellIter.next());
             }
@@ -608,12 +609,12 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction, StackLocal> {
             AbstractInvoke refInvoke = convertAbstractInvoke(stackInvoke, argumentValues, instanceOpt);
 
             if (refInvoke instanceof me.aki.tactical.ref.invoke.AbstractInstanceInvoke) {
-                Cell<Expression> instanceCell = ((AbstractInstanceInvoke) refInvoke).getInstanceCell();
+                RWCell<Expression> instanceCell = ((AbstractInstanceInvoke) refInvoke).getInstanceCell();
                 instanceOpt.get().addReference(instanceCell);
             }
 
             Iterator<StackValue> argIter = argumentValues.iterator();
-            Iterator<Cell<Expression>> cellIter = refInvoke.getArgumentCells().iterator();
+            Iterator<RWCell<Expression>> cellIter = refInvoke.getArgumentCells().iterator();
             while(argIter.hasNext()) {
                 argIter.next().addReference(cellIter.next());
             }
@@ -750,7 +751,7 @@ public class RefInsnWriter extends StackInsnVisitor<Instruction, StackLocal> {
 
             converter.registerInsnReference(defaultTarget, stmt.getDefaultTargetCell());
             for (Integer key : targetTable.keySet()) {
-                converter.registerInsnReference(targetTable.get(key), Cell.ofMap(key, refBranchTable, Statement.class));
+                converter.registerInsnReference(targetTable.get(key), RWCell.ofMap(key, refBranchTable, Statement.class));
             }
 
             converter.addStatement(instruction, stmt);

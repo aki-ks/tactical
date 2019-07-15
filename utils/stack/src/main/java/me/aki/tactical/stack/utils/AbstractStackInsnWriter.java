@@ -7,7 +7,7 @@ import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.AddInsn;
 import me.aki.tactical.stack.insn.AndInsn;
@@ -73,7 +73,7 @@ public abstract class AbstractStackInsnWriter<I, L> extends StackInsnVisitor<I, 
         super(null);
     }
 
-    public abstract void registerTargetCell(I target, Cell<Instruction> cell);
+    public abstract void registerTargetCell(I target, RWCell<Instruction> cell);
 
     public abstract StackLocal convertLocal(L local);
 
@@ -324,7 +324,7 @@ public abstract class AbstractStackInsnWriter<I, L> extends StackInsnVisitor<I, 
         registerTargetCell(defaultTarget, insn.getDefaultLocationCell());
         targetTable.forEach((key, label) -> {
             table.put(key, null);
-            registerTargetCell(label, Cell.ofMap(key, table, Instruction.class));
+            registerTargetCell(label, RWCell.ofMap(key, table, Instruction.class));
         });
 
         visitInsn(insn);

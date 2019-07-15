@@ -1,11 +1,11 @@
 package me.aki.tactical.ref.stmt;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -43,14 +43,14 @@ public class ReturnStmt implements Statement {
         this.value = value;
     }
 
-    public Optional<Cell<Expression>> getValueCell() {
-        return value.map(x -> Cell.of(() -> value.get(),
+    public Optional<RWCell<Expression>> getValueCell() {
+        return value.map(x -> RWCell.of(() -> value.get(),
                         newValue -> value = Optional.of(newValue), Expression.class));
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
-        return getValueCell().map(List::of).orElse(List.of());
+    public List<RCell<Expression>> getReferencedValueCells() {
+        return getValueCell().map(List::<RCell<Expression>>of).orElse(List.of());
     }
 
     @Override

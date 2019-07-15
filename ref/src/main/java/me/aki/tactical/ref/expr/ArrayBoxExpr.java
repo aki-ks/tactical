@@ -2,7 +2,8 @@ package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Variable;
 
@@ -36,8 +37,8 @@ public class ArrayBoxExpr implements Variable {
         this.array = array;
     }
 
-    public Cell<Expression> getArrayCell() {
-        return Cell.of(this::getArray, this::setArray, Expression.class);
+    public RWCell<Expression> getArrayCell() {
+        return RWCell.of(this::getArray, this::setArray, Expression.class);
     }
 
     public Expression getIndex() {
@@ -48,8 +49,8 @@ public class ArrayBoxExpr implements Variable {
         this.index = index;
     }
 
-    public Cell<Expression> getIndexCell() {
-        return Cell.of(this::getIndex, this::setIndex, Expression.class);
+    public RWCell<Expression> getIndexCell() {
+        return RWCell.of(this::getIndex, this::setIndex, Expression.class);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class ArrayBoxExpr implements Variable {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.of(getArrayCell(), getIndexCell());
     }
 

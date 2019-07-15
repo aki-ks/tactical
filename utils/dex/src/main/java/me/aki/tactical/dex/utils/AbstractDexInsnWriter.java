@@ -7,7 +7,7 @@ import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.Register;
@@ -99,7 +99,7 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
 
     public abstract Register convertRegister(R register);
 
-    public abstract void registerReference(I instruction, Cell<Instruction> insnCell);
+    public abstract void registerReference(I instruction, RWCell<Instruction> insnCell);
 
     @Override
     public void visitConstant(DexConstant constant, R target) {
@@ -375,7 +375,7 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
 
         branchTable.keySet().forEach(key -> {
             table.put(key, null);
-            registerReference(branchTable.get(key), Cell.ofMap(key, table, Instruction.class));
+            registerReference(branchTable.get(key), RWCell.ofMap(key, table, Instruction.class));
         });
 
         visitInstruction(instruction);

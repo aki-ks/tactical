@@ -1,6 +1,7 @@
 package me.aki.tactical.ref.condition;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Referencing;
 
@@ -27,8 +28,8 @@ public abstract class Condition implements Referencing {
         this.value1 = value1;
     }
 
-    public Cell<Expression> getValue1Cell() {
-        return Cell.of(this::getValue1, this::setValue1, Expression.class);
+    public RWCell<Expression> getValue1Cell() {
+        return RWCell.of(this::getValue1, this::setValue1, Expression.class);
     }
 
     public Expression getValue2() {
@@ -39,12 +40,12 @@ public abstract class Condition implements Referencing {
         this.value2 = value2;
     }
 
-    public Cell<Expression> getValue2Cell() {
-        return Cell.of(this::getValue2, this::setValue2, Expression.class);
+    public RWCell<Expression> getValue2Cell() {
+        return RWCell.of(this::getValue2, this::setValue2, Expression.class);
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.of(getValue1Cell(), getValue2Cell());
     }
 

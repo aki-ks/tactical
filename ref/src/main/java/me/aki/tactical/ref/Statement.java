@@ -1,6 +1,7 @@
 package me.aki.tactical.ref;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public interface Statement extends Referencing {
      *
      * @return cells containing all expressions that this statement reads from.
      */
-    default List<Cell<Expression>> getReadValueCells() {
+    default List<RCell<Expression>> getReadValueCells() {
         return this.getRecursiveReferencedValueCells();
     }
 
@@ -51,7 +52,7 @@ public interface Statement extends Referencing {
      *
      * @return cell containing the variable that this statement writes into or empty
      */
-    default Optional<Cell<Variable>> getWriteValueCells() {
+    default Optional<RWCell<Variable>> getWriteValueCells() {
         return Optional.empty();
     }
 }

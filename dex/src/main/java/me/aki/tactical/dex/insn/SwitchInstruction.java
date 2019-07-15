@@ -1,13 +1,12 @@
 package me.aki.tactical.dex.insn;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Compare a value from a register against a branch table and jump to the found or a default value.
@@ -52,9 +51,9 @@ public class SwitchInstruction implements BranchInstruction {
     }
 
     @Override
-    public List<Cell<Instruction>> getBranchTargetCells() {
+    public List<RWCell<Instruction>> getBranchTargetCells() {
         return branchTable.keySet().stream()
-                .map(key -> Cell.ofMap(key, branchTable, Instruction.class))
+                .map(key -> RWCell.ofMap(key, branchTable, Instruction.class))
                 .collect(Collectors.toUnmodifiableList());
     }
 

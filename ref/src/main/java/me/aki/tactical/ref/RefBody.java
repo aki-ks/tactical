@@ -3,7 +3,7 @@ package me.aki.tactical.ref;
 import me.aki.tactical.core.Body;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.core.util.LinkedInsertList;
 import me.aki.tactical.ref.stmt.AssignStmt;
@@ -220,8 +220,8 @@ public class RefBody implements Body {
             this.start = start;
         }
 
-        public Cell<Statement> getStartCell() {
-            return Cell.of(this::getStart, this::setStart, Statement.class);
+        public RWCell<Statement> getStartCell() {
+            return RWCell.of(this::getStart, this::setStart, Statement.class);
         }
 
         public Statement getEnd() {
@@ -232,8 +232,8 @@ public class RefBody implements Body {
             this.end = end;
         }
 
-        public Cell<Statement> getEndCell() {
-            return Cell.of(this::getEnd, this::setEnd, Statement.class);
+        public RWCell<Statement> getEndCell() {
+            return RWCell.of(this::getEnd, this::setEnd, Statement.class);
         }
 
         public RefLocal getLocal() {
@@ -345,8 +345,8 @@ public class RefBody implements Body {
                 this.start = start;
             }
 
-            public Cell<Statement> getStartCell() {
-                return Cell.of(this::getStart, this::setStart, Statement.class);
+            public RWCell<Statement> getStartCell() {
+                return RWCell.of(this::getStart, this::setStart, Statement.class);
             }
 
             public Statement getEnd() {
@@ -357,8 +357,8 @@ public class RefBody implements Body {
                 this.end = end;
             }
 
-            public Cell<Statement> getEndCell() {
-                return Cell.of(this::getEnd, this::setEnd, Statement.class);
+            public RWCell<Statement> getEndCell() {
+                return RWCell.of(this::getEnd, this::setEnd, Statement.class);
             }
 
             public RefLocal getLocal() {
@@ -421,8 +421,8 @@ public class RefBody implements Body {
             this.statement = statement;
         }
 
-        public Cell<Statement> getStatementCell() {
-            return Cell.of(this::getStatement, this::setStatement, Statement.class);
+        public RWCell<Statement> getStatementCell() {
+            return RWCell.of(this::getStatement, this::setStatement, Statement.class);
         }
 
         @Override

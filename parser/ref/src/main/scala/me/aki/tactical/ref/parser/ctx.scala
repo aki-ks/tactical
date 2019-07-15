@@ -1,6 +1,6 @@
 package me.aki.tactical.ref.parser
 
-import me.aki.tactical.core.util.Cell
+import me.aki.tactical.core.util.RWCell
 import me.aki.tactical.ref.{RefLocal, Statement}
 
 abstract class RefCtx {
@@ -11,9 +11,9 @@ abstract class RefCtx {
 
 /** A conversion context that's still resolving labels */
 class UnresolvedRefCtx(protected val locals: Map[String, RefLocal]) extends RefCtx {
-  private var unresolvedReferences = Map[String, Set[Cell[Statement]]]()
+  private var unresolvedReferences = Map[String, Set[RWCell[Statement]]]()
 
-  def registerReference(label: String, target: Cell[Statement]): Unit = {
+  def registerReference(label: String, target: RWCell[Statement]): Unit = {
     val otherCells = unresolvedReferences.getOrElse(label, Set())
     unresolvedReferences += label -> (otherCells + target)
   }
@@ -21,7 +21,7 @@ class UnresolvedRefCtx(protected val locals: Map[String, RefLocal]) extends RefC
   def resolve(labels: Map[String, Statement]): ResolvedRefCtx = {
     for {
       (labelName, cells) ← unresolvedReferences
-      val label = labels.getOrElse(labelName, throw new NoSuchElementException(s"No such label '$labelName'"))
+      label = labels.getOrElse(labelName, throw new NoSuchElementException(s"No such label '$labelName'"))
       cell ← cells
     } cell.set(label)
 

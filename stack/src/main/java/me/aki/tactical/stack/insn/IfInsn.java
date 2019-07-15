@@ -1,6 +1,6 @@
 package me.aki.tactical.stack.insn;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,8 +64,8 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
         this.target = target;
     }
 
-    public Cell<Instruction> getTargetCell() {
-        return Cell.of(this::getTarget, this::setTarget, Instruction.class);
+    public RWCell<Instruction> getTargetCell() {
+        return RWCell.of(this::getTarget, this::setTarget, Instruction.class);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class IfInsn extends AbstractInstruction implements BranchInsn {
     }
 
     @Override
-    public List<Cell<Instruction>> getBranchTargetCells() {
+    public List<RWCell<Instruction>> getBranchTargetCells() {
         return List.of(getTargetCell());
     }
 

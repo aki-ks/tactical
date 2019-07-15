@@ -1,6 +1,6 @@
 package me.aki.tactical.dex.insn;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 
 import java.util.List;
 
@@ -20,5 +20,5 @@ public interface BranchInstruction extends Instruction {
      *
      * @return cells for all branch targets of this instruction
      */
-    List<Cell<Instruction>> getBranchTargetCells();
+    List<RWCell<Instruction>> getBranchTargetCells();
 }

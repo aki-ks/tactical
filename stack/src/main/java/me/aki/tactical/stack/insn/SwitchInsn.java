@@ -1,12 +1,11 @@
 package me.aki.tactical.stack.insn;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -39,13 +38,13 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
         this.branchTable = branchTable;
     }
 
-    public Cell<Instruction> getBranchTableCell(int key) {
-        return Cell.ofMap(key, branchTable, Instruction.class);
+    public RWCell<Instruction> getBranchTableCell(int key) {
+        return RWCell.ofMap(key, branchTable, Instruction.class);
     }
 
-    public List<Cell<Instruction>> getBranchTableCells() {
+    public List<RWCell<Instruction>> getBranchTableCells() {
         return branchTable.entrySet().stream()
-                .map(e -> Cell.ofMap(e.getKey(), branchTable, Instruction.class))
+                .map(e -> RWCell.ofMap(e.getKey(), branchTable, Instruction.class))
                 .collect(Collectors.toList());
     }
 
@@ -57,8 +56,8 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
         this.defaultLocation = defaultLocation;
     }
 
-    public Cell<Instruction> getDefaultLocationCell() {
-        return Cell.of(this::getDefaultLocation, this::setDefaultLocation, Instruction.class);
+    public RWCell<Instruction> getDefaultLocationCell() {
+        return RWCell.of(this::getDefaultLocation, this::setDefaultLocation, Instruction.class);
     }
 
     @Override
@@ -84,8 +83,8 @@ public class SwitchInsn extends AbstractInstruction implements BranchInsn {
     }
 
     @Override
-    public List<Cell<Instruction>> getBranchTargetCells() {
-        List<Cell<Instruction>> cells = getBranchTableCells();
+    public List<RWCell<Instruction>> getBranchTargetCells() {
+        List<RWCell<Instruction>> cells = getBranchTableCells();
         cells.add(getDefaultLocationCell());
         return cells;
     }

@@ -7,7 +7,7 @@ import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
@@ -48,7 +48,7 @@ public class BodyConverter {
     /**
      * Cells that should be assigned to the statement corresponding to a certain instructions.
      */
-    private final Map<Instruction, List<Cell<Statement>>> instructionReferences = new HashMap<>();
+    private final Map<Instruction, List<RWCell<Statement>>> instructionReferences = new HashMap<>();
 
     /**
      * Map instructions to the statements that represent them.
@@ -95,8 +95,8 @@ public class BodyConverter {
         return local;
     }
 
-    public void registerInsnReference(Instruction instruction, Cell<Statement> statementCell) {
-        List<Cell<Statement>> cells = this.instructionReferences.computeIfAbsent(instruction, x -> new ArrayList<>());
+    public void registerInsnReference(Instruction instruction, RWCell<Statement> statementCell) {
+        List<RWCell<Statement>> cells = this.instructionReferences.computeIfAbsent(instruction, x -> new ArrayList<>());
         cells.add(statementCell);
     }
 

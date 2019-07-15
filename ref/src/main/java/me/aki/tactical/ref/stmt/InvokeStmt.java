@@ -1,13 +1,13 @@
 package me.aki.tactical.ref.stmt;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.expr.InvokeExpr;
 import me.aki.tactical.ref.invoke.AbstractInvoke;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Invoke a method without storing the return value.
@@ -30,7 +30,7 @@ public class InvokeStmt implements Statement {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return invoke.getReferencedValueCells();
     }
 }

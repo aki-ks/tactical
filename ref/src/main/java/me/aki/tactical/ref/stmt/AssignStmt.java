@@ -1,12 +1,12 @@
 package me.aki.tactical.ref.stmt;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.Variable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,8 +38,8 @@ public class AssignStmt implements Statement {
         this.variable = variable;
     }
 
-    public Cell<Variable> getVariableCell() {
-        return Cell.of(this::getVariable, this::setVariable, Variable.class);
+    public RWCell<Variable> getVariableCell() {
+        return RWCell.of(this::getVariable, this::setVariable, Variable.class);
     }
 
     public Expression getValue() {
@@ -50,13 +50,13 @@ public class AssignStmt implements Statement {
         this.value = value;
     }
 
-    public Cell<Expression> getValueCell() {
-        return Cell.of(this::getValue, this::setValue, Expression.class);
+    public RWCell<Expression> getValueCell() {
+        return RWCell.of(this::getValue, this::setValue, Expression.class);
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
-        return List.of(getVariableCell().cast(), getValueCell());
+    public List<RCell<Expression>> getReferencedValueCells() {
+        return List.of(getVariableCell().r(Expression.class), getValueCell());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class AssignStmt implements Statement {
     }
 
     @Override
-    public List<Cell<Expression>> getReadValueCells() {
+    public List<RCell<Expression>> getReadValueCells() {
         return Stream.concat(Stream.of(getValueCell()), getValue().getRecursiveReferencedValueCells().stream())
                 .collect(Collectors.toUnmodifiableList());
     }
@@ -77,7 +77,7 @@ public class AssignStmt implements Statement {
     }
 
     @Override
-    public Optional<Cell<Variable>> getWriteValueCells() {
+    public Optional<RWCell<Variable>> getWriteValueCells() {
         return Optional.of(getVariableCell());
     }
 }

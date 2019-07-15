@@ -1,6 +1,6 @@
 package me.aki.tactical.dex.utils;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.Instruction;
 
@@ -14,7 +14,7 @@ public class DexInsnWriter extends AbstractDexInsnWriter<Instruction, Register> 
     }
 
     @Override
-    public void registerReference(Instruction instruction, Cell<Instruction> insnCell) {
+    public void registerReference(Instruction instruction, RWCell<Instruction> insnCell) {
         insnCell.set(instruction);
     }
 }

@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.asmutils;
 
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.stack.utils.analysis.JvmType;
 import me.aki.tactical.stack.utils.analysis.Stack;
 import me.aki.tactical.conversion.stack2asm.AsmUtil;
@@ -47,7 +48,6 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.util.Cell;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.insn.IfInsn;
 import me.aki.tactical.stack.insn.Instruction;
@@ -898,7 +898,7 @@ public class AsmInsnNodeWriter extends StackInsnVisitor<Instruction, StackLocal>
 
     private void convertJumpInsnNode(Instruction target, int aGoto) {
         JumpInsnNode node = new JumpInsnNode(aGoto, null);
-        ctx.registerLabel(target, Cell.of(() -> node.label, x -> node.label = x, LabelNode.class));
+        ctx.registerLabel(target, RWCell.of(() -> node.label, x -> node.label = x, LabelNode.class));
         visitConvertedInsn(node);
     }
 
@@ -952,10 +952,10 @@ public class AsmInsnNodeWriter extends StackInsnVisitor<Instruction, StackLocal>
             int max = keySet.last();
             TableSwitchInsnNode node = new TableSwitchInsnNode(min, max, null, new LabelNode[max - min + 1]);
 
-            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x, LabelNode.class));
+            ctx.registerLabel(defaultTarget, RWCell.of(() -> node.dflt, x -> node.dflt = x, LabelNode.class));
             IntStream.rangeClosed(min, max).forEach(key -> {
                 Instruction target = targetTable.get(key);
-                ctx.registerLabel(target, Cell.of(() -> node.labels.get(key), x -> node.labels.set(key, x), LabelNode.class));
+                ctx.registerLabel(target, RWCell.of(() -> node.labels.get(key), x -> node.labels.set(key, x), LabelNode.class));
             });
 
             visitConvertedInsn(node);
@@ -964,10 +964,10 @@ public class AsmInsnNodeWriter extends StackInsnVisitor<Instruction, StackLocal>
             LabelNode[] labels = new LabelNode[targetTable.size()];
             LookupSwitchInsnNode node = new LookupSwitchInsnNode(null, keys, labels);
 
-            ctx.registerLabel(defaultTarget, Cell.of(() -> node.dflt, x -> node.dflt = x, LabelNode.class));
+            ctx.registerLabel(defaultTarget, RWCell.of(() -> node.dflt, x -> node.dflt = x, LabelNode.class));
             targetTable.forEach((key, value) -> {
                 int index = node.keys.indexOf(key);
-                ctx.registerLabel(value, Cell.of(() -> node.labels.get(index), x -> node.labels.set(index, x), LabelNode.class));
+                ctx.registerLabel(value, RWCell.of(() -> node.labels.get(index), x -> node.labels.set(index, x), LabelNode.class));
             });
 
             visitConvertedInsn(node);

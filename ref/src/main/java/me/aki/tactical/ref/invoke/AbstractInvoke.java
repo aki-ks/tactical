@@ -1,11 +1,13 @@
 package me.aki.tactical.ref.invoke;
 
 import me.aki.tactical.core.MethodDescriptor;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Referencing;
 
 import java.lang.invoke.CallSite;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,9 +31,9 @@ public abstract class AbstractInvoke implements Referencing {
         this.arguments = arguments;
     }
 
-    public List<Cell<Expression>> getArgumentCells() {
+    public List<RWCell<Expression>> getArgumentCells() {
         return IntStream.range(0, arguments.size())
-                .mapToObj(index -> Cell.ofList(arguments, index, Expression.class))
+                .mapToObj(index -> RWCell.ofList(arguments, index, Expression.class))
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -43,8 +45,8 @@ public abstract class AbstractInvoke implements Referencing {
     public abstract MethodDescriptor getMethodDescriptor();
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
-        return getArgumentCells();
+    public List<RCell<Expression>> getReferencedValueCells() {
+        return new ArrayList<>(getArgumentCells());
     }
 
     @Override

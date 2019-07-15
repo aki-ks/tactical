@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.stack2ref.postprocessor;
 
 import me.aki.tactical.core.util.InsertList;
+import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
@@ -18,7 +19,6 @@ import java.util.Map;
  *     local = "Hello World;
  *     System.out.println(local);
  * </code></pre>
- *
  */
 public class DirectReuseInliningPostProcessor implements PostProcessor {
     @Override
@@ -44,7 +44,7 @@ public class DirectReuseInliningPostProcessor implements PostProcessor {
             readingStatement.getReadValueCells().stream()
                     .filter(cell -> cell.get() == local)
                     .findAny().get()
-                    .set(writingStatement.getValue());
+                    .w(Expression.class).set(writingStatement.getValue());
 
             CommonOperations.removeStatement(body, writingStatement);
             CommonOperations.removeLocal(body, local);

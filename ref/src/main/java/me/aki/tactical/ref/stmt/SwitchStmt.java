@@ -1,6 +1,7 @@
 package me.aki.tactical.ref.stmt;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
@@ -8,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -45,8 +44,8 @@ public class SwitchStmt implements BranchStmt {
         this.value = value;
     }
 
-    public Cell<Expression> getValueCell() {
-        return Cell.of(this::getValue, this::setValue, Expression.class);
+    public RWCell<Expression> getValueCell() {
+        return RWCell.of(this::getValue, this::setValue, Expression.class);
     }
 
     public LinkedHashMap<Integer, Statement> getBranchTable() {
@@ -57,13 +56,13 @@ public class SwitchStmt implements BranchStmt {
         this.branchTable = branchTable;
     }
 
-    public Cell<Statement> getBranchTableCell(int key) {
-        return Cell.ofMap(key, branchTable, Statement.class);
+    public RWCell<Statement> getBranchTableCell(int key) {
+        return RWCell.ofMap(key, branchTable, Statement.class);
     }
 
-    public List<Cell<Statement>> getBranchTableCells() {
+    public List<RWCell<Statement>> getBranchTableCells() {
         return this.branchTable.keySet().stream()
-                .map(key -> Cell.ofMap(key, this.branchTable, Statement.class))
+                .map(key -> RWCell.ofMap(key, this.branchTable, Statement.class))
                 .collect(Collectors.toList());
     }
 
@@ -75,27 +74,25 @@ public class SwitchStmt implements BranchStmt {
         this.defaultTarget = defaultTarget;
     }
 
-    public Cell<Statement> getDefaultTargetCell() {
-        return Cell.of(this::getDefaultTarget, this::setDefaultTarget, Statement.class);
+    public RWCell<Statement> getDefaultTargetCell() {
+        return RWCell.of(this::getDefaultTarget, this::setDefaultTarget, Statement.class);
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.of(getValueCell());
     }
 
     @Override
     public List<Statement> getBranchTargets() {
-        List<Statement> targets = new ArrayList<>();
-        targets.addAll(getBranchTable().values());
+        List<Statement> targets = new ArrayList<>(getBranchTable().values());
         targets.add(getDefaultTarget());
         return Collections.unmodifiableList(targets);
     }
 
     @Override
-    public List<Cell<Statement>> getBranchTargetsCells() {
-        List<Cell<Statement>> cells = new ArrayList<>();
-        cells.addAll(getBranchTableCells());
+    public List<RWCell<Statement>> getBranchTargetsCells() {
+        List<RWCell<Statement>> cells = new ArrayList<>(getBranchTableCells());
         cells.add(getDefaultTargetCell());
         return Collections.unmodifiableList(cells);
     }

@@ -1,7 +1,8 @@
 package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
@@ -28,8 +29,8 @@ public class NegExpr implements Expression {
         this.value = value;
     }
 
-    public Cell<Expression> getValueCell() {
-        return Cell.of(this::getValue, this::setValue, Expression.class);
+    public RWCell<Expression> getValueCell() {
+        return RWCell.of(this::getValue, this::setValue, Expression.class);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class NegExpr implements Expression {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.of(getValueCell());
     }
 

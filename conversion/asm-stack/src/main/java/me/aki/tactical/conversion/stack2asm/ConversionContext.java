@@ -1,6 +1,6 @@
 package me.aki.tactical.conversion.stack2asm;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.stack.StackLocal;
 import me.aki.tactical.stack.StackBody;
 import me.aki.tactical.stack.insn.Instruction;
@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class ConversionContext {
     private final List<StackLocal> locals;
-    private final Map<Instruction, List<Cell<LabelNode>>> convertedLabels = new HashMap<>();
+    private final Map<Instruction, List<RWCell<LabelNode>>> convertedLabels = new HashMap<>();
 
     public ConversionContext(StackBody body) {
         List<StackLocal> allLocals = body.getLocals();
@@ -49,12 +49,12 @@ public class ConversionContext {
         return index;
     }
 
-    public void registerLabel(Instruction target, Cell<LabelNode> labelCell) {
-        List<Cell<LabelNode>> cells = convertedLabels.computeIfAbsent(target, x -> new ArrayList<>());
+    public void registerLabel(Instruction target, RWCell<LabelNode> labelCell) {
+        List<RWCell<LabelNode>> cells = convertedLabels.computeIfAbsent(target, x -> new ArrayList<>());
         cells.add(labelCell);
     }
 
-    public Map<Instruction, List<Cell<LabelNode>>> getConvertedLabels() {
+    public Map<Instruction, List<RWCell<LabelNode>>> getConvertedLabels() {
         return convertedLabels;
     }
 }

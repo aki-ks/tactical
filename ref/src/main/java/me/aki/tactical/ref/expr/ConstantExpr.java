@@ -2,7 +2,8 @@ package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class ConstantExpr implements Expression {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.of();
     }
 

@@ -3,7 +3,7 @@ package me.aki.tactical.stack;
 import me.aki.tactical.core.Body;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.typeannotation.LocalVariableTypeAnnotation;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.core.util.LinkedInsertList;
 import me.aki.tactical.stack.insn.Instruction;
@@ -223,8 +223,8 @@ public class StackBody implements Body {
             this.start = start;
         }
 
-        public Cell<Instruction> getStartCell() {
-            return Cell.of(this::getStart, this::setStart, Instruction.class);
+        public RWCell<Instruction> getStartCell() {
+            return RWCell.of(this::getStart, this::setStart, Instruction.class);
         }
 
         public Instruction getEnd() {
@@ -235,8 +235,8 @@ public class StackBody implements Body {
             this.end = end;
         }
 
-        public Cell<Instruction> getEndCell() {
-            return Cell.of(this::getEnd, this::setEnd, Instruction.class);
+        public RWCell<Instruction> getEndCell() {
+            return RWCell.of(this::getEnd, this::setEnd, Instruction.class);
         }
 
         public StackLocal getLocal() {
@@ -345,8 +345,8 @@ public class StackBody implements Body {
                 this.start = start;
             }
 
-            public Cell<Instruction> getStartCell() {
-                return Cell.of(this::getStart, this::setStart, Instruction.class);
+            public RWCell<Instruction> getStartCell() {
+                return RWCell.of(this::getStart, this::setStart, Instruction.class);
             }
 
             public Instruction getEnd() {
@@ -357,8 +357,8 @@ public class StackBody implements Body {
                 this.end = end;
             }
 
-            public Cell<Instruction> getEndCell() {
-                return Cell.of(this::getEnd, this::setEnd, Instruction.class);
+            public RWCell<Instruction> getEndCell() {
+                return RWCell.of(this::getEnd, this::setEnd, Instruction.class);
             }
 
             public StackLocal getLocal() {
@@ -421,8 +421,8 @@ public class StackBody implements Body {
             this.instruction = instruction;
         }
 
-        public Cell<Instruction> getInstructionCell() {
-            return Cell.of(this::getInstruction, this::setInstruction, Instruction.class);
+        public RWCell<Instruction> getInstructionCell() {
+            return RWCell.of(this::getInstruction, this::setInstruction, Instruction.class);
         }
 
         @Override

@@ -2,7 +2,7 @@ package me.aki.tactical.ref;
 
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +61,8 @@ public class TryCatchBlock {
         this.first = first;
     }
 
-    public Cell<Statement> getFirstCell() {
-        return Cell.of(this::getFirst, this::setFirst, Statement.class);
+    public RWCell<Statement> getFirstCell() {
+        return RWCell.of(this::getFirst, this::setFirst, Statement.class);
     }
 
     public Statement getLast() {
@@ -73,8 +73,8 @@ public class TryCatchBlock {
         this.last = last;
     }
 
-    public Cell<Statement> getLastCell() {
-        return Cell.of(this::getLast, this::setLast, Statement.class);
+    public RWCell<Statement> getLastCell() {
+        return RWCell.of(this::getLast, this::setLast, Statement.class);
     }
 
     public Statement getHandler() {
@@ -85,8 +85,8 @@ public class TryCatchBlock {
         this.handler = handler;
     }
 
-    public Cell<Statement> getHandlerCell() {
-        return Cell.of(this::getHandler, this::setHandler, Statement.class);
+    public RWCell<Statement> getHandlerCell() {
+        return RWCell.of(this::getHandler, this::setHandler, Statement.class);
     }
 
     public Optional<Path> getException() {
@@ -105,8 +105,8 @@ public class TryCatchBlock {
         this.exceptionLocal = exceptionLocal;
     }
 
-    public Cell<RefLocal> getExceptionLocalCell() {
-        return Cell.of(this::getExceptionLocal, this::setExceptionLocal, RefLocal.class);
+    public RWCell<RefLocal> getExceptionLocalCell() {
+        return RWCell.of(this::getExceptionLocal, this::setExceptionLocal, RefLocal.class);
     }
 
     public List<ExceptionTypeAnnotation> getTypeAnnotations() {

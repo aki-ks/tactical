@@ -1,7 +1,8 @@
 package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.type.ArrayType;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
@@ -46,14 +47,14 @@ public class NewArrayExpr implements Expression {
         this.dimensionSizes = dimensionSizes;
     }
 
-    public List<Cell<Expression>> getDimensionSizeCells() {
+    public List<RWCell<Expression>> getDimensionSizeCells() {
         return IntStream.range(0, dimensionSizes.size())
-                .mapToObj(index -> Cell.ofList(dimensionSizes, index, Expression.class))
+                .mapToObj(index -> RWCell.ofList(dimensionSizes, index, Expression.class))
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.copyOf(getDimensionSizeCells());
     }
 

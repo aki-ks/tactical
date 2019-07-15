@@ -1,6 +1,7 @@
 package me.aki.tactical.ref.stmt;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Statement;
 
 import java.util.List;
@@ -21,5 +22,5 @@ public interface BranchStmt extends Statement {
      *
      * @return cells of all branch targets
      */
-    List<Cell<Statement>> getBranchTargetsCells();
+    List<RWCell<Statement>> getBranchTargetsCells();
 }

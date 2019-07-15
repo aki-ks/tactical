@@ -2,7 +2,8 @@ package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
 import java.util.List;
@@ -29,8 +30,8 @@ public class ArrayLengthExpr implements Expression {
         this.array = array;
     }
 
-    public Cell<Expression> getArrayCell() {
-        return Cell.of(this::getArray, this::setArray, Expression.class);
+    public RWCell<Expression> getArrayCell() {
+        return RWCell.of(this::getArray, this::setArray, Expression.class);
     }
 
     @Override
@@ -39,7 +40,7 @@ public class ArrayLengthExpr implements Expression {
     }
 
     @Override
-    public List<Cell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReferencedValueCells() {
         return List.of(getArrayCell());
     }
 

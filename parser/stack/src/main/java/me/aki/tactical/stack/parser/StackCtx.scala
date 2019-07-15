@@ -1,8 +1,8 @@
 package me.aki.tactical.stack.parser
 
-import scala.collection.mutable
+import me.aki.tactical.core.util.RWCell
 
-import me.aki.tactical.core.util.Cell
+import scala.collection.mutable
 import me.aki.tactical.stack.StackLocal
 import me.aki.tactical.stack.insn.Instruction
 
@@ -29,7 +29,7 @@ abstract class StackCtx {
 class UnresolvedStackCtx() extends StackCtx {
   var locals = Map[String, StackLocal]()
 
-  private var labelReferences = Map[String, Set[Cell[Instruction]]]()
+  private var labelReferences = Map[String, Set[RWCell[Instruction]]]()
 
   /**
     * Register a new reference of a label.
@@ -37,7 +37,7 @@ class UnresolvedStackCtx() extends StackCtx {
     * @param label name of the label
     * @param cell cell containing a the usage of the label
     */
-  def registerLabelReference(label: String, cell: Cell[Instruction]) = {
+  def registerLabelReference(label: String, cell: RWCell[Instruction]) = {
     val otherCells = labelReferences.getOrElse(label, Set())
     labelReferences += label -> (otherCells + cell)
   }

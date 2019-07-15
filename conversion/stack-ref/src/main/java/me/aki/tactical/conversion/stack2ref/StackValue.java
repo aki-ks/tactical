@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.stack2ref;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RCell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.stmt.AssignStmt;
@@ -29,7 +30,7 @@ public class StackValue {
     /**
      * All cells that refer to the expression.
      */
-    private List<Cell<Expression>> references = new ArrayList<>();
+    private List<RWCell<Expression>> references = new ArrayList<>();
 
     public StackValue(Instruction instruction, Expression value) {
         this.instruction = instruction;
@@ -58,11 +59,11 @@ public class StackValue {
         this.references.forEach(cell -> cell.set(value));
     }
 
-    public List<Cell<Expression>> getReferences() {
+    public List<RWCell<Expression>> getReferences() {
         return references;
     }
 
-    public void addReference(Cell<Expression> cell) {
+    public void addReference(RWCell<Expression> cell) {
         this.references.add(cell);
     }
 

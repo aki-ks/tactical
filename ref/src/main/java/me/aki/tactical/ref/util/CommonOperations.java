@@ -1,6 +1,6 @@
 package me.aki.tactical.ref.util;
 
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;
@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class CommonOperations {
     /**
@@ -47,7 +46,7 @@ public class CommonOperations {
         statements.stream().filter(stmt -> stmt instanceof BranchStmt)
                 .flatMap(stmt -> ((BranchStmt) stmt).getBranchTargetsCells().stream())
                 .filter(cell -> cell.get() == statement)
-                .forEach(cell -> cell.set(statements.getNext(statement)));
+                .forEach(cell -> cell.w(Statement.class).set(statements.getNext(statement)));
 
         statements.remove(statement);
     }
@@ -61,7 +60,7 @@ public class CommonOperations {
      * @param end the last statement of the range
      * @return did the range only contain the removed statement.
      */
-    private static boolean removeFromRange(InsertList<Statement> statements, Statement statement, Cell<Statement> start, Cell<Statement> end) {
+    private static boolean removeFromRange(InsertList<Statement> statements, Statement statement, RWCell<Statement> start, RWCell<Statement> end) {
         boolean isStart = start.get() == statement;
         boolean isEnd = end.get() == statement;
         if (isStart && isEnd) {

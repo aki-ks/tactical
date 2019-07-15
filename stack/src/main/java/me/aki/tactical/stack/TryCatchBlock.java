@@ -2,7 +2,7 @@ package me.aki.tactical.stack;
 
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.typeannotation.ExceptionTypeAnnotation;
-import me.aki.tactical.core.util.Cell;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.stack.insn.Instruction;
 
 import java.util.ArrayList;
@@ -55,8 +55,8 @@ public class TryCatchBlock {
         this.first = first;
     }
 
-    public Cell<Instruction> getFirstCell() {
-        return Cell.of(this::getFirst, this::setFirst, Instruction.class);
+    public RWCell<Instruction> getFirstCell() {
+        return RWCell.of(this::getFirst, this::setFirst, Instruction.class);
     }
 
     public Instruction getLast() {
@@ -67,8 +67,8 @@ public class TryCatchBlock {
         this.last = last;
     }
 
-    public Cell<Instruction> getLastCell() {
-        return Cell.of(this::getLast, this::setLast, Instruction.class);
+    public RWCell<Instruction> getLastCell() {
+        return RWCell.of(this::getLast, this::setLast, Instruction.class);
     }
 
     public Instruction getHandler() {
@@ -79,8 +79,8 @@ public class TryCatchBlock {
         this.handler = handler;
     }
 
-    public Cell<Instruction> getHandlerCell() {
-        return Cell.of(this::getHandler, this::setHandler, Instruction.class);
+    public RWCell<Instruction> getHandlerCell() {
+        return RWCell.of(this::getHandler, this::setHandler, Instruction.class);
     }
 
     public Optional<Path> getExceptionType() {

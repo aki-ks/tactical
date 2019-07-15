@@ -1,7 +1,6 @@
 package me.aki.tactical.conversion.ref2stack;
 
-import me.aki.tactical.core.util.Cell;
-import me.aki.tactical.ref.RefBody;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.RefLocal;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.stack.StackLocal;
@@ -22,7 +21,7 @@ public class ConversionContext {
      * {@link Instruction} cells that should be assigned to the equivalent of a certain
      * {@link Statement} once the method is build.
      */
-    private final Map<Statement, List<Cell<Instruction>>> insnsRefs = new HashMap<>();
+    private final Map<Statement, List<RWCell<Instruction>>> insnsRefs = new HashMap<>();
 
     /**
      * Register a reference to a instruction that will get updates once the whole body is build.
@@ -30,8 +29,8 @@ public class ConversionContext {
      * @param target the statement that is reference
      * @param cell a cell that should later contain the equivalent instruction
      */
-    public void registerInstructionReference(Statement target, Cell<Instruction> cell) {
-        List<Cell<Instruction>> cells = insnsRefs.computeIfAbsent(target, x -> new ArrayList<>());
+    public void registerInstructionReference(Statement target, RWCell<Instruction> cell) {
+        List<RWCell<Instruction>> cells = insnsRefs.computeIfAbsent(target, x -> new ArrayList<>());
         cells.add(cell);
     }
 
@@ -49,7 +48,7 @@ public class ConversionContext {
         return localMap;
     }
 
-    public Map<Statement, List<Cell<Instruction>>> getInstructionsRefs() {
+    public Map<Statement, List<RWCell<Instruction>>> getInstructionsRefs() {
         return insnsRefs;
     }
 }
