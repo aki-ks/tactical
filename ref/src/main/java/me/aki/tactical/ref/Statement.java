@@ -37,12 +37,12 @@ public interface Statement extends Referencing {
     }
 
     /**
-     * Get variables that this statement writes to.
+     * Get the variable that this statement writes to.
      * This can only be the variable of an assign statement.
      *
      * @return the variable that this statement writes into or empty
      */
-    default Optional<Variable> getWriteValues() {
+    default Optional<Variable> getWriteValue() {
         return Optional.empty();
     }
 
@@ -52,7 +52,7 @@ public interface Statement extends Referencing {
      *
      * @return cell containing the variable that this statement writes into or empty
      */
-    default Optional<RWCell<Variable>> getWriteValueCells() {
+    default Optional<RWCell<Variable>> getWriteValueCell() {
         return Optional.empty();
     }
 }

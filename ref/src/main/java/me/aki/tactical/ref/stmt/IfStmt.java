@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class IfStmt implements BranchStmt {
     /**
-     * Branch if this location is true.
+     * Branch if this condition is true.
      */
     private Condition condition;
 

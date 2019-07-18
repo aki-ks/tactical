@@ -118,7 +118,7 @@ public class CommonOperations {
     public static Map<RefLocal, List<AssignStmt>> getLocalWriteMap(RefBody body) {
         final Map<RefLocal, List<AssignStmt>> localWriteMap = new HashMap<>();
         for (Statement statement : body.getStatements()) {
-            statement.getWriteValues().ifPresent(variable -> {
+            statement.getWriteValue().ifPresent(variable -> {
                 if (variable instanceof RefLocal) {
                     localWriteMap.computeIfAbsent((RefLocal) variable, x -> new ArrayList<>()).add((AssignStmt) statement);
                 }

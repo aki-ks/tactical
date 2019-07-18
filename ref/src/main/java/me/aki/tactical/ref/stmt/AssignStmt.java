@@ -72,12 +72,12 @@ public class AssignStmt implements Statement {
     }
 
     @Override
-    public Optional<Variable> getWriteValues() {
+    public Optional<Variable> getWriteValue() {
         return Optional.of(getVariable());
     }
 
     @Override
-    public Optional<RWCell<Variable>> getWriteValueCells() {
+    public Optional<RWCell<Variable>> getWriteValueCell() {
         return Optional.of(getVariableCell());
     }
 }
