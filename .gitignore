@@ -6,6 +6,7 @@
 .classpath
 .project
 .settings
+.attach_pid*
 
 # ignore sbt's output folders
 /target/
