@@ -12,29 +12,8 @@ import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.Opcode;
-import org.jf.dexlib2.iface.instruction.Instruction;
-import org.jf.dexlib2.iface.instruction.OffsetInstruction;
-import org.jf.dexlib2.iface.instruction.SwitchElement;
-import org.jf.dexlib2.iface.instruction.SwitchPayload;
-import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
-import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
-import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
-import org.jf.dexlib2.iface.instruction.formats.Instruction11x;
-import org.jf.dexlib2.iface.instruction.formats.Instruction12x;
-import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
-import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
-import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
-import org.jf.dexlib2.iface.instruction.formats.Instruction21s;
-import org.jf.dexlib2.iface.instruction.formats.Instruction21t;
-import org.jf.dexlib2.iface.instruction.formats.Instruction22c;
-import org.jf.dexlib2.iface.instruction.formats.Instruction22t;
-import org.jf.dexlib2.iface.instruction.formats.Instruction23x;
-import org.jf.dexlib2.iface.instruction.formats.Instruction31c;
-import org.jf.dexlib2.iface.instruction.formats.Instruction31i;
-import org.jf.dexlib2.iface.instruction.formats.Instruction31t;
-import org.jf.dexlib2.iface.instruction.formats.Instruction35c;
-import org.jf.dexlib2.iface.instruction.formats.Instruction3rc;
-import org.jf.dexlib2.iface.instruction.formats.Instruction51l;
+import org.jf.dexlib2.iface.instruction.*;
+import org.jf.dexlib2.iface.instruction.formats.*;
 import org.jf.dexlib2.iface.reference.FieldReference;
 import org.jf.dexlib2.iface.reference.StringReference;
 import org.jf.dexlib2.iface.reference.TypeReference;
@@ -485,16 +464,6 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case INVOKE_VIRTUAL:
-            case INVOKE_SUPER:
-            case INVOKE_DIRECT:
-            case INVOKE_STATIC:
-            case INVOKE_INTERFACE:
-            case INVOKE_VIRTUAL_RANGE:
-            case INVOKE_SUPER_RANGE:
-            case INVOKE_DIRECT_RANGE:
-            case INVOKE_STATIC_RANGE:
-            case INVOKE_INTERFACE_RANGE:
             case ADD_INT:
             case SUB_INT:
             case MUL_INT:
@@ -506,6 +475,7 @@ public class SmaliDexInsnReader {
             case SHL_INT:
             case SHR_INT:
             case USHR_INT:
+
             case ADD_LONG:
             case SUB_LONG:
             case MUL_LONG:
@@ -517,16 +487,19 @@ public class SmaliDexInsnReader {
             case SHL_LONG:
             case SHR_LONG:
             case USHR_LONG:
+
             case ADD_FLOAT:
             case SUB_FLOAT:
             case MUL_FLOAT:
             case DIV_FLOAT:
             case REM_FLOAT:
+
             case ADD_DOUBLE:
             case SUB_DOUBLE:
             case MUL_DOUBLE:
             case DIV_DOUBLE:
             case REM_DOUBLE:
+
             case ADD_INT_2ADDR:
             case SUB_INT_2ADDR:
             case MUL_INT_2ADDR:
@@ -538,6 +511,7 @@ public class SmaliDexInsnReader {
             case SHL_INT_2ADDR:
             case SHR_INT_2ADDR:
             case USHR_INT_2ADDR:
+
             case ADD_LONG_2ADDR:
             case SUB_LONG_2ADDR:
             case MUL_LONG_2ADDR:
@@ -549,16 +523,22 @@ public class SmaliDexInsnReader {
             case SHL_LONG_2ADDR:
             case SHR_LONG_2ADDR:
             case USHR_LONG_2ADDR:
+
             case ADD_FLOAT_2ADDR:
             case SUB_FLOAT_2ADDR:
             case MUL_FLOAT_2ADDR:
             case DIV_FLOAT_2ADDR:
             case REM_FLOAT_2ADDR:
+
             case ADD_DOUBLE_2ADDR:
             case SUB_DOUBLE_2ADDR:
             case MUL_DOUBLE_2ADDR:
             case DIV_DOUBLE_2ADDR:
             case REM_DOUBLE_2ADDR:
+                throw new RuntimeException("Not yet implemented");
+
+            // LITERAL MATH //
+
             case ADD_INT_LIT16:
             case RSUB_INT:
             case MUL_INT_LIT16:
@@ -567,6 +547,7 @@ public class SmaliDexInsnReader {
             case AND_INT_LIT16:
             case OR_INT_LIT16:
             case XOR_INT_LIT16:
+
             case ADD_INT_LIT8:
             case RSUB_INT_LIT8:
             case MUL_INT_LIT8:
@@ -577,7 +558,24 @@ public class SmaliDexInsnReader {
             case XOR_INT_LIT8:
             case SHL_INT_LIT8:
             case SHR_INT_LIT8:
-            case USHR_INT_LIT8:
+            case USHR_INT_LIT8: {
+                int literal = ((NarrowLiteralInstruction) instruction).getNarrowLiteral();
+                TwoRegisterInstruction insn = (TwoRegisterInstruction) instruction;
+                visitLiteralMath(insn, literal);
+                break;
+            }
+
+
+            case INVOKE_VIRTUAL:
+            case INVOKE_SUPER:
+            case INVOKE_DIRECT:
+            case INVOKE_STATIC:
+            case INVOKE_INTERFACE:
+            case INVOKE_VIRTUAL_RANGE:
+            case INVOKE_SUPER_RANGE:
+            case INVOKE_DIRECT_RANGE:
+            case INVOKE_STATIC_RANGE:
+            case INVOKE_INTERFACE_RANGE:
             case IGET_VOLATILE:
             case IPUT_VOLATILE:
             case SGET_VOLATILE:
@@ -811,4 +809,67 @@ public class SmaliDexInsnReader {
 
         iv.visitPrimitiveCast(fromType, toType, instruction.getRegisterB(), instruction.getRegisterA());
     }
+
+    private void visitLiteralMath(TwoRegisterInstruction insn, int literal) {
+        Integer op1 = insn.getRegisterB();
+        Integer result = insn.getRegisterA();
+
+        switch (insn.getOpcode()) {
+            case ADD_INT_LIT8:
+            case ADD_INT_LIT16:
+                iv.visitLitAdd(op1, literal, result);
+                break;
+
+            case RSUB_INT_LIT8:
+            case RSUB_INT:
+                iv.visitLitRSub(op1, literal, result);
+                break;
+
+            case MUL_INT_LIT8:
+            case MUL_INT_LIT16:
+                iv.visitLitMul(op1, literal, result);
+                break;
+
+            case DIV_INT_LIT8:
+            case DIV_INT_LIT16:
+                iv.visitLitDiv(op1, literal, result);
+                break;
+
+            case REM_INT_LIT8:
+            case REM_INT_LIT16:
+                iv.visitLitMod(op1, literal, result);
+                break;
+
+            case AND_INT_LIT8:
+            case AND_INT_LIT16:
+                iv.visitLitAnd(op1, literal, result);
+                break;
+
+            case OR_INT_LIT8:
+            case OR_INT_LIT16:
+                iv.visitLitOr(op1, literal, result);
+                break;
+
+            case XOR_INT_LIT8:
+            case XOR_INT_LIT16:
+                iv.visitLitXor(op1, literal, result);
+                break;
+
+            case SHL_INT_LIT8:
+                iv.visitLitShl(op1, literal, result);
+                break;
+
+            case SHR_INT_LIT8:
+                iv.visitLitShr(op1, literal, result);
+                break;
+
+            case USHR_INT_LIT8:
+                iv.visitLitUShr(op1, literal, result);
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
 }
