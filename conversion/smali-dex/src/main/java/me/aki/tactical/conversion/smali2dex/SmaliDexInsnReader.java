@@ -1,14 +1,12 @@
 package me.aki.tactical.conversion.smali2dex;
 
 import me.aki.tactical.conversion.smalidex.DexUtils;
+import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.ClassConstant;
 import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.constant.StringConstant;
-import me.aki.tactical.core.type.ArrayType;
-import me.aki.tactical.core.type.DoubleType;
-import me.aki.tactical.core.type.FloatType;
-import me.aki.tactical.core.type.RefType;
+import me.aki.tactical.core.type.*;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.IfInstruction;
@@ -37,6 +35,8 @@ import org.jf.dexlib2.iface.instruction.formats.Instruction31t;
 import org.jf.dexlib2.iface.instruction.formats.Instruction35c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction3rc;
 import org.jf.dexlib2.iface.instruction.formats.Instruction51l;
+import org.jf.dexlib2.iface.reference.FieldReference;
+import org.jf.dexlib2.iface.reference.Reference;
 import org.jf.dexlib2.iface.reference.StringReference;
 import org.jf.dexlib2.iface.reference.TypeReference;
 
@@ -397,34 +397,60 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // FIELD ACCESS //
+
             case IGET:
             case IGET_WIDE:
             case IGET_OBJECT:
             case IGET_BOOLEAN:
             case IGET_BYTE:
             case IGET_CHAR:
-            case IGET_SHORT:
+            case IGET_SHORT: {
+                Instruction22c insn = (Instruction22c) instruction;
+                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                iv.visitFieldGet(field, Optional.of(insn.getRegisterB()), insn.getRegisterA());
+                break;
+            }
+
             case IPUT:
             case IPUT_WIDE:
             case IPUT_OBJECT:
             case IPUT_BOOLEAN:
             case IPUT_BYTE:
             case IPUT_CHAR:
-            case IPUT_SHORT:
+            case IPUT_SHORT: {
+                Instruction22c insn = (Instruction22c) instruction;
+                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                iv.visitFieldSet(field, Optional.of(insn.getRegisterB()), insn.getRegisterA());
+                break;
+            }
+
             case SGET:
             case SGET_WIDE:
             case SGET_OBJECT:
             case SGET_BOOLEAN:
             case SGET_BYTE:
             case SGET_CHAR:
-            case SGET_SHORT:
+            case SGET_SHORT: {
+                Instruction21c insn = (Instruction21c) instruction;
+                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                iv.visitFieldGet(field, Optional.empty(), insn.getRegisterA());
+                break;
+            }
+
             case SPUT:
             case SPUT_WIDE:
             case SPUT_OBJECT:
             case SPUT_BOOLEAN:
             case SPUT_BYTE:
             case SPUT_CHAR:
-            case SPUT_SHORT:
+            case SPUT_SHORT: {
+                Instruction21c insn = (Instruction21c) instruction;
+                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                iv.visitFieldSet(field, Optional.empty(), insn.getRegisterA());
+                break;
+            }
+
             case INVOKE_VIRTUAL:
             case INVOKE_SUPER:
             case INVOKE_DIRECT:
@@ -664,5 +690,11 @@ public class SmaliDexInsnReader {
             default:
                 throw new AssertionError();
         }
+    }
+
+    private FieldRef toFieldRef(FieldReference reference) {
+        Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
+        Type type = DexUtils.parseDescriptor(reference.getType());
+        return new FieldRef(owner, reference.getName(), type);
     }
 }
