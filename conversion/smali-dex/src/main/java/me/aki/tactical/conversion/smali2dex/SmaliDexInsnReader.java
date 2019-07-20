@@ -498,7 +498,10 @@ public class SmaliDexInsnReader {
             case SUB_DOUBLE:
             case MUL_DOUBLE:
             case DIV_DOUBLE:
-            case REM_DOUBLE:
+            case REM_DOUBLE: {
+                visitMathInsn((Instruction23x) instruction);
+                break;
+            }
 
             case ADD_INT_2ADDR:
             case SUB_INT_2ADDR:
@@ -872,4 +875,129 @@ public class SmaliDexInsnReader {
         }
     }
 
+    private void visitMathInsn(Instruction23x instruction) {
+        PrimitiveType type;
+        switch (instruction.getOpcode()) {
+            case ADD_INT:
+            case SUB_INT:
+            case MUL_INT:
+            case DIV_INT:
+            case REM_INT:
+            case AND_INT:
+            case OR_INT:
+            case XOR_INT:
+            case SHL_INT:
+            case SHR_INT:
+            case USHR_INT:
+                type = IntType.getInstance();
+                break;
+
+            case ADD_LONG:
+            case SUB_LONG:
+            case MUL_LONG:
+            case DIV_LONG:
+            case REM_LONG:
+            case AND_LONG:
+            case OR_LONG:
+            case XOR_LONG:
+            case SHL_LONG:
+            case SHR_LONG:
+            case USHR_LONG:
+                type = LongType.getInstance();
+                break;
+
+            case ADD_FLOAT:
+            case SUB_FLOAT:
+            case MUL_FLOAT:
+            case DIV_FLOAT:
+            case REM_FLOAT:
+                type = FloatType.getInstance();
+                break;
+
+            case ADD_DOUBLE:
+            case SUB_DOUBLE:
+            case MUL_DOUBLE:
+            case DIV_DOUBLE:
+            case REM_DOUBLE:
+                type = DoubleType.getInstance();
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+
+        Integer result = instruction.getRegisterA();
+        Integer op1 = instruction.getRegisterB();
+        Integer op2 = instruction.getRegisterC();
+
+        switch (instruction.getOpcode()) {
+            case ADD_INT:
+            case ADD_LONG:
+            case ADD_FLOAT:
+            case ADD_DOUBLE:
+                iv.visitAdd(type, op1, op2, result);
+                break;
+
+            case SUB_INT:
+            case SUB_LONG:
+            case SUB_FLOAT:
+            case SUB_DOUBLE:
+                iv.visitSub(type, op1, op2, result);
+                break;
+
+            case MUL_INT:
+            case MUL_LONG:
+            case MUL_FLOAT:
+            case MUL_DOUBLE:
+                iv.visitMul(type, op1, op2, result);
+                break;
+
+            case DIV_INT:
+            case DIV_LONG:
+            case DIV_FLOAT:
+            case DIV_DOUBLE:
+                iv.visitDiv(type, op1, op2, result);
+                break;
+
+            case REM_INT:
+            case REM_LONG:
+            case REM_FLOAT:
+            case REM_DOUBLE:
+                iv.visitMod(type, op1, op2, result);
+                break;
+
+            case AND_INT:
+            case AND_LONG:
+                iv.visitAnd(type, op1, op2, result);
+                break;
+
+            case OR_INT:
+            case OR_LONG:
+                iv.visitOr(type, op1, op2, result);
+                break;
+
+            case XOR_INT:
+            case XOR_LONG:
+                iv.visitXor(type, op1, op2, result);
+                break;
+
+            case SHL_INT:
+            case SHL_LONG:
+                iv.visitShl(type, op1, op2, result);
+                break;
+
+            case SHR_INT:
+            case SHR_LONG:
+                iv.visitShr(type, op1, op2 ,result);
+                break;
+
+            case USHR_INT:
+            case USHR_LONG:
+                iv.visitUShr(type, op1, op2, result);
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+    }
 }
