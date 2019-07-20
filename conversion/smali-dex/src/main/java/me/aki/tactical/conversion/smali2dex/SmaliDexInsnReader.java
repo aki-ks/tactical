@@ -466,16 +466,6 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case INVOKE_VIRTUAL:
-            case INVOKE_SUPER:
-            case INVOKE_DIRECT:
-            case INVOKE_STATIC:
-            case INVOKE_INTERFACE:
-            case INVOKE_VIRTUAL_RANGE:
-            case INVOKE_SUPER_RANGE:
-            case INVOKE_DIRECT_RANGE:
-            case INVOKE_STATIC_RANGE:
-            case INVOKE_INTERFACE_RANGE:
             case INT_TO_LONG:
             case INT_TO_FLOAT:
             case INT_TO_DOUBLE:
@@ -490,7 +480,21 @@ public class SmaliDexInsnReader {
             case DOUBLE_TO_FLOAT:
             case INT_TO_BYTE:
             case INT_TO_CHAR:
-            case INT_TO_SHORT:
+            case INT_TO_SHORT: {
+                visitPrimitiveCast((Instruction12x) instruction);
+                break;
+            }
+
+            case INVOKE_VIRTUAL:
+            case INVOKE_SUPER:
+            case INVOKE_DIRECT:
+            case INVOKE_STATIC:
+            case INVOKE_INTERFACE:
+            case INVOKE_VIRTUAL_RANGE:
+            case INVOKE_SUPER_RANGE:
+            case INVOKE_DIRECT_RANGE:
+            case INVOKE_STATIC_RANGE:
+            case INVOKE_INTERFACE_RANGE:
             case ADD_INT:
             case SUB_INT:
             case MUL_INT:
@@ -726,5 +730,85 @@ public class SmaliDexInsnReader {
         Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
         Type type = DexUtils.parseDescriptor(reference.getType());
         return new FieldRef(owner, reference.getName(), type);
+    }
+
+    private void visitPrimitiveCast(Instruction12x instruction) {
+        PrimitiveType fromType;
+        PrimitiveType toType;
+
+        switch (instruction.getOpcode()) {
+            case INT_TO_LONG:
+            case INT_TO_FLOAT:
+            case INT_TO_DOUBLE:
+            case INT_TO_BYTE:
+            case INT_TO_CHAR:
+            case INT_TO_SHORT:
+                fromType = IntType.getInstance();
+                break;
+
+            case LONG_TO_INT:
+            case LONG_TO_FLOAT:
+            case LONG_TO_DOUBLE:
+                fromType = LongType.getInstance();
+                break;
+
+            case FLOAT_TO_INT:
+            case FLOAT_TO_LONG:
+            case FLOAT_TO_DOUBLE:
+                fromType = FloatType.getInstance();
+                break;
+
+            case DOUBLE_TO_INT:
+            case DOUBLE_TO_LONG:
+            case DOUBLE_TO_FLOAT:
+                fromType = DoubleType.getInstance();
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+
+        switch (instruction.getOpcode()) {
+            case LONG_TO_INT:
+            case FLOAT_TO_INT:
+            case DOUBLE_TO_INT:
+                toType = IntType.getInstance();
+                break;
+
+            case INT_TO_LONG:
+            case FLOAT_TO_LONG:
+            case DOUBLE_TO_LONG:
+                toType = LongType.getInstance();
+                break;
+
+            case INT_TO_FLOAT:
+            case LONG_TO_FLOAT:
+            case DOUBLE_TO_FLOAT:
+                toType = FloatType.getInstance();
+                break;
+
+            case INT_TO_DOUBLE:
+            case LONG_TO_DOUBLE:
+            case FLOAT_TO_DOUBLE:
+                toType = DoubleType.getInstance();
+                break;
+
+            case INT_TO_BYTE:
+                toType = ByteType.getInstance();
+                break;
+
+            case INT_TO_CHAR:
+                toType = CharType.getInstance();
+                break;
+
+            case INT_TO_SHORT:
+                toType = ShortType.getInstance();
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+
+        iv.visitPrimitiveCast(fromType, toType, instruction.getRegisterB(), instruction.getRegisterA());
     }
 }
