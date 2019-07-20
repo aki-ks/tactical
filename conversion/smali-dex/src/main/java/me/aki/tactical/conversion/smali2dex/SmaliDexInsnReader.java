@@ -9,6 +9,7 @@ import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.DoubleType;
 import me.aki.tactical.core.type.FloatType;
 import me.aki.tactical.core.type.RefType;
+import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
@@ -19,11 +20,9 @@ import org.jf.dexlib2.iface.instruction.SwitchElement;
 import org.jf.dexlib2.iface.instruction.SwitchPayload;
 import org.jf.dexlib2.iface.instruction.TwoRegisterInstruction;
 import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
-import org.jf.dexlib2.iface.instruction.formats.Instruction10t;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11x;
 import org.jf.dexlib2.iface.instruction.formats.Instruction12x;
-import org.jf.dexlib2.iface.instruction.formats.Instruction20t;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21ih;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21lh;
@@ -61,6 +60,8 @@ public class SmaliDexInsnReader {
         switch (instruction.getOpcode()) {
             case NOP:
                 break;
+
+            // MOVE //
 
             case MOVE:
             case MOVE_FROM16:
@@ -110,6 +111,8 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // RETURN //
+
             case RETURN_VOID: {
                 iv.visitReturnVoid();
                 break;
@@ -130,6 +133,8 @@ public class SmaliDexInsnReader {
                 iv.visitReturn(DexType.OBJECT, insn.getRegisterA());
                 break;
             }
+
+            // CONST //
 
             case CONST_4: {
                 Instruction11n insn = (Instruction11n) instruction;
@@ -191,6 +196,8 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // MONITOR //
+
             case MONITOR_ENTER: {
                 Instruction11x insn = (Instruction11x) instruction;
                 iv.visitMonitorEnter(insn.getRegisterA());
@@ -201,6 +208,8 @@ public class SmaliDexInsnReader {
                 iv.visitMonitorExit(insn.getRegisterA());
                 break;
             }
+
+            // OBJECT TYPE INSNS //
 
             case CHECK_CAST: {
                 Instruction21c insn = (Instruction21c) instruction;
@@ -223,6 +232,8 @@ public class SmaliDexInsnReader {
                 iv.visitNew(path, insn.getRegisterA());
                 break;
             }
+
+            // ARRAY INSNS //
 
             case ARRAY_LENGTH: {
                 Instruction12x insn = (Instruction12x) instruction;
@@ -276,11 +287,15 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // THROW //
+
             case THROW: {
                 Instruction11x insn = (Instruction11x) instruction;
                 iv.visitThrow(insn.getRegisterA());
                 break;
             }
+
+            // GOTO //
 
             case GOTO:
             case GOTO_16:
@@ -289,6 +304,8 @@ public class SmaliDexInsnReader {
                 iv.visitGoto(insnIndex.getOffsetInstruction(insn, insn.getCodeOffset()));
                 break;
             }
+
+            // SWITCH //
 
             case PACKED_SWITCH:
             case SPARSE_SWITCH: {
@@ -303,6 +320,8 @@ public class SmaliDexInsnReader {
                 iv.visitSwitch(insn.getRegisterA(), branchTable);
                 break;
             }
+
+            // CMP //
 
             case CMPL_FLOAT: {
                 Instruction23x insn = (Instruction23x) instruction;
@@ -330,6 +349,8 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // IF //
+
             case IF_EQ:
             case IF_NE:
             case IF_LT:
@@ -348,20 +369,34 @@ public class SmaliDexInsnReader {
                 visitIfZeroInstruction((Instruction21t) instruction);
                 break;
 
+            // ARRAY ACCESS //
+
             case AGET:
             case AGET_WIDE:
             case AGET_OBJECT:
             case AGET_BOOLEAN:
             case AGET_BYTE:
             case AGET_CHAR:
-            case AGET_SHORT:
+            case AGET_SHORT: {
+                Instruction23x insn = (Instruction23x) instruction;
+                DetailedDexType type = getDetailedDexType(insn.getOpcode());
+                iv.visitArrayLoad(type, insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                break;
+            }
+
             case APUT:
             case APUT_WIDE:
             case APUT_OBJECT:
             case APUT_BOOLEAN:
             case APUT_BYTE:
             case APUT_CHAR:
-            case APUT_SHORT:
+            case APUT_SHORT: {
+                Instruction23x insn = (Instruction23x) instruction;
+                DetailedDexType type = getDetailedDexType(insn.getOpcode());
+                iv.visitArrayStore(type, insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                break;
+            }
+
             case IGET:
             case IGET_WIDE:
             case IGET_OBJECT:
@@ -590,6 +625,41 @@ public class SmaliDexInsnReader {
             case IF_LE:
             case IF_LEZ:
                 return IfInstruction.Comparison.LESS_EQUAL;
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    private DetailedDexType getDetailedDexType(Opcode opcode) {
+        switch (opcode) {
+            case AGET:
+            case APUT:
+                return DetailedDexType.NORMAL;
+
+            case AGET_WIDE:
+            case APUT_WIDE:
+                return DetailedDexType.WIDE;
+
+            case AGET_OBJECT:
+            case APUT_OBJECT:
+                return DetailedDexType.OBJECT;
+
+            case AGET_BOOLEAN:
+            case APUT_BOOLEAN:
+                return DetailedDexType.BOOLEAN;
+
+            case AGET_BYTE:
+            case APUT_BYTE:
+                return DetailedDexType.BYTE;
+
+            case AGET_CHAR:
+            case APUT_CHAR:
+                return DetailedDexType.CHAR;
+
+            case AGET_SHORT:
+            case APUT_SHORT:
+                return DetailedDexType.SHORT;
 
             default:
                 throw new AssertionError();
