@@ -583,11 +583,29 @@ public class SmaliDexInsnReader {
             case INVOKE_DIRECT:
             case INVOKE_STATIC:
             case INVOKE_INTERFACE:
+
             case INVOKE_VIRTUAL_RANGE:
             case INVOKE_SUPER_RANGE:
             case INVOKE_DIRECT_RANGE:
             case INVOKE_STATIC_RANGE:
             case INVOKE_INTERFACE_RANGE:
+
+            case PACKED_SWITCH_PAYLOAD:
+            case SPARSE_SWITCH_PAYLOAD:
+            case ARRAY_PAYLOAD:
+
+            case INVOKE_POLYMORPHIC:
+            case INVOKE_POLYMORPHIC_RANGE:
+
+            case INVOKE_CUSTOM:
+            case INVOKE_CUSTOM_RANGE:
+
+            case CONST_METHOD_HANDLE:
+            case CONST_METHOD_TYPE:
+                throw new RuntimeException("NOT YET IMPLEMENTED");
+
+            // ODEX INSTRUCTIONS ///
+
             case IGET_VOLATILE:
             case IPUT_VOLATILE:
             case SGET_VOLATILE:
@@ -597,6 +615,7 @@ public class SmaliDexInsnReader {
             case IPUT_WIDE_VOLATILE:
             case SGET_WIDE_VOLATILE:
             case SPUT_WIDE_VOLATILE:
+
             case THROW_VERIFICATION_ERROR:
             case EXECUTE_INLINE:
             case EXECUTE_INLINE_RANGE:
@@ -604,6 +623,7 @@ public class SmaliDexInsnReader {
             case INVOKE_OBJECT_INIT_RANGE:
             case RETURN_VOID_BARRIER:
             case RETURN_VOID_NO_BARRIER:
+
             case IGET_QUICK:
             case IGET_WIDE_QUICK:
             case IGET_OBJECT_QUICK:
@@ -618,6 +638,7 @@ public class SmaliDexInsnReader {
             case IGET_BYTE_QUICK:
             case IGET_CHAR_QUICK:
             case IGET_SHORT_QUICK:
+
             case INVOKE_VIRTUAL_QUICK:
             case INVOKE_VIRTUAL_QUICK_RANGE:
             case INVOKE_SUPER_QUICK:
@@ -625,17 +646,11 @@ public class SmaliDexInsnReader {
             case IPUT_OBJECT_VOLATILE:
             case SGET_OBJECT_VOLATILE:
             case SPUT_OBJECT_VOLATILE:
-            case PACKED_SWITCH_PAYLOAD:
-            case SPARSE_SWITCH_PAYLOAD:
-            case ARRAY_PAYLOAD:
-            case INVOKE_POLYMORPHIC:
-            case INVOKE_POLYMORPHIC_RANGE:
-            case INVOKE_CUSTOM:
-            case INVOKE_CUSTOM_RANGE:
-            case CONST_METHOD_HANDLE:
-            case CONST_METHOD_TYPE:
+                // Baksmali should alread have deodexed the code, so there are no odex only instructions in the code
+                throw new IllegalStateException("Unexpected ODEX instruction " + instruction.getOpcode());
+
             default:
-//                throw new RuntimeException("NOT YET IMPLEMENTED");
+                throw new AssertionError();
         }
     }
 
