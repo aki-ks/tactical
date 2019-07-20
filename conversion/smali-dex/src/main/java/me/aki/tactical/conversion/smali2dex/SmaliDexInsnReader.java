@@ -36,7 +36,6 @@ import org.jf.dexlib2.iface.instruction.formats.Instruction35c;
 import org.jf.dexlib2.iface.instruction.formats.Instruction3rc;
 import org.jf.dexlib2.iface.instruction.formats.Instruction51l;
 import org.jf.dexlib2.iface.reference.FieldReference;
-import org.jf.dexlib2.iface.reference.Reference;
 import org.jf.dexlib2.iface.reference.StringReference;
 import org.jf.dexlib2.iface.reference.TypeReference;
 
@@ -451,6 +450,16 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            case NEG_INT:
+            case NEG_LONG:
+            case NEG_FLOAT:
+            case NEG_DOUBLE: {
+                Instruction12x insn = (Instruction12x) instruction;
+                iv.visitNeg(getPrimitiveType(insn.getOpcode()), insn.getRegisterB(), insn.getRegisterA());
+                break;
+            }
+
+
             case INVOKE_VIRTUAL:
             case INVOKE_SUPER:
             case INVOKE_DIRECT:
@@ -461,12 +470,8 @@ public class SmaliDexInsnReader {
             case INVOKE_DIRECT_RANGE:
             case INVOKE_STATIC_RANGE:
             case INVOKE_INTERFACE_RANGE:
-            case NEG_INT:
             case NOT_INT:
-            case NEG_LONG:
             case NOT_LONG:
-            case NEG_FLOAT:
-            case NEG_DOUBLE:
             case INT_TO_LONG:
             case INT_TO_FLOAT:
             case INT_TO_DOUBLE:
@@ -686,6 +691,25 @@ public class SmaliDexInsnReader {
             case AGET_SHORT:
             case APUT_SHORT:
                 return DetailedDexType.SHORT;
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    private PrimitiveType getPrimitiveType(Opcode opcode) {
+        switch (opcode) {
+            case NEG_INT:
+                return IntType.getInstance();
+
+            case NEG_LONG:
+                return LongType.getInstance();
+
+            case NEG_FLOAT:
+                return FloatType.getInstance();
+
+            case NEG_DOUBLE:
+                return DoubleType.getInstance();
 
             default:
                 throw new AssertionError();
