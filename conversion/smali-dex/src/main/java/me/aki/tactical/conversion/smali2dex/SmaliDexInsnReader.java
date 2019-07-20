@@ -429,6 +429,8 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // UNARY MATH //
+
             case NEG_INT:
             case NEG_LONG:
             case NEG_FLOAT:
@@ -444,6 +446,8 @@ public class SmaliDexInsnReader {
                 iv.visitNot(getPrimitiveType(insn.getOpcode()), insn.getRegisterB(), insn.getRegisterA());
                 break;
             }
+
+            // PRIMITIVE CASTS //
 
             case INT_TO_LONG:
             case INT_TO_FLOAT:
@@ -463,6 +467,8 @@ public class SmaliDexInsnReader {
                 visitPrimitiveCast((Instruction12x) instruction);
                 break;
             }
+
+            // MATH  //
 
             case ADD_INT:
             case SUB_INT:
@@ -503,6 +509,8 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // 2ADDR MATH //
+
             case ADD_INT_2ADDR:
             case SUB_INT_2ADDR:
             case MUL_INT_2ADDR:
@@ -537,8 +545,10 @@ public class SmaliDexInsnReader {
             case SUB_DOUBLE_2ADDR:
             case MUL_DOUBLE_2ADDR:
             case DIV_DOUBLE_2ADDR:
-            case REM_DOUBLE_2ADDR:
-                throw new RuntimeException("Not yet implemented");
+            case REM_DOUBLE_2ADDR: {
+                visit2AddrMathInsn((Instruction12x) instruction);
+                break;
+            }
 
             // LITERAL MATH //
 
@@ -567,7 +577,6 @@ public class SmaliDexInsnReader {
                 visitLiteralMath(insn, literal);
                 break;
             }
-
 
             case INVOKE_VIRTUAL:
             case INVOKE_SUPER:
@@ -710,16 +719,88 @@ public class SmaliDexInsnReader {
         switch (opcode) {
             case NOT_INT:
             case NEG_INT:
+
+            case ADD_INT:
+            case SUB_INT:
+            case MUL_INT:
+            case DIV_INT:
+            case REM_INT:
+            case AND_INT:
+            case OR_INT:
+            case XOR_INT:
+            case SHL_INT:
+            case SHR_INT:
+            case USHR_INT:
+
+            case ADD_INT_2ADDR:
+            case SUB_INT_2ADDR:
+            case MUL_INT_2ADDR:
+            case DIV_INT_2ADDR:
+            case REM_INT_2ADDR:
+            case AND_INT_2ADDR:
+            case OR_INT_2ADDR:
+            case XOR_INT_2ADDR:
+            case SHL_INT_2ADDR:
+            case SHR_INT_2ADDR:
+            case USHR_INT_2ADDR:
                 return IntType.getInstance();
 
             case NOT_LONG:
             case NEG_LONG:
+
+            case ADD_LONG:
+            case SUB_LONG:
+            case MUL_LONG:
+            case DIV_LONG:
+            case REM_LONG:
+            case AND_LONG:
+            case OR_LONG:
+            case XOR_LONG:
+            case SHL_LONG:
+            case SHR_LONG:
+            case USHR_LONG:
+
+            case ADD_LONG_2ADDR:
+            case SUB_LONG_2ADDR:
+            case MUL_LONG_2ADDR:
+            case DIV_LONG_2ADDR:
+            case REM_LONG_2ADDR:
+            case AND_LONG_2ADDR:
+            case OR_LONG_2ADDR:
+            case XOR_LONG_2ADDR:
+            case SHL_LONG_2ADDR:
+            case SHR_LONG_2ADDR:
+            case USHR_LONG_2ADDR:
                 return LongType.getInstance();
 
             case NEG_FLOAT:
+
+            case ADD_FLOAT:
+            case SUB_FLOAT:
+            case MUL_FLOAT:
+            case DIV_FLOAT:
+            case REM_FLOAT:
+
+            case ADD_FLOAT_2ADDR:
+            case SUB_FLOAT_2ADDR:
+            case MUL_FLOAT_2ADDR:
+            case DIV_FLOAT_2ADDR:
+            case REM_FLOAT_2ADDR:
                 return FloatType.getInstance();
 
             case NEG_DOUBLE:
+
+            case ADD_DOUBLE:
+            case SUB_DOUBLE:
+            case MUL_DOUBLE:
+            case DIV_DOUBLE:
+            case REM_DOUBLE:
+
+            case ADD_DOUBLE_2ADDR:
+            case SUB_DOUBLE_2ADDR:
+            case MUL_DOUBLE_2ADDR:
+            case DIV_DOUBLE_2ADDR:
+            case REM_DOUBLE_2ADDR:
                 return DoubleType.getInstance();
 
             default:
@@ -813,6 +894,128 @@ public class SmaliDexInsnReader {
         iv.visitPrimitiveCast(fromType, toType, instruction.getRegisterB(), instruction.getRegisterA());
     }
 
+    private void visit2AddrMathInsn(Instruction12x instruction) {
+        PrimitiveType type = getPrimitiveType(instruction.getOpcode());
+        Integer result = instruction.getRegisterA();
+        Integer op1 = instruction.getRegisterA();
+        Integer op2 = instruction.getRegisterB();
+
+        visitMathInsn(instruction.getOpcode(), type, op1, op2, result);
+    }
+
+    private void visitMathInsn(Instruction23x instruction) {
+        PrimitiveType type = getPrimitiveType(instruction.getOpcode());
+        Integer result = instruction.getRegisterA();
+        Integer op1 = instruction.getRegisterB();
+        Integer op2 = instruction.getRegisterC();
+
+        visitMathInsn(instruction.getOpcode(), type, op1, op2, result);
+    }
+
+    private void visitMathInsn(Opcode opcode, PrimitiveType type, Integer op1, Integer op2, Integer result) {
+        switch (opcode) {
+            case ADD_INT:
+            case ADD_LONG:
+            case ADD_FLOAT:
+            case ADD_DOUBLE:
+            case ADD_INT_2ADDR:
+            case ADD_LONG_2ADDR:
+            case ADD_FLOAT_2ADDR:
+            case ADD_DOUBLE_2ADDR:
+                iv.visitAdd(type, op1, op2, result);
+                break;
+
+            case SUB_INT:
+            case SUB_LONG:
+            case SUB_FLOAT:
+            case SUB_DOUBLE:
+            case SUB_INT_2ADDR:
+            case SUB_LONG_2ADDR:
+            case SUB_FLOAT_2ADDR:
+            case SUB_DOUBLE_2ADDR:
+                iv.visitSub(type, op1, op2, result);
+                break;
+
+            case MUL_INT:
+            case MUL_LONG:
+            case MUL_FLOAT:
+            case MUL_DOUBLE:
+            case MUL_INT_2ADDR:
+            case MUL_LONG_2ADDR:
+            case MUL_FLOAT_2ADDR:
+            case MUL_DOUBLE_2ADDR:
+                iv.visitMul(type, op1, op2, result);
+                break;
+
+            case DIV_INT:
+            case DIV_LONG:
+            case DIV_FLOAT:
+            case DIV_DOUBLE:
+            case DIV_INT_2ADDR:
+            case DIV_LONG_2ADDR:
+            case DIV_FLOAT_2ADDR:
+            case DIV_DOUBLE_2ADDR:
+                iv.visitDiv(type, op1, op2, result);
+                break;
+
+            case REM_INT:
+            case REM_LONG:
+            case REM_FLOAT:
+            case REM_DOUBLE:
+            case REM_INT_2ADDR:
+            case REM_LONG_2ADDR:
+            case REM_FLOAT_2ADDR:
+            case REM_DOUBLE_2ADDR:
+                iv.visitMod(type, op1, op2, result);
+                break;
+
+            case AND_INT:
+            case AND_LONG:
+            case AND_INT_2ADDR:
+            case AND_LONG_2ADDR:
+                iv.visitAnd(type, op1, op2, result);
+                break;
+
+            case OR_INT:
+            case OR_LONG:
+            case OR_INT_2ADDR:
+            case OR_LONG_2ADDR:
+                iv.visitOr(type, op1, op2, result);
+                break;
+
+            case XOR_INT:
+            case XOR_LONG:
+            case XOR_INT_2ADDR:
+            case XOR_LONG_2ADDR:
+                iv.visitXor(type, op1, op2, result);
+                break;
+
+            case SHL_INT:
+            case SHL_LONG:
+            case SHL_INT_2ADDR:
+            case SHL_LONG_2ADDR:
+                iv.visitShl(type, op1, op2, result);
+                break;
+
+            case SHR_INT:
+            case SHR_LONG:
+            case SHR_INT_2ADDR:
+            case SHR_LONG_2ADDR:
+                iv.visitShr(type, op1, op2 ,result);
+                break;
+
+            case USHR_INT:
+            case USHR_LONG:
+            case USHR_INT_2ADDR:
+            case USHR_LONG_2ADDR:
+                iv.visitUShr(type, op1, op2, result);
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
     private void visitLiteralMath(TwoRegisterInstruction insn, int literal) {
         Integer op1 = insn.getRegisterB();
         Integer result = insn.getRegisterA();
@@ -868,132 +1071,6 @@ public class SmaliDexInsnReader {
 
             case USHR_INT_LIT8:
                 iv.visitLitUShr(op1, literal, result);
-                break;
-
-            default:
-                throw new AssertionError();
-        }
-    }
-
-    private void visitMathInsn(Instruction23x instruction) {
-        PrimitiveType type;
-        switch (instruction.getOpcode()) {
-            case ADD_INT:
-            case SUB_INT:
-            case MUL_INT:
-            case DIV_INT:
-            case REM_INT:
-            case AND_INT:
-            case OR_INT:
-            case XOR_INT:
-            case SHL_INT:
-            case SHR_INT:
-            case USHR_INT:
-                type = IntType.getInstance();
-                break;
-
-            case ADD_LONG:
-            case SUB_LONG:
-            case MUL_LONG:
-            case DIV_LONG:
-            case REM_LONG:
-            case AND_LONG:
-            case OR_LONG:
-            case XOR_LONG:
-            case SHL_LONG:
-            case SHR_LONG:
-            case USHR_LONG:
-                type = LongType.getInstance();
-                break;
-
-            case ADD_FLOAT:
-            case SUB_FLOAT:
-            case MUL_FLOAT:
-            case DIV_FLOAT:
-            case REM_FLOAT:
-                type = FloatType.getInstance();
-                break;
-
-            case ADD_DOUBLE:
-            case SUB_DOUBLE:
-            case MUL_DOUBLE:
-            case DIV_DOUBLE:
-            case REM_DOUBLE:
-                type = DoubleType.getInstance();
-                break;
-
-            default:
-                throw new AssertionError();
-        }
-
-        Integer result = instruction.getRegisterA();
-        Integer op1 = instruction.getRegisterB();
-        Integer op2 = instruction.getRegisterC();
-
-        switch (instruction.getOpcode()) {
-            case ADD_INT:
-            case ADD_LONG:
-            case ADD_FLOAT:
-            case ADD_DOUBLE:
-                iv.visitAdd(type, op1, op2, result);
-                break;
-
-            case SUB_INT:
-            case SUB_LONG:
-            case SUB_FLOAT:
-            case SUB_DOUBLE:
-                iv.visitSub(type, op1, op2, result);
-                break;
-
-            case MUL_INT:
-            case MUL_LONG:
-            case MUL_FLOAT:
-            case MUL_DOUBLE:
-                iv.visitMul(type, op1, op2, result);
-                break;
-
-            case DIV_INT:
-            case DIV_LONG:
-            case DIV_FLOAT:
-            case DIV_DOUBLE:
-                iv.visitDiv(type, op1, op2, result);
-                break;
-
-            case REM_INT:
-            case REM_LONG:
-            case REM_FLOAT:
-            case REM_DOUBLE:
-                iv.visitMod(type, op1, op2, result);
-                break;
-
-            case AND_INT:
-            case AND_LONG:
-                iv.visitAnd(type, op1, op2, result);
-                break;
-
-            case OR_INT:
-            case OR_LONG:
-                iv.visitOr(type, op1, op2, result);
-                break;
-
-            case XOR_INT:
-            case XOR_LONG:
-                iv.visitXor(type, op1, op2, result);
-                break;
-
-            case SHL_INT:
-            case SHL_LONG:
-                iv.visitShl(type, op1, op2, result);
-                break;
-
-            case SHR_INT:
-            case SHR_LONG:
-                iv.visitShr(type, op1, op2 ,result);
-                break;
-
-            case USHR_INT:
-            case USHR_LONG:
-                iv.visitUShr(type, op1, op2, result);
                 break;
 
             default:
