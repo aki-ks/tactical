@@ -135,6 +135,7 @@ public abstract class RWCell<T> implements RCell<T>, WCell<T> {
         return clazz.isAssignableFrom(type);
     }
 
+    @SuppressWarnings("unchecked")
     public final <U> RCell<U> r(Class<U> clazz) {
         if (canRead(clazz)) {
             return (RCell<U>) this;
@@ -143,6 +144,7 @@ public abstract class RWCell<T> implements RCell<T>, WCell<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public final <U> WCell<U> w(Class<U> clazz) {
         if (canWrite(clazz)) {
             return (WCell<U>) this;
@@ -152,6 +154,7 @@ public abstract class RWCell<T> implements RCell<T>, WCell<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <U extends T> WCell<U> w() {
         return (WCell<U>) this;
     }
