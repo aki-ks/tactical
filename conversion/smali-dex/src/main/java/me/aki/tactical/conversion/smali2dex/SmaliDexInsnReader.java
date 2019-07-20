@@ -459,6 +459,12 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            case NOT_INT:
+            case NOT_LONG: {
+                Instruction12x insn = (Instruction12x) instruction;
+                iv.visitNot(getPrimitiveType(insn.getOpcode()), insn.getRegisterB(), insn.getRegisterA());
+                break;
+            }
 
             case INVOKE_VIRTUAL:
             case INVOKE_SUPER:
@@ -470,8 +476,6 @@ public class SmaliDexInsnReader {
             case INVOKE_DIRECT_RANGE:
             case INVOKE_STATIC_RANGE:
             case INVOKE_INTERFACE_RANGE:
-            case NOT_INT:
-            case NOT_LONG:
             case INT_TO_LONG:
             case INT_TO_FLOAT:
             case INT_TO_DOUBLE:
@@ -699,9 +703,11 @@ public class SmaliDexInsnReader {
 
     private PrimitiveType getPrimitiveType(Opcode opcode) {
         switch (opcode) {
+            case NOT_INT:
             case NEG_INT:
                 return IntType.getInstance();
 
+            case NOT_LONG:
             case NEG_LONG:
                 return LongType.getInstance();
 
