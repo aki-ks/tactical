@@ -590,10 +590,6 @@ public class SmaliDexInsnReader {
             case INVOKE_STATIC_RANGE:
             case INVOKE_INTERFACE_RANGE:
 
-            case PACKED_SWITCH_PAYLOAD:
-            case SPARSE_SWITCH_PAYLOAD:
-            case ARRAY_PAYLOAD:
-
             case INVOKE_POLYMORPHIC:
             case INVOKE_POLYMORPHIC_RANGE:
 
@@ -603,6 +599,14 @@ public class SmaliDexInsnReader {
             case CONST_METHOD_HANDLE:
             case CONST_METHOD_TYPE:
                 throw new RuntimeException("NOT YET IMPLEMENTED");
+
+            // PAYLOAD //
+
+            case PACKED_SWITCH_PAYLOAD:
+            case SPARSE_SWITCH_PAYLOAD:
+            case ARRAY_PAYLOAD:
+                // These instructions contain data and are only referenced by other instructions
+                break;
 
             // ODEX INSTRUCTIONS ///
 
