@@ -589,7 +589,8 @@ public class SmaliDexInsnReader {
             case INVOKE_SUPER:
             case INVOKE_DIRECT:
             case INVOKE_STATIC:
-            case INVOKE_INTERFACE: {
+            case INVOKE_INTERFACE:
+            case INVOKE_POLYMORPHIC: {
                 Instruction35c insn = (Instruction35c) instruction;
                 visitInvokeInsn(insn);
                 break;
@@ -599,14 +600,12 @@ public class SmaliDexInsnReader {
             case INVOKE_SUPER_RANGE:
             case INVOKE_DIRECT_RANGE:
             case INVOKE_STATIC_RANGE:
-            case INVOKE_INTERFACE_RANGE: {
+            case INVOKE_INTERFACE_RANGE:
+            case INVOKE_POLYMORPHIC_RANGE: {
                 Instruction3rc insn = (Instruction3rc) instruction;
                 visitRangeInvokeInsn(insn);
                 break;
             }
-
-            case INVOKE_POLYMORPHIC:
-            case INVOKE_POLYMORPHIC_RANGE:
 
             case INVOKE_CUSTOM:
             case INVOKE_CUSTOM_RANGE:
