@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.smalidex;
 
+import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.BooleanType;
@@ -12,10 +13,12 @@ import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.type.Type;
+import org.jf.dexlib2.iface.reference.MethodProtoReference;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DexUtils {
     /**
@@ -95,5 +98,14 @@ public class DexUtils {
             default:
                 throw new IllegalArgumentException("Illegal descriptor: " + string.subSequence(offset, string.length()));
         }
+    }
+
+    public static MethodDescriptor convertMethodDescriptor(MethodProtoReference methodProto) {
+        Optional<Type> returnType = parseReturnType(methodProto.getReturnType());
+        List<Type> parameters = methodProto.getParameterTypes().stream()
+                .map(DexUtils::parseDescriptor)
+                .collect(Collectors.toList());
+
+        return new MethodDescriptor(parameters, returnType);
     }
 }

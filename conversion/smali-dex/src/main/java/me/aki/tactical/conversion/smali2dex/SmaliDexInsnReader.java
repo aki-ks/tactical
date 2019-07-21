@@ -2,32 +2,29 @@ package me.aki.tactical.conversion.smali2dex;
 
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
-import me.aki.tactical.core.constant.ClassConstant;
-import me.aki.tactical.core.constant.DexNumberConstant;
-import me.aki.tactical.core.constant.StringConstant;
+import me.aki.tactical.core.constant.*;
+import me.aki.tactical.core.handle.*;
 import me.aki.tactical.core.type.*;
 import me.aki.tactical.dex.DetailedDexType;
-import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.DexType;
-import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
+import org.jf.dexlib2.MethodHandleType;
 import org.jf.dexlib2.Opcode;
+import org.jf.dexlib2.ValueType;
 import org.jf.dexlib2.iface.instruction.*;
 import org.jf.dexlib2.iface.instruction.formats.*;
-import org.jf.dexlib2.iface.reference.FieldReference;
-import org.jf.dexlib2.iface.reference.MethodReference;
-import org.jf.dexlib2.iface.reference.StringReference;
-import org.jf.dexlib2.iface.reference.TypeReference;
+import org.jf.dexlib2.iface.reference.*;
+import org.jf.dexlib2.iface.value.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class SmaliDexInsnReader {
@@ -592,7 +589,7 @@ public class SmaliDexInsnReader {
             case INVOKE_INTERFACE:
             case INVOKE_POLYMORPHIC: {
                 Instruction35c insn = (Instruction35c) instruction;
-                visitInvokeInsn(insn);
+                visitInvoke(insn, getRegisters(insn));
                 break;
             }
 
@@ -603,12 +600,20 @@ public class SmaliDexInsnReader {
             case INVOKE_INTERFACE_RANGE:
             case INVOKE_POLYMORPHIC_RANGE: {
                 Instruction3rc insn = (Instruction3rc) instruction;
-                visitRangeInvokeInsn(insn);
+                visitInvoke(insn, getRegisters(insn));
                 break;
             }
 
-            case INVOKE_CUSTOM:
-            case INVOKE_CUSTOM_RANGE:
+            case INVOKE_CUSTOM: {
+                Instruction35c insn = (Instruction35c) instruction;
+                visitCustomInvoke(insn, getRegisters(insn));
+                break;
+            }
+            case INVOKE_CUSTOM_RANGE: {
+                Instruction3rc insn = (Instruction3rc) instruction;
+                visitCustomInvoke(insn, getRegisters(insn));
+                break;
+            }
 
             case CONST_METHOD_HANDLE:
             case CONST_METHOD_TYPE:
@@ -1121,7 +1126,8 @@ public class SmaliDexInsnReader {
         }
     }
 
-    private void visitInvokeInsn(Instruction35c insn) {
+
+    private List<Integer> getRegisters(Instruction35c insn) {
         int registerCount = insn.getRegisterCount();
         List<Integer> registers = new ArrayList<>(registerCount);
 
@@ -1141,16 +1147,15 @@ public class SmaliDexInsnReader {
             }
         }
 
-        visitInvoke(insn, new ArrayList<>(registers));
+        return registers;
     }
 
-    private void visitRangeInvokeInsn(Instruction3rc insn) {
+    private List<Integer> getRegisters(Instruction3rc insn) {
         List<Integer> registers = new ArrayList<>(insn.getRegisterCount());
         for (int i = 0; i < insn.getRegisterCount(); i++) {
             registers.add(insn.getStartRegister() + i);
         }
-
-        visitInvoke(insn, registers);
+        return registers;
     }
 
     private void visitInvoke(ReferenceInstruction insn, List<Integer> registers) {
@@ -1203,6 +1208,84 @@ public class SmaliDexInsnReader {
 
             default:
                 throw new AssertionError();
+        }
+    }
+
+    private void visitCustomInvoke(ReferenceInstruction insn, List<Integer> arguments) {
+        CallSiteReference reference = (CallSiteReference) insn.getReference();
+
+        Handle bootstrapMethod = convertMethodHandle(reference.getMethodHandle());
+        MethodDescriptor descriptor = DexUtils.convertMethodDescriptor(reference.getMethodProto());
+        List<BootstrapConstant> bootstrapArguments = reference.getExtraArguments().stream()
+                .map(this::convertBootstrapConstant)
+                .collect(Collectors.toList());
+
+        iv.visitCustomInvoke(arguments, reference.getMethodName(), descriptor, bootstrapArguments, bootstrapMethod);
+    }
+
+    private Handle convertMethodHandle(MethodHandleReference methodHandle) {
+        switch (methodHandle.getMethodHandleType()) {
+            case MethodHandleType.STATIC_PUT:
+            case MethodHandleType.STATIC_GET:
+            case MethodHandleType.INSTANCE_PUT:
+            case MethodHandleType.INSTANCE_GET:
+                FieldRef fieldRef = toFieldRef((FieldReference) methodHandle.getMemberReference());
+                switch (methodHandle.getMethodHandleType()) {
+                    case MethodHandleType.STATIC_PUT: return new SetStaticHandle(fieldRef);
+                    case MethodHandleType.STATIC_GET: return new GetStaticHandle(fieldRef);
+                    case MethodHandleType.INSTANCE_PUT: return new SetFieldHandle(fieldRef);
+                    case MethodHandleType.INSTANCE_GET: return new GetFieldHandle(fieldRef);
+                    default: throw new AssertionError();
+                }
+
+            case MethodHandleType.INVOKE_STATIC:
+            case MethodHandleType.INVOKE_INSTANCE:
+            case MethodHandleType.INVOKE_CONSTRUCTOR:
+            case MethodHandleType.INVOKE_DIRECT:
+            case MethodHandleType.INVOKE_INTERFACE:
+                MethodRef methodRef = toMethodRef((MethodReference) methodHandle.getMemberReference());
+                switch (methodHandle.getMethodHandleType()) {
+                    case MethodHandleType.INVOKE_STATIC: return new InvokeStaticHandle(methodRef, false);
+                    case MethodHandleType.INVOKE_INSTANCE: return new InvokeVirtualHandle(methodRef);
+                    case MethodHandleType.INVOKE_CONSTRUCTOR: return new NewInstanceHandle(methodRef);
+                    case MethodHandleType.INVOKE_DIRECT: return new InvokeSpecialHandle(methodRef, false);
+                    case MethodHandleType.INVOKE_INTERFACE: return new InvokeInterfaceHandle(methodRef);
+                    default: throw new AssertionError();
+                }
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    private BootstrapConstant convertBootstrapConstant(EncodedValue value) {
+        switch (value.getValueType()) {
+            case ValueType.BOOLEAN: return new IntConstant(((BooleanEncodedValue) value).getValue() ? 1 : 0);
+            case ValueType.BYTE: return new IntConstant(((ByteEncodedValue) value).getValue());
+            case ValueType.SHORT: return new IntConstant(((ShortEncodedValue) value).getValue());
+            case ValueType.CHAR: return new IntConstant(((CharEncodedValue) value).getValue());
+            case ValueType.INT: return new IntConstant(((IntEncodedValue) value).getValue());
+            case ValueType.LONG: return new LongConstant(((LongEncodedValue) value).getValue());
+            case ValueType.FLOAT: return new FloatConstant(((FloatEncodedValue) value).getValue());
+            case ValueType.DOUBLE: return new DoubleConstant(((DoubleEncodedValue) value).getValue());
+
+            case ValueType.STRING:
+                return new StringConstant(((StringEncodedValue) value).getValue());
+
+            case ValueType.TYPE:
+                Type type = DexUtils.parseDescriptor(((TypeEncodedValue) value).getValue());
+                return new ClassConstant((RefType) type);
+
+            case ValueType.ENUM:
+            case ValueType.METHOD_TYPE:
+            case ValueType.METHOD_HANDLE:
+            case ValueType.ARRAY:
+            case ValueType.ANNOTATION:
+            case ValueType.FIELD:
+            case ValueType.METHOD:
+            case ValueType.NULL:
+            default:
+                throw new AssertionError(ValueType.getValueTypeName(value.getValueType()));
         }
     }
 }
