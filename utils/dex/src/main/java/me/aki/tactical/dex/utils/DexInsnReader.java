@@ -1,9 +1,13 @@
 package me.aki.tactical.dex.utils;
 
+import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.*;
 import me.aki.tactical.dex.insn.litmath.*;
 import me.aki.tactical.dex.insn.math.*;
+import me.aki.tactical.dex.invoke.*;
+
+import java.util.Optional;
 
 /**
  * Call events for {@link Instruction Instructions} on a {@link DexInsnVisitor}.
@@ -140,8 +144,7 @@ public class DexInsnReader {
             InstanceOfInstruction instanceOfInsn = (InstanceOfInstruction) instruction;
             iv.visitInstanceOf(instanceOfInsn.getType(), instanceOfInsn.getValue(),instanceOfInsn.getResult());
         } else if (instruction instanceof InvokeInstruction) {
-            InvokeInstruction invokeInsn = (InvokeInstruction) instruction;
-            iv.visitInvoke(invokeInsn.getInvoke());
+            visitInvoke((InvokeInstruction) instruction);
         } else if (instruction instanceof MonitorEnterInstruction) {
             MonitorEnterInstruction monitorEnter = (MonitorEnterInstruction) instruction;
             iv.visitMonitorEnter(monitorEnter.getRegister());
@@ -185,6 +188,40 @@ public class DexInsnReader {
             iv.visitReturnVoid();
         } else if (instruction instanceof ThrowInstruction) {
             iv.visitThrow(((ThrowInstruction) instruction).getRegister());
+        } else {
+            throw new AssertionError();
+        }
+    }
+
+    private void visitInvoke(InvokeInstruction invokeInsn) {
+        Invoke invoke = invokeInsn.getInvoke();
+        if (invoke instanceof InvokeCustom) {
+            InvokeCustom invokeCustom = (InvokeCustom) invoke;
+            iv.visitCustomInvoke(invokeCustom.getArguments(), invokeCustom.getName(), invokeCustom.getDescriptor(), invokeCustom.getBootstrapArguments(), invokeCustom.getBootstrapMethod());
+        } else if (invoke instanceof ConcreteInvoke){
+            MethodRef method = ((ConcreteInvoke) invoke).getMethod();
+            Optional<Register> instance = invoke instanceof InstanceInvoke ?
+                    Optional.of(((InstanceInvoke) invoke).getInstance()) : Optional.empty();
+
+            iv.visitInvoke(convertInvokeType(invoke), method, instance, invoke.getArguments());
+        } else {
+            throw new AssertionError();
+        }
+    }
+
+    private DexInsnVisitor.InvokeType convertInvokeType(Invoke invoke) {
+        if (invoke instanceof InvokeDirect) {
+            return DexInsnVisitor.InvokeType.DIRECT;
+        } else if (invoke instanceof InvokeInterface) {
+            return DexInsnVisitor.InvokeType.INTERFACE;
+        } else if (invoke instanceof InvokePolymorphic) {
+            return DexInsnVisitor.InvokeType.POLYMORPHIC;
+        } else if (invoke instanceof InvokeStatic) {
+            return DexInsnVisitor.InvokeType.STATIC;
+        } else if (invoke instanceof InvokeSuper) {
+            return DexInsnVisitor.InvokeType.SUPER;
+        } else if (invoke instanceof InvokeVirtual) {
+            return DexInsnVisitor.InvokeType.VIRTUAL;
         } else {
             throw new AssertionError();
         }

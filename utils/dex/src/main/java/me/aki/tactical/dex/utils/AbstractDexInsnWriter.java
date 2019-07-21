@@ -1,9 +1,13 @@
 package me.aki.tactical.dex.utils;
 
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
+import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.DexConstant;
 import me.aki.tactical.core.constant.DexNumberConstant;
+import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -64,7 +68,7 @@ import me.aki.tactical.dex.insn.math.ShrInstruction;
 import me.aki.tactical.dex.insn.math.SubInstruction;
 import me.aki.tactical.dex.insn.math.UShrInstruction;
 import me.aki.tactical.dex.insn.math.XorInstruction;
-import me.aki.tactical.dex.invoke.Invoke;
+import me.aki.tactical.dex.invoke.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -331,8 +335,52 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitInvoke(Invoke invoke) {
+    public void visitInvoke(InvokeType invokeType, MethodRef method, Optional<R> instance, List<R> arguments) {
+        List<Register> argumentRegisters = arguments.stream()
+                .map(this::convertRegister)
+                .collect(Collectors.toList());
+
+        Invoke invoke;
+        if (invokeType == InvokeType.STATIC) {
+            invoke = new InvokeStatic(method, argumentRegisters);
+        } else {
+            Register instanceRegister = convertRegister(instance.get());
+            switch (invokeType) {
+                case DIRECT:
+                    invoke = new InvokeDirect(method, instanceRegister, argumentRegisters);
+                    break;
+
+                case INTERFACE:
+                    invoke = new InvokeInterface(method, instanceRegister, argumentRegisters);
+                    break;
+
+                case POLYMORPHIC:
+                    invoke = new InvokePolymorphic(method, instanceRegister, argumentRegisters);
+                    break;
+
+                case SUPER:
+                    invoke = new InvokeSuper(method, instanceRegister, argumentRegisters);
+                    break;
+
+                case VIRTUAL:
+                    invoke = new InvokeVirtual(method, instanceRegister, argumentRegisters);
+                    break;
+
+                default:
+                    throw new AssertionError();
+            }
+        }
+
         visitInstruction(new InvokeInstruction(invoke));
+    }
+
+    @Override
+    public void visitCustomInvoke(List<R> arguments, String name, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
+        List<Register> argumentRegisters = arguments.stream()
+                .map(this::convertRegister)
+                .collect(Collectors.toList());
+
+        visitInstruction(new InvokeInstruction(new InvokeCustom(argumentRegisters, name, descriptor, bootstrapArguments, bootstrapMethod)));
     }
 
     @Override

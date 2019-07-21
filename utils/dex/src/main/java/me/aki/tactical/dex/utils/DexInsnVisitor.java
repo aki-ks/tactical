@@ -1,9 +1,13 @@
 package me.aki.tactical.dex.utils;
 
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.MethodDescriptor;
+import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
+import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.DexConstant;
 import me.aki.tactical.core.constant.DexNumberConstant;
+import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
@@ -320,9 +324,19 @@ public class DexInsnVisitor<I, R> {
 
     // METHOD INVOKE
 
-    public void visitInvoke(Invoke invoke) {
+    public static enum InvokeType {
+        DIRECT, INTERFACE, POLYMORPHIC, STATIC, SUPER, VIRTUAL
+    }
+
+    public void visitInvoke(InvokeType invoke, MethodRef method, Optional<R> instance, List<R> arguments) {
         if (iv != null) {
-            iv.visitInvoke(invoke);
+            iv.visitInvoke(invoke, method, instance, arguments);
+        }
+    }
+
+    public void visitCustomInvoke(List<R> arguments, String name, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
+        if (iv != null) {
+            iv.visitCustomInvoke(arguments, name, descriptor, bootstrapArguments, bootstrapMethod);
         }
     }
 

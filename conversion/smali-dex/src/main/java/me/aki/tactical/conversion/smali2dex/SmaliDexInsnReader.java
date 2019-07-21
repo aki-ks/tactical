@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.smali2dex;
 
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.ClassConstant;
 import me.aki.tactical.core.constant.DexNumberConstant;
@@ -10,11 +11,15 @@ import me.aki.tactical.core.type.*;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.IfInstruction;
+import me.aki.tactical.dex.invoke.Invoke;
+import me.aki.tactical.dex.invoke.InvokeStatic;
+import me.aki.tactical.dex.invoke.InvokeVirtual;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.*;
 import org.jf.dexlib2.iface.instruction.formats.*;
 import org.jf.dexlib2.iface.reference.FieldReference;
+import org.jf.dexlib2.iface.reference.MethodReference;
 import org.jf.dexlib2.iface.reference.StringReference;
 import org.jf.dexlib2.iface.reference.TypeReference;
 
@@ -578,11 +583,17 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            // INVOKE //
+
             case INVOKE_VIRTUAL:
             case INVOKE_SUPER:
             case INVOKE_DIRECT:
             case INVOKE_STATIC:
-            case INVOKE_INTERFACE:
+            case INVOKE_INTERFACE: {
+                Instruction35c insn = (Instruction35c) instruction;
+                visitInvokeInsn(insn);
+                break;
+            }
 
             case INVOKE_VIRTUAL_RANGE:
             case INVOKE_SUPER_RANGE:
@@ -831,6 +842,16 @@ public class SmaliDexInsnReader {
         Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
         Type type = DexUtils.parseDescriptor(reference.getType());
         return new FieldRef(owner, reference.getName(), type);
+    }
+
+    private MethodRef toMethodRef(MethodReference reference) {
+        Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
+        Optional<Type> returnType = DexUtils.parseReturnType(reference.getReturnType());
+        List<Type> arguments = reference.getParameterTypes().stream()
+                .map(DexUtils::parseDescriptor)
+                .collect(Collectors.toList());
+
+        return new MethodRef(owner, reference.getName(), arguments, returnType);
     }
 
     private void visitPrimitiveCast(Instruction12x instruction) {
@@ -1094,6 +1115,67 @@ public class SmaliDexInsnReader {
 
             default:
                 throw new AssertionError();
+        }
+    }
+
+    private void visitInvokeInsn(Instruction35c insn) {
+        List<Integer> registers = getRegisters(insn);
+        MethodRef method = toMethodRef((MethodReference) insn.getReference());
+        DexInsnVisitor.InvokeType invokeType = convertInvokeType(insn.getOpcode());
+
+        Optional<Integer> instanceRegister;
+        List<Integer> argumentRegisters;
+        if (insn.getOpcode() == Opcode.INVOKE_STATIC) {
+            instanceRegister = Optional.empty();
+            argumentRegisters = new ArrayList<>(registers);
+        } else {
+            instanceRegister = Optional.of(registers.get(0));
+            argumentRegisters = new ArrayList<>(registers.subList(1, registers.size()));
+        }
+
+        iv.visitInvoke(invokeType, method, instanceRegister, argumentRegisters);
+    }
+
+    private DexInsnVisitor.InvokeType convertInvokeType(Opcode opcode) {
+        switch (opcode) {
+            case INVOKE_DIRECT:
+            case INVOKE_DIRECT_RANGE:
+                return DexInsnVisitor.InvokeType.DIRECT;
+
+            case INVOKE_INTERFACE:
+            case INVOKE_INTERFACE_RANGE:
+                return DexInsnVisitor.InvokeType.INTERFACE;
+
+            case INVOKE_POLYMORPHIC:
+            case INVOKE_POLYMORPHIC_RANGE:
+                return DexInsnVisitor.InvokeType.POLYMORPHIC;
+
+            case INVOKE_STATIC:
+            case INVOKE_STATIC_RANGE:
+                return DexInsnVisitor.InvokeType.STATIC;
+
+            case INVOKE_SUPER:
+            case INVOKE_SUPER_RANGE:
+                return DexInsnVisitor.InvokeType.SUPER;
+
+            case INVOKE_VIRTUAL:
+            case INVOKE_VIRTUAL_RANGE:
+                return DexInsnVisitor.InvokeType.VIRTUAL;
+
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    private List<Integer> getRegisters(Instruction35c insn) {
+        switch (insn.getRegisterCount()) {
+            case 0: return List.of();
+            case 1: return List.of(insn.getRegisterC());
+            case 2: return List.of(insn.getRegisterC(), insn.getRegisterD());
+            case 3: return List.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE());
+            case 4: return List.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF());
+            case 5: return List.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF(), insn.getRegisterG());
+            default: throw new AssertionError();
         }
     }
 }
