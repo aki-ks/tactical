@@ -178,7 +178,7 @@ public class BodyConverter {
 
             Stack.Mutable<StackValue> stack = new Stack.Mutable<>();
             stack.push(new StackValue(stackTryCatchBlock.getHandler(), caughtExceptionLocal));
-            worklist.add(new CfgNode(stackTryCatchBlock.getHandler(), stack.immutableCopy()));
+            worklist.add(new CfgNode(stackTryCatchBlock.getHandler(), stack.toImmutable()));
 
             convertTryCatchBlock(stackTryCatchBlock, caughtExceptionLocal);
         });
@@ -202,7 +202,7 @@ public class BodyConverter {
                     BranchInsn branchInsn = (BranchInsn) instruction;
                     for (Instruction branchTarget : branchInsn.getBranchTargets()) {
                         if (!record.wasVisited(branchInsn, branchTarget)) {
-                            worklist.add(new CfgNode(branchTarget, this.stack.immutableCopy()));
+                            worklist.add(new CfgNode(branchTarget, this.stack.toImmutable()));
                             record.setVisited(branchInsn, branchTarget);
                         }
                     }

@@ -76,7 +76,7 @@ public class Analysis {
             for (TryCatchBlock block : blocksToConvert) {
                 Stack.Mutable<JvmType> stack = new Stack.Mutable<>();
                 stack.push(JvmType.REFERENCE); // put the caught exception on the stack
-                startAnalysingFrom(new Workable(block.getHandler(), stack.immutableCopy()));
+                startAnalysingFrom(new Workable(block.getHandler(), stack.toImmutable()));
             }
 
             notYetConvertedBlocks.removeAll(blocksToConvert);
@@ -133,7 +133,7 @@ public class Analysis {
 
                 instruction = iterator.next();
 
-                Stack.Immutable<JvmType> currentFrame = stackEmulator.getStack().immutableCopy();
+                Stack.Immutable<JvmType> currentFrame = stackEmulator.getStack().toImmutable();
                 Stack.Immutable<JvmType> expectedFrame = stackMap.get(instruction);
                 if (expectedFrame != null) {
                     // The code starting from here on has already been visited.
@@ -152,7 +152,7 @@ public class Analysis {
                 insnReader.accept(instruction);
 
                 if (instruction instanceof BranchInsn) {
-                    currentFrame = stackEmulator.getStack().immutableCopy();
+                    currentFrame = stackEmulator.getStack().toImmutable();
                     for (Instruction branchTarget : ((BranchInsn) instruction).getBranchTargets()) {
                         worklist.add(new Workable(branchTarget, currentFrame));
                     }

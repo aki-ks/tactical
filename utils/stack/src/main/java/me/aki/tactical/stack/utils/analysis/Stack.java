@@ -1,11 +1,6 @@
 package me.aki.tactical.stack.utils.analysis;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,7 +26,7 @@ public class Stack<T> {
             }
         }
 
-        public Mutable(Optional<Stack<T>.Node> head, int size) {
+        private Mutable(Optional<Stack<T>.Node> head, int size) {
             super(head, size);
         }
 
@@ -49,10 +44,10 @@ public class Stack<T> {
          * Get and remove the upper value on the stack.
          *
          * @return removed upper value
-         * @throws StackUnderflowException the stack was empty
+         * @throws NoSuchElementException the stack was empty
          */
         public T pop() {
-            Stack<T>.Node head = this.head.orElseThrow(StackUnderflowException::new);
+            Stack<T>.Node head = this.head.orElseThrow(NoSuchElementException::new);
             this.head = head.tail;
             this.size -= 1;
             return head.value;
@@ -63,13 +58,13 @@ public class Stack<T> {
          *
          * @param other stack to be loaded
          */
-        public void loadFrom(Stack other) {
+        public void loadFrom(Stack<T> other) {
             this.head = other.head;
             this.size = other.size;
         }
 
         /**
-         * Delete all types on the stack
+         * Delete all values on the stack
          */
         public void clear() {
             this.size = 0;
@@ -78,7 +73,7 @@ public class Stack<T> {
     }
 
     /**
-     * A immutable snapshot of a stack state
+     * An immutable snapshot of a stack state
      */
     public static class Immutable<T> extends Stack<T> {
         public Immutable() {
@@ -109,7 +104,7 @@ public class Stack<T> {
     protected Optional<Node> head;
 
     /**
-     * amount of values on the stack
+     * Amount of values on the stack
      */
     protected int size;
 
@@ -122,24 +117,34 @@ public class Stack<T> {
      * Get, but do not remove the upper value on the stack.
      *
      * @return upper value on the stack
-     * @throws StackUnderflowException the stack was empty
+     * @throws NoSuchElementException the stack was empty
      */
     public T peek() {
-        return this.head.orElseThrow(StackUnderflowException::new).value;
+        return this.head.orElseThrow(NoSuchElementException::new).value;
+    }
+
+    /**
+     * Get the most upper value on the stack if present.
+     *
+     * @return upper value on the stack
+     */
+    public Optional<T> peekOpt() {
+        return this.head.map(node -> node.value);
     }
 
     /**
      * Copy the n must upper values into an array.
      * The most upper value will be at index zero.
      *
-     * @param ammount of values to peek
+     * @param amount of values to peek
      * @return an array of peeked values
      */
-    public T[] peek(int ammount) {
-        T[] array = (T[]) new Object[ammount];
+    @SuppressWarnings("unchecked")
+    public T[] peek(int amount) {
+        T[] array = (T[]) new Object[amount];
         Optional<Node> nodeOpt = this.head;
-        for (int i = 0; i < ammount; i++) {
-            Node node = nodeOpt.orElseThrow(StackUnderflowException::new);
+        for (int i = 0; i < amount; i++) {
+            Node node = nodeOpt.orElseThrow(NoSuchElementException::new);
             array[i] = node.value;
             nodeOpt = node.tail;
         }
@@ -162,7 +167,7 @@ public class Stack<T> {
 
             @Override
             public T next() {
-                Node node = nodeOpt.orElseThrow(StackUnderflowException::new);
+                Node node = nodeOpt.orElseThrow(NoSuchElementException::new);
                 this.nodeOpt = node.tail;
                 return node.value;
             }
@@ -170,20 +175,11 @@ public class Stack<T> {
     }
 
     /**
-     * Get the most upper value on the stack if present.
-     *
-     * @return upper value on the stack
-     */
-    public Optional<T> peekOpt() {
-        return this.head.map(node -> node.value);
-    }
-
-    /**
      * Create a constant time immutable copy of this stack.
      *
      * @return copy of this stack
      */
-    public Stack.Immutable<T> immutableCopy() {
+    public Stack.Immutable<T> toImmutable() {
         return this instanceof Stack.Immutable ? (Stack.Immutable<T>) this :
                 new Stack.Immutable<>(this.head, this.size);
     }
@@ -193,7 +189,7 @@ public class Stack<T> {
      *
      * @return copy of this stack
      */
-    public Stack.Mutable<T> mutableCopy() {
+    public Stack.Mutable<T> toMutable() {
         return new Stack.Mutable<>(this.head, this.size);
     }
 
@@ -208,29 +204,15 @@ public class Stack<T> {
     }
 
     public boolean isEqual(Stack stack) {
-        return size == stack.size &&
-                Objects.equals(head, stack.head);
+        return this.size == stack.size &&
+                Objects.equals(this.head, stack.head);
     }
 
-    @SuppressWarnings("unchecked")
-    public <U> U[] toArray(Function<Integer, U[]> newArray) {
-        U[] obj = newArray.apply(this.size);
-        Optional<Node> nodeOpt = this.head;
-        int i = this.size - 1;
-        while (nodeOpt.isPresent()) {
-            Node node = nodeOpt.get();
-            obj[i--] = (U) node.value;
-            nodeOpt = node.tail;
-        }
-        return obj;
-    }
-
-    @SuppressWarnings("unchecked")
     public Stream<T> stream() {
-        return (Stream<T>) Arrays.stream(toArray(Object[]::new));
+        return Stream.iterate(this.head, Optional::isPresent, nodeOpt -> nodeOpt.flatMap(node -> node.tail))
+                .flatMap(node -> node.map(x -> x.value).stream());
     }
 
-    @SuppressWarnings("unchecked")
     public List<T> toList() {
         return stream().collect(Collectors.toList());
     }
@@ -245,6 +227,7 @@ public class Stack<T> {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -258,6 +241,4 @@ public class Stack<T> {
             return Objects.hash(value, tail);
         }
     }
-
-    public static class StackUnderflowException extends RuntimeException {}
 }
