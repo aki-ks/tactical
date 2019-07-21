@@ -9,11 +9,10 @@ import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.type.*;
 import me.aki.tactical.dex.DetailedDexType;
+import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.DexType;
+import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.IfInstruction;
-import me.aki.tactical.dex.invoke.Invoke;
-import me.aki.tactical.dex.invoke.InvokeStatic;
-import me.aki.tactical.dex.invoke.InvokeVirtual;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.*;
@@ -28,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class SmaliDexInsnReader {
@@ -599,7 +599,11 @@ public class SmaliDexInsnReader {
             case INVOKE_SUPER_RANGE:
             case INVOKE_DIRECT_RANGE:
             case INVOKE_STATIC_RANGE:
-            case INVOKE_INTERFACE_RANGE:
+            case INVOKE_INTERFACE_RANGE: {
+                Instruction3rc insn = (Instruction3rc) instruction;
+                visitRangeInvokeInsn(insn);
+                break;
+            }
 
             case INVOKE_POLYMORPHIC:
             case INVOKE_POLYMORPHIC_RANGE:
@@ -1119,18 +1123,54 @@ public class SmaliDexInsnReader {
     }
 
     private void visitInvokeInsn(Instruction35c insn) {
-        List<Integer> registers = getRegisters(insn);
+        int registerCount = insn.getRegisterCount();
+        List<Integer> registers = new ArrayList<>(registerCount);
+
+        if (registerCount > 0) {
+            registers.add(insn.getRegisterC());
+            if (registerCount > 1) {
+                registers.add(insn.getRegisterD());
+                if (registerCount > 2) {
+                    registers.add(insn.getRegisterE());
+                    if (registerCount > 3) {
+                        registers.add(insn.getRegisterF());
+                        if (registerCount > 4) {
+                            registers.add(insn.getRegisterG());
+                        }
+                    }
+                }
+            }
+        }
+
+        visitInvoke(insn, new ArrayList<>(registers));
+    }
+
+    private void visitRangeInvokeInsn(Instruction3rc insn) {
+        List<Integer> registers = new ArrayList<>(insn.getRegisterCount());
+        for (int i = 0; i < insn.getRegisterCount(); i++) {
+            registers.add(insn.getStartRegister() + i);
+        }
+
+        visitInvoke(insn, registers);
+    }
+
+    private void visitInvoke(ReferenceInstruction insn, List<Integer> registers) {
         MethodRef method = toMethodRef((MethodReference) insn.getReference());
         DexInsnVisitor.InvokeType invokeType = convertInvokeType(insn.getOpcode());
 
         Optional<Integer> instanceRegister;
         List<Integer> argumentRegisters;
-        if (insn.getOpcode() == Opcode.INVOKE_STATIC) {
-            instanceRegister = Optional.empty();
-            argumentRegisters = new ArrayList<>(registers);
-        } else {
-            instanceRegister = Optional.of(registers.get(0));
-            argumentRegisters = new ArrayList<>(registers.subList(1, registers.size()));
+        switch (insn.getOpcode()) {
+            case INVOKE_STATIC:
+            case INVOKE_STATIC_RANGE:
+                instanceRegister = Optional.empty();
+                argumentRegisters = new ArrayList<>(registers);
+                break;
+
+            default:
+                instanceRegister = Optional.of(registers.get(0));
+                argumentRegisters = new ArrayList<>(registers.subList(1, registers.size()));
+                break;
         }
 
         iv.visitInvoke(invokeType, method, instanceRegister, argumentRegisters);
@@ -1164,18 +1204,6 @@ public class SmaliDexInsnReader {
 
             default:
                 throw new AssertionError();
-        }
-    }
-
-    private List<Integer> getRegisters(Instruction35c insn) {
-        switch (insn.getRegisterCount()) {
-            case 0: return List.of();
-            case 1: return List.of(insn.getRegisterC());
-            case 2: return List.of(insn.getRegisterC(), insn.getRegisterD());
-            case 3: return List.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE());
-            case 4: return List.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF());
-            case 5: return List.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF(), insn.getRegisterG());
-            default: throw new AssertionError();
         }
     }
 }
