@@ -97,6 +97,12 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
         return instructions;
     }
 
+    public List<Instruction> popInstructions() {
+        List<Instruction> currentList = new ArrayList<>(this.instructions);
+        this.instructions.clear();
+        return currentList;
+    }
+
     private void visitInstruction(Instruction instruction) {
         this.instructions.add(instruction);
     }

@@ -13,11 +13,12 @@ import me.aki.tactical.core.constant.IntConstant;
 import me.aki.tactical.core.constant.LongConstant;
 import me.aki.tactical.core.constant.StringConstant;
 import me.aki.tactical.core.type.Type;
-import me.aki.tactical.dex.DexBody;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.utils.VersionVisitor;
 import org.jf.dexlib2.ValueType;
 import org.jf.dexlib2.iface.ClassDef;
 import org.jf.dexlib2.iface.MethodImplementation;
+import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.value.BooleanEncodedValue;
 import org.jf.dexlib2.iface.value.ByteEncodedValue;
 import org.jf.dexlib2.iface.value.CharEncodedValue;
@@ -29,8 +30,7 @@ import org.jf.dexlib2.iface.value.LongEncodedValue;
 import org.jf.dexlib2.iface.value.ShortEncodedValue;
 import org.jf.dexlib2.iface.value.StringEncodedValue;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ClassFileConverter {
@@ -40,7 +40,7 @@ public class ClassFileConverter {
     public ClassFileConverter(ClassDef smaliClass) {
         this.smaliClass = smaliClass;
 
-        this.tacticalClass = convertClassDescriptor(smaliClass);
+        this.tacticalClass = convertClassDescriptor();
         this.tacticalClass.setFlags(FlagConverter.CLASSFILE.fromBitMap(smaliClass.getAccessFlags()));
         this.tacticalClass.setSource(Optional.ofNullable(smaliClass.getSourceFile()));
         this.tacticalClass.setAnnotations(AnnotationConverter.convertAnnotations(smaliClass.getAnnotations()));
@@ -51,7 +51,7 @@ public class ClassFileConverter {
         this.tacticalClass.setVersion(computeJvmVersion());
     }
 
-    private Classfile convertClassDescriptor(ClassDef classDef) {
+    private Classfile convertClassDescriptor() {
         Path name = DexUtils.parseObjectDescriptor(smaliClass.getType());
 
         String superDescriptor = smaliClass.getSuperclass();
@@ -109,12 +109,10 @@ public class ClassFileConverter {
             Method method = new Method(smaliMethod.getName(), paramTypes, returnType);
             method.setFlags(FlagConverter.METHOD.fromBitMap(smaliMethod.getAccessFlags()));
             method.setAnnotations(AnnotationConverter.convertAnnotations(smaliMethod.getAnnotations()));
-            method.setBody(Optional.ofNullable(smaliMethod.getImplementation()).map(this::convertBody));
+            method.setBody(Optional.ofNullable(smaliMethod.getImplementation())
+                    .map(body -> new BodyConverter(method, body).getBody()));
+            tacticalClass.getMethods().add(method);
         }
-    }
-
-    private DexBody convertBody(MethodImplementation smaliBody) {
-        throw new RuntimeException("Not yet implemented");
     }
 
     public Classfile getTacticalClass() {
