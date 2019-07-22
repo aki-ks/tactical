@@ -23,6 +23,10 @@ public class MethodTypeConstant implements BootstrapConstant, PushableConstant, 
      */
     private final Optional<Type> returnType;
 
+    public MethodTypeConstant(MethodDescriptor descriptor) {
+        this(descriptor.getParameterTypes(), descriptor.getReturnType());
+    }
+
     public MethodTypeConstant(List<Type> argumentTypes, Optional<Type> returnType) {
         this.argumentTypes = List.copyOf(argumentTypes);
         this.returnType = returnType;

@@ -1223,6 +1223,43 @@ public class SmaliDexInsnReader {
         iv.visitCustomInvoke(arguments, reference.getMethodName(), descriptor, bootstrapArguments, bootstrapMethod);
     }
 
+    private BootstrapConstant convertBootstrapConstant(EncodedValue value) {
+        switch (value.getValueType()) {
+            case ValueType.BOOLEAN: return new IntConstant(((BooleanEncodedValue) value).getValue() ? 1 : 0);
+            case ValueType.BYTE: return new IntConstant(((ByteEncodedValue) value).getValue());
+            case ValueType.SHORT: return new IntConstant(((ShortEncodedValue) value).getValue());
+            case ValueType.CHAR: return new IntConstant(((CharEncodedValue) value).getValue());
+            case ValueType.INT: return new IntConstant(((IntEncodedValue) value).getValue());
+            case ValueType.LONG: return new LongConstant(((LongEncodedValue) value).getValue());
+            case ValueType.FLOAT: return new FloatConstant(((FloatEncodedValue) value).getValue());
+            case ValueType.DOUBLE: return new DoubleConstant(((DoubleEncodedValue) value).getValue());
+
+            case ValueType.STRING:
+                return new StringConstant(((StringEncodedValue) value).getValue());
+
+            case ValueType.TYPE:
+                Type type = DexUtils.parseDescriptor(((TypeEncodedValue) value).getValue());
+                return new ClassConstant((RefType) type);
+
+            case ValueType.METHOD_TYPE:
+                MethodProtoReference proto = ((MethodTypeEncodedValue) value).getValue();
+                return new MethodTypeConstant(DexUtils.convertMethodDescriptor(proto));
+
+            case ValueType.METHOD_HANDLE:
+                MethodHandleReference handle = ((MethodHandleEncodedValue) value).getValue();
+                return new HandleConstant(convertMethodHandle(handle));
+
+            case ValueType.ENUM:
+            case ValueType.ARRAY:
+            case ValueType.ANNOTATION:
+            case ValueType.FIELD:
+            case ValueType.METHOD:
+            case ValueType.NULL:
+            default:
+                throw new AssertionError(ValueType.getValueTypeName(value.getValueType()));
+        }
+    }
+
     private Handle convertMethodHandle(MethodHandleReference methodHandle) {
         switch (methodHandle.getMethodHandleType()) {
             case MethodHandleType.STATIC_PUT:
@@ -1255,37 +1292,6 @@ public class SmaliDexInsnReader {
 
             default:
                 throw new AssertionError();
-        }
-    }
-
-    private BootstrapConstant convertBootstrapConstant(EncodedValue value) {
-        switch (value.getValueType()) {
-            case ValueType.BOOLEAN: return new IntConstant(((BooleanEncodedValue) value).getValue() ? 1 : 0);
-            case ValueType.BYTE: return new IntConstant(((ByteEncodedValue) value).getValue());
-            case ValueType.SHORT: return new IntConstant(((ShortEncodedValue) value).getValue());
-            case ValueType.CHAR: return new IntConstant(((CharEncodedValue) value).getValue());
-            case ValueType.INT: return new IntConstant(((IntEncodedValue) value).getValue());
-            case ValueType.LONG: return new LongConstant(((LongEncodedValue) value).getValue());
-            case ValueType.FLOAT: return new FloatConstant(((FloatEncodedValue) value).getValue());
-            case ValueType.DOUBLE: return new DoubleConstant(((DoubleEncodedValue) value).getValue());
-
-            case ValueType.STRING:
-                return new StringConstant(((StringEncodedValue) value).getValue());
-
-            case ValueType.TYPE:
-                Type type = DexUtils.parseDescriptor(((TypeEncodedValue) value).getValue());
-                return new ClassConstant((RefType) type);
-
-            case ValueType.ENUM:
-            case ValueType.METHOD_TYPE:
-            case ValueType.METHOD_HANDLE:
-            case ValueType.ARRAY:
-            case ValueType.ANNOTATION:
-            case ValueType.FIELD:
-            case ValueType.METHOD:
-            case ValueType.NULL:
-            default:
-                throw new AssertionError(ValueType.getValueTypeName(value.getValueType()));
         }
     }
 }
