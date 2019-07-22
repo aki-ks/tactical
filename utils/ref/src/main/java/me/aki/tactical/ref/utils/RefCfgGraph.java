@@ -15,7 +15,6 @@ public class RefCfgGraph extends AbstractCfgGraph<Statement> {
 
     public RefCfgGraph(RefBody body) {
         this.body = body;
-        this.analyze();
     }
 
     public RefBody getBody() {

@@ -27,6 +27,10 @@ public abstract class AbstractCfgGraph<I> {
 
     private Collection<TryCatchBlock> tryCatchBlocks;
 
+    public AbstractCfgGraph() {
+        analyze();
+    }
+
     /**
      * Start building the CFG graph.
      */
@@ -141,9 +145,9 @@ public abstract class AbstractCfgGraph<I> {
     /**
      * Get all instructions that may be reached after an instruction.
      * Either since they are succeeding the instruction or
-     * it may branch to that instruction.
+     * the instruction may branch to those instructions.
      *
-     * @param instruction which instructions may be reached from this instructions
+     * @param instruction which instructions may be reached from this instruction
      * @return all instructions that may be reached from the instruction
      */
     protected abstract Stream<I> getReachableInstructions(I instruction);
@@ -211,11 +215,11 @@ public abstract class AbstractCfgGraph<I> {
         }
 
         public List<Node> getPreceeding() {
-            return preceeding;
+            return Collections.unmodifiableList(preceeding);
         }
 
         public List<Node> getSucceeding() {
-            return succeeding;
+            return Collections.unmodifiableList(succeeding);
         }
     }
 }
