@@ -20,10 +20,7 @@ import org.jf.dexlib2.iface.instruction.formats.*;
 import org.jf.dexlib2.iface.reference.*;
 import org.jf.dexlib2.iface.value.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -230,14 +227,10 @@ public class SmaliDexInsnReader {
             case FILLED_NEW_ARRAY: {
                 Instruction35c insn = (Instruction35c) instruction;
 
-                String descriptor = ((TypeReference) insn.getReference()).getType();
-                ArrayType type = (ArrayType) DexUtils.parseDescriptor(descriptor);
+                String arrayDescriptor = ((TypeReference) insn.getReference()).getType();
+                ArrayType type = (ArrayType) DexUtils.parseDescriptor(arrayDescriptor);
 
-                List<Integer> registers = Stream.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF(), insn.getRegisterG())
-                        .limit(insn.getRegisterCount())
-                        .collect(Collectors.toList());
-
-                iv.visitNewFilledArray(type, registers);
+                iv.visitNewFilledArray(type, getRegisters(insn));
                 break;
             }
             case FILLED_NEW_ARRAY_RANGE: {
@@ -1128,26 +1121,9 @@ public class SmaliDexInsnReader {
 
 
     private List<Integer> getRegisters(Instruction35c insn) {
-        int registerCount = insn.getRegisterCount();
-        List<Integer> registers = new ArrayList<>(registerCount);
-
-        if (registerCount > 0) {
-            registers.add(insn.getRegisterC());
-            if (registerCount > 1) {
-                registers.add(insn.getRegisterD());
-                if (registerCount > 2) {
-                    registers.add(insn.getRegisterE());
-                    if (registerCount > 3) {
-                        registers.add(insn.getRegisterF());
-                        if (registerCount > 4) {
-                            registers.add(insn.getRegisterG());
-                        }
-                    }
-                }
-            }
-        }
-
-        return registers;
+        return Stream.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF(), insn.getRegisterG())
+                        .limit(insn.getRegisterCount())
+                        .collect(Collectors.toList());
     }
 
     private List<Integer> getRegisters(Instruction3rc insn) {
@@ -1176,6 +1152,8 @@ public class SmaliDexInsnReader {
                 argumentRegisters = new ArrayList<>(registers.subList(1, registers.size()));
                 break;
         }
+
+        dropDummyRegisters(method.getArguments(), argumentRegisters);
 
         iv.visitInvoke(invokeType, method, instanceRegister, argumentRegisters);
     }
@@ -1220,7 +1198,37 @@ public class SmaliDexInsnReader {
                 .map(this::convertBootstrapConstant)
                 .collect(Collectors.toList());
 
+        dropDummyRegisters(descriptor.getParameterTypes(), arguments);
+
         iv.visitCustomInvoke(arguments, reference.getMethodName(), descriptor, bootstrapArguments, bootstrapMethod);
+    }
+
+    /**
+     * Remove the dummy registers for longs and doubles from a list of registers
+     *
+     * @param types the list of types
+     * @param registers the list of corresponding types
+     */
+    private void dropDummyRegisters(List<Type> types, List<Integer> registers) {
+        Iterator<Type> typeIter = types.iterator();
+        Iterator<Integer> registerIter = registers.iterator();
+
+        while (typeIter.hasNext()) {
+            Type type = typeIter.next();
+            registerIter.next();
+
+            if (type instanceof LongType || type instanceof DoubleType) {
+                // Remove the following local, which represents the 2nd part of the long/double
+                registerIter.next();
+                registerIter.remove();
+            }
+        }
+
+        // After all dummy registers have been removed,
+        // the register count should match the local count
+        if (types.size() != registers.size()) {
+            throw new IllegalStateException("types=" + types + ", registers=" + registers);
+        }
     }
 
     private BootstrapConstant convertBootstrapConstant(EncodedValue value) {

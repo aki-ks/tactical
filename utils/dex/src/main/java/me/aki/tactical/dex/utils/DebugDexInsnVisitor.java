@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
+    public DebugDexInsnVisitor() {
+        this(null);
+    }
+
     public DebugDexInsnVisitor(DexInsnVisitor<I, R> iv) {
         super(iv);
     }
