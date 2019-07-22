@@ -1,6 +1,7 @@
 package me.aki.tactical.dex;
 
 import me.aki.tactical.core.Path;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.insn.Instruction;
 import me.aki.tactical.dex.insn.MoveExceptionInstruction;
 
@@ -42,12 +43,20 @@ public class TryCatchBlock {
         this.start = start;
     }
 
+    public RWCell<Instruction> getStartCell() {
+        return RWCell.of(this::getStart, this::setStart, Instruction.class);
+    }
+
     public Instruction getEnd() {
         return end;
     }
 
     public void setEnd(Instruction end) {
         this.end = end;
+    }
+
+    public RWCell<Instruction> getEndCell() {
+        return RWCell.of(this::getEnd, this::setEnd, Instruction.class);
     }
 
     public List<Handler> getHandlers() {
@@ -74,7 +83,7 @@ public class TryCatchBlock {
     }
 
     /**
-     * Handle a certain kind of exception by branching to a certain instruction
+     * Handle one kind of exceptions by branching to a certain instruction
      */
     public static class Handler {
         /**
@@ -107,6 +116,10 @@ public class TryCatchBlock {
 
         public void setHandler(Instruction handler) {
             this.handler = handler;
+        }
+
+        public RWCell<Instruction> getHandlerCell() {
+            return RWCell.of(this::getHandler, this::setHandler, Instruction.class);
         }
 
         @Override
