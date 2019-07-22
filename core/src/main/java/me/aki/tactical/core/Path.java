@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Immutable name of a class and its package.
@@ -83,10 +84,11 @@ public class Path {
 
     @Override
     public String toString() {
-        return "Path{" +
-                "pkg=" + pkg +
-                ", name='" + name + '\'' +
-                '}';
+        String joined = Stream.concat(pkg.stream(), Stream.of(name))
+                .map(p -> '\'' + p + '\'')
+                .collect(Collectors.joining(", "));
+
+        return "Path{" + joined + '}';
     }
 
     @Override
