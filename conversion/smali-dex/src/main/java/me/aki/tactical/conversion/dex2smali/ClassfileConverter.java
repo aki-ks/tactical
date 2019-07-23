@@ -4,14 +4,19 @@ import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.conversion.smalidex.FlagConverter;
 import me.aki.tactical.core.Body;
 import me.aki.tactical.core.Classfile;
+import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.annotation.Annotation;
+import me.aki.tactical.core.constant.*;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.dex.DexBody;
 import org.jf.dexlib2.iface.MethodImplementation;
 import org.jf.dexlib2.iface.MethodParameter;
+import org.jf.dexlib2.iface.value.EncodedValue;
+import org.jf.dexlib2.immutable.ImmutableField;
 import org.jf.dexlib2.immutable.ImmutableMethod;
 import org.jf.dexlib2.immutable.ImmutableMethodParameter;
+import org.jf.dexlib2.immutable.value.*;
 
 import java.util.*;
 
@@ -20,6 +25,31 @@ public class ClassfileConverter {
 
     public ClassfileConverter(Classfile classfile) {
         this.classfile = classfile;
+    }
+
+    private org.jf.dexlib2.iface.Field convertField(Field field) {
+        String definingClass = DexUtils.toObjectDescriptor(classfile.getName());
+        String type = DexUtils.toDexType(field.getType());
+        int accessFlags = FlagConverter.FIELD.toBitMap(field.getFlags());
+        EncodedValue initialValue = field.getValue().map(this::convertFieldConstant).orElse(null);
+        Set<? extends org.jf.dexlib2.iface.Annotation> annotations = AnnotationConverter.convertAnnotations(field.getAnnotations());
+        return new ImmutableField(definingClass, field.getName(), type, accessFlags, initialValue, annotations);
+    }
+
+    private EncodedValue convertFieldConstant(FieldConstant constant) {
+        if (constant instanceof IntConstant) {
+            return new ImmutableIntEncodedValue(((IntConstant) constant).getValue());
+        } else if (constant instanceof LongConstant) {
+            return new ImmutableLongEncodedValue(((LongConstant) constant).getValue());
+        } else if (constant instanceof FloatConstant) {
+            return new ImmutableFloatEncodedValue(((FloatConstant) constant).getValue());
+        } else if (constant instanceof DoubleConstant) {
+            return new ImmutableDoubleEncodedValue(((DoubleConstant) constant).getValue());
+        } else if (constant instanceof StringConstant) {
+            return new ImmutableStringEncodedValue(((StringConstant) constant).getValue());
+        } else {
+            throw new AssertionError();
+        }
     }
 
     private ImmutableMethod convertMethod(Method method) {
