@@ -1,18 +1,9 @@
 package me.aki.tactical.conversion.smalidex;
 
+import me.aki.tactical.core.Method;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.Path;
-import me.aki.tactical.core.type.ArrayType;
-import me.aki.tactical.core.type.BooleanType;
-import me.aki.tactical.core.type.ByteType;
-import me.aki.tactical.core.type.CharType;
-import me.aki.tactical.core.type.DoubleType;
-import me.aki.tactical.core.type.FloatType;
-import me.aki.tactical.core.type.IntType;
-import me.aki.tactical.core.type.LongType;
-import me.aki.tactical.core.type.ObjectType;
-import me.aki.tactical.core.type.ShortType;
-import me.aki.tactical.core.type.Type;
+import me.aki.tactical.core.type.*;
 import org.jf.dexlib2.iface.reference.MethodProtoReference;
 
 import java.util.ArrayList;
@@ -29,6 +20,14 @@ public class DexUtils {
      */
     public static Path parseObjectDescriptor(String descriptor) {
         return ((ObjectType) parseDescriptor(descriptor)).getName();
+    }
+
+    public static String toObjectDescriptor(Path path) {
+        StringBuilder builder = new StringBuilder();
+        builder.append('L');
+        builder.append(path.join('/'));
+        builder.append(';');
+        return builder.toString();
     }
 
     /**
@@ -107,5 +106,79 @@ public class DexUtils {
                 .collect(Collectors.toList());
 
         return new MethodDescriptor(parameters, returnType);
+    }
+
+    /**
+     * Convert the {@link Method#getReturnType()} return type} of a {@link Method} to a dex type descriptor.
+     *
+     * @param type a {@link Method#getReturnType()} return type} of a {@link Method}
+     * @return the corresponding dex type descriptor
+     */
+    public static String toDexReturnType(Optional<Type> type) {
+        return type.map(DexUtils::toDexType).orElse("V");
+    }
+
+    /**
+     * Convert a tactical {@link Type} into a dex type descriptor.
+     *
+     * @param type a tactical {@link Type}
+     * @return the corresponding dex type descriptor
+     */
+    public static String toDexType(Type type) {
+        StringBuilder builder = new StringBuilder();
+        toDexType(type, builder);
+        return builder.toString();
+    }
+
+    private static void toDexType(Type type, StringBuilder builder) {
+        if (type instanceof PrimitiveType) {
+            if (type instanceof IntLikeType) {
+                if (type instanceof BooleanType) {
+                    builder.append('Z');
+                } else if (type instanceof ByteType) {
+                    builder.append('B');
+                } else if (type instanceof ShortType) {
+                    builder.append('S');
+                } else if (type instanceof CharType) {
+                    builder.append('C');
+                } else if (type instanceof IntType) {
+                    builder.append('I');
+                } else {
+                    throw new AssertionError();
+                }
+            } else if (type instanceof LongType) {
+                builder.append('J');
+            } else if (type instanceof FloatType) {
+                builder.append('F');
+            } else if (type instanceof DoubleType) {
+                builder.append('D');
+            } else {
+                throw new AssertionError();
+            }
+        } else if (type instanceof RefType) {
+            if (type instanceof ArrayType) {
+                ArrayType arrayType = (ArrayType) type;
+                for (int i = 0; i < arrayType.getDimensions(); i++) {
+                    builder.append('[');
+                }
+
+                toDexType(arrayType.getBaseType(), builder);
+            } else if (type instanceof ObjectType) {
+                builder.append('L');
+
+                Path name = ((ObjectType) type).getName();
+                for (String pkg : name.getPackage()) {
+                    builder.append(pkg);
+                    builder.append('/');
+                }
+                builder.append(name.getName());
+
+                builder.append(';');
+            } else {
+                throw new AssertionError();
+            }
+        } else {
+            throw new AssertionError();
+        }
     }
 }

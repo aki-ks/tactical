@@ -50,7 +50,6 @@ public class AnnotationConverter {
      */
     public static Annotation convertAnnotation(org.jf.dexlib2.iface.Annotation smaliAnno) throws InconvertibleEnumValueException {
         Path type = DexUtils.parseObjectDescriptor(smaliAnno.getType());
-
         boolean isRuntimeVisible = smaliAnno.getVisibility() == AnnotationVisibility.RUNTIME;
 
         LinkedHashMap<String, AnnotationValue> values = new LinkedHashMap<>();
