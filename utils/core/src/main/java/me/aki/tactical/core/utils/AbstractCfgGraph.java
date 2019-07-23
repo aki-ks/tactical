@@ -27,10 +27,6 @@ public abstract class AbstractCfgGraph<I> {
 
     private Collection<TryCatchBlock> tryCatchBlocks;
 
-    public AbstractCfgGraph() {
-        analyze();
-    }
-
     /**
      * Start building the CFG graph.
      */
