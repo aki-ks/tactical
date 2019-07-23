@@ -6,6 +6,7 @@ import me.aki.tactical.core.Classfile;
 import me.aki.tactical.core.Field;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
+import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.constant.DoubleConstant;
 import me.aki.tactical.core.constant.FieldConstant;
 import me.aki.tactical.core.constant.FloatConstant;
@@ -18,6 +19,7 @@ import me.aki.tactical.dex.utils.VersionVisitor;
 import org.jf.dexlib2.ValueType;
 import org.jf.dexlib2.iface.ClassDef;
 import org.jf.dexlib2.iface.MethodImplementation;
+import org.jf.dexlib2.iface.MethodParameter;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.value.BooleanEncodedValue;
 import org.jf.dexlib2.iface.value.ByteEncodedValue;
@@ -107,6 +109,15 @@ public class ClassFileConverter {
                     .map(DexUtils::parseDescriptor).collect(Collectors.toList());
             Optional<Type> returnType = DexUtils.parseReturnType(smaliMethod.getReturnType());
             Method method = new Method(smaliMethod.getName(), paramTypes, returnType);
+
+            method.setParameterAnnotations(smaliMethod.getParameters().stream()
+                    .map(param -> AnnotationConverter.convertAnnotations(param.getAnnotations()))
+                    .collect(Collectors.toList()));
+
+            method.setParameterInfo(smaliMethod.getParameters().stream()
+                    .map(param -> new Method.Parameter(Optional.ofNullable(param.getName()), new HashSet<>()))
+                    .collect(Collectors.toList()));
+
             method.setFlags(FlagConverter.METHOD.fromBitMap(smaliMethod.getAccessFlags()));
             method.setAnnotations(AnnotationConverter.convertAnnotations(smaliMethod.getAnnotations()));
             method.setBody(Optional.ofNullable(smaliMethod.getImplementation())
