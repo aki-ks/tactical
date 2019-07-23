@@ -33,7 +33,7 @@ public abstract class RWCell<T> implements RCell<T>, WCell<T> {
 
             @Override
             public void set(T newValue) {
-                this.value = initialValue;
+                this.value = newValue;
             }
         };
     }
