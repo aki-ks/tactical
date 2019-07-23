@@ -10,9 +10,11 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.TryCatchBlock;
+import org.jf.dexlib2.DebugItemType;
 import org.jf.dexlib2.iface.ExceptionHandler;
 import org.jf.dexlib2.iface.MethodImplementation;
 import org.jf.dexlib2.iface.TryBlock;
+import org.jf.dexlib2.iface.debug.*;
 import org.jf.dexlib2.iface.instruction.Instruction;
 
 import java.util.*;
@@ -64,6 +66,8 @@ public class BodyConverter {
         this.updateInsnReferences();
 
         this.convertTryCatchBlocks();
+
+        this.convertDebug();
     }
 
     public DexBody getBody() {
@@ -236,5 +240,50 @@ public class BodyConverter {
         }
 
         return this.convertedInsns.get(insn);
+    }
+
+    private void convertDebug() {
+        for (DebugItem debugItem : smaliBody.getDebugItems()) {
+            Instruction insn = insnIndex.getInstructionByCodeUnit(debugItem.getCodeAddress());
+            switch (debugItem.getDebugItemType()) {
+                case DebugItemType.START_LOCAL:
+                    StartLocal startLocal = (StartLocal) debugItem;
+                    //TODO
+                    break;
+
+                case DebugItemType.END_LOCAL:
+                    EndLocal endLocal = (EndLocal) debugItem;
+                    //TODO
+                    break;
+
+                case DebugItemType.RESTART_LOCAL:
+                    RestartLocal restartLocal = (RestartLocal) debugItem;
+                    //TODO
+                    break;
+
+                case DebugItemType.PROLOGUE_END:
+                    PrologueEnd prologueEnd = (PrologueEnd) debugItem;
+                    //TODO
+                    break;
+
+                case DebugItemType.EPILOGUE_BEGIN:
+                    EpilogueBegin epilogueBegin = (EpilogueBegin) debugItem;
+                    //TODO
+                    break;
+
+                case DebugItemType.SET_SOURCE_FILE:
+                    SetSourceFile setSourceFile = (SetSourceFile) debugItem;
+                    //TODO
+                    break;
+
+                case DebugItemType.LINE_NUMBER:
+                    LineNumber lineNumber = (LineNumber) debugItem;
+                    //TODO
+                    break;
+
+                default:
+                    throw new AssertionError();
+            }
+        }
     }
 }
