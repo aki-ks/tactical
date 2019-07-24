@@ -2,29 +2,66 @@ package me.aki.tactical.conversion.dex2smali;
 
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.conversion.smalidex.FlagConverter;
-import me.aki.tactical.core.Body;
-import me.aki.tactical.core.Classfile;
-import me.aki.tactical.core.Field;
-import me.aki.tactical.core.Method;
+import me.aki.tactical.core.*;
 import me.aki.tactical.core.annotation.Annotation;
 import me.aki.tactical.core.constant.*;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.dex.DexBody;
+import org.jf.dexlib2.iface.ClassDef;
 import org.jf.dexlib2.iface.MethodImplementation;
 import org.jf.dexlib2.iface.MethodParameter;
 import org.jf.dexlib2.iface.value.EncodedValue;
+import org.jf.dexlib2.immutable.ImmutableClassDef;
 import org.jf.dexlib2.immutable.ImmutableField;
 import org.jf.dexlib2.immutable.ImmutableMethod;
 import org.jf.dexlib2.immutable.ImmutableMethodParameter;
 import org.jf.dexlib2.immutable.value.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ClassfileConverter {
     private final Classfile classfile;
 
     public ClassfileConverter(Classfile classfile) {
         this.classfile = classfile;
+    }
+
+    public ClassDef convert() {
+        String type = DexUtils.toObjectDescriptor(classfile.getName());
+        int accessFlags = FlagConverter.CLASSFILE.toBitMap(classfile.getFlags());
+        String sourceFile = classfile.getSource().orElse(null);
+        Set<? extends org.jf.dexlib2.iface.Annotation> annotations = AnnotationConverter.convertAnnotations(classfile.getAnnotations());
+        String superclass = classfile.getSupertype() == null ? null : DexUtils.toObjectDescriptor(classfile.getSupertype());
+        List<String> interfaces = classfile.getInterfaces().stream()
+                .map(DexUtils::toObjectDescriptor)
+                .collect(Collectors.toList());
+
+        List<org.jf.dexlib2.iface.Field> staticFields = classfile.getFields().stream()
+                .filter(field -> field.getFlag(Field.Flag.STATIC))
+                .map(this::convertField)
+                .collect(Collectors.toList());
+
+        List<org.jf.dexlib2.iface.Field> instanceFields = classfile.getFields().stream()
+                .filter(field -> !field.getFlag(Field.Flag.STATIC))
+                .map(this::convertField)
+                .collect(Collectors.toList());
+
+        List<ImmutableMethod> directMethods = classfile.getMethods().stream()
+                .filter(this::isDirectMethod)
+                .map(this::convertMethod)
+                .collect(Collectors.toList());
+
+        List<ImmutableMethod> virtualMethods = classfile.getMethods().stream()
+                .filter(m -> !isDirectMethod(m))
+                .map(this::convertMethod)
+                .collect(Collectors.toList());
+
+        return new ImmutableClassDef(type, accessFlags, superclass, interfaces, sourceFile, annotations, staticFields, instanceFields, directMethods, virtualMethods);
+    }
+
+    private boolean isDirectMethod(Method method) {
+        return method.getName().equals("<init>") || method.getFlag(Method.Flag.PRIVATE);
     }
 
     private org.jf.dexlib2.iface.Field convertField(Field field) {

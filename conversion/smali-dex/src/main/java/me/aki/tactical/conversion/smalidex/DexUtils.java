@@ -25,7 +25,11 @@ public class DexUtils {
     public static String toObjectDescriptor(Path path) {
         StringBuilder builder = new StringBuilder();
         builder.append('L');
-        builder.append(path.join('/'));
+        for (String pkg : path.getPackage()) {
+            builder.append(pkg);
+            builder.append('/');
+        }
+        builder.append(path.getName());
         builder.append(';');
         return builder.toString();
     }
