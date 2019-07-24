@@ -30,6 +30,10 @@ import java.util.Optional;
 public class DexInsnVisitor<I, R> {
     private final DexInsnVisitor<I, R> iv;
 
+    public DexInsnVisitor() {
+        this(null);
+    }
+
     public DexInsnVisitor(DexInsnVisitor<I, R> iv) {
         this.iv = iv;
     }
