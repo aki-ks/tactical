@@ -1,10 +1,12 @@
 package me.aki.tactical.conversion.smalidex;
 
-import me.aki.tactical.core.Method;
-import me.aki.tactical.core.MethodDescriptor;
-import me.aki.tactical.core.Path;
+import me.aki.tactical.core.*;
 import me.aki.tactical.core.type.*;
+import org.jf.dexlib2.iface.reference.FieldReference;
 import org.jf.dexlib2.iface.reference.MethodProtoReference;
+import org.jf.dexlib2.iface.reference.MethodReference;
+import org.jf.dexlib2.immutable.reference.ImmutableFieldReference;
+import org.jf.dexlib2.immutable.reference.ImmutableMethodReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,5 +186,26 @@ public class DexUtils {
         } else {
             throw new AssertionError();
         }
+    }
+
+    public static FieldReference convertFieldRef(FieldRef fieldRef) {
+        String definingClass = DexUtils.toObjectDescriptor(fieldRef.getOwner());
+        String type = DexUtils.toDexType(fieldRef.getType());
+        return new ImmutableFieldReference(definingClass, fieldRef.getName(), type);
+    }
+
+    public static MethodReference convertMethodRef(MethodRef methodRef) {
+        String definingClass = DexUtils.toObjectDescriptor(methodRef.getOwner());
+        String name = methodRef.getName();
+        String returnType = DexUtils.toDexReturnType(methodRef.getReturnType());
+        List<String> parameters = methodRef.getArguments().stream()
+                .map(DexUtils::toDexType)
+                .collect(Collectors.toList());
+
+        return new ImmutableMethodReference(definingClass, name, parameters, returnType);
+    }
+
+    public static <T> T unreachable() {
+        throw new RuntimeException();
     }
 }

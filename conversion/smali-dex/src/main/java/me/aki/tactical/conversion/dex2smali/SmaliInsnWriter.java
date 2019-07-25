@@ -1,11 +1,12 @@
 package me.aki.tactical.conversion.dex2smali;
 
+import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.*;
-import me.aki.tactical.core.handle.Handle;
+import me.aki.tactical.core.handle.*;
 import me.aki.tactical.core.type.*;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DetailedDexType;
@@ -13,19 +14,21 @@ import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
+import org.jf.dexlib2.MethodHandleType;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.Instruction;
+import org.jf.dexlib2.iface.reference.*;
 import org.jf.dexlib2.immutable.instruction.*;
-import org.jf.dexlib2.immutable.reference.ImmutableStringReference;
+import org.jf.dexlib2.immutable.reference.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Instruction, Register> {
     // Since dexlib instructions are immutable, we use RWCells and replace their content to mutate instructions.
     private List<RWCell<Instruction>> instructions = new ArrayList<>();
+
+    private Map<me.aki.tactical.dex.insn.Instruction, Set<RWCell<Integer>>> insnRefs = new HashMap<>();
 
     private void visitInstruction(Instruction insn) {
         visitInstruction(RWCell.of(insn, Instruction.class));
@@ -50,12 +53,62 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     private void registerInsnRef(me.aki.tactical.dex.insn.Instruction insn, RWCell<Integer> cell) {
-
+        this.insnRefs.computeIfAbsent(insn, x -> new HashSet<>()).add(cell);
     }
 
     @Override
-    public void visitConstant(DexConstant constant, Integer target) {
-        super.visitConstant(constant, target);
+    public void visitConstant(DexConstant constant, Register target) {
+        if (constant instanceof ClassConstant) {
+            RefType classConstant = ((ClassConstant) constant).getValue();
+            String type = DexUtils.toDexType(classConstant);
+            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_CLASS, convertRegister(target), new ImmutableTypeReference(type)));
+        } else if (constant instanceof DexNumberConstant) {
+            throw new RuntimeException("NOT YET IMPLEMENTED");
+        } else if (constant instanceof HandleConstant) {
+            MethodHandleReference reference = convertMethodHandle(((HandleConstant) constant).getHandle());
+            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_METHOD_HANDLE, convertRegister(target), reference));
+        } else if (constant instanceof MethodTypeConstant) {
+            MethodTypeConstant methodType = (MethodTypeConstant) constant;
+            String returnType = DexUtils.toDexReturnType(methodType.getReturnType());
+            List<String> parameters = methodType.getArgumentTypes().stream()
+                    .map(DexUtils::toDexType)
+                    .collect(Collectors.toList());
+
+            MethodProtoReference proto = new ImmutableMethodProtoReference(parameters, returnType);
+            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_METHOD_TYPE, convertRegister(target), proto));
+        } else if (constant instanceof StringConstant) {
+            String string = ((StringConstant) constant).getValue();
+            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_STRING, convertRegister(target), new ImmutableStringReference(string)));
+        } else {
+            DexUtils.unreachable();
+        }
+    }
+
+    private MethodHandleReference convertMethodHandle(Handle handle) {
+        int type = match(handle, new HandleMatch<>() {
+            public Integer caseGetFieldHandle(GetFieldHandle handle) { return MethodHandleType.INSTANCE_GET; }
+            public Integer caseSetFieldHandle(SetFieldHandle handle) { return MethodHandleType.INSTANCE_PUT; }
+            public Integer caseGetStaticHandle(GetStaticHandle handle) { return MethodHandleType.STATIC_GET; }
+            public Integer caseSetStaticHandle(SetStaticHandle handle) { return MethodHandleType.STATIC_PUT; }
+
+            public Integer caseInvokeStaticHandle(InvokeStaticHandle handle) { return MethodHandleType.INVOKE_STATIC; }
+            public Integer caseInvokeInterfaceHandle(InvokeInterfaceHandle handle) { return MethodHandleType.INVOKE_INTERFACE; }
+            public Integer caseInvokeSpecialHandle(InvokeSpecialHandle handle) { return MethodHandleType.INVOKE_DIRECT; }
+            public Integer caseInvokeVirtualHandle(InvokeVirtualHandle handle) { return MethodHandleType.INVOKE_INSTANCE; }
+            public Integer caseNewInstanceHandle(NewInstanceHandle handle) { return MethodHandleType.INVOKE_CONSTRUCTOR; }
+        });
+
+        if (handle instanceof FieldHandle) {
+            FieldHandle fh = (FieldHandle) handle;
+            FieldReference fieldRef = DexUtils.convertFieldRef(fh.getFieldRef());
+            return new ImmutableMethodHandleReference(type, fieldRef);
+        } else if (handle instanceof MethodHandle) {
+            MethodHandle mh = (MethodHandle) handle;
+            MethodReference methodRef = DexUtils.convertMethodRef(mh.getMethodRef());
+            return new ImmutableMethodHandleReference(type, methodRef);
+        } else {
+            return DexUtils.unreachable();
+        }
     }
 
     // MATH //
@@ -539,7 +592,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             case LESS_EQUAL: return Opcode.IF_LE;
             case GREATER_THAN: return Opcode.IF_GT;
             case GREATER_EQUAL: return Opcode.IF_GE;
-            default: throw new AssertionError();
+            default: return DexUtils.unreachable();
         }
     }
 
@@ -551,7 +604,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             case LESS_EQUAL: return Opcode.IF_LEZ;
             case GREATER_THAN: return Opcode.IF_GTZ;
             case GREATER_EQUAL: return Opcode.IF_GEZ;
-            default: throw new AssertionError();
+            default: return DexUtils.unreachable();
         }
     }
 
@@ -674,6 +727,16 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     // UTILS //
 
+    private <T> T match(RefType type, RATypeMatch<T> matcher) {
+        if (type instanceof ObjectType) {
+            return matcher.caseObject((ObjectType) type);
+        } else if (type instanceof ArrayType) {
+            return matcher.caseArray((ArrayType) type);
+        } else {
+            return DexUtils.unreachable();
+        }
+    }
+
     private <T> T match(PrimitiveType type, ILFDTypeMatch<T> matcher) {
         if (type instanceof IntLikeType) {
             return matcher.caseIntLike((IntLikeType) type);
@@ -684,7 +747,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         } else if (type instanceof DoubleType) {
             return matcher.caseDouble();
         } else {
-            throw new AssertionError();
+            return DexUtils.unreachable();
         }
     }
 
@@ -694,8 +757,45 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         } else if (type instanceof LongType) {
             return matcher.caseLong();
         } else {
-            throw new AssertionError();
+            return DexUtils.unreachable();
         }
+    }
+
+    private <T> T match(Handle handle, HandleMatch<T> matcher) {
+        if (handle instanceof FieldHandle) {
+            if (handle instanceof GetFieldHandle) {
+                return matcher.caseGetFieldHandle((GetFieldHandle) handle);
+            } else if (handle instanceof SetFieldHandle) {
+                return matcher.caseSetFieldHandle((SetFieldHandle) handle);
+            } else if (handle instanceof GetStaticHandle) {
+                return matcher.caseGetStaticHandle((GetStaticHandle) handle);
+            } else if (handle instanceof SetStaticHandle) {
+                return matcher.caseSetStaticHandle((SetStaticHandle) handle);
+            } else {
+                return DexUtils.unreachable();
+            }
+        } else if(handle instanceof MethodHandle) {
+            if (handle instanceof InvokeStaticHandle) {
+                return matcher.caseInvokeStaticHandle((InvokeStaticHandle) handle);
+            } else if (handle instanceof InvokeInterfaceHandle) {
+                return matcher.caseInvokeInterfaceHandle((InvokeInterfaceHandle) handle);
+            } else if (handle instanceof InvokeSpecialHandle) {
+                return matcher.caseInvokeSpecialHandle((InvokeSpecialHandle) handle);
+            } else if (handle instanceof InvokeVirtualHandle) {
+                return matcher.caseInvokeVirtualHandle((InvokeVirtualHandle) handle);
+            } else if (handle instanceof NewInstanceHandle) {
+                return matcher.caseNewInstanceHandle((NewInstanceHandle) handle);
+            } else {
+                return DexUtils.unreachable();
+            }
+        } else {
+            return DexUtils.unreachable();
+        }
+    }
+
+    interface RATypeMatch<T> {
+        T caseArray(ArrayType type);
+        T caseObject(ObjectType type);
     }
 
     interface ILTypeMatch<T> {
@@ -708,5 +808,18 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         T caseLong();
         T caseFloat();
         T caseDouble();
+    }
+
+    interface HandleMatch<T> {
+        T caseGetFieldHandle(GetFieldHandle handle);
+        T caseSetFieldHandle(SetFieldHandle handle);
+        T caseGetStaticHandle(GetStaticHandle handle);
+        T caseSetStaticHandle(SetStaticHandle handle);
+
+        T caseInvokeStaticHandle(InvokeStaticHandle handle);
+        T caseInvokeInterfaceHandle(InvokeInterfaceHandle handle);
+        T caseInvokeSpecialHandle(InvokeSpecialHandle handle);
+        T caseInvokeVirtualHandle(InvokeVirtualHandle handle);
+        T caseNewInstanceHandle(NewInstanceHandle handle);
     }
 }

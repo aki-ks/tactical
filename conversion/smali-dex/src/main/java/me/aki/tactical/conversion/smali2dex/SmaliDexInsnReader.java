@@ -612,7 +612,7 @@ public class SmaliDexInsnReader {
                 Instruction21c insn = (Instruction21c) instruction;
                 MethodHandleReference reference = (MethodHandleReference) insn.getReference();
                 Handle handle = convertMethodHandle(reference);
-                iv.visitConstant(new HandleConstant(handle), insn.getRegisterA();
+                iv.visitConstant(new HandleConstant(handle), insn.getRegisterA());
                 break;
             }
 
