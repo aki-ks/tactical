@@ -608,9 +608,21 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case CONST_METHOD_HANDLE:
-            case CONST_METHOD_TYPE:
-                throw new RuntimeException("NOT YET IMPLEMENTED");
+            case CONST_METHOD_HANDLE: {
+                Instruction21c insn = (Instruction21c) instruction;
+                MethodHandleReference reference = (MethodHandleReference) insn.getReference();
+                Handle handle = convertMethodHandle(reference);
+                iv.visitConstant(new HandleConstant(handle), insn.getRegisterA();
+                break;
+            }
+
+            case CONST_METHOD_TYPE: {
+                Instruction21c insn = (Instruction21c) instruction;
+                MethodProtoReference proto = (MethodProtoReference) insn.getReference();
+                MethodDescriptor descriptor = DexUtils.convertMethodDescriptor(proto);
+                iv.visitConstant(new MethodTypeConstant(descriptor), insn.getRegisterA());
+                break;
+            }
 
             // PAYLOAD //
 
