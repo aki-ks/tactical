@@ -460,17 +460,27 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitCmp(Register op1, Register op2, Register result) {
-        super.visitCmp(op1, op2, result);
+        visitInstruction(new ImmutableInstruction23x(Opcode.CMP_LONG, convertRegister(result), convertRegister(op1), convertRegister(op2)));
     }
 
     @Override
     public void visitCmpl(PrimitiveType type, Register op1, Register op2, Register result) {
-        super.visitCmpl(type, op1, op2, result);
+        Opcode opcode = match(type, new FDTypeMatch<>() {
+            public Opcode caseFloat() { return Opcode.CMPL_FLOAT; }
+            public Opcode caseDouble() { return Opcode.CMPL_DOUBLE; }
+        });
+
+        visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
     }
 
     @Override
     public void visitCmpg(PrimitiveType type, Register op1, Register op2, Register result) {
-        super.visitCmpg(type, op1, op2, result);
+        Opcode opcode = match(type, new FDTypeMatch<>() {
+            public Opcode caseFloat() { return Opcode.CMPG_FLOAT; }
+            public Opcode caseDouble() { return Opcode.CMPG_DOUBLE; }
+        });
+
+        visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
     }
 
     @Override
@@ -788,6 +798,26 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
+    private <T> T match(PrimitiveType type, ILTypeMatch<T> matcher) {
+        if (type instanceof IntLikeType) {
+            return matcher.caseIntLike((IntLikeType) type);
+        } else if (type instanceof LongType) {
+            return matcher.caseLong();
+        } else {
+            return DexUtils.unreachable();
+        }
+    }
+
+    private <T> T match(PrimitiveType type, FDTypeMatch<T> matcher) {
+        if (type instanceof FloatType) {
+            return matcher.caseFloat();
+        } else if (type instanceof DoubleType) {
+            return matcher.caseDouble();
+        } else {
+            return DexUtils.unreachable();
+        }
+    }
+
     private <T> T match(PrimitiveType type, ILFDTypeMatch<T> matcher) {
         if (type instanceof IntLikeType) {
             return matcher.caseIntLike((IntLikeType) type);
@@ -797,16 +827,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             return matcher.caseFloat();
         } else if (type instanceof DoubleType) {
             return matcher.caseDouble();
-        } else {
-            return DexUtils.unreachable();
-        }
-    }
-
-    private <T> T match(PrimitiveType type, ILTypeMatch<T> matcher) {
-        if (type instanceof IntLikeType) {
-            return matcher.caseIntLike((IntLikeType) type);
-        } else if (type instanceof LongType) {
-            return matcher.caseLong();
         } else {
             return DexUtils.unreachable();
         }
@@ -852,6 +872,11 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     interface ILTypeMatch<T> {
         T caseIntLike(IntLikeType type);
         T caseLong();
+    }
+
+    public interface FDTypeMatch<T> {
+        T caseFloat();
+        T caseDouble();
     }
 
     interface ILFDTypeMatch<T> {
