@@ -1,6 +1,8 @@
 package me.aki.tactical.dex;
 
 import me.aki.tactical.core.Body;
+import me.aki.tactical.core.util.InsertList;
+import me.aki.tactical.core.util.LinkedInsertList;
 import me.aki.tactical.dex.insn.Instruction;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class DexBody implements Body {
     /**
      * All instructions of this method.
      */
-    private List<Instruction> instructions;
+    private InsertList<Instruction> instructions;
 
     /**
      * The try/catch blocks of this method that catch and handle exceptions.
@@ -35,11 +37,11 @@ public class DexBody implements Body {
     private List<TryCatchBlock> tryCatchBlocks;
 
     public DexBody() {
-        this(new ArrayList<>(), Optional.empty(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this(new ArrayList<>(), Optional.empty(), new ArrayList<>(), new LinkedInsertList<>(), new ArrayList<>());
     }
 
     public DexBody(List<Register> registers, Optional<Register> thisRegister, List<Register> parameterRegisters,
-                   List<Instruction> instructions, List<TryCatchBlock> tryCatchBlocks) {
+                   InsertList<Instruction> instructions, List<TryCatchBlock> tryCatchBlocks) {
         this.registers = registers;
         this.thisRegister = thisRegister;
         this.parameterRegisters = parameterRegisters;
@@ -71,11 +73,11 @@ public class DexBody implements Body {
         this.parameterRegisters = parameterRegisters;
     }
 
-    public List<Instruction> getInstructions() {
+    public InsertList<Instruction> getInstructions() {
         return instructions;
     }
 
-    public void setInstructions(List<Instruction> instructions) {
+    public void setInstructions(InsertList<Instruction> instructions) {
         this.instructions = instructions;
     }
 
