@@ -9,7 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Compare a value from a register against a branch table and jump to the found or a default value.
+ * Compare a value from a register against a branch table and jump to the found or
+ * continue execution if no branch target ist defined for the value.
  *
  * This instruction represents the <tt>sparse-switch</tt> and <tt>packed-switch</tt> opcodes.
  */
@@ -20,7 +21,7 @@ public class SwitchInstruction implements BranchInstruction {
     private Register value;
 
     /**
-     * Map certain values to branch locations.
+     * Map constants to branch locations.
      */
     private LinkedHashMap<Integer, Instruction> branchTable;
 
