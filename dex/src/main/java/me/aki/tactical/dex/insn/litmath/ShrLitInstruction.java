@@ -12,7 +12,7 @@ import me.aki.tactical.dex.Register;
  * @see UShrLitInstruction for a bitwise shift that does not preserve the sign.
  */
 public class ShrLitInstruction extends AbstractBinaryLitMathInstruction {
-    public ShrLitInstruction(Register op1, int op2, Register result) {
+    public ShrLitInstruction(Register op1, short op2, Register result) {
         super(op1, op2, result);
     }
 }

@@ -172,57 +172,57 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitLitAdd(R op1, int literal, R result) {
+    public void visitLitAdd(R op1, short literal, R result) {
         visitInstruction(new AddLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitRSub(R op1, int literal, R result) {
+    public void visitLitRSub(R op1, short literal, R result) {
         visitInstruction(new RSubLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitMul(R op1, int literal, R result) {
+    public void visitLitMul(R op1, short literal, R result) {
         visitInstruction(new MulLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitDiv(R op1, int literal, R result) {
+    public void visitLitDiv(R op1, short literal, R result) {
         visitInstruction(new DivLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitMod(R op1, int literal, R result) {
+    public void visitLitMod(R op1, short literal, R result) {
         visitInstruction(new ModLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitAnd(R op1, int literal, R result) {
+    public void visitLitAnd(R op1, short literal, R result) {
         visitInstruction(new AndLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitOr(R op1, int literal, R result) {
+    public void visitLitOr(R op1, short literal, R result) {
         visitInstruction(new OrLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitXor(R op1, int literal, R result) {
+    public void visitLitXor(R op1, short literal, R result) {
         visitInstruction(new XorLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitShl(R op1, int literal, R result) {
+    public void visitLitShl(R op1, short literal, R result) {
         visitInstruction(new ShlLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitShr(R op1, int literal, R result) {
+    public void visitLitShr(R op1, short literal, R result) {
         visitInstruction(new ShrLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 
     @Override
-    public void visitLitUShr(R op1, int literal, R result) {
+    public void visitLitUShr(R op1, short literal, R result) {
         visitInstruction(new UShrLitInstruction(convertRegister(op1), literal, convertRegister(result)));
     }
 

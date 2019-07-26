@@ -10,7 +10,7 @@ import me.aki.tactical.dex.Register;
  * <code>result = op1 << op2;</code>
  */
 public class ShlLitInstruction extends AbstractBinaryLitMathInstruction {
-    public ShlLitInstruction(Register op1, int op2, Register result) {
+    public ShlLitInstruction(Register op1, short op2, Register result) {
         super(op1, op2, result);
     }
 }

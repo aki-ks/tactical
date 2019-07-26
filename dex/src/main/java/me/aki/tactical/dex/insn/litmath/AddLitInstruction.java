@@ -9,7 +9,7 @@ import me.aki.tactical.dex.Register;
  * <code>result = op1 + op2;</code>
  */
 public class AddLitInstruction extends AbstractBinaryLitMathInstruction {
-    public AddLitInstruction(Register op1, int op2, Register result) {
+    public AddLitInstruction(Register op1, short op2, Register result) {
         super(op1, op2, result);
     }
 }

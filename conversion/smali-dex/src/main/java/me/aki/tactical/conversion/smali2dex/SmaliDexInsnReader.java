@@ -568,7 +568,7 @@ public class SmaliDexInsnReader {
             case SHL_INT_LIT8:
             case SHR_INT_LIT8:
             case USHR_INT_LIT8: {
-                int literal = ((NarrowLiteralInstruction) instruction).getNarrowLiteral();
+                short literal = (short) ((NarrowLiteralInstruction) instruction).getNarrowLiteral();
                 TwoRegisterInstruction insn = (TwoRegisterInstruction) instruction;
                 visitLiteralMath(insn, literal);
                 break;
@@ -1070,7 +1070,7 @@ public class SmaliDexInsnReader {
         }
     }
 
-    private void visitLiteralMath(TwoRegisterInstruction insn, int literal) {
+    private void visitLiteralMath(TwoRegisterInstruction insn, short literal) {
         Integer op1 = insn.getRegisterB();
         Integer result = insn.getRegisterA();
 

@@ -18,14 +18,14 @@ public abstract class AbstractBinaryLitMathInstruction implements Instruction {
     /**
      * Second operator of the mathematical operation.
      */
-    private int op2;
+    private short op2;
 
     /**
      * The resulting value gets stored in this register.
      */
     private Register result;
 
-    public AbstractBinaryLitMathInstruction(Register op1, int op2, Register result) {
+    public AbstractBinaryLitMathInstruction(Register op1, short op2, Register result) {
         this.op1 = op1;
         this.op2 = op2;
         this.result = result;
@@ -39,11 +39,11 @@ public abstract class AbstractBinaryLitMathInstruction implements Instruction {
         this.op1 = op1;
     }
 
-    public int getOp2() {
+    public short getOp2() {
         return op2;
     }
 
-    public void setOp2(int op2) {
+    public void setOp2(short op2) {
         this.op2 = op2;
     }
 

@@ -102,67 +102,67 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitLitAdd(R op1, int literal, R result) {
+    public void visitLitAdd(R op1, short literal, R result) {
         super.visitLitAdd(op1, literal, result);
         System.out.println("visitLitAdd(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitRSub(R op1, int literal, R result) {
+    public void visitLitRSub(R op1, short literal, R result) {
         super.visitLitRSub(op1, literal, result);
         System.out.println("visitLitRSub(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitMul(R op1, int literal, R result) {
+    public void visitLitMul(R op1, short literal, R result) {
         super.visitLitMul(op1, literal, result);
         System.out.println("visitLitMul(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitDiv(R op1, int literal, R result) {
+    public void visitLitDiv(R op1, short literal, R result) {
         super.visitLitDiv(op1, literal, result);
         System.out.println("visitLitDiv(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitMod(R op1, int literal, R result) {
+    public void visitLitMod(R op1, short literal, R result) {
         super.visitLitMod(op1, literal, result);
         System.out.println("visitLitMod(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitAnd(R op1, int literal, R result) {
+    public void visitLitAnd(R op1, short literal, R result) {
         super.visitLitAnd(op1, literal, result);
         System.out.println("visitLitAnd(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitOr(R op1, int literal, R result) {
+    public void visitLitOr(R op1, short literal, R result) {
         super.visitLitOr(op1, literal, result);
         System.out.println("visitLitOr(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitXor(R op1, int literal, R result) {
+    public void visitLitXor(R op1, short literal, R result) {
         super.visitLitXor(op1, literal, result);
         System.out.println("visitLitXor(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitShl(R op1, int literal, R result) {
+    public void visitLitShl(R op1, short literal, R result) {
         super.visitLitShl(op1, literal, result);
         System.out.println("visitLitShl(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitShr(R op1, int literal, R result) {
+    public void visitLitShr(R op1, short literal, R result) {
         super.visitLitShr(op1, literal, result);
         System.out.println("visitLitShr(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
 
     @Override
-    public void visitLitUShr(R op1, int literal, R result) {
+    public void visitLitUShr(R op1, short literal, R result) {
         super.visitLitUShr(op1, literal, result);
         System.out.println("visitLitUShr(op1 = " + op1 + ", literal = " + literal + ", result = " + result + ")");
     }
