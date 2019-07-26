@@ -64,7 +64,27 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             String type = DexUtils.toDexType(classConstant);
             visitInstruction(new ImmutableInstruction21c(Opcode.CONST_CLASS, convertRegister(target), new ImmutableTypeReference(type)));
         } else if (constant instanceof DexNumberConstant) {
-            throw new RuntimeException("NOT YET IMPLEMENTED");
+            if (constant instanceof DexNumber32Constant) {
+                int literal = ((DexNumber32Constant) constant).intValue();
+                if (-8 <= literal && literal <= 7) {
+                    visitInstruction(new ImmutableInstruction11n(Opcode.CONST_4, convertRegister(target), literal));
+                } else if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
+                    visitInstruction(new ImmutableInstruction21s(Opcode.CONST_16, convertRegister(target), literal));
+                } else {
+                    visitInstruction(new ImmutableInstruction31i(Opcode.CONST, convertRegister(target), literal));
+                }
+            } else if (constant instanceof DexNumber64Constant) {
+                long literal = ((DexNumber64Constant) constant).longValue();
+                if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
+                    visitInstruction(new ImmutableInstruction21s(Opcode.CONST_WIDE_16, convertRegister(target), (int) literal));
+                } else if (Integer.MIN_VALUE <= literal && literal <= Integer.MAX_VALUE) {
+                    visitInstruction(new ImmutableInstruction31i(Opcode.CONST_WIDE_32, convertRegister(target), (int) literal));
+                } else {
+                    visitInstruction(new ImmutableInstruction51l(Opcode.CONST_WIDE, convertRegister(target), literal));
+                }
+            } else {
+                DexUtils.unreachable();
+            }
         } else if (constant instanceof HandleConstant) {
             MethodHandleReference reference = convertMethodHandle(((HandleConstant) constant).getHandle());
             visitInstruction(new ImmutableInstruction21c(Opcode.CONST_METHOD_HANDLE, convertRegister(target), reference));
