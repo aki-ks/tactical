@@ -1,6 +1,5 @@
 package me.aki.tactical.dex.insn;
 
-import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -18,9 +17,9 @@ public class FillArrayInstruction implements Instruction {
     /**
      * The numbers that should be stored in the array.
      */
-    private List<DexNumberConstant> values;
+    private List<NumbericConstant> values;
 
-    public FillArrayInstruction(Register array, List<DexNumberConstant> values) {
+    public FillArrayInstruction(Register array, List<NumbericConstant> values) {
         this.array = array;
         this.values = values;
     }
@@ -33,11 +32,11 @@ public class FillArrayInstruction implements Instruction {
         this.array = array;
     }
 
-    public List<DexNumberConstant> getValues() {
+    public List<NumbericConstant> getValues() {
         return values;
     }
 
-    public void setValues(List<DexNumberConstant> values) {
+    public void setValues(List<NumbericConstant> values) {
         this.values = values;
     }
 
@@ -49,5 +48,54 @@ public class FillArrayInstruction implements Instruction {
     @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.empty();
+    }
+
+    /**
+     * A numeric constant of int, long, float or double type.
+     */
+    public static class NumbericConstant {
+        private long value;
+
+        public NumbericConstant(int value) {
+            this.value = value;
+        }
+
+        public NumbericConstant(long value) {
+            this.value = value;
+        }
+
+        public NumbericConstant(float value) {
+            this.value = Float.floatToRawIntBits(value);
+        }
+
+        public NumbericConstant(double value) {
+            this.value = Double.doubleToLongBits(value);
+        }
+
+        public int intValue() {
+            return (int) value;
+        }
+
+        public long longValue() {
+            return value;
+        }
+
+        public float floatValue() {
+            return Float.intBitsToFloat((int) value);
+        }
+
+        public double doubleValue() {
+            return Double.longBitsToDouble(value);
+        }
+
+        @Override
+        public String toString() {
+            return NumbericConstant.class.getSimpleName() + '{' +
+                    "intValue()=" + intValue() +
+                    ", longValue()=" + longValue() +
+                    ", floatValue()=" + floatValue() +
+                    ", doubleValue()=" + doubleValue() +
+                    '}';
+        }
     }
 }

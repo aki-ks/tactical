@@ -13,9 +13,9 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
+import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.insn.Instruction;
-import me.aki.tactical.dex.invoke.Invoke;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -232,7 +232,7 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitFillArray(R array, List<DexNumberConstant> values) {
+    public void visitFillArray(R array, List<FillArrayInstruction.NumbericConstant> values) {
         if (iv != null) {
             iv.visitFillArray(array, values);
         }

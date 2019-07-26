@@ -12,6 +12,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.Register;
+import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.MethodHandleType;
@@ -438,7 +439,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     @Override
-    public void visitFillArray(Register array, List<DexNumberConstant> values) {
+    public void visitFillArray(Register array, List<FillArrayInstruction.NumbericConstant> values) {
         super.visitFillArray(array, values);
     }
 

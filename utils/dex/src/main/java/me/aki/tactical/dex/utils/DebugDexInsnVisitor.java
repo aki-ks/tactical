@@ -13,6 +13,7 @@ import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
+import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 
 import java.util.LinkedHashMap;
@@ -215,7 +216,7 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitFillArray(R array, List<DexNumberConstant> values) {
+    public void visitFillArray(R array, List<FillArrayInstruction.NumbericConstant> values) {
         super.visitFillArray(array, values);
         System.out.println("visitFillArray(array = " + array + ", values = " + values + ")");
     }

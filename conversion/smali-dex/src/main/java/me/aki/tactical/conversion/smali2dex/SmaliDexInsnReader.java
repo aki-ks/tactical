@@ -10,6 +10,7 @@ import me.aki.tactical.core.handle.*;
 import me.aki.tactical.core.type.*;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
+import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
 import org.jf.dexlib2.MethodHandleType;
@@ -115,42 +116,42 @@ public class SmaliDexInsnReader {
 
             case CONST_4: {
                 Instruction11n insn = (Instruction11n) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber32Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST_16: {
                 Instruction21s insn = (Instruction21s) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber32Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST: {
                 Instruction31i insn = (Instruction31i) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber32Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST_HIGH16: {
                 Instruction21ih insn = (Instruction21ih) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber32Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST_WIDE_16: {
                 Instruction21s insn = (Instruction21s) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber64Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST_WIDE_32: {
                 Instruction31i insn = (Instruction31i) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber64Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST_WIDE: {
                 Instruction51l insn = (Instruction51l) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber64Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST_WIDE_HIGH16: {
                 Instruction21lh insn = (Instruction21lh) instruction;
-                iv.visitConstant(new DexNumberConstant(insn.getWideLiteral()), insn.getRegisterA());
+                iv.visitConstant(new DexNumber64Constant(insn.getWideLiteral()), insn.getRegisterA());
                 break;
             }
             case CONST_STRING: {
@@ -251,9 +252,9 @@ public class SmaliDexInsnReader {
                 Instruction31t insn = (Instruction31t) instruction;
                 ArrayPayload payload = (ArrayPayload) insnIndex.getOffsetInstruction(insn, insn.getCodeOffset());
 
-                List<DexNumberConstant> numbers = payload.getArrayElements().stream()
+                List<FillArrayInstruction.NumbericConstant> numbers = payload.getArrayElements().stream()
                         .map(Number::longValue)
-                        .map(DexNumberConstant::new)
+                        .map(FillArrayInstruction.NumbericConstant::new)
                         .collect(Collectors.toList());
 
                 iv.visitFillArray(insn.getRegisterA(), numbers);

@@ -267,7 +267,7 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitFillArray(R array, List<DexNumberConstant> values) {
+    public void visitFillArray(R array, List<FillArrayInstruction.NumbericConstant> values) {
         visitInstruction(new FillArrayInstruction(convertRegister(array), values));
     }
 
