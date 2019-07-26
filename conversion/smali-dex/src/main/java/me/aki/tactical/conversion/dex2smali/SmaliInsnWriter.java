@@ -438,12 +438,24 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitNeg(PrimitiveType type, Register value, Register result) {
-        super.visitNeg(type, value, result);
+        Opcode opcode = match(type, new ILFDTypeMatch<>() {
+            public Opcode caseIntLike(IntLikeType type) { return Opcode.NEG_INT; }
+            public Opcode caseLong() { return Opcode.NEG_LONG; }
+            public Opcode caseFloat() { return Opcode.NEG_FLOAT; }
+            public Opcode caseDouble() { return Opcode.NEG_DOUBLE; }
+        });
+
+        visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(result), convertRegister(value)));
     }
 
     @Override
     public void visitNot(PrimitiveType type, Register value, Register result) {
-        super.visitNot(type, value, result);
+        Opcode opcode = match(type, new ILTypeMatch<>() {
+            public Opcode caseIntLike(IntLikeType type) { return Opcode.NOT_INT; }
+            public Opcode caseLong() { return Opcode.NOT_LONG; }
+        });
+
+        visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(result), convertRegister(value)));
     }
 
     @Override
