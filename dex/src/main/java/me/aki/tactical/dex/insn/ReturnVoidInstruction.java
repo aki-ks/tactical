@@ -20,4 +20,9 @@ public class ReturnVoidInstruction implements Instruction {
     public Optional<Register> getWrittenRegister() {
         return Optional.empty();
     }
+
+    @Override
+    public boolean continuesExecution() {
+        return false;
+    }
 }

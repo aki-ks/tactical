@@ -15,4 +15,11 @@ public interface Instruction {
      * Get the register that this instruction writes to.
      */
     Optional<Register> getWrittenRegister();
+
+    /**
+     * Is the succeeding instruction reachable from this insn.
+     */
+    default boolean continuesExecution() {
+        return true;
+    }
 }
