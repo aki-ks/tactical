@@ -11,7 +11,7 @@ import java.util.Optional;
  */
 public class ConstInstruction implements Instruction {
     /**
-     * The constant that this instruction writed into a register.
+     * The constant that this instruction written into the register.
      */
     private DexConstant constant;
 
@@ -48,6 +48,6 @@ public class ConstInstruction implements Instruction {
 
     @Override
     public Optional<Register> getWrittenRegister() {
-        return Optional.empty();
+        return Optional.of(register);
     }
 }
