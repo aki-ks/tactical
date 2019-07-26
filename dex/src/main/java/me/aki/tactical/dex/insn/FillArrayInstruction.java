@@ -2,6 +2,7 @@ package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.dex.Register;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,12 +16,18 @@ public class FillArrayInstruction implements Instruction {
     private Register array;
 
     /**
+     * The bytes size of values in the array.
+     */
+    private NumberSize elementSize;
+
+    /**
      * The numbers that should be stored in the array.
      */
-    private List<NumbericConstant> values;
+    private List<NumericConstant> values;
 
-    public FillArrayInstruction(Register array, List<NumbericConstant> values) {
+    public FillArrayInstruction(Register array, NumberSize elementSize, List<NumericConstant> values) {
         this.array = array;
+        this.elementSize = elementSize;
         this.values = values;
     }
 
@@ -32,11 +39,19 @@ public class FillArrayInstruction implements Instruction {
         this.array = array;
     }
 
-    public List<NumbericConstant> getValues() {
+    public NumberSize getElementSize() {
+        return elementSize;
+    }
+
+    public void setElementSize(NumberSize elementSize) {
+        this.elementSize = elementSize;
+    }
+
+    public List<NumericConstant> getValues() {
         return values;
     }
 
-    public void setValues(List<NumbericConstant> values) {
+    public void setValues(List<NumericConstant> values) {
         this.values = values;
     }
 
@@ -50,25 +65,56 @@ public class FillArrayInstruction implements Instruction {
         return Optional.empty();
     }
 
+    public static enum NumberSize {
+        BYTE(1),   // 1 BYTE
+        SHORT(2),  // 2 bytes
+        INT(4),    // 4 bytes
+        LONG(8);    // 8 bytes
+
+        private final int byteSize;
+
+        NumberSize(int byteSize) {
+            this.byteSize = byteSize;
+        }
+
+        /**
+         * Get the size of this kind of numbers in bytes
+         * @return
+         */
+        public int getByteSize() {
+            return byteSize;
+        }
+
+        public static NumberSize fromByteSize(int bytesize) {
+            for (NumberSize value : values()) {
+                if (value.byteSize == bytesize) {
+                    return value;
+                }
+            }
+
+            throw new IllegalArgumentException("Expected 1, 2, 4 or 8, got " + bytesize);
+        }
+    }
+
     /**
      * A numeric constant of int, long, float or double type.
      */
-    public static class NumbericConstant {
+    public static class NumericConstant {
         private long value;
 
-        public NumbericConstant(int value) {
+        public NumericConstant(int value) {
             this.value = value;
         }
 
-        public NumbericConstant(long value) {
+        public NumericConstant(long value) {
             this.value = value;
         }
 
-        public NumbericConstant(float value) {
+        public NumericConstant(float value) {
             this.value = Float.floatToRawIntBits(value);
         }
 
-        public NumbericConstant(double value) {
+        public NumericConstant(double value) {
             this.value = Double.doubleToLongBits(value);
         }
 
@@ -81,16 +127,16 @@ public class FillArrayInstruction implements Instruction {
         }
 
         public float floatValue() {
-            return Float.intBitsToFloat((int) value);
+            return Float.intBitsToFloat(intValue());
         }
 
         public double doubleValue() {
-            return Double.longBitsToDouble(value);
+            return Double.longBitsToDouble(longValue());
         }
 
         @Override
         public String toString() {
-            return NumbericConstant.class.getSimpleName() + '{' +
+            return NumericConstant.class.getSimpleName() + '{' +
                     "intValue()=" + intValue() +
                     ", longValue()=" + longValue() +
                     ", floatValue()=" + floatValue() +

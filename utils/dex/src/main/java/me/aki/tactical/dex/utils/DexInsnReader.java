@@ -139,7 +139,7 @@ public class DexInsnReader {
             iv.visitFieldSet(fieldInsn.getField(), fieldInsn.getInstance(), fieldInsn.getValue());
         } else if (instruction instanceof FillArrayInstruction) {
             FillArrayInstruction fillInsn = (FillArrayInstruction) instruction;
-            iv.visitFillArray(fillInsn.getArray(), fillInsn.getValues());
+            iv.visitFillArray(fillInsn.getArray(), fillInsn.getElementSize(), fillInsn.getValues());
         } else if (instruction instanceof InstanceOfInstruction) {
             InstanceOfInstruction instanceOfInsn = (InstanceOfInstruction) instruction;
             iv.visitInstanceOf(instanceOfInsn.getType(), instanceOfInsn.getValue(),instanceOfInsn.getResult());

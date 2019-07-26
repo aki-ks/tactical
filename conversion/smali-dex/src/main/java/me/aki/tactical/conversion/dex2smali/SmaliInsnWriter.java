@@ -29,7 +29,10 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     // Since dexlib instructions are immutable, we use RWCells and replace their content to mutate instructions.
     private List<RWCell<Instruction>> instructions = new ArrayList<>();
 
+    private List<RWCell<Instruction>> payloadInstructions = new ArrayList<>();
+
     private Map<me.aki.tactical.dex.insn.Instruction, Set<RWCell<Integer>>> insnRefs = new HashMap<>();
+    private List<OffsetInsnRef> offsetInsnRefs = new ArrayList<>();
 
     private void visitInstruction(Instruction insn) {
         visitInstruction(RWCell.of(insn, Instruction.class));
@@ -49,12 +52,26 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         return instructions;
     }
 
+    public List<RWCell<Instruction>> getPayloadInstructions() {
+        return payloadInstructions;
+    }
+
+    public List<RWCell<Instruction>> popPayloadInstructions() {
+        List<RWCell<Instruction>> instructions = this.payloadInstructions;
+        this.payloadInstructions = new ArrayList<>();
+        return instructions;
+    }
+
     private Integer convertRegister(Register register) {
         throw new RuntimeException("NOT YET IMPLEMENTED");
     }
 
     private void registerInsnRef(me.aki.tactical.dex.insn.Instruction insn, RWCell<Integer> cell) {
         this.insnRefs.computeIfAbsent(insn, x -> new HashSet<>()).add(cell);
+    }
+
+    private void registerOffsetInsnRef(RWCell<Instruction> relativeTo, RWCell<Instruction> target, RWCell<Integer> offsetCell) {
+        this.offsetInsnRefs.add(new OffsetInsnRef(relativeTo, target, offsetCell));
     }
 
     @Override
@@ -527,18 +544,39 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     @Override
-    public void visitFillArray(Register array, List<FillArrayInstruction.NumbericConstant> values) {
-        super.visitFillArray(array, values);
+    public void visitFillArray(Register array, FillArrayInstruction.NumberSize elementSize, List<FillArrayInstruction.NumericConstant> values) {
+        Insn31tCell insnCell = new Insn31tCell(Opcode.FILL_ARRAY_DATA, convertRegister(array));
+
+        List<Number> numbers = values.stream().map(FillArrayInstruction.NumericConstant::longValue).collect(Collectors.toList());
+        RWCell<Instruction> arrayPayload = RWCell.of(new ImmutableArrayPayload(elementSize.getByteSize(), numbers), Instruction.class);
+
+        registerOffsetInsnRef(insnCell, arrayPayload, insnCell.getOffsetCell());
+        this.payloadInstructions.add(arrayPayload);
     }
 
     @Override
     public void visitNewArray(ArrayType type, Register size, Register result) {
-        super.visitNewArray(type, size, result);
+        TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
+        visitInstruction(new ImmutableInstruction22c(Opcode.NEW_ARRAY, convertRegister(result), convertRegister(size), typeRef));
     }
 
     @Override
     public void visitNewFilledArray(ArrayType type, List<Register> registers) {
-        super.visitNewFilledArray(type, registers);
+        TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
+
+        int registerCount = registers.size();
+        if (registerCount <= 5) {
+            Iterator<Integer> registerIter = registers.stream().map(this::convertRegister).iterator();
+            int registerC = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerD = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerE = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerF = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerG = registerIter.hasNext() ? registerIter.next() : 0;
+            visitInstruction(new ImmutableInstruction35c(Opcode.FILLED_NEW_ARRAY, registerCount, registerC, registerD, registerE, registerF, registerG, typeRef));
+        } else {
+            //TODO The registers musts have indices that follow each other
+            throw new RuntimeException("Not Yet implemented");
+        }
     }
 
     @Override
@@ -748,6 +786,28 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
+    class Insn31tCell extends NonInitializedCell<Instruction> {
+        private final Opcode opcode;
+        private final int registerA;
+        private final RWCell<Integer> offsetCell = new InnerNonInitializedCell<>(Integer.class, this);
+
+        public Insn31tCell(Opcode opcode, int registerA) {
+            super(Instruction.class);
+            this.opcode = opcode;
+            this.registerA = registerA;
+        }
+
+        public RWCell<Integer> getOffsetCell() {
+            return offsetCell;
+        }
+
+        @Override
+        protected Instruction uninitializedValue() {
+            Integer offset = offsetCell.get();
+            return new ImmutableInstruction31t(opcode, registerA, offset);
+        }
+    }
+
     /**
      * A {@link NonInitializedCell} that denies write operation if another 'outer' {@link NonInitializedCell} has already been initialized.
      *
@@ -811,6 +871,41 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         public void set(T newValue) {
             this.value = newValue;
             this.isInitialized = true;
+        }
+    }
+
+    public class OffsetInsnRef {
+        /**
+         * The offset should be calculated relative to this instruction
+         */
+        private final RWCell<Instruction> relativeTo;
+
+        /**
+         * The offset cell should point at this instruction
+         */
+        private final RWCell<Instruction> target;
+
+        /**
+         * The cell containing the offset
+         */
+        private final RWCell<Integer> offsetCell;
+
+        public OffsetInsnRef(RWCell<Instruction> relativeTo, RWCell<Instruction> target, RWCell<Integer> offsetCell) {
+            this.relativeTo = relativeTo;
+            this.target = target;
+            this.offsetCell = offsetCell;
+        }
+
+        public RWCell<Instruction> getRelativeTo() {
+            return relativeTo;
+        }
+
+        public RWCell<Instruction> getTarget() {
+            return target;
+        }
+
+        public RWCell<Integer> getOffsetCell() {
+            return offsetCell;
         }
     }
 
@@ -911,7 +1006,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         T caseFloat();
         T caseDouble();
     }
-
 
     interface HandleMatch<T> {
         T caseGetFieldHandle(GetFieldHandle handle);

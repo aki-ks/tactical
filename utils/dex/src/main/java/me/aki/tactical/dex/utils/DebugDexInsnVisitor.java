@@ -6,7 +6,6 @@ import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.DexConstant;
-import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
@@ -216,9 +215,9 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitFillArray(R array, List<FillArrayInstruction.NumbericConstant> values) {
-        super.visitFillArray(array, values);
-        System.out.println("visitFillArray(array = " + array + ", values = " + values + ")");
+    public void visitFillArray(R array, FillArrayInstruction.NumberSize elementSize, List<FillArrayInstruction.NumericConstant> values) {
+        super.visitFillArray(array, elementSize, values);
+        System.out.println("visitFillArray(array = " + array + ", elementSize = " + elementSize + ", values = " + values + ")");
     }
 
     @Override

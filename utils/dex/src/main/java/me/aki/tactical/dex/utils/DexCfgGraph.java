@@ -17,6 +17,10 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
         this.body = body;
     }
 
+    public DexBody getBody() {
+        return body;
+    }
+
     @Override
     protected Instruction getHeadInsn() {
         return body.getInstructions().getFirst();

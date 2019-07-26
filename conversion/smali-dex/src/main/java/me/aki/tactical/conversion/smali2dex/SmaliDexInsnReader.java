@@ -251,13 +251,14 @@ public class SmaliDexInsnReader {
             case FILL_ARRAY_DATA: {
                 Instruction31t insn = (Instruction31t) instruction;
                 ArrayPayload payload = (ArrayPayload) insnIndex.getOffsetInstruction(insn, insn.getCodeOffset());
+                FillArrayInstruction.NumberSize elementSize = FillArrayInstruction.NumberSize.fromByteSize(payload.getElementWidth());
 
-                List<FillArrayInstruction.NumbericConstant> numbers = payload.getArrayElements().stream()
+                List<FillArrayInstruction.NumericConstant> numbers = payload.getArrayElements().stream()
                         .map(Number::longValue)
-                        .map(FillArrayInstruction.NumbericConstant::new)
+                        .map(FillArrayInstruction.NumericConstant::new)
                         .collect(Collectors.toList());
 
-                iv.visitFillArray(insn.getRegisterA(), numbers);
+                iv.visitFillArray(insn.getRegisterA(), elementSize, numbers);
                 break;
             }
 

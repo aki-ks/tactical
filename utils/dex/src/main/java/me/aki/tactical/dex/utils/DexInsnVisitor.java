@@ -6,7 +6,6 @@ import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.constant.DexConstant;
-import me.aki.tactical.core.constant.DexNumberConstant;
 import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
@@ -232,9 +231,9 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitFillArray(R array, List<FillArrayInstruction.NumbericConstant> values) {
+    public void visitFillArray(R array, FillArrayInstruction.NumberSize elementSize, List<FillArrayInstruction.NumericConstant> values) {
         if (iv != null) {
-            iv.visitFillArray(array, values);
+            iv.visitFillArray(array, elementSize, values);
         }
     }
 
