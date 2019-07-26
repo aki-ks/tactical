@@ -483,19 +483,47 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
     }
 
+    // ARRAY INSTRUCTIONS //
+
     @Override
     public void visitArrayLength(Register array, Register result) {
-        super.visitArrayLength(array, result);
+        visitInstruction(new ImmutableInstruction12x(Opcode.ARRAY_LENGTH, convertRegister(result), convertRegister(array)));
     }
 
     @Override
     public void visitArrayLoad(DetailedDexType type, Register array, Register index, Register result) {
-        super.visitArrayLoad(type, array, index, result);
+        visitInstruction(new ImmutableInstruction23x(getArrayLoadOpcode(type), convertRegister(result), convertRegister(array), convertRegister(index)));
+    }
+
+    private Opcode getArrayLoadOpcode(DetailedDexType type) {
+        switch (type) {
+            case BOOLEAN: return Opcode.AGET_BOOLEAN;
+            case BYTE: return Opcode.AGET_BYTE;
+            case SHORT: return Opcode.AGET_SHORT;
+            case CHAR: return Opcode.AGET_CHAR;
+            case NORMAL: return Opcode.AGET;
+            case OBJECT: return Opcode.AGET_OBJECT;
+            case WIDE: return Opcode.AGET_WIDE;
+            default: return DexUtils.unreachable();
+        }
     }
 
     @Override
     public void visitArrayStore(DetailedDexType type, Register array, Register index, Register value) {
-        super.visitArrayStore(type, array, index, value);
+        visitInstruction(new ImmutableInstruction23x(getArrayStoreOpcode(type), convertRegister(value), convertRegister(array), convertRegister(index)));
+    }
+
+    private Opcode getArrayStoreOpcode(DetailedDexType type) {
+        switch (type) {
+            case BOOLEAN: return Opcode.APUT_BOOLEAN;
+            case BYTE: return Opcode.APUT_BYTE;
+            case SHORT: return Opcode.APUT_SHORT;
+            case CHAR: return Opcode.APUT_CHAR;
+            case NORMAL: return Opcode.APUT;
+            case OBJECT: return Opcode.APUT_OBJECT;
+            case WIDE: return Opcode.APUT_WIDE;
+            default: return DexUtils.unreachable();
+        }
     }
 
     @Override
@@ -789,76 +817,63 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     // UTILS //
 
     private <T> T match(RefType type, RATypeMatch<T> matcher) {
-        if (type instanceof ObjectType) {
-            return matcher.caseObject((ObjectType) type);
-        } else if (type instanceof ArrayType) {
-            return matcher.caseArray((ArrayType) type);
-        } else {
-            return DexUtils.unreachable();
-        }
+        return type instanceof ObjectType ? matcher.caseObject((ObjectType) type) :
+                type instanceof ArrayType ? matcher.caseArray((ArrayType) type) :
+                DexUtils.unreachable();
     }
 
     private <T> T match(PrimitiveType type, ILTypeMatch<T> matcher) {
-        if (type instanceof IntLikeType) {
-            return matcher.caseIntLike((IntLikeType) type);
-        } else if (type instanceof LongType) {
-            return matcher.caseLong();
-        } else {
-            return DexUtils.unreachable();
-        }
+        return type instanceof IntLikeType ? matcher.caseIntLike((IntLikeType) type) :
+                type instanceof LongType ? matcher.caseLong() :
+                DexUtils.unreachable();
     }
 
     private <T> T match(PrimitiveType type, FDTypeMatch<T> matcher) {
-        if (type instanceof FloatType) {
-            return matcher.caseFloat();
-        } else if (type instanceof DoubleType) {
-            return matcher.caseDouble();
-        } else {
-            return DexUtils.unreachable();
-        }
+        return type instanceof FloatType ? matcher.caseFloat() :
+                type instanceof DoubleType ? matcher.caseDouble() :
+                DexUtils.unreachable();
     }
 
     private <T> T match(PrimitiveType type, ILFDTypeMatch<T> matcher) {
-        if (type instanceof IntLikeType) {
-            return matcher.caseIntLike((IntLikeType) type);
-        } else if (type instanceof LongType) {
-            return matcher.caseLong();
-        } else if (type instanceof FloatType) {
-            return matcher.caseFloat();
-        } else if (type instanceof DoubleType) {
-            return matcher.caseDouble();
-        } else {
-            return DexUtils.unreachable();
-        }
+        return type instanceof IntLikeType ? matcher.caseIntLike((IntLikeType) type) :
+                type instanceof LongType ? matcher.caseLong() :
+                type instanceof FloatType ? matcher.caseFloat() :
+                type instanceof DoubleType ? matcher.caseDouble() :
+                DexUtils.unreachable();
+    }
+
+    private <T> T match(PrimitiveType type, PrimitiveTypeMatch<T> matcher) {
+        return match(type, new ILFDTypeMatch<>() {
+            @Override
+            public T caseIntLike(IntLikeType type) {
+                return type instanceof BooleanType ? matcher.caseBoolean() :
+                        type instanceof ByteType ? matcher.caseByte() :
+                        type instanceof ShortType ? matcher.caseShort() :
+                        type instanceof CharType ? matcher.caseChar() :
+                        type instanceof IntType ? matcher.caseInt() :
+                        DexUtils.unreachable();
+            }
+
+            public T caseLong() { return matcher.caseLong(); }
+            public T caseFloat() { return matcher.caseFloat(); }
+            public T caseDouble() { return matcher.caseDouble(); }
+        });
     }
 
     private <T> T match(Handle handle, HandleMatch<T> matcher) {
         if (handle instanceof FieldHandle) {
-            if (handle instanceof GetFieldHandle) {
-                return matcher.caseGetFieldHandle((GetFieldHandle) handle);
-            } else if (handle instanceof SetFieldHandle) {
-                return matcher.caseSetFieldHandle((SetFieldHandle) handle);
-            } else if (handle instanceof GetStaticHandle) {
-                return matcher.caseGetStaticHandle((GetStaticHandle) handle);
-            } else if (handle instanceof SetStaticHandle) {
-                return matcher.caseSetStaticHandle((SetStaticHandle) handle);
-            } else {
-                return DexUtils.unreachable();
-            }
-        } else if(handle instanceof MethodHandle) {
-            if (handle instanceof InvokeStaticHandle) {
-                return matcher.caseInvokeStaticHandle((InvokeStaticHandle) handle);
-            } else if (handle instanceof InvokeInterfaceHandle) {
-                return matcher.caseInvokeInterfaceHandle((InvokeInterfaceHandle) handle);
-            } else if (handle instanceof InvokeSpecialHandle) {
-                return matcher.caseInvokeSpecialHandle((InvokeSpecialHandle) handle);
-            } else if (handle instanceof InvokeVirtualHandle) {
-                return matcher.caseInvokeVirtualHandle((InvokeVirtualHandle) handle);
-            } else if (handle instanceof NewInstanceHandle) {
-                return matcher.caseNewInstanceHandle((NewInstanceHandle) handle);
-            } else {
-                return DexUtils.unreachable();
-            }
+            return handle instanceof GetFieldHandle ? matcher.caseGetFieldHandle((GetFieldHandle) handle) :
+                    handle instanceof SetFieldHandle ? matcher.caseSetFieldHandle((SetFieldHandle) handle) :
+                    handle instanceof GetStaticHandle ? matcher.caseGetStaticHandle((GetStaticHandle) handle) :
+                    handle instanceof SetStaticHandle ? matcher.caseSetStaticHandle((SetStaticHandle) handle) :
+                    DexUtils.unreachable();
+        } else if (handle instanceof MethodHandle) {
+            return handle instanceof InvokeStaticHandle ? matcher.caseInvokeStaticHandle((InvokeStaticHandle) handle) :
+                    handle instanceof InvokeInterfaceHandle ? matcher.caseInvokeInterfaceHandle((InvokeInterfaceHandle) handle) :
+                    handle instanceof InvokeSpecialHandle ? matcher.caseInvokeSpecialHandle((InvokeSpecialHandle) handle) :
+                    handle instanceof InvokeVirtualHandle ? matcher.caseInvokeVirtualHandle((InvokeVirtualHandle) handle) :
+                    handle instanceof NewInstanceHandle ? matcher.caseNewInstanceHandle((NewInstanceHandle) handle) :
+                    DexUtils.unreachable();
         } else {
             return DexUtils.unreachable();
         }
@@ -885,6 +900,18 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         T caseFloat();
         T caseDouble();
     }
+
+    interface PrimitiveTypeMatch<T> {
+        T caseBoolean();
+        T caseByte();
+        T caseChar();
+        T caseShort();
+        T caseInt();
+        T caseLong();
+        T caseFloat();
+        T caseDouble();
+    }
+
 
     interface HandleMatch<T> {
         T caseGetFieldHandle(GetFieldHandle handle);
