@@ -371,59 +371,69 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
+    // LITERAL MATH //
+
     @Override
-    public void visitLitAdd(Register op1, int op2, Register result) {
-        super.visitLitAdd(op1, op2, result);
+    public void visitLitAdd(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.ADD_INT_LIT8, Opcode.ADD_INT_LIT16, op1, literal, result);
     }
 
     @Override
-    public void visitLitRSub(Register op1, int op2, Register result) {
-        super.visitLitRSub(op1, op2, result);
+    public void visitLitRSub(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.RSUB_INT_LIT8, Opcode.RSUB_INT, op1, literal, result);
     }
 
     @Override
-    public void visitLitMul(Register op1, int op2, Register result) {
-        super.visitLitMul(op1, op2, result);
+    public void visitLitMul(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.MUL_INT_LIT8, Opcode.MUL_INT_LIT16, op1, literal, result);
     }
 
     @Override
-    public void visitLitDiv(Register op1, int op2, Register result) {
-        super.visitLitDiv(op1, op2, result);
+    public void visitLitDiv(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.DIV_INT_LIT8, Opcode.DIV_INT_LIT16, op1, literal, result);
     }
 
     @Override
-    public void visitLitMod(Register op1, int op2, Register result) {
-        super.visitLitMod(op1, op2, result);
+    public void visitLitMod(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.REM_INT_LIT8, Opcode.REM_INT_LIT16, op1, literal, result);
     }
 
     @Override
-    public void visitLitAnd(Register op1, int op2, Register result) {
-        super.visitLitAnd(op1, op2, result);
+    public void visitLitAnd(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.AND_INT_LIT8, Opcode.AND_INT_LIT16, op1, literal, result);
     }
 
     @Override
-    public void visitLitOr(Register op1, int op2, Register result) {
-        super.visitLitOr(op1, op2, result);
+    public void visitLitOr(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.OR_INT_LIT8, Opcode.OR_INT_LIT16, op1, literal, result);
     }
 
     @Override
-    public void visitLitXor(Register op1, int op2, Register result) {
-        super.visitLitXor(op1, op2, result);
+    public void visitLitXor(Register op1, int literal, Register result) {
+        visitLiteralMathInsn(Opcode.XOR_INT_LIT8, Opcode.XOR_INT_LIT16, op1, literal, result);
+    }
+
+    private void visitLiteralMathInsn(Opcode lit8, Opcode lit16, Register op1, int literal, Register result) {
+        if (-128 <= literal && literal <= 127) {
+            visitInstruction(new ImmutableInstruction22b(lit8, convertRegister(result), convertRegister(op1), literal));
+        } else {
+            visitInstruction(new ImmutableInstruction22s(lit16, convertRegister(result), convertRegister(op1), literal));
+        }
     }
 
     @Override
-    public void visitLitShl(Register op1, int op2, Register result) {
-        super.visitLitShl(op1, op2, result);
+    public void visitLitShl(Register op1, int literal, Register result) {
+        visitInstruction(new ImmutableInstruction22b(Opcode.SHL_INT_LIT8, convertRegister(result), convertRegister(op1), literal));
     }
 
     @Override
-    public void visitLitShr(Register op1, int op2, Register result) {
-        super.visitLitShr(op1, op2, result);
+    public void visitLitShr(Register op1, int literal, Register result) {
+        visitInstruction(new ImmutableInstruction22b(Opcode.SHR_INT_LIT8, convertRegister(result), convertRegister(op1), literal));
     }
 
     @Override
-    public void visitLitUShr(Register op1, int op2, Register result) {
-        super.visitLitUShr(op1, op2, result);
+    public void visitLitUShr(Register op1, int literal, Register result) {
+        visitInstruction(new ImmutableInstruction22b(Opcode.USHR_INT_LIT8, convertRegister(result), convertRegister(op1), literal));
     }
 
     @Override
