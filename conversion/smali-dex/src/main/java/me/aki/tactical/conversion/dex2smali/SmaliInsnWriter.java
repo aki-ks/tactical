@@ -64,27 +64,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             String type = DexUtils.toDexType(classConstant);
             visitInstruction(new ImmutableInstruction21c(Opcode.CONST_CLASS, convertRegister(target), new ImmutableTypeReference(type)));
         } else if (constant instanceof DexNumberConstant) {
-            if (constant instanceof DexNumber32Constant) {
-                int literal = ((DexNumber32Constant) constant).intValue();
-                if (-8 <= literal && literal <= 7) {
-                    visitInstruction(new ImmutableInstruction11n(Opcode.CONST_4, convertRegister(target), literal));
-                } else if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
-                    visitInstruction(new ImmutableInstruction21s(Opcode.CONST_16, convertRegister(target), literal));
-                } else {
-                    visitInstruction(new ImmutableInstruction31i(Opcode.CONST, convertRegister(target), literal));
-                }
-            } else if (constant instanceof DexNumber64Constant) {
-                long literal = ((DexNumber64Constant) constant).longValue();
-                if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
-                    visitInstruction(new ImmutableInstruction21s(Opcode.CONST_WIDE_16, convertRegister(target), (int) literal));
-                } else if (Integer.MIN_VALUE <= literal && literal <= Integer.MAX_VALUE) {
-                    visitInstruction(new ImmutableInstruction31i(Opcode.CONST_WIDE_32, convertRegister(target), (int) literal));
-                } else {
-                    visitInstruction(new ImmutableInstruction51l(Opcode.CONST_WIDE, convertRegister(target), literal));
-                }
-            } else {
-                DexUtils.unreachable();
-            }
+            visitNumberConstant((DexNumberConstant) constant, target);
         } else if (constant instanceof HandleConstant) {
             MethodHandleReference reference = convertMethodHandle(((HandleConstant) constant).getHandle());
             visitInstruction(new ImmutableInstruction21c(Opcode.CONST_METHOD_HANDLE, convertRegister(target), reference));
@@ -100,6 +80,34 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         } else if (constant instanceof StringConstant) {
             String string = ((StringConstant) constant).getValue();
             visitInstruction(new ImmutableInstruction21c(Opcode.CONST_STRING, convertRegister(target), new ImmutableStringReference(string)));
+        } else {
+            DexUtils.unreachable();
+        }
+    }
+
+    private void visitNumberConstant(DexNumberConstant constant, Register target) {
+        if (constant instanceof DexNumber32Constant) {
+            int literal = ((DexNumber32Constant) constant).intValue();
+            if (-8 <= literal && literal <= 7) {
+                visitInstruction(new ImmutableInstruction11n(Opcode.CONST_4, convertRegister(target), literal));
+            } else if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
+                visitInstruction(new ImmutableInstruction21s(Opcode.CONST_16, convertRegister(target), literal));
+            } else if ((literal & 0x0000FFFF) == 0) {
+                visitInstruction(new ImmutableInstruction21ih(Opcode.CONST_WIDE_HIGH16, convertRegister(target), literal));
+            } else {
+                visitInstruction(new ImmutableInstruction31i(Opcode.CONST, convertRegister(target), literal));
+            }
+        } else if (constant instanceof DexNumber64Constant) {
+            long literal = ((DexNumber64Constant) constant).longValue();
+            if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
+                visitInstruction(new ImmutableInstruction21s(Opcode.CONST_WIDE_16, convertRegister(target), (int) literal));
+            } else if (Integer.MIN_VALUE <= literal && literal <= Integer.MAX_VALUE) {
+                visitInstruction(new ImmutableInstruction31i(Opcode.CONST_WIDE_32, convertRegister(target), (int) literal));
+            } else if ((literal & 0x0000FFFFFFFFFFFL) == 0) {
+                visitInstruction(new ImmutableInstruction21lh(Opcode.CONST_WIDE_HIGH16, convertRegister(target), literal));
+            } else {
+                visitInstruction(new ImmutableInstruction51l(Opcode.CONST_WIDE, convertRegister(target), literal));
+            }
         } else {
             DexUtils.unreachable();
         }
