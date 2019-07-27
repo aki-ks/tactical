@@ -848,22 +848,60 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         });
     }
 
+    // MOVE INSTRUCTIONS //
+
     @Override
     public void visitMove(DexType type, Register from, Register to) {
-        super.visitMove(type, from, to);
+        Opcode opcode;
+        Opcode opcodeFrom16;
+        Opcode opcode16;
+
+        switch (type) {
+            case NORMAL:
+                opcode = Opcode.MOVE;
+                opcodeFrom16 = Opcode.MOVE_FROM16;
+                opcode16 = Opcode.MOVE_16;
+                break;
+
+            case OBJECT:
+                opcode = Opcode.MOVE_OBJECT;
+                opcodeFrom16 = Opcode.MOVE_OBJECT_FROM16;
+                opcode16 = Opcode.MOVE_OBJECT_16;
+                break;
+
+            case WIDE:
+                opcode = Opcode.MOVE_WIDE;
+                opcodeFrom16 = Opcode.MOVE_WIDE_FROM16;
+                opcode16 = Opcode.MOVE_WIDE_16;
+                break;
+
+            default:
+                throw new RuntimeException("Unreachable");
+        }
+
+        visitInstruction(new MoveLikeInsnProvider(opcode, opcodeFrom16, opcode16, to, from));
     }
 
     @Override
     public void visitMoveResult(DexType type, Register register) {
-        super.visitMoveResult(type, register);
+        visitInstruction(new Insn11xProvider(getMoveResultOpcode(type), register));
+    }
+
+    private Opcode getMoveResultOpcode(DexType type) {
+        switch (type) {
+            case NORMAL: return Opcode.MOVE_RESULT;
+            case OBJECT: return Opcode.MOVE_RESULT_OBJECT;
+            case WIDE: return Opcode.MOVE_RESULT_WIDE;
+            default: return DexUtils.unreachable();
+        }
     }
 
     @Override
     public void visitMoveException(Register target) {
-        super.visitMoveException(target);
+        visitInstruction(new Insn11xProvider(Opcode.MOVE_EXCEPTION, target));
     }
 
-    // Branch instructions
+    // BRANCH INSTRUCTIONS //
 
     @Override
     public void visitGoto(me.aki.tactical.dex.insn.Instruction target) {
