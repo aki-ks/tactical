@@ -19,8 +19,10 @@ import org.jf.dexlib2.MethodHandleType;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.reference.*;
+import org.jf.dexlib2.iface.value.EncodedValue;
 import org.jf.dexlib2.immutable.instruction.*;
 import org.jf.dexlib2.immutable.reference.*;
+import org.jf.dexlib2.immutable.value.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,6 +35,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     private Map<me.aki.tactical.dex.insn.Instruction, Set<RWCell<Integer>>> insnRefs = new HashMap<>();
     private List<OffsetInsnRef> offsetInsnRefs = new ArrayList<>();
+
+    private int callSiteIndex = 0;
 
     private void visitInstruction(Instruction insn) {
         visitInstruction(RWCell.of(insn, Instruction.class));
@@ -130,7 +134,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
-    private MethodHandleReference convertMethodHandle(Handle handle) {
+    private ImmutableMethodHandleReference convertMethodHandle(Handle handle) {
         int type = match(handle, new HandleMatch<>() {
             public Integer caseGetFieldHandle(GetFieldHandle handle) { return MethodHandleType.INSTANCE_GET; }
             public Integer caseSetFieldHandle(SetFieldHandle handle) { return MethodHandleType.INSTANCE_PUT; }
@@ -742,12 +746,116 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitInvoke(InvokeType invoke, MethodRef method, Optional<Register> instance, List<Register> arguments) {
-        super.visitInvoke(invoke, method, instance, arguments);
+        MethodReference methodRef = DexUtils.convertMethodRef(method);
+
+        List<Register> registers;
+        if (instance.isPresent()) {
+            registers = new ArrayList<>(arguments.size() + 1);
+            registers.add(instance.get());
+            registers.addAll(arguments);
+        } else {
+            registers = new ArrayList<>(arguments);
+        }
+
+        int registerCount = registers.size();
+        if (registerCount < 5) {
+            Opcode opcode = getInvokeOpcode(invoke);
+            Iterator<Integer> registerIter = registers.stream().map(this::convertRegister).iterator();
+            int registerC = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerD = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerE = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerF = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerG = registerIter.hasNext() ? registerIter.next() : 0;
+            visitInstruction(new ImmutableInstruction35c(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef));
+        } else {
+            Opcode opcode = getInvokeRangeOpcode(invoke);
+            //TODO The registers musts have indices that follow each other
+            throw new RuntimeException("Not Yet implemented");
+        }
     }
 
+    private Opcode getInvokeOpcode(InvokeType invoke) {
+        switch (invoke) {
+            case DIRECT: return Opcode.INVOKE_DIRECT;
+            case INTERFACE: return Opcode.INVOKE_INTERFACE;
+            case POLYMORPHIC: return Opcode.INVOKE_POLYMORPHIC;
+            case STATIC: return Opcode.INVOKE_STATIC;
+            case SUPER: return Opcode.INVOKE_SUPER;
+            case VIRTUAL: return Opcode.INVOKE_VIRTUAL;
+            default: return DexUtils.unreachable();
+        }
+    }
+
+    private Opcode getInvokeRangeOpcode(InvokeType invoke) {
+        switch (invoke) {
+            case DIRECT: return Opcode.INVOKE_DIRECT_RANGE;
+            case INTERFACE: return Opcode.INVOKE_INTERFACE_RANGE;
+            case POLYMORPHIC: return Opcode.INVOKE_POLYMORPHIC_RANGE;
+            case STATIC: return Opcode.INVOKE_STATIC_RANGE;
+            case SUPER: return Opcode.INVOKE_SUPER_RANGE;
+            case VIRTUAL: return Opcode.INVOKE_VIRTUAL_RANGE;
+            default: return DexUtils.unreachable();
+        }
+    }
+
+
     @Override
-    public void visitCustomInvoke(List<Register> arguments, String name, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
-        super.visitCustomInvoke(arguments, name, descriptor, bootstrapArguments, bootstrapMethod);
+    public void visitCustomInvoke(List<Register> arguments, String methodName, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
+
+        List<EncodedValue> extraArguments = bootstrapArguments.stream()
+                .map(this::convertBootstrapConstant)
+                .collect(Collectors.toList());
+
+        String returnType = DexUtils.toDexReturnType(descriptor.getReturnType());
+        List<String> parameters = descriptor.getParameterTypes().stream()
+                .map(DexUtils::toDexType)
+                .collect(Collectors.toList());
+        MethodProtoReference methodProto = new ImmutableMethodProtoReference(parameters, returnType);
+
+        String callSiteName = Integer.toString(this.callSiteIndex++);
+        CallSiteReference callSiteRef = new ImmutableCallSiteReference(callSiteName, convertMethodHandle(bootstrapMethod), methodName, methodProto, extraArguments);
+
+        int registerCount = arguments.size();
+        if (registerCount < 5) {
+            Iterator<Integer> registerIter = arguments.stream().map(this::convertRegister).iterator();
+            int registerC = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerD = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerE = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerF = registerIter.hasNext() ? registerIter.next() : 0;
+            int registerG = registerIter.hasNext() ? registerIter.next() : 0;
+            visitInstruction(new ImmutableInstruction35c(Opcode.INVOKE_CUSTOM, registerCount, registerC, registerD, registerE, registerF, registerG, callSiteRef));
+        } else {
+            //TODO The registers musts have indices that follow each other
+            throw new RuntimeException("Not Yet implemented");
+        }
+    }
+
+    private EncodedValue convertBootstrapConstant(BootstrapConstant bootstrapConstant) {
+        return match(bootstrapConstant, new BootstrapConstantMatch<>() {
+            public EncodedValue caseIntConstant(IntConstant constant) { return new ImmutableIntEncodedValue(constant.getValue()); }
+            public EncodedValue caseLongConstant(LongConstant constant) { return new ImmutableLongEncodedValue(constant.getValue()); }
+            public EncodedValue caseFloatConstant(FloatConstant constant) { return new ImmutableFloatEncodedValue(constant.getValue()); }
+            public EncodedValue caseDoubleConstant(DoubleConstant constant) { return new ImmutableDoubleEncodedValue(constant.getValue()); }
+            public EncodedValue caseStringConstant(StringConstant constant) { return new ImmutableStringEncodedValue(constant.getValue()); }
+
+            public EncodedValue caseClassConstant(ClassConstant constant) {
+                String typeDesc = DexUtils.toDexType(constant.getValue());
+                return new ImmutableTypeEncodedValue(typeDesc);
+            }
+
+            public EncodedValue caseHandleConstant(HandleConstant constant) {
+                return new ImmutableMethodHandleEncodedValue(convertMethodHandle(constant.getHandle()));
+            }
+
+            public EncodedValue caseMethodTypeConstant(MethodTypeConstant constant) {
+                String returnType = DexUtils.toDexReturnType(constant.getReturnType());
+                List<String> parameters = constant.getArgumentTypes().stream()
+                        .map(DexUtils::toDexType)
+                        .collect(Collectors.toList());
+
+                return new ImmutableMethodTypeEncodedValue(new ImmutableMethodProtoReference(parameters, returnType));
+            }
+        });
     }
 
     @Override
@@ -1086,6 +1194,18 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
+    private <T> T match(BootstrapConstant constant, BootstrapConstantMatch<T> matcher) {
+        return constant instanceof IntConstant ? matcher.caseIntConstant((IntConstant) constant) :
+                constant instanceof LongConstant ? matcher.caseLongConstant((LongConstant) constant) :
+                constant instanceof FloatConstant ? matcher.caseFloatConstant((FloatConstant) constant) :
+                constant instanceof DoubleConstant ? matcher.caseDoubleConstant((DoubleConstant) constant) :
+                constant instanceof StringConstant ? matcher.caseStringConstant((StringConstant) constant) :
+                constant instanceof ClassConstant ? matcher.caseClassConstant((ClassConstant) constant) :
+                constant instanceof HandleConstant ? matcher.caseHandleConstant((HandleConstant) constant) :
+                constant instanceof MethodTypeConstant ? matcher.caseMethodTypeConstant((MethodTypeConstant) constant) :
+                DexUtils.unreachable();
+    }
+
     interface RefTypeMatch<T> {
         T caseArray(ArrayType type);
         T caseObject(ObjectType type);
@@ -1132,5 +1252,16 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         T caseInvokeSpecialHandle(InvokeSpecialHandle handle);
         T caseInvokeVirtualHandle(InvokeVirtualHandle handle);
         T caseNewInstanceHandle(NewInstanceHandle handle);
+    }
+
+    interface BootstrapConstantMatch<T> {
+        T caseIntConstant(IntConstant constant);
+        T caseLongConstant(LongConstant constant);
+        T caseFloatConstant(FloatConstant constant);
+        T caseDoubleConstant(DoubleConstant constant);
+        T caseStringConstant(StringConstant constant);
+        T caseClassConstant(ClassConstant constant);
+        T caseHandleConstant(HandleConstant constant);
+        T caseMethodTypeConstant(MethodTypeConstant constant);
     }
 }
