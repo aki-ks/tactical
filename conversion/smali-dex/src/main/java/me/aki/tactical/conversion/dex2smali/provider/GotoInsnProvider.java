@@ -7,6 +7,8 @@ import org.jf.dexlib2.immutable.instruction.ImmutableInstruction10t;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction20t;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction30t;
 
+import java.util.List;
+
 public class GotoInsnProvider implements InstructionProvider<OffsetInstruction> {
     private AbstractOffsetCell offsetCell;
 
@@ -16,6 +18,16 @@ public class GotoInsnProvider implements InstructionProvider<OffsetInstruction> 
 
     public AbstractOffsetCell getOffsetCell() {
         return offsetCell;
+    }
+
+    @Override
+    public List<RegisterCell> getRegisterCells() {
+        return List.of();
+    }
+
+    @Override
+    public List<AbstractOffsetCell> getOffsetCells() {
+        return List.of(offsetCell);
     }
 
     @Override

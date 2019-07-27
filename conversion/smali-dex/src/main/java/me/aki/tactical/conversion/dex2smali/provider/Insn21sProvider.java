@@ -5,6 +5,8 @@ import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.formats.Instruction21s;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction21s;
 
+import java.util.List;
+
 public class Insn21sProvider implements InstructionProvider<Instruction21s> {
     private final Opcode opcode;
     private final RegisterCell registerA;
@@ -18,6 +20,16 @@ public class Insn21sProvider implements InstructionProvider<Instruction21s> {
 
     public RegisterCell getRegisterACell() {
         return registerA;
+    }
+
+    @Override
+    public List<RegisterCell> getRegisterCells() {
+        return List.of(registerA);
+    }
+
+    @Override
+    public List<AbstractOffsetCell> getOffsetCells() {
+        return List.of();
     }
 
     @Override

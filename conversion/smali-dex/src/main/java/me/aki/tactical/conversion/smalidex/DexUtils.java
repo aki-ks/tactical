@@ -206,6 +206,6 @@ public class DexUtils {
     }
 
     public static <T> T unreachable() {
-        throw new RuntimeException();
+        throw new RuntimeException("Unreachable");
     }
 }

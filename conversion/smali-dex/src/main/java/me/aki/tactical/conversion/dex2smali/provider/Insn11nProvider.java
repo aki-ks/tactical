@@ -5,6 +5,8 @@ import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction11n;
 
+import java.util.List;
+
 public class Insn11nProvider implements InstructionProvider<Instruction11n> {
     private final Opcode opcode;
     private final RegisterCell registerA;
@@ -18,6 +20,16 @@ public class Insn11nProvider implements InstructionProvider<Instruction11n> {
 
     public RegisterCell getRegisterACell() {
         return registerA;
+    }
+
+    @Override
+    public List<RegisterCell> getRegisterCells() {
+        return List.of(registerA);
+    }
+
+    @Override
+    public List<AbstractOffsetCell> getOffsetCells() {
+        return List.of();
     }
 
     @Override

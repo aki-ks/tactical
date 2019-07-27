@@ -34,9 +34,21 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
      */
     private List<InstructionProvider<? extends Instruction>> payloadInstructions = new ArrayList<>();
 
+    private final Map<Register, List<RegisterCell>> registerCells = new HashMap<>();
+    private final List<AbstractOffsetCell> offsetCells = new ArrayList<>();
+
+    /**
+     * Require that registers are aligned next to each other to allow the generation of a range instruction.
+     */
+    private final List<RegisterConstraint> registerConstraints = new ArrayList<>();
+
     private int callSiteIndex = 0;
 
     private void visitInstruction(InstructionProvider<? extends Instruction> insn) {
+        for (RegisterCell registerCell : insn.getRegisterCells()) {
+            this.registerCells.computeIfAbsent(registerCell.getRegister(), x -> new ArrayList<>()).add(registerCell);
+        }
+        this.offsetCells.addAll(insn.getOffsetCells());
         this.instructions.add(insn);
     }
 
@@ -547,7 +559,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     @Override
     public void visitNewFilledArray(ArrayType type, List<Register> registers) {
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
-
         int registerCount = registers.size();
         if (registerCount <= 5) {
             Iterator<Register> registerIter = registers.iterator();
@@ -558,8 +569,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             Register registerG = registerIter.hasNext() ? registerIter.next() : null;
             visitInstruction(new Insn35cProvider(Opcode.FILLED_NEW_ARRAY, registerCount, registerC, registerD, registerE, registerF, registerG, typeRef));
         } else {
-            //TODO The registers musts have indices that follow each other
-            throw new RuntimeException("Not Yet implemented");
+            registerConstraints.add(new RegisterConstraint(registers));
+            visitInstruction(new Insn3rcProvider(Opcode.FILLED_NEW_ARRAY_RANGE, registers.get(0), registerCount, typeRef));
         }
     }
 
@@ -738,7 +749,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
 
         int registerCount = registers.size();
-        if (registerCount < 5) {
+        if (registerCount <= 5) {
             Opcode opcode = getInvokeOpcode(invoke);
             Iterator<Register> registerIter = registers.iterator();
             Register registerC = registerIter.hasNext() ? registerIter.next() : null;
@@ -749,8 +760,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             visitInstruction(new Insn35cProvider(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef));
         } else {
             Opcode opcode = getInvokeRangeOpcode(invoke);
-            //TODO The registers musts have indices that follow each other
-            throw new RuntimeException("Not Yet implemented");
+            registerConstraints.add(new RegisterConstraint(registers));
+            visitInstruction(new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef));
         }
     }
 
@@ -795,7 +806,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         CallSiteReference callSiteRef = new ImmutableCallSiteReference(callSiteName, convertMethodHandle(bootstrapMethod), methodName, methodProto, extraArguments);
 
         int registerCount = arguments.size();
-        if (registerCount < 5) {
+        if (registerCount <= 5) {
             Iterator<Register> registerIter = arguments.iterator();
             Register registerC = registerIter.hasNext() ? registerIter.next() : null;
             Register registerD = registerIter.hasNext() ? registerIter.next() : null;
@@ -804,8 +815,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             Register registerG = registerIter.hasNext() ? registerIter.next() : null;
             visitInstruction(new Insn35cProvider(Opcode.INVOKE_CUSTOM, registerCount, registerC, registerD, registerE, registerF, registerG, callSiteRef));
         } else {
-            //TODO The registers musts have indices that follow each other
-            throw new RuntimeException("Not Yet implemented");
+            registerConstraints.add(new RegisterConstraint(arguments));
+            visitInstruction(new Insn3rcProvider(Opcode.INVOKE_CUSTOM_RANGE, arguments.get(0), registerCount, callSiteRef));
         }
     }
 
@@ -904,6 +915,18 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     // UTILS //
+
+    public class RegisterConstraint {
+        private final List<Register> registers;
+
+        public RegisterConstraint(List<Register> registers) {
+            this.registers = registers;
+        }
+
+        public List<Register> getRegisters() {
+            return registers;
+        }
+    }
 
     private <T> T match(RefType type, RefTypeMatch<T> matcher) {
         return type instanceof ObjectType ? matcher.caseObject((ObjectType) type) :

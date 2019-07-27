@@ -15,6 +15,16 @@ public class ArrayPayloadProvider implements InstructionProvider<ArrayPayload> {
     }
 
     @Override
+    public List<RegisterCell> getRegisterCells() {
+        return List.of();
+    }
+
+    @Override
+    public List<AbstractOffsetCell> getOffsetCells() {
+        return List.of();
+    }
+
+    @Override
     public ArrayPayload newInstance() {
         return new ImmutableArrayPayload(this.elementWidth, this.elements);
     }

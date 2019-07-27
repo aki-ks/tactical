@@ -4,11 +4,23 @@ import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.formats.Instruction10x;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction10x;
 
+import java.util.List;
+
 public class Insn10xProvider implements InstructionProvider<Instruction10x> {
     private final Opcode opcode;
 
     public Insn10xProvider(Opcode opcode) {
         this.opcode = opcode;
+    }
+
+    @Override
+    public List<RegisterCell> getRegisterCells() {
+        return List.of();
+    }
+
+    @Override
+    public List<AbstractOffsetCell> getOffsetCells() {
+        return List.of();
     }
 
     @Override

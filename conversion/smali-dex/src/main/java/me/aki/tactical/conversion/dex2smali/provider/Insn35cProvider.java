@@ -6,6 +6,10 @@ import org.jf.dexlib2.iface.instruction.formats.Instruction35c;
 import org.jf.dexlib2.iface.reference.Reference;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction35c;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class Insn35cProvider implements InstructionProvider<Instruction35c> {
     private final Opcode opcode;
     private final int registerCount;
@@ -45,6 +49,18 @@ public class Insn35cProvider implements InstructionProvider<Instruction35c> {
 
     public RegisterCell getRegisterGCell() {
         return registerG;
+    }
+
+    @Override
+    public List<RegisterCell> getRegisterCells() {
+        return Stream.of(registerC, registerD, registerE, registerF, registerG)
+                .limit(registerCount)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<AbstractOffsetCell> getOffsetCells() {
+        return List.of();
     }
 
     @Override
