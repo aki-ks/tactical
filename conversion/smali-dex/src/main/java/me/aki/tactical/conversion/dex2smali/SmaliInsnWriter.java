@@ -579,14 +579,59 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
+    // CASTS //
+
     @Override
     public void visitPrimitiveCast(PrimitiveType fromType, PrimitiveType toType, Register fromRegister, Register toRegister) {
-        super.visitPrimitiveCast(fromType, toType, fromRegister, toRegister);
+        Opcode opcode = match(fromType, new ILFDTypeMatch<>() {
+            public Opcode caseIntLike(IntLikeType type) {
+                return match(toType, new PrimitiveTypeMatch<>() {
+                    public Opcode caseBoolean() { return DexUtils.unreachable(); }
+                    public Opcode caseByte() { return Opcode.INT_TO_BYTE; }
+                    public Opcode caseChar() { return Opcode.INT_TO_CHAR; }
+                    public Opcode caseShort() { return Opcode.INT_TO_SHORT; }
+                    public Opcode caseInt() { return DexUtils.unreachable(); }
+                    public Opcode caseLong() { return Opcode.INT_TO_LONG; }
+                    public Opcode caseFloat() { return Opcode.INT_TO_FLOAT; }
+                    public Opcode caseDouble() { return Opcode.INT_TO_DOUBLE; }
+                });
+            }
+
+            public Opcode caseLong() {
+                return match(toType, new ILFDTypeMatch<>() {
+                    public Opcode caseIntLike(IntLikeType type) { return Opcode.LONG_TO_INT; }
+                    public Opcode caseLong() { return DexUtils.unreachable();}
+                    public Opcode caseFloat() { return Opcode.LONG_TO_FLOAT; }
+                    public Opcode caseDouble() { return Opcode.LONG_TO_DOUBLE; }
+                });
+            }
+
+            public Opcode caseFloat() {
+                return match(toType, new ILFDTypeMatch<>() {
+                    public Opcode caseIntLike(IntLikeType type) { return Opcode.FLOAT_TO_INT; }
+                    public Opcode caseLong() { return Opcode.FLOAT_TO_LONG; }
+                    public Opcode caseFloat() { return DexUtils.unreachable(); }
+                    public Opcode caseDouble() { return Opcode.FLOAT_TO_DOUBLE; }
+                });
+            }
+
+            public Opcode caseDouble() {
+                return match(toType, new ILFDTypeMatch<>() {
+                    public Opcode caseIntLike(IntLikeType type) { return Opcode.DOUBLE_TO_INT; }
+                    public Opcode caseLong() { return Opcode.DOUBLE_TO_LONG; }
+                    public Opcode caseFloat() { return Opcode.DOUBLE_TO_FLOAT; }
+                    public Opcode caseDouble() { return DexUtils.unreachable(); }
+                });
+            }
+        });
+
+        visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(toRegister), convertRegister(fromRegister)));
     }
 
     @Override
     public void visitRefCast(RefType type, Register register) {
-        super.visitRefCast(type, register);
+        TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
+        visitInstruction(new ImmutableInstruction21c(Opcode.CHECK_CAST, convertRegister(register), typeRef));
     }
 
     @Override
