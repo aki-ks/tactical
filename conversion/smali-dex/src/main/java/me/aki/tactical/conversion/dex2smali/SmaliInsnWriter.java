@@ -45,11 +45,21 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     private int callSiteIndex = 0;
 
     private void visitInstruction(InstructionProvider<? extends Instruction> insn) {
+        registerCells(insn);
+        this.instructions.add(insn);
+    }
+
+    private void visitPayloadInstruction(InstructionProvider<? extends Instruction> insn) {
+        registerCells(insn);
+        this.payloadInstructions.add(insn);
+    }
+
+    private void registerCells(InstructionProvider<? extends Instruction> insn) {
         for (RegisterCell registerCell : insn.getRegisterCells()) {
             this.registerCells.computeIfAbsent(registerCell.getRegister(), x -> new ArrayList<>()).add(registerCell);
         }
+
         this.offsetCells.addAll(insn.getOffsetCells());
-        this.instructions.add(insn);
     }
 
     public List<InstructionProvider<? extends Instruction>> getInstructions() {
@@ -546,7 +556,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         List<Number> numbers = values.stream().map(FillArrayInstruction.NumericConstant::longValue).collect(Collectors.toList());
         ArrayPayloadProvider arrayPayload = new ArrayPayloadProvider(elementSize.getByteSize(), numbers);
 
-        this.payloadInstructions.add(arrayPayload);
+        visitPayloadInstruction(arrayPayload);
         visitInstruction(new Insn31tProvider(Opcode.FILL_ARRAY_DATA, array, arrayPayload));
     }
 
@@ -914,11 +924,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         if (op2Opt.isPresent()) {
             Register op2 = op2Opt.get();
             Opcode opcode = getTwoRegisterComparionsOpcode(comparison);
-
             visitInstruction(new Insn22tProvider(opcode, op1, op2, target));
         } else {
             Opcode opcode = getZeroComparionsOpcode(comparison);
-
             visitInstruction(new Insn21tProvider(opcode, op1, target));
         }
     }
@@ -949,7 +957,31 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitSwitch(Register value, LinkedHashMap<Integer, me.aki.tactical.dex.insn.Instruction> branchTable) {
-        super.visitSwitch(value, branchTable);
+        Opcode opcode;
+        AbstractSwitchPayloadProvider<?> payload;
+
+        TreeSet<Integer> sortedkeys = new TreeSet<>(branchTable.keySet());
+        if (isRange(sortedkeys)) {
+            opcode = Opcode.PACKED_SWITCH;
+            payload = new PackedSwitchPayloadProvider(sortedkeys, branchTable);
+        } else {
+            opcode = Opcode.SPARSE_SWITCH;
+            payload = new SparseSwitchPayloadProvider(sortedkeys, branchTable);
+        }
+
+        visitPayloadInstruction(payload);
+        visitInstruction(new Insn31tProvider(opcode, value, payload));
+    }
+
+    private boolean isRange(TreeSet<Integer> sortedInts) {
+        Integer last = null;
+        for (Integer i : sortedInts) {
+            if (last != null && last + 1 != i) {
+                return false;
+            }
+            last = i;
+        }
+        return true;
     }
 
     // UTILS //
