@@ -686,14 +686,58 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         visitInstruction(new ImmutableInstruction11x(Opcode.THROW, convertRegister(exception)));
     }
 
+    // FIELD ACCESS //
+
     @Override
     public void visitFieldGet(FieldRef field, Optional<Register> instance, Register result) {
-        super.visitFieldGet(field, instance, result);
+        FieldReference fieldRef = DexUtils.convertFieldRef(field);
+        boolean isInstance = instance.isPresent();
+
+        Opcode opcode = match(field.getType(), new TypeMatch<>() {
+            public Opcode caseBoolean() { return isInstance ? Opcode.IGET_BOOLEAN : Opcode.SGET_BOOLEAN; }
+            public Opcode caseByte() { return isInstance ? Opcode.IGET_BYTE : Opcode.SGET_BYTE; }
+            public Opcode caseChar() { return isInstance ? Opcode.IGET_CHAR : Opcode.SGET_CHAR; }
+            public Opcode caseShort() { return isInstance ? Opcode.IGET_SHORT : Opcode.SGET_SHORT; }
+            public Opcode caseInt() { return isInstance ? Opcode.IGET : Opcode.SGET; }
+            public Opcode caseLong() { return isInstance ? Opcode.IGET_WIDE : Opcode.SGET_WIDE; }
+            public Opcode caseFloat() { return isInstance ? Opcode.IGET : Opcode.SGET; }
+            public Opcode caseDouble() { return isInstance ? Opcode.IGET_WIDE : Opcode.SGET_WIDE; }
+
+            public Opcode caseArray(ArrayType type) { return isInstance ? Opcode.IGET_OBJECT : Opcode.SGET_OBJECT; }
+            public Opcode caseObject(ObjectType type) { return isInstance ? Opcode.IGET_OBJECT : Opcode.SGET_OBJECT; }
+        });
+
+        if (isInstance) {
+            visitInstruction(new ImmutableInstruction22c(opcode, convertRegister(result), convertRegister(instance.get()), fieldRef));
+        } else {
+            visitInstruction(new ImmutableInstruction21c(opcode, convertRegister(result), fieldRef));
+        }
     }
 
     @Override
     public void visitFieldSet(FieldRef field, Optional<Register> instance, Register value) {
-        super.visitFieldSet(field, instance, value);
+        FieldReference fieldRef = DexUtils.convertFieldRef(field);
+        boolean isInstance = instance.isPresent();
+
+        Opcode opcode = match(field.getType(), new TypeMatch<>() {
+            public Opcode caseBoolean() { return isInstance ? Opcode.IPUT_BOOLEAN : Opcode.SPUT_BOOLEAN; }
+            public Opcode caseByte() { return isInstance ? Opcode.IPUT_BYTE : Opcode.SPUT_BYTE; }
+            public Opcode caseChar() { return isInstance ? Opcode.IPUT_CHAR : Opcode.SPUT_CHAR; }
+            public Opcode caseShort() { return isInstance ? Opcode.IPUT_SHORT : Opcode.SPUT_SHORT; }
+            public Opcode caseInt() { return isInstance ? Opcode.IPUT : Opcode.SPUT; }
+            public Opcode caseLong() { return isInstance ? Opcode.IPUT_WIDE : Opcode.SPUT_WIDE; }
+            public Opcode caseFloat() { return isInstance ? Opcode.IPUT : Opcode.SPUT; }
+            public Opcode caseDouble() { return isInstance ? Opcode.IPUT_WIDE : Opcode.SPUT_WIDE; }
+
+            public Opcode caseArray(ArrayType type) { return isInstance ? Opcode.IPUT_OBJECT : Opcode.SPUT_OBJECT; }
+            public Opcode caseObject(ObjectType type) { return isInstance ? Opcode.IPUT_OBJECT : Opcode.SPUT_OBJECT; }
+        });
+
+        if (isInstance) {
+            visitInstruction(new ImmutableInstruction22c(opcode, convertRegister(value), convertRegister(instance.get()), fieldRef));
+        } else {
+            visitInstruction(new ImmutableInstruction21c(opcode, convertRegister(value), fieldRef));
+        }
     }
 
     @Override
@@ -973,7 +1017,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     // UTILS //
 
-    private <T> T match(RefType type, RATypeMatch<T> matcher) {
+    private <T> T match(RefType type, RefTypeMatch<T> matcher) {
         return type instanceof ObjectType ? matcher.caseObject((ObjectType) type) :
                 type instanceof ArrayType ? matcher.caseArray((ArrayType) type) :
                 DexUtils.unreachable();
@@ -1017,6 +1061,12 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         });
     }
 
+    private <T> T match(Type type, TypeMatch<T> matcher) {
+        return type instanceof PrimitiveType ? match((PrimitiveType) type, (PrimitiveTypeMatch<T>) matcher) :
+                type instanceof RefType ? match((RefType) type, (RefTypeMatch<T>) matcher) :
+                DexUtils.unreachable();
+    }
+
     private <T> T match(Handle handle, HandleMatch<T> matcher) {
         if (handle instanceof FieldHandle) {
             return handle instanceof GetFieldHandle ? matcher.caseGetFieldHandle((GetFieldHandle) handle) :
@@ -1036,7 +1086,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
-    interface RATypeMatch<T> {
+    interface RefTypeMatch<T> {
         T caseArray(ArrayType type);
         T caseObject(ObjectType type);
     }
@@ -1068,6 +1118,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         T caseFloat();
         T caseDouble();
     }
+
+    interface TypeMatch<T> extends PrimitiveTypeMatch<T>, RefTypeMatch<T> {}
 
     interface HandleMatch<T> {
         T caseGetFieldHandle(GetFieldHandle handle);
