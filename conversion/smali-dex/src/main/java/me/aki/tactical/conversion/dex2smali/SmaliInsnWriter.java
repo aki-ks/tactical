@@ -634,14 +634,16 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         visitInstruction(new ImmutableInstruction21c(Opcode.CHECK_CAST, convertRegister(register), typeRef));
     }
 
+    // MONITOR INSTRUCTIONS //
+
     @Override
     public void visitMonitorEnter(Register value) {
-        super.visitMonitorEnter(value);
+        visitInstruction(new ImmutableInstruction11x(Opcode.MONITOR_ENTER, convertRegister(value)));
     }
 
     @Override
     public void visitMonitorExit(Register value) {
-        super.visitMonitorExit(value);
+        visitInstruction(new ImmutableInstruction11x(Opcode.MONITOR_EXIT, convertRegister(value)));
     }
 
     @Override
