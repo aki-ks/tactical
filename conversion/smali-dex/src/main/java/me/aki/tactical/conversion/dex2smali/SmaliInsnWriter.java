@@ -660,19 +660,30 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         visitInstruction(new ImmutableInstruction22c(Opcode.INSTANCE_OF, convertRegister(result), convertRegister(value), typeRef));
     }
 
+    // METHOD EXIT INSTRUCTIONS //
+
     @Override
     public void visitReturn(DexType type, Register register) {
-        super.visitReturn(type, register);
+        visitInstruction(new ImmutableInstruction11x(getReturnOpcode(type), convertRegister(register)));
+    }
+
+    private Opcode getReturnOpcode(DexType type) {
+        switch (type) {
+            case NORMAL: return Opcode.RETURN;
+            case WIDE: return Opcode.RETURN_WIDE;
+            case OBJECT: return Opcode.RETURN_OBJECT;
+            default: return DexUtils.unreachable();
+        }
     }
 
     @Override
     public void visitReturnVoid() {
-        super.visitReturnVoid();
+        visitInstruction(new ImmutableInstruction10x(Opcode.RETURN_VOID));
     }
 
     @Override
     public void visitThrow(Register exception) {
-        super.visitThrow(exception);
+        visitInstruction(new ImmutableInstruction11x(Opcode.THROW, convertRegister(exception)));
     }
 
     @Override
