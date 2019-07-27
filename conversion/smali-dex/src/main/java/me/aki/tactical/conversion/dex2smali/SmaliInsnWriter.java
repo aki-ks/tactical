@@ -646,14 +646,18 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         visitInstruction(new ImmutableInstruction11x(Opcode.MONITOR_EXIT, convertRegister(value)));
     }
 
+    // INSTANCE OPERATIONS //
+
     @Override
     public void visitNew(Path type, Register result) {
-        super.visitNew(type, result);
+        TypeReference typeRef = new ImmutableTypeReference(DexUtils.toObjectDescriptor(type));
+        visitInstruction(new ImmutableInstruction21c(Opcode.NEW_INSTANCE, convertRegister(result), typeRef));
     }
 
     @Override
     public void visitInstanceOf(RefType type, Register value, Register result) {
-        super.visitInstanceOf(type, value, result);
+        TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
+        visitInstruction(new ImmutableInstruction22c(Opcode.INSTANCE_OF, convertRegister(result), convertRegister(value), typeRef));
     }
 
     @Override
