@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.dex2smali;
 
+import me.aki.tactical.conversion.dex2smali.provider.*;
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
@@ -8,7 +9,6 @@ import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.*;
 import me.aki.tactical.core.handle.*;
 import me.aki.tactical.core.type.*;
-import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.Register;
@@ -20,7 +20,6 @@ import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.reference.*;
 import org.jf.dexlib2.iface.value.EncodedValue;
-import org.jf.dexlib2.immutable.instruction.*;
 import org.jf.dexlib2.immutable.reference.*;
 import org.jf.dexlib2.immutable.value.*;
 
@@ -28,54 +27,37 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Instruction, Register> {
-    // Since dexlib instructions are immutable, we use RWCells and replace their content to mutate instructions.
-    private List<RWCell<Instruction>> instructions = new ArrayList<>();
+    private List<InstructionProvider<? extends Instruction>> instructions = new ArrayList<>();
 
-    private List<RWCell<Instruction>> payloadInstructions = new ArrayList<>();
-
-    private Map<me.aki.tactical.dex.insn.Instruction, Set<RWCell<Integer>>> insnRefs = new HashMap<>();
-    private List<OffsetInsnRef> offsetInsnRefs = new ArrayList<>();
+    /**
+     * Additional payload instructions that must get stored in the method as dead code.
+     */
+    private List<InstructionProvider<? extends Instruction>> payloadInstructions = new ArrayList<>();
 
     private int callSiteIndex = 0;
 
-    private void visitInstruction(Instruction insn) {
-        visitInstruction(RWCell.of(insn, Instruction.class));
+    private void visitInstruction(InstructionProvider<? extends Instruction> insn) {
+        this.instructions.add(insn);
     }
 
-    private void visitInstruction(RWCell<Instruction> insn) {
-        instructions.add(insn);
-    }
-
-    public List<RWCell<Instruction>> getInstructions() {
+    public List<InstructionProvider<? extends Instruction>> getInstructions() {
         return instructions;
     }
 
-    public List<RWCell<Instruction>> popInstructions() {
-        List<RWCell<Instruction>> instructions = this.instructions;
+    public List<InstructionProvider<? extends Instruction>> popInstructions() {
+        List<InstructionProvider<? extends Instruction>> instructions = this.instructions;
         this.instructions = new ArrayList<>();
         return instructions;
     }
 
-    public List<RWCell<Instruction>> getPayloadInstructions() {
+    public List<InstructionProvider<? extends Instruction>> getPayloadInstructions() {
         return payloadInstructions;
     }
 
-    public List<RWCell<Instruction>> popPayloadInstructions() {
-        List<RWCell<Instruction>> instructions = this.payloadInstructions;
+    public List<InstructionProvider<? extends Instruction>> popPayloadInstructions() {
+        List<InstructionProvider<? extends Instruction>> instructions = this.payloadInstructions;
         this.payloadInstructions = new ArrayList<>();
         return instructions;
-    }
-
-    private Integer convertRegister(Register register) {
-        throw new RuntimeException("NOT YET IMPLEMENTED");
-    }
-
-    private void registerInsnRef(me.aki.tactical.dex.insn.Instruction insn, RWCell<Integer> cell) {
-        this.insnRefs.computeIfAbsent(insn, x -> new HashSet<>()).add(cell);
-    }
-
-    private void registerOffsetInsnRef(RWCell<Instruction> relativeTo, RWCell<Instruction> target, RWCell<Integer> offsetCell) {
-        this.offsetInsnRefs.add(new OffsetInsnRef(relativeTo, target, offsetCell));
     }
 
     @Override
@@ -83,12 +65,12 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         if (constant instanceof ClassConstant) {
             RefType classConstant = ((ClassConstant) constant).getValue();
             String type = DexUtils.toDexType(classConstant);
-            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_CLASS, convertRegister(target), new ImmutableTypeReference(type)));
+            visitInstruction(new Insn21cProvider(Opcode.CONST_CLASS, target, new ImmutableTypeReference(type)));
         } else if (constant instanceof DexNumberConstant) {
             visitNumberConstant((DexNumberConstant) constant, target);
         } else if (constant instanceof HandleConstant) {
             MethodHandleReference reference = convertMethodHandle(((HandleConstant) constant).getHandle());
-            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_METHOD_HANDLE, convertRegister(target), reference));
+            visitInstruction(new Insn21cProvider(Opcode.CONST_METHOD_HANDLE, target, reference));
         } else if (constant instanceof MethodTypeConstant) {
             MethodTypeConstant methodType = (MethodTypeConstant) constant;
             String returnType = DexUtils.toDexReturnType(methodType.getReturnType());
@@ -97,10 +79,10 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                     .collect(Collectors.toList());
 
             MethodProtoReference proto = new ImmutableMethodProtoReference(parameters, returnType);
-            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_METHOD_TYPE, convertRegister(target), proto));
+            visitInstruction(new Insn21cProvider(Opcode.CONST_METHOD_TYPE, target, proto));
         } else if (constant instanceof StringConstant) {
             String string = ((StringConstant) constant).getValue();
-            visitInstruction(new ImmutableInstruction21c(Opcode.CONST_STRING, convertRegister(target), new ImmutableStringReference(string)));
+            visitInstruction(new Insn21cProvider(Opcode.CONST_STRING, target, new ImmutableStringReference(string)));
         } else {
             DexUtils.unreachable();
         }
@@ -110,24 +92,24 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         if (constant instanceof DexNumber32Constant) {
             int literal = ((DexNumber32Constant) constant).intValue();
             if (-8 <= literal && literal <= 7) {
-                visitInstruction(new ImmutableInstruction11n(Opcode.CONST_4, convertRegister(target), literal));
+                visitInstruction(new Insn11nProvider(Opcode.CONST_4, target, literal));
             } else if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
-                visitInstruction(new ImmutableInstruction21s(Opcode.CONST_16, convertRegister(target), literal));
+                visitInstruction(new Insn21sProvider(Opcode.CONST_16, target, literal));
             } else if ((literal & 0x0000FFFF) == 0) {
-                visitInstruction(new ImmutableInstruction21ih(Opcode.CONST_WIDE_HIGH16, convertRegister(target), literal));
+                visitInstruction(new Insn21ihProvider(Opcode.CONST_WIDE_HIGH16, target, literal));
             } else {
-                visitInstruction(new ImmutableInstruction31i(Opcode.CONST, convertRegister(target), literal));
+                visitInstruction(new Insn31iProvider(Opcode.CONST, target, literal));
             }
         } else if (constant instanceof DexNumber64Constant) {
             long literal = ((DexNumber64Constant) constant).longValue();
             if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
-                visitInstruction(new ImmutableInstruction21s(Opcode.CONST_WIDE_16, convertRegister(target), (int) literal));
+                visitInstruction(new Insn21sProvider(Opcode.CONST_WIDE_16, target, (int) literal));
             } else if (Integer.MIN_VALUE <= literal && literal <= Integer.MAX_VALUE) {
-                visitInstruction(new ImmutableInstruction31i(Opcode.CONST_WIDE_32, convertRegister(target), (int) literal));
+                visitInstruction(new Insn31iProvider(Opcode.CONST_WIDE_32, target, (int) literal));
             } else if ((literal & 0x0000FFFFFFFFFFFL) == 0) {
-                visitInstruction(new ImmutableInstruction21lh(Opcode.CONST_WIDE_HIGH16, convertRegister(target), literal));
+                visitInstruction(new Insn21lhProvider(Opcode.CONST_WIDE_HIGH16, target, literal));
             } else {
-                visitInstruction(new ImmutableInstruction51l(Opcode.CONST_WIDE, convertRegister(target), literal));
+                visitInstruction(new Insn51lProvider(Opcode.CONST_WIDE, target, literal));
             }
         } else {
             DexUtils.unreachable();
@@ -173,7 +155,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.ADD_DOUBLE_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILFDTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.ADD_INT; }
@@ -182,7 +164,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.ADD_DOUBLE; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -196,7 +178,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.SUB_DOUBLE_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILFDTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.SUB_INT; }
@@ -205,7 +187,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.SUB_DOUBLE; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -219,7 +201,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.MUL_DOUBLE_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILFDTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.MUL_INT; }
@@ -228,7 +210,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.MUL_DOUBLE; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -242,7 +224,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.DIV_DOUBLE_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILFDTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.DIV_INT; }
@@ -251,7 +233,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.DIV_DOUBLE; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -265,7 +247,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.REM_DOUBLE_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILFDTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.REM_INT; }
@@ -274,7 +256,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseDouble() { return Opcode.REM_DOUBLE; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -286,14 +268,14 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseLong() { return Opcode.AND_LONG_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.AND_INT; }
                 public Opcode caseLong() { return Opcode.AND_LONG; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -305,14 +287,14 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseLong() { return Opcode.OR_LONG_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.OR_INT; }
                 public Opcode caseLong() { return Opcode.OR_LONG; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -324,14 +306,14 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseLong() { return Opcode.XOR_LONG_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.XOR_INT; }
                 public Opcode caseLong() { return Opcode.XOR_LONG; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -343,14 +325,14 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseLong() { return Opcode.SHL_LONG_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.SHL_INT; }
                 public Opcode caseLong() { return Opcode.SHL_LONG; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -362,14 +344,14 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseLong() { return Opcode.SHR_LONG_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.SHR_INT; }
                 public Opcode caseLong() { return Opcode.SHR_LONG; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -381,14 +363,14 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 public Opcode caseLong() { return Opcode.USHR_LONG_2ADDR; }
             });
 
-            visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILTypeMatch<>() {
                 public Opcode caseIntLike(IntLikeType type) { return Opcode.USHR_INT; }
                 public Opcode caseLong() { return Opcode.USHR_LONG; }
             });
 
-            visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
         }
     }
 
@@ -436,25 +418,25 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     private void visitLiteralMathInsn(Opcode lit8, Opcode lit16, Register op1, short literal, Register result) {
         if (Byte.MIN_VALUE <= literal && literal <= Byte.MAX_VALUE) {
-            visitInstruction(new ImmutableInstruction22b(lit8, convertRegister(result), convertRegister(op1), literal));
+            visitInstruction(new Insn22bProvider(lit8, result, op1, literal));
         } else {
-            visitInstruction(new ImmutableInstruction22s(lit16, convertRegister(result), convertRegister(op1), literal));
+            visitInstruction(new Insn22sProvider(lit16, result, op1, literal));
         }
     }
 
     @Override
     public void visitLitShl(Register op1, short literal, Register result) {
-        visitInstruction(new ImmutableInstruction22b(Opcode.SHL_INT_LIT8, convertRegister(result), convertRegister(op1), literal));
+        visitInstruction(new Insn22bProvider(Opcode.SHL_INT_LIT8, result, op1, literal));
     }
 
     @Override
     public void visitLitShr(Register op1, short literal, Register result) {
-        visitInstruction(new ImmutableInstruction22b(Opcode.SHR_INT_LIT8, convertRegister(result), convertRegister(op1), literal));
+        visitInstruction(new Insn22bProvider(Opcode.SHR_INT_LIT8, result, op1, literal));
     }
 
     @Override
     public void visitLitUShr(Register op1, short literal, Register result) {
-        visitInstruction(new ImmutableInstruction22b(Opcode.USHR_INT_LIT8, convertRegister(result), convertRegister(op1), literal));
+        visitInstruction(new Insn22bProvider(Opcode.USHR_INT_LIT8, result, op1, literal));
     }
 
     @Override
@@ -466,7 +448,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             public Opcode caseDouble() { return Opcode.NEG_DOUBLE; }
         });
 
-        visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(result), convertRegister(value)));
+        visitInstruction(new Insn12xProvider(opcode, result, value));
     }
 
     @Override
@@ -476,12 +458,12 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             public Opcode caseLong() { return Opcode.NOT_LONG; }
         });
 
-        visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(result), convertRegister(value)));
+        visitInstruction(new Insn12xProvider(opcode, result, value));
     }
 
     @Override
     public void visitCmp(Register op1, Register op2, Register result) {
-        visitInstruction(new ImmutableInstruction23x(Opcode.CMP_LONG, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+        visitInstruction(new Insn23xProvider(Opcode.CMP_LONG, result, op1, op2));
     }
 
     @Override
@@ -491,7 +473,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             public Opcode caseDouble() { return Opcode.CMPL_DOUBLE; }
         });
 
-        visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+        visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
     }
 
     @Override
@@ -501,19 +483,19 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             public Opcode caseDouble() { return Opcode.CMPG_DOUBLE; }
         });
 
-        visitInstruction(new ImmutableInstruction23x(opcode, convertRegister(result), convertRegister(op1), convertRegister(op2)));
+        visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
     }
 
     // ARRAY INSTRUCTIONS //
 
     @Override
     public void visitArrayLength(Register array, Register result) {
-        visitInstruction(new ImmutableInstruction12x(Opcode.ARRAY_LENGTH, convertRegister(result), convertRegister(array)));
+        visitInstruction(new Insn12xProvider(Opcode.ARRAY_LENGTH, result, array));
     }
 
     @Override
     public void visitArrayLoad(DetailedDexType type, Register array, Register index, Register result) {
-        visitInstruction(new ImmutableInstruction23x(getArrayLoadOpcode(type), convertRegister(result), convertRegister(array), convertRegister(index)));
+        visitInstruction(new Insn23xProvider(getArrayLoadOpcode(type), result, array, index));
     }
 
     private Opcode getArrayLoadOpcode(DetailedDexType type) {
@@ -531,7 +513,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitArrayStore(DetailedDexType type, Register array, Register index, Register value) {
-        visitInstruction(new ImmutableInstruction23x(getArrayStoreOpcode(type), convertRegister(value), convertRegister(array), convertRegister(index)));
+        visitInstruction(new Insn23xProvider(getArrayStoreOpcode(type), value, array, index));
     }
 
     private Opcode getArrayStoreOpcode(DetailedDexType type) {
@@ -549,19 +531,17 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitFillArray(Register array, FillArrayInstruction.NumberSize elementSize, List<FillArrayInstruction.NumericConstant> values) {
-        Insn31tCell insnCell = new Insn31tCell(Opcode.FILL_ARRAY_DATA, convertRegister(array));
-
         List<Number> numbers = values.stream().map(FillArrayInstruction.NumericConstant::longValue).collect(Collectors.toList());
-        RWCell<Instruction> arrayPayload = RWCell.of(new ImmutableArrayPayload(elementSize.getByteSize(), numbers), Instruction.class);
+        ArrayPayloadProvider arrayPayload = new ArrayPayloadProvider(elementSize.getByteSize(), numbers);
 
-        registerOffsetInsnRef(insnCell, arrayPayload, insnCell.getOffsetCell());
         this.payloadInstructions.add(arrayPayload);
+        visitInstruction(new Insn31tProvider(Opcode.FILL_ARRAY_DATA, array, arrayPayload));
     }
 
     @Override
     public void visitNewArray(ArrayType type, Register size, Register result) {
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
-        visitInstruction(new ImmutableInstruction22c(Opcode.NEW_ARRAY, convertRegister(result), convertRegister(size), typeRef));
+        visitInstruction(new Insn22cProvider(Opcode.NEW_ARRAY, result, size, typeRef));
     }
 
     @Override
@@ -570,13 +550,13 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
         int registerCount = registers.size();
         if (registerCount <= 5) {
-            Iterator<Integer> registerIter = registers.stream().map(this::convertRegister).iterator();
-            int registerC = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerD = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerE = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerF = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerG = registerIter.hasNext() ? registerIter.next() : 0;
-            visitInstruction(new ImmutableInstruction35c(Opcode.FILLED_NEW_ARRAY, registerCount, registerC, registerD, registerE, registerF, registerG, typeRef));
+            Iterator<Register> registerIter = registers.iterator();
+            Register registerC = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerD = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerE = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerF = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerG = registerIter.hasNext() ? registerIter.next() : null;
+            visitInstruction(new Insn35cProvider(Opcode.FILLED_NEW_ARRAY, registerCount, registerC, registerD, registerE, registerF, registerG, typeRef));
         } else {
             //TODO The registers musts have indices that follow each other
             throw new RuntimeException("Not Yet implemented");
@@ -629,25 +609,25 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             }
         });
 
-        visitInstruction(new ImmutableInstruction12x(opcode, convertRegister(toRegister), convertRegister(fromRegister)));
+        visitInstruction(new Insn12xProvider(opcode, toRegister, fromRegister));
     }
 
     @Override
     public void visitRefCast(RefType type, Register register) {
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
-        visitInstruction(new ImmutableInstruction21c(Opcode.CHECK_CAST, convertRegister(register), typeRef));
+        visitInstruction(new Insn21cProvider(Opcode.CHECK_CAST, register, typeRef));
     }
 
     // MONITOR INSTRUCTIONS //
 
     @Override
     public void visitMonitorEnter(Register value) {
-        visitInstruction(new ImmutableInstruction11x(Opcode.MONITOR_ENTER, convertRegister(value)));
+        visitInstruction(new Insn11xProvider(Opcode.MONITOR_ENTER, value));
     }
 
     @Override
     public void visitMonitorExit(Register value) {
-        visitInstruction(new ImmutableInstruction11x(Opcode.MONITOR_EXIT, convertRegister(value)));
+        visitInstruction(new Insn11xProvider(Opcode.MONITOR_EXIT, value));
     }
 
     // INSTANCE OPERATIONS //
@@ -655,20 +635,20 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     @Override
     public void visitNew(Path type, Register result) {
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toObjectDescriptor(type));
-        visitInstruction(new ImmutableInstruction21c(Opcode.NEW_INSTANCE, convertRegister(result), typeRef));
+        visitInstruction(new Insn21cProvider(Opcode.NEW_INSTANCE, result, typeRef));
     }
 
     @Override
     public void visitInstanceOf(RefType type, Register value, Register result) {
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
-        visitInstruction(new ImmutableInstruction22c(Opcode.INSTANCE_OF, convertRegister(result), convertRegister(value), typeRef));
+        visitInstruction(new Insn22cProvider(Opcode.INSTANCE_OF, result, value, typeRef));
     }
 
     // METHOD EXIT INSTRUCTIONS //
 
     @Override
     public void visitReturn(DexType type, Register register) {
-        visitInstruction(new ImmutableInstruction11x(getReturnOpcode(type), convertRegister(register)));
+        visitInstruction(new Insn11xProvider(getReturnOpcode(type), register));
     }
 
     private Opcode getReturnOpcode(DexType type) {
@@ -682,12 +662,12 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitReturnVoid() {
-        visitInstruction(new ImmutableInstruction10x(Opcode.RETURN_VOID));
+        visitInstruction(new Insn10xProvider(Opcode.RETURN_VOID));
     }
 
     @Override
     public void visitThrow(Register exception) {
-        visitInstruction(new ImmutableInstruction11x(Opcode.THROW, convertRegister(exception)));
+        visitInstruction(new Insn11xProvider(Opcode.THROW, exception));
     }
 
     // FIELD ACCESS //
@@ -712,9 +692,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         });
 
         if (isInstance) {
-            visitInstruction(new ImmutableInstruction22c(opcode, convertRegister(result), convertRegister(instance.get()), fieldRef));
+            visitInstruction(new Insn22cProvider(opcode, result, instance.get(), fieldRef));
         } else {
-            visitInstruction(new ImmutableInstruction21c(opcode, convertRegister(result), fieldRef));
+            visitInstruction(new Insn21cProvider(opcode, result, fieldRef));
         }
     }
 
@@ -738,9 +718,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         });
 
         if (isInstance) {
-            visitInstruction(new ImmutableInstruction22c(opcode, convertRegister(value), convertRegister(instance.get()), fieldRef));
+            visitInstruction(new Insn22cProvider(opcode, value, instance.get(), fieldRef));
         } else {
-            visitInstruction(new ImmutableInstruction21c(opcode, convertRegister(value), fieldRef));
+            visitInstruction(new Insn21cProvider(opcode, value, fieldRef));
         }
     }
 
@@ -760,13 +740,13 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         int registerCount = registers.size();
         if (registerCount < 5) {
             Opcode opcode = getInvokeOpcode(invoke);
-            Iterator<Integer> registerIter = registers.stream().map(this::convertRegister).iterator();
-            int registerC = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerD = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerE = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerF = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerG = registerIter.hasNext() ? registerIter.next() : 0;
-            visitInstruction(new ImmutableInstruction35c(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef));
+            Iterator<Register> registerIter = registers.iterator();
+            Register registerC = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerD = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerE = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerF = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerG = registerIter.hasNext() ? registerIter.next() : null;
+            visitInstruction(new Insn35cProvider(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef));
         } else {
             Opcode opcode = getInvokeRangeOpcode(invoke);
             //TODO The registers musts have indices that follow each other
@@ -801,7 +781,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitCustomInvoke(List<Register> arguments, String methodName, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
-
         List<EncodedValue> extraArguments = bootstrapArguments.stream()
                 .map(this::convertBootstrapConstant)
                 .collect(Collectors.toList());
@@ -817,13 +796,13 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
         int registerCount = arguments.size();
         if (registerCount < 5) {
-            Iterator<Integer> registerIter = arguments.stream().map(this::convertRegister).iterator();
-            int registerC = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerD = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerE = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerF = registerIter.hasNext() ? registerIter.next() : 0;
-            int registerG = registerIter.hasNext() ? registerIter.next() : 0;
-            visitInstruction(new ImmutableInstruction35c(Opcode.INVOKE_CUSTOM, registerCount, registerC, registerD, registerE, registerF, registerG, callSiteRef));
+            Iterator<Register> registerIter = arguments.iterator();
+            Register registerC = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerD = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerE = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerF = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerG = registerIter.hasNext() ? registerIter.next() : null;
+            visitInstruction(new Insn35cProvider(Opcode.INVOKE_CUSTOM, registerCount, registerC, registerD, registerE, registerF, registerG, callSiteRef));
         } else {
             //TODO The registers musts have indices that follow each other
             throw new RuntimeException("Not Yet implemented");
@@ -877,34 +856,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitGoto(me.aki.tactical.dex.insn.Instruction target) {
-        GotoInsnCell insnCell = new GotoInsnCell();
-        registerInsnRef(target, insnCell.getOffsetCell());
+        GotoInsnProvider insnCell = new GotoInsnProvider(target);
         visitInstruction(insnCell);
-    }
-
-    class GotoInsnCell extends NonInitializedCell<Instruction> {
-        private RWCell<Integer> offsetCell = new InnerNonInitializedCell<>(Integer.class, this);
-
-        public GotoInsnCell() {
-            super(Instruction.class);
-        }
-
-        public RWCell<Integer> getOffsetCell() {
-            return offsetCell;
-        }
-
-        @Override
-        protected Instruction uninitializedValue() {
-            int offset = offsetCell.get();
-
-            if (-128 <= offset && offset <= 127) {
-                return new ImmutableInstruction10t(Opcode.GOTO, offset);
-            } else if (-32768 <= offset && offset <= 32767) {
-                return new ImmutableInstruction20t(Opcode.GOTO_16, offset);
-            } else {
-                return new ImmutableInstruction30t(Opcode.GOTO_32, offset);
-            }
-        }
     }
 
     @Override
@@ -913,15 +866,11 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             Register op2 = op2Opt.get();
             Opcode opcode = getTwoRegisterComparionsOpcode(comparison);
 
-            Insn22tCell insnCell = new Insn22tCell(opcode, convertRegister(op1), convertRegister(op2));
-            registerInsnRef(target, insnCell.getOffsetCell());
-            visitInstruction(insnCell);
+            visitInstruction(new Insn22tProvider(opcode, op1, op2, target));
         } else {
             Opcode opcode = getZeroComparionsOpcode(comparison);
 
-            Insn21tCell insnCell = new Insn21tCell(opcode, convertRegister(op1));
-            registerInsnRef(target, insnCell.getOffsetCell());
-            visitInstruction(insnCell);
+            visitInstruction(new Insn21tProvider(opcode, op1, target));
         }
     }
 
@@ -952,175 +901,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     @Override
     public void visitSwitch(Register value, LinkedHashMap<Integer, me.aki.tactical.dex.insn.Instruction> branchTable) {
         super.visitSwitch(value, branchTable);
-    }
-
-    class Insn21tCell extends NonInitializedCell<Instruction> {
-        private final Opcode opcode;
-        private final int registerA;
-        private final RWCell<Integer> offsetCell = new InnerNonInitializedCell<>(Integer.class, this);
-
-        public Insn21tCell(Opcode opcode, int registerA) {
-            super(Instruction.class);
-            this.opcode = opcode;
-            this.registerA = registerA;
-        }
-
-        public RWCell<Integer> getOffsetCell() {
-            return offsetCell;
-        }
-
-        @Override
-        protected Instruction uninitializedValue() {
-            Integer offset = offsetCell.get();
-            return new ImmutableInstruction21t(opcode, registerA, offset);
-        }
-    }
-
-    class Insn22tCell extends NonInitializedCell<Instruction> {
-        private final Opcode opcode;
-        private final int registerA;
-        private final int registerB;
-        private final RWCell<Integer> offsetCell = new InnerNonInitializedCell<>(Integer.class, this);
-
-        public Insn22tCell(Opcode opcode, int registerA, int registerB) {
-            super(Instruction.class);
-            this.opcode = opcode;
-            this.registerA = registerA;
-            this.registerB = registerB;
-        }
-
-        public RWCell<Integer> getOffsetCell() {
-            return offsetCell;
-        }
-
-        @Override
-        protected Instruction uninitializedValue() {
-            int offset = offsetCell.get();
-            return new ImmutableInstruction22t(opcode, registerA, registerB, offset);
-        }
-    }
-
-    class Insn31tCell extends NonInitializedCell<Instruction> {
-        private final Opcode opcode;
-        private final int registerA;
-        private final RWCell<Integer> offsetCell = new InnerNonInitializedCell<>(Integer.class, this);
-
-        public Insn31tCell(Opcode opcode, int registerA) {
-            super(Instruction.class);
-            this.opcode = opcode;
-            this.registerA = registerA;
-        }
-
-        public RWCell<Integer> getOffsetCell() {
-            return offsetCell;
-        }
-
-        @Override
-        protected Instruction uninitializedValue() {
-            Integer offset = offsetCell.get();
-            return new ImmutableInstruction31t(opcode, registerA, offset);
-        }
-    }
-
-    /**
-     * A {@link NonInitializedCell} that denies write operation if another 'outer' {@link NonInitializedCell} has already been initialized.
-     *
-     * This cell is used in cases where {@link NonInitializedCell#uninitializedValue() the computation of the default value}
-     * of a {@link NonInitializedCell} uses the content of this cell. If that cell gets initialized by calling the
-     * {@link NonInitializedCell#set(Object)} value, altering this cell will have no effects.
-     * This is unwanted behavior and therefore causes an exception.
-     */
-    class InnerNonInitializedCell<T> extends NonInitializedCell<T> {
-        private final NonInitializedCell<?> outerCell;
-
-        public InnerNonInitializedCell(Class<T> type, NonInitializedCell<?> outerCell) {
-            super(type);
-            this.outerCell = outerCell;
-        }
-
-        @Override
-        public void set(T newValue) {
-            if (outerCell.isInitialized) {
-                throw new RuntimeException("Outer cell should not be initialized");
-            }
-
-            super.set(newValue);
-        }
-    }
-
-    /**
-     * A cell that has no value by default.
-     * It has a method {@link NonInitializedCell#uninitializedValue() for computation of a default value} that can be overridden.
-     */
-    class NonInitializedCell<T> extends RWCell<T> {
-        private boolean isInitialized = false;
-        private T value;
-
-        public NonInitializedCell(Class<T> type) {
-            super(type);
-        }
-
-        @Override
-        public T get() {
-            return this.isInitialized ? this.value : uninitializedValue();
-        }
-
-        /**
-         * Check whether this cell was initialed by calling the set method.
-         *
-         * @return was the set method of this cell called at least once
-         */
-        public boolean isInitialized() {
-            return this.isInitialized;
-        }
-
-        /**
-         * Compute a fallback value or throw an exception if no value was set yet.
-         */
-        protected T uninitializedValue() {
-            throw new RuntimeException("Cell was not yet initialized");
-        }
-
-        @Override
-        public void set(T newValue) {
-            this.value = newValue;
-            this.isInitialized = true;
-        }
-    }
-
-    public class OffsetInsnRef {
-        /**
-         * The offset should be calculated relative to this instruction
-         */
-        private final RWCell<Instruction> relativeTo;
-
-        /**
-         * The offset cell should point at this instruction
-         */
-        private final RWCell<Instruction> target;
-
-        /**
-         * The cell containing the offset
-         */
-        private final RWCell<Integer> offsetCell;
-
-        public OffsetInsnRef(RWCell<Instruction> relativeTo, RWCell<Instruction> target, RWCell<Integer> offsetCell) {
-            this.relativeTo = relativeTo;
-            this.target = target;
-            this.offsetCell = offsetCell;
-        }
-
-        public RWCell<Instruction> getRelativeTo() {
-            return relativeTo;
-        }
-
-        public RWCell<Instruction> getTarget() {
-            return target;
-        }
-
-        public RWCell<Integer> getOffsetCell() {
-            return offsetCell;
-        }
     }
 
     // UTILS //

@@ -14,6 +14,25 @@ import java.util.function.Supplier;
  * @param <T> type of the value
  */
 public abstract class RWCell<T> implements RCell<T>, WCell<T> {
+    public static class Heap<T> extends RWCell<T> {
+        private T value;
+
+        public Heap(Class<T> type, T initialValue) {
+            super(type);
+            this.value = initialValue;
+        }
+
+        @Override
+        public T get() {
+            return value;
+        }
+
+        @Override
+        public void set(T newValue) {
+            this.value = newValue;
+        }
+    }
+
     /**
      * Create a cell that stores a value in a variable.
      *
@@ -23,19 +42,7 @@ public abstract class RWCell<T> implements RCell<T>, WCell<T> {
      * @return a cell that contains the actual value
      */
     public static <T> RWCell<T> of(T initialValue, Class<T> originalClass) {
-        return new RWCell<>(originalClass) {
-            private T value = initialValue;
-
-            @Override
-            public T get() {
-                return value;
-            }
-
-            @Override
-            public void set(T newValue) {
-                this.value = newValue;
-            }
-        };
+        return new RWCell.Heap<>(originalClass, initialValue);
     }
 
     /**
