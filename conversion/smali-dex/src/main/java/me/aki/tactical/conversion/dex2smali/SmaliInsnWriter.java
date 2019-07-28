@@ -66,20 +66,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         return instructions;
     }
 
-    public List<InstructionProvider<? extends Instruction>> popInstructions() {
-        List<InstructionProvider<? extends Instruction>> instructions = this.instructions;
-        this.instructions = new ArrayList<>();
-        return instructions;
-    }
-
     public List<InstructionProvider<? extends Instruction>> getPayloadInstructions() {
         return payloadInstructions;
-    }
-
-    public List<InstructionProvider<? extends Instruction>> popPayloadInstructions() {
-        List<InstructionProvider<? extends Instruction>> instructions = this.payloadInstructions;
-        this.payloadInstructions = new ArrayList<>();
-        return instructions;
     }
 
     @Override
@@ -579,8 +567,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             Register registerG = registerIter.hasNext() ? registerIter.next() : null;
             visitInstruction(new Insn35cProvider(Opcode.FILLED_NEW_ARRAY, registerCount, registerC, registerD, registerE, registerF, registerG, typeRef));
         } else {
-            registerConstraints.add(new RegisterConstraint(registers));
-            visitInstruction(new Insn3rcProvider(Opcode.FILLED_NEW_ARRAY_RANGE, registers.get(0), registerCount, typeRef));
+            Insn3rcProvider insn = new Insn3rcProvider(Opcode.FILLED_NEW_ARRAY_RANGE, registers.get(0), registerCount, typeRef);
+            registerConstraints.add(new RegisterConstraint(insn, registers));
+            visitInstruction(insn);
         }
     }
 
@@ -770,8 +759,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             visitInstruction(new Insn35cProvider(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef));
         } else {
             Opcode opcode = getInvokeRangeOpcode(invoke);
-            registerConstraints.add(new RegisterConstraint(registers));
-            visitInstruction(new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef));
+            Insn3rcProvider insn = new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef);
+            registerConstraints.add(new RegisterConstraint(insn, registers));
+            visitInstruction(insn);
         }
     }
 
@@ -825,8 +815,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             Register registerG = registerIter.hasNext() ? registerIter.next() : null;
             visitInstruction(new Insn35cProvider(Opcode.INVOKE_CUSTOM, registerCount, registerC, registerD, registerE, registerF, registerG, callSiteRef));
         } else {
-            registerConstraints.add(new RegisterConstraint(arguments));
-            visitInstruction(new Insn3rcProvider(Opcode.INVOKE_CUSTOM_RANGE, arguments.get(0), registerCount, callSiteRef));
+            Insn3rcProvider insn = new Insn3rcProvider(Opcode.INVOKE_CUSTOM_RANGE, arguments.get(0), registerCount, callSiteRef);
+            registerConstraints.add(new RegisterConstraint(insn, arguments));
+            visitInstruction(insn);
         }
     }
 
@@ -987,10 +978,20 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     // UTILS //
 
     public class RegisterConstraint {
+        /**
+         * Instruction that requires the constraint.
+         */
+        private final InstructionProvider<?> instruction;
+
         private final List<Register> registers;
 
-        public RegisterConstraint(List<Register> registers) {
+        public RegisterConstraint(InstructionProvider<?> instruction, List<Register> registers) {
+            this.instruction = instruction;
             this.registers = registers;
+        }
+
+        public InstructionProvider<?> getInstruction() {
+            return instruction;
         }
 
         public List<Register> getRegisters() {
