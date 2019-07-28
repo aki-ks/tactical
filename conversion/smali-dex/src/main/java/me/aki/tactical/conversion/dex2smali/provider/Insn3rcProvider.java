@@ -1,12 +1,14 @@
 package me.aki.tactical.conversion.dex2smali.provider;
 
 import me.aki.tactical.dex.Register;
+import org.jf.dexlib2.Format;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.formats.Instruction3rc;
 import org.jf.dexlib2.iface.reference.Reference;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction3rc;
 
 import java.util.List;
+import java.util.Set;
 
 public class Insn3rcProvider implements InstructionProvider<Instruction3rc> {
     private final Opcode opcode;
@@ -37,6 +39,11 @@ public class Insn3rcProvider implements InstructionProvider<Instruction3rc> {
     @Override
     public List<AbstractOffsetCell> getOffsetCells() {
         return List.of();
+    }
+
+    @Override
+    public Format getFormat() {
+        return Format.Format3rc;
     }
 
     @Override

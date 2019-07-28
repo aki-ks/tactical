@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.dex2smali.provider;
 
+import org.jf.dexlib2.Format;
 import org.jf.dexlib2.iface.instruction.formats.ArrayPayload;
 import org.jf.dexlib2.immutable.instruction.ImmutableArrayPayload;
 
@@ -22,6 +23,11 @@ public class ArrayPayloadProvider implements InstructionProvider<ArrayPayload> {
     @Override
     public List<AbstractOffsetCell> getOffsetCells() {
         return List.of();
+    }
+
+    @Override
+    public Format getFormat() {
+        return Format.ArrayPayload;
     }
 
     @Override

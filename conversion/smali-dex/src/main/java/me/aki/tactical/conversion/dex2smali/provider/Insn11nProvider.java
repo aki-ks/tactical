@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.dex2smali.provider;
 
 import me.aki.tactical.dex.Register;
+import org.jf.dexlib2.Format;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.formats.Instruction11n;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction11n;
@@ -30,6 +31,11 @@ public class Insn11nProvider implements InstructionProvider<Instruction11n> {
     @Override
     public List<AbstractOffsetCell> getOffsetCells() {
         return List.of();
+    }
+
+    @Override
+    public Format getFormat() {
+        return Format.Format11n;
     }
 
     @Override

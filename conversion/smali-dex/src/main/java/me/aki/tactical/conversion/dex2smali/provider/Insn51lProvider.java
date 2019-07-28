@@ -1,6 +1,7 @@
 package me.aki.tactical.conversion.dex2smali.provider;
 
 import me.aki.tactical.dex.Register;
+import org.jf.dexlib2.Format;
 import org.jf.dexlib2.Opcode;
 import org.jf.dexlib2.iface.instruction.formats.Instruction51l;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction51l;
@@ -30,6 +31,11 @@ public class Insn51lProvider implements InstructionProvider<Instruction51l> {
     @Override
     public List<AbstractOffsetCell> getOffsetCells() {
         return List.of();
+    }
+
+    @Override
+    public Format getFormat() {
+        return Format.Format51l;
     }
 
     @Override
