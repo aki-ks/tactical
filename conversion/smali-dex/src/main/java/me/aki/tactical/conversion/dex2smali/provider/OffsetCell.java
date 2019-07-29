@@ -4,8 +4,6 @@ import me.aki.tactical.core.util.Either;
 import me.aki.tactical.core.util.RWCell;
 import org.jf.dexlib2.iface.instruction.Instruction;
 
-import java.util.Optional;
-
 /**
  * A RWCell that should contain the offset of an instruction in the converted smali method.
  */
@@ -37,8 +35,12 @@ public class OffsetCell extends RWCell.Heap<Integer> {
         return relativeTo;
     }
 
-    public Optional<me.aki.tactical.dex.insn.Instruction> getUnresolvedTarget() {
-        return target.getLeftOpt();
+    public boolean isUnresolved() {
+        return target.isLeft();
+    }
+
+    public me.aki.tactical.dex.insn.Instruction getUnresolvedTarget() {
+        return target.getLeft();
     }
 
     public void resolveTarget(InstructionProvider<? extends Instruction> target) {

@@ -11,6 +11,7 @@ val smaliVersion = "2.2.5"
 
 val fastparseVersion = "1.0.0"
 
+val junitVersion = "5.5.1"
 val scalaTestVersion = "3.0.5"
 val scalaCheckVersion = "1.14.0"
 
@@ -28,6 +29,10 @@ lazy val parserSettings = Seq(
 lazy val scalaTest = Seq(
   libraryDependencies += "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
   libraryDependencies += "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
+)
+
+lazy val javaTest = Seq(
+  libraryDependencies += "org.junit.jupiter" % "junit-jupiter-api" % junitVersion % Test
 )
 
 // INTERMEDIATIONS
@@ -92,6 +97,7 @@ lazy val conversionRefStack = (project in file ("conversion/stack-ref"))
 lazy val conversionSmaliDex = (project in file ("conversion/smali-dex"))
   .dependsOn(dex, utilsDex)
   .settings(javaSettings(Compile))
+  .settings(javaTest)
   .settings(
     libraryDependencies += "org.smali" % "dexlib2" % smaliVersion
   )
