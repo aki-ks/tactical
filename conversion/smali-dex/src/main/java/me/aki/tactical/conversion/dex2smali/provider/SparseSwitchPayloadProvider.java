@@ -20,6 +20,6 @@ public class SparseSwitchPayloadProvider extends AbstractSwitchPayloadProvider<S
 
     @Override
     public SparseSwitchPayload newInstance() {
-        return new ImmutableSparseSwitchPayload(getSmaliElements());
+        return new ImmutableSparseSwitchPayload(getSortedSmaliElements());
     }
 }

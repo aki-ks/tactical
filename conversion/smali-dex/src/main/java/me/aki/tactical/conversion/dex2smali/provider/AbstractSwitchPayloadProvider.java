@@ -11,10 +11,10 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSwitchPayloadProvider<T extends SwitchPayload> implements InstructionProvider<T> {
-    private final List<Element> elements;
+    private final List<Element> sortedElements;
 
     public AbstractSwitchPayloadProvider(TreeSet<Integer> sortedKeys, Map<Integer, Instruction> branchTable) {
-        this.elements = sortedKeys.stream()
+        this.sortedElements = sortedKeys.stream()
                 .map(key -> new Element(key, new OffsetCell(this, branchTable.get(key))))
                 .collect(Collectors.toList());
     }
@@ -26,13 +26,13 @@ public abstract class AbstractSwitchPayloadProvider<T extends SwitchPayload> imp
 
     @Override
     public List<AbstractOffsetCell> getOffsetCells() {
-        return elements.stream()
+        return sortedElements.stream()
                 .map(Element::getOffsetCell)
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    protected List<SwitchElement> getSmaliElements() {
-        return elements.stream()
+    protected List<SwitchElement> getSortedSmaliElements() {
+        return sortedElements.stream()
                 .map(e -> new ImmutableSwitchElement(e.key, e.offsetCell.get()))
                 .collect(Collectors.toList());
     }

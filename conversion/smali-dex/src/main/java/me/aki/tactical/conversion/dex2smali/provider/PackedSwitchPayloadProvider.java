@@ -20,6 +20,6 @@ public class PackedSwitchPayloadProvider extends AbstractSwitchPayloadProvider<P
 
     @Override
     public PackedSwitchPayload newInstance() {
-        return new ImmutablePackedSwitchPayload(getSmaliElements());
+        return new ImmutablePackedSwitchPayload(getSortedSmaliElements());
     }
 }
