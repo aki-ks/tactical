@@ -13,7 +13,7 @@ public class Insn22tProvider implements InstructionProvider<Instruction22t> {
     private final Opcode opcode;
     private final RegisterCell registerA;
     private final RegisterCell registerB;
-    private final AbstractOffsetCell offsetCell;
+    private final OffsetCell offsetCell;
 
     public Insn22tProvider(Opcode opcode, Register registerA, Register registerB, Instruction target) {
         this.opcode = opcode;
@@ -30,7 +30,7 @@ public class Insn22tProvider implements InstructionProvider<Instruction22t> {
         return registerB;
     }
 
-    public AbstractOffsetCell getOffsetCell() {
+    public OffsetCell getOffsetCell() {
         return offsetCell;
     }
 
@@ -40,7 +40,7 @@ public class Insn22tProvider implements InstructionProvider<Instruction22t> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of(offsetCell);
     }
 

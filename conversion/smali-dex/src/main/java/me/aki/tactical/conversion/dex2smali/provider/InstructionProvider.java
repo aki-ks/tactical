@@ -3,7 +3,6 @@ package me.aki.tactical.conversion.dex2smali.provider;
 import org.jf.dexlib2.Format;
 import org.jf.dexlib2.iface.instruction.Instruction;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +19,7 @@ public interface InstructionProvider<I extends Instruction> {
      *
      * @return unmodifiable list of all offset cells
      */
-    List<AbstractOffsetCell> getOffsetCells();
+    List<OffsetCell> getOffsetCells();
 
     /**
      * Get the format of the instruction that gets emitted by this provider in its current state.

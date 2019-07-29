@@ -25,7 +25,7 @@ public abstract class AbstractSwitchPayloadProvider<T extends SwitchPayload> imp
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return sortedElements.stream()
                 .map(Element::getOffsetCell)
                 .collect(Collectors.toUnmodifiableList());
@@ -39,9 +39,9 @@ public abstract class AbstractSwitchPayloadProvider<T extends SwitchPayload> imp
 
     public static class Element {
         private final int key;
-        private final AbstractOffsetCell offsetCell;
+        private final OffsetCell offsetCell;
 
-        Element(int key, AbstractOffsetCell offsetCell) {
+        Element(int key, OffsetCell offsetCell) {
             this.key = key;
             this.offsetCell = offsetCell;
         }
@@ -50,7 +50,7 @@ public abstract class AbstractSwitchPayloadProvider<T extends SwitchPayload> imp
             return key;
         }
 
-        public AbstractOffsetCell getOffsetCell() {
+        public OffsetCell getOffsetCell() {
             return offsetCell;
         }
     }

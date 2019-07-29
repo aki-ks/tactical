@@ -20,7 +20,7 @@ public class Insn10xProvider implements InstructionProvider<Instruction10x> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

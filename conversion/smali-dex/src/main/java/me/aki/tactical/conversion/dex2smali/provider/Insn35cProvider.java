@@ -60,7 +60,7 @@ public class Insn35cProvider implements InstructionProvider<Instruction35c> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

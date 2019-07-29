@@ -33,7 +33,7 @@ public class Insn12xProvider implements InstructionProvider<Instruction12x> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

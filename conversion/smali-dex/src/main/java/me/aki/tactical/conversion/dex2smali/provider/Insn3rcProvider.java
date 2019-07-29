@@ -8,7 +8,6 @@ import org.jf.dexlib2.iface.reference.Reference;
 import org.jf.dexlib2.immutable.instruction.ImmutableInstruction3rc;
 
 import java.util.List;
-import java.util.Set;
 
 public class Insn3rcProvider implements InstructionProvider<Instruction3rc> {
     private final Opcode opcode;
@@ -37,7 +36,7 @@ public class Insn3rcProvider implements InstructionProvider<Instruction3rc> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

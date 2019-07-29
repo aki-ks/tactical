@@ -43,7 +43,7 @@ public class MoveLikeInsnProvider implements InstructionProvider<TwoRegisterInst
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

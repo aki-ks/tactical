@@ -21,7 +21,7 @@ public class ArrayPayloadProvider implements InstructionProvider<ArrayPayload> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

@@ -29,7 +29,7 @@ public class Insn11nProvider implements InstructionProvider<Instruction11n> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

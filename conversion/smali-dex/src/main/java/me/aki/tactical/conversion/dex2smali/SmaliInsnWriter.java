@@ -35,7 +35,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     private List<InstructionProvider<? extends Instruction>> payloadInstructions = new ArrayList<>();
 
     private final Map<Register, List<RegisterCell>> registerCells = new HashMap<>();
-    private final List<AbstractOffsetCell> offsetCells = new ArrayList<>();
+    private final List<OffsetCell> offsetCells = new ArrayList<>();
 
     /**
      * Require that registers are aligned next to each other to allow the generation of a range instruction.

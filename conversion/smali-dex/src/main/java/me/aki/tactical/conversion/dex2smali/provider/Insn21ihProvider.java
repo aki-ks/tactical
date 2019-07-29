@@ -29,7 +29,7 @@ public class Insn21ihProvider implements InstructionProvider<Instruction21ih> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

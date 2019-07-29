@@ -39,7 +39,7 @@ public class Insn23xProvider implements InstructionProvider<Instruction23x> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

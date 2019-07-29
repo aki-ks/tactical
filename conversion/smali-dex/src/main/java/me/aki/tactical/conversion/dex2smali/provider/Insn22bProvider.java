@@ -35,7 +35,7 @@ public class Insn22bProvider implements InstructionProvider<Instruction22b> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of();
     }
 

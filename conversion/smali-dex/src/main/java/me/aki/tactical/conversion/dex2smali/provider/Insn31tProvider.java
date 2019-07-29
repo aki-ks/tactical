@@ -12,19 +12,19 @@ import java.util.List;
 public class Insn31tProvider implements InstructionProvider<Instruction31t> {
     private final Opcode opcode;
     private final RegisterCell registerA;
-    private final AbstractOffsetCell offsetCell;
+    private final OffsetCell offsetCell;
 
     public Insn31tProvider(Opcode opcode, Register registerA, InstructionProvider<? extends Instruction> target) {
         this.opcode = opcode;
         this.registerA = new RegisterCell(registerA);
-        this.offsetCell = new ProviderOffsetCell(this, target);
+        this.offsetCell = new OffsetCell(this, target);
     }
 
     public RegisterCell getRegisterACell() {
         return registerA;
     }
 
-    public AbstractOffsetCell getOffsetCell() {
+    public OffsetCell getOffsetCell() {
         return offsetCell;
     }
 
@@ -34,7 +34,7 @@ public class Insn31tProvider implements InstructionProvider<Instruction31t> {
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of(offsetCell);
     }
 

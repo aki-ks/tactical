@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Set;
 
 public class GotoInsnProvider implements InstructionProvider<OffsetInstruction> {
-    private AbstractOffsetCell offsetCell;
+    private OffsetCell offsetCell;
 
     public GotoInsnProvider(Instruction target) {
         this.offsetCell = new OffsetCell(this, target);
     }
 
-    public AbstractOffsetCell getOffsetCell() {
+    public OffsetCell getOffsetCell() {
         return offsetCell;
     }
 
@@ -29,7 +29,7 @@ public class GotoInsnProvider implements InstructionProvider<OffsetInstruction> 
     }
 
     @Override
-    public List<AbstractOffsetCell> getOffsetCells() {
+    public List<OffsetCell> getOffsetCells() {
         return List.of(offsetCell);
     }
 

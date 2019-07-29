@@ -1,22 +1,55 @@
 package me.aki.tactical.conversion.dex2smali.provider;
 
-import me.aki.tactical.dex.insn.Instruction;
+import me.aki.tactical.core.util.Either;
+import me.aki.tactical.core.util.RWCell;
+import org.jf.dexlib2.iface.instruction.Instruction;
+
+import java.util.Optional;
 
 /**
- * An {@link AbstractOffsetCell} where the pointed at instructions is represented as an {@link InstructionProvider}
+ * A RWCell that should contain the offset of an instruction in the converted smali method.
  */
-public class OffsetCell extends AbstractOffsetCell {
+public class OffsetCell extends RWCell.Heap<Integer> {
     /**
-     * The cell should point at this instruction in smali representation.
+     * The offset should be calculated relative to this instruction.
      */
-    private final Instruction target;
+    private final InstructionProvider<?> relativeTo;
 
-    public OffsetCell(InstructionProvider<?> relativeTo, Instruction target) {
-        super(relativeTo);
-        this.target = target;
+    /**
+     * The cell should point at this instruction.
+     * It should be an {@link InstructionProvider} but may initially be set to an {@link Instruction}.
+     */
+    private Either<me.aki.tactical.dex.insn.Instruction, InstructionProvider<? extends Instruction>> target;
+
+    public OffsetCell(InstructionProvider<?> relativeTo, InstructionProvider<? extends Instruction> target) {
+        super(Integer.class, 0);
+        this.relativeTo = relativeTo;
+        this.target = Either.right(target);
     }
 
-    public Instruction getTarget() {
-        return target;
+    public OffsetCell(InstructionProvider<?> relativeTo, me.aki.tactical.dex.insn.Instruction target) {
+        super(Integer.class, 0);
+        this.relativeTo = relativeTo;
+        this.target = Either.left(target);
+    }
+
+    public InstructionProvider<?> getRelativeTo() {
+        return relativeTo;
+    }
+
+    public Optional<me.aki.tactical.dex.insn.Instruction> getUnresolvedTarget() {
+        return target.getLeftOpt();
+    }
+
+    public void resolveTarget(InstructionProvider<? extends Instruction> target) {
+        if (this.target.isLeft()) {
+            this.target = Either.right(target);
+        } else {
+            throw new IllegalStateException("The instructions has already been resolved");
+        }
+    }
+
+    public InstructionProvider<? extends Instruction> getTarget() {
+        return target.getRight();
     }
 }
