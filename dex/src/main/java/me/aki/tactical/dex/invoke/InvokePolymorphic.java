@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.invoke;
 
+import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.dex.Register;
 
@@ -16,7 +17,15 @@ import java.util.List;
  * {@link MethodHandle#invokeExact(Object...)}.
  */
 public class InvokePolymorphic extends InstanceInvoke {
-    public InvokePolymorphic(MethodRef method, Register instance, List<Register> arguments) {
+    private final MethodDescriptor descriptor;
+
+    public InvokePolymorphic(MethodRef method, MethodDescriptor descriptor, Register instance, List<Register> arguments) {
         super(method, instance, arguments);
+        this.descriptor = descriptor;
+    }
+
+    @Override
+    public MethodDescriptor getDescriptor() {
+        return descriptor;
     }
 }

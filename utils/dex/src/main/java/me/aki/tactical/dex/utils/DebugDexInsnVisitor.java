@@ -305,6 +305,12 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
+    public void visitPolymorphicInvoke(MethodRef method, MethodDescriptor descriptor, R instance, List<R> arguments) {
+        super.visitPolymorphicInvoke(method, descriptor, instance, arguments);
+        System.out.println("visitPolymorphicInvoke(method = " + method + ", descriptor = " + descriptor + ", instance = " + instance + ", arguments = " + arguments + ")");
+    }
+
+    @Override
     public void visitCustomInvoke(List<R> arguments, String name, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
         super.visitCustomInvoke(arguments, name, descriptor, bootstrapArguments, bootstrapMethod);
         System.out.println("visitCustomInvoke(arguments = " + arguments + ", name = " + name + ", descriptor = " + descriptor + ", bootstrapArguments = " + bootstrapArguments + ", bootstrapMethod = " + bootstrapMethod + ")");

@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.utils;
 
+import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.*;
@@ -7,6 +8,7 @@ import me.aki.tactical.dex.insn.litmath.*;
 import me.aki.tactical.dex.insn.math.*;
 import me.aki.tactical.dex.invoke.*;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -198,7 +200,14 @@ public class DexInsnReader {
         if (invoke instanceof InvokeCustom) {
             InvokeCustom invokeCustom = (InvokeCustom) invoke;
             iv.visitCustomInvoke(invokeCustom.getArguments(), invokeCustom.getName(), invokeCustom.getDescriptor(), invokeCustom.getBootstrapArguments(), invokeCustom.getBootstrapMethod());
-        } else if (invoke instanceof ConcreteInvoke){
+        } else if (invoke instanceof InvokePolymorphic) {
+            InvokePolymorphic invokePolymorphic = (InvokePolymorphic) invoke;
+            MethodRef methodRef = invokePolymorphic.getMethod();
+            MethodDescriptor descriptor = invokePolymorphic.getDescriptor();
+            Register instance = invokePolymorphic.getInstance();
+            List<Register> arguments = invokePolymorphic.getArguments();
+            iv.visitPolymorphicInvoke(methodRef, descriptor, instance, arguments);
+        } else if (invoke instanceof ConcreteInvoke) {
             MethodRef method = ((ConcreteInvoke) invoke).getMethod();
             Optional<Register> instance = invoke instanceof InstanceInvoke ?
                     Optional.of(((InstanceInvoke) invoke).getInstance()) : Optional.empty();
@@ -214,8 +223,6 @@ public class DexInsnReader {
             return DexInsnVisitor.InvokeType.DIRECT;
         } else if (invoke instanceof InvokeInterface) {
             return DexInsnVisitor.InvokeType.INTERFACE;
-        } else if (invoke instanceof InvokePolymorphic) {
-            return DexInsnVisitor.InvokeType.POLYMORPHIC;
         } else if (invoke instanceof InvokeStatic) {
             return DexInsnVisitor.InvokeType.STATIC;
         } else if (invoke instanceof InvokeSuper) {

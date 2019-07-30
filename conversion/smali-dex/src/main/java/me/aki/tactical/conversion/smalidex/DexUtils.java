@@ -6,6 +6,7 @@ import org.jf.dexlib2.iface.reference.FieldReference;
 import org.jf.dexlib2.iface.reference.MethodProtoReference;
 import org.jf.dexlib2.iface.reference.MethodReference;
 import org.jf.dexlib2.immutable.reference.ImmutableFieldReference;
+import org.jf.dexlib2.immutable.reference.ImmutableMethodProtoReference;
 import org.jf.dexlib2.immutable.reference.ImmutableMethodReference;
 
 import java.util.ArrayList;
@@ -188,6 +189,22 @@ public class DexUtils {
         }
     }
 
+    public static FieldRef toFieldRef(FieldReference reference) {
+        Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
+        Type type = DexUtils.parseDescriptor(reference.getType());
+        return new FieldRef(owner, reference.getName(), type);
+    }
+
+    public static MethodRef toMethodRef(MethodReference reference) {
+        Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
+        Optional<Type> returnType = DexUtils.parseReturnType(reference.getReturnType());
+        List<Type> arguments = reference.getParameterTypes().stream()
+                .map(DexUtils::parseDescriptor)
+                .collect(Collectors.toList());
+
+        return new MethodRef(owner, reference.getName(), arguments, returnType);
+    }
+
     public static FieldReference convertFieldRef(FieldRef fieldRef) {
         String definingClass = DexUtils.toObjectDescriptor(fieldRef.getOwner());
         String type = DexUtils.toDexType(fieldRef.getType());
@@ -207,5 +224,14 @@ public class DexUtils {
 
     public static <T> T unreachable() {
         throw new RuntimeException("Unreachable");
+    }
+
+
+    public static MethodProtoReference convertMethodProto(MethodDescriptor descriptor) {
+        String returnType = DexUtils.toDexReturnType(descriptor.getReturnType());
+        List<String> parameters = descriptor.getParameterTypes().stream()
+                .map(DexUtils::toDexType)
+                .collect(Collectors.toList());
+        return new ImmutableMethodProtoReference(parameters, returnType);
     }
 }

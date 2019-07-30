@@ -382,7 +382,7 @@ public class SmaliDexInsnReader {
             case IGET_CHAR:
             case IGET_SHORT: {
                 Instruction22c insn = (Instruction22c) instruction;
-                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                FieldRef field = DexUtils.toFieldRef((FieldReference) insn.getReference());
                 iv.visitFieldGet(field, Optional.of(insn.getRegisterB()), insn.getRegisterA());
                 break;
             }
@@ -395,7 +395,7 @@ public class SmaliDexInsnReader {
             case IPUT_CHAR:
             case IPUT_SHORT: {
                 Instruction22c insn = (Instruction22c) instruction;
-                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                FieldRef field = DexUtils.toFieldRef((FieldReference) insn.getReference());
                 iv.visitFieldSet(field, Optional.of(insn.getRegisterB()), insn.getRegisterA());
                 break;
             }
@@ -408,7 +408,7 @@ public class SmaliDexInsnReader {
             case SGET_CHAR:
             case SGET_SHORT: {
                 Instruction21c insn = (Instruction21c) instruction;
-                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                FieldRef field = DexUtils.toFieldRef((FieldReference) insn.getReference());
                 iv.visitFieldGet(field, Optional.empty(), insn.getRegisterA());
                 break;
             }
@@ -421,7 +421,7 @@ public class SmaliDexInsnReader {
             case SPUT_CHAR:
             case SPUT_SHORT: {
                 Instruction21c insn = (Instruction21c) instruction;
-                FieldRef field = toFieldRef((FieldReference) insn.getReference());
+                FieldRef field = DexUtils.toFieldRef((FieldReference) insn.getReference());
                 iv.visitFieldSet(field, Optional.empty(), insn.getRegisterA());
                 break;
             }
@@ -581,8 +581,7 @@ public class SmaliDexInsnReader {
             case INVOKE_SUPER:
             case INVOKE_DIRECT:
             case INVOKE_STATIC:
-            case INVOKE_INTERFACE:
-            case INVOKE_POLYMORPHIC: {
+            case INVOKE_INTERFACE: {
                 Instruction35c insn = (Instruction35c) instruction;
                 visitInvoke(insn, getRegisters(insn));
                 break;
@@ -592,12 +591,23 @@ public class SmaliDexInsnReader {
             case INVOKE_SUPER_RANGE:
             case INVOKE_DIRECT_RANGE:
             case INVOKE_STATIC_RANGE:
-            case INVOKE_INTERFACE_RANGE:
-            case INVOKE_POLYMORPHIC_RANGE: {
+            case INVOKE_INTERFACE_RANGE: {
                 Instruction3rc insn = (Instruction3rc) instruction;
                 visitInvoke(insn, getRegisters(insn));
                 break;
             }
+
+            case INVOKE_POLYMORPHIC: {
+                Instruction45cc insn = (Instruction45cc) instruction;
+                visitPolymorphicInvoke(insn, getRegisters(insn));
+                break;
+            }
+            case INVOKE_POLYMORPHIC_RANGE: {
+                Instruction4rcc insn = (Instruction4rcc) instruction;
+                visitPolymorphicInvoke(insn, getRegisters(insn));
+                break;
+            }
+
 
             case INVOKE_CUSTOM: {
                 Instruction35c insn = (Instruction35c) instruction;
@@ -851,22 +861,6 @@ public class SmaliDexInsnReader {
             default:
                 throw new AssertionError();
         }
-    }
-
-    private FieldRef toFieldRef(FieldReference reference) {
-        Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
-        Type type = DexUtils.parseDescriptor(reference.getType());
-        return new FieldRef(owner, reference.getName(), type);
-    }
-
-    private MethodRef toMethodRef(MethodReference reference) {
-        Path owner = DexUtils.parseObjectDescriptor(reference.getDefiningClass());
-        Optional<Type> returnType = DexUtils.parseReturnType(reference.getReturnType());
-        List<Type> arguments = reference.getParameterTypes().stream()
-                .map(DexUtils::parseDescriptor)
-                .collect(Collectors.toList());
-
-        return new MethodRef(owner, reference.getName(), arguments, returnType);
     }
 
     private void visitPrimitiveCast(Instruction12x instruction) {
@@ -1134,13 +1128,13 @@ public class SmaliDexInsnReader {
     }
 
 
-    private List<Integer> getRegisters(Instruction35c insn) {
+    private List<Integer> getRegisters(FiveRegisterInstruction insn) {
         return Stream.of(insn.getRegisterC(), insn.getRegisterD(), insn.getRegisterE(), insn.getRegisterF(), insn.getRegisterG())
                         .limit(insn.getRegisterCount())
                         .collect(Collectors.toList());
     }
 
-    private List<Integer> getRegisters(Instruction3rc insn) {
+    private List<Integer> getRegisters(RegisterRangeInstruction insn) {
         List<Integer> registers = new ArrayList<>(insn.getRegisterCount());
         for (int i = 0; i < insn.getRegisterCount(); i++) {
             registers.add(insn.getStartRegister() + i);
@@ -1149,7 +1143,7 @@ public class SmaliDexInsnReader {
     }
 
     private void visitInvoke(ReferenceInstruction insn, List<Integer> registers) {
-        MethodRef method = toMethodRef((MethodReference) insn.getReference());
+        MethodRef method = DexUtils.toMethodRef((MethodReference) insn.getReference());
         DexInsnVisitor.InvokeType invokeType = convertInvokeType(insn.getOpcode());
 
         Optional<Integer> instanceRegister;
@@ -1182,10 +1176,6 @@ public class SmaliDexInsnReader {
             case INVOKE_INTERFACE_RANGE:
                 return DexInsnVisitor.InvokeType.INTERFACE;
 
-            case INVOKE_POLYMORPHIC:
-            case INVOKE_POLYMORPHIC_RANGE:
-                return DexInsnVisitor.InvokeType.POLYMORPHIC;
-
             case INVOKE_STATIC:
             case INVOKE_STATIC_RANGE:
                 return DexInsnVisitor.InvokeType.STATIC;
@@ -1201,6 +1191,18 @@ public class SmaliDexInsnReader {
             default:
                 throw new AssertionError();
         }
+    }
+
+    private void visitPolymorphicInvoke(DualReferenceInstruction insn, List<Integer> registers) {
+        MethodRef method = DexUtils.toMethodRef((MethodReference) insn.getReference());
+        MethodDescriptor descriptor = DexUtils.convertMethodDescriptor((MethodProtoReference) insn.getReference2());
+
+        Integer instance = registers.get(0);
+        List<Integer> arguments = registers.subList(1, registers.size());
+
+        dropDummyRegisters(descriptor.getParameterTypes(), arguments);
+
+        iv.visitPolymorphicInvoke(method, descriptor, instance, arguments);
     }
 
     private void visitCustomInvoke(ReferenceInstruction insn, List<Integer> arguments) {
@@ -1288,7 +1290,7 @@ public class SmaliDexInsnReader {
             case MethodHandleType.STATIC_GET:
             case MethodHandleType.INSTANCE_PUT:
             case MethodHandleType.INSTANCE_GET:
-                FieldRef fieldRef = toFieldRef((FieldReference) methodHandle.getMemberReference());
+                FieldRef fieldRef = DexUtils.toFieldRef((FieldReference) methodHandle.getMemberReference());
                 switch (methodHandle.getMethodHandleType()) {
                     case MethodHandleType.STATIC_PUT: return new SetStaticHandle(fieldRef);
                     case MethodHandleType.STATIC_GET: return new GetStaticHandle(fieldRef);
@@ -1302,7 +1304,7 @@ public class SmaliDexInsnReader {
             case MethodHandleType.INVOKE_CONSTRUCTOR:
             case MethodHandleType.INVOKE_DIRECT:
             case MethodHandleType.INVOKE_INTERFACE:
-                MethodRef methodRef = toMethodRef((MethodReference) methodHandle.getMemberReference());
+                MethodRef methodRef = DexUtils.toMethodRef((MethodReference) methodHandle.getMemberReference());
                 switch (methodHandle.getMethodHandleType()) {
                     case MethodHandleType.INVOKE_STATIC: return new InvokeStaticHandle(methodRef, false);
                     case MethodHandleType.INVOKE_INSTANCE: return new InvokeVirtualHandle(methodRef);

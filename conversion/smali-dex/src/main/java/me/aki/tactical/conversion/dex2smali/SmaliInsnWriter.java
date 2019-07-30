@@ -769,7 +769,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         switch (invoke) {
             case DIRECT: return Opcode.INVOKE_DIRECT;
             case INTERFACE: return Opcode.INVOKE_INTERFACE;
-            case POLYMORPHIC: return Opcode.INVOKE_POLYMORPHIC;
             case STATIC: return Opcode.INVOKE_STATIC;
             case SUPER: return Opcode.INVOKE_SUPER;
             case VIRTUAL: return Opcode.INVOKE_VIRTUAL;
@@ -781,7 +780,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         switch (invoke) {
             case DIRECT: return Opcode.INVOKE_DIRECT_RANGE;
             case INTERFACE: return Opcode.INVOKE_INTERFACE_RANGE;
-            case POLYMORPHIC: return Opcode.INVOKE_POLYMORPHIC_RANGE;
             case STATIC: return Opcode.INVOKE_STATIC_RANGE;
             case SUPER: return Opcode.INVOKE_SUPER_RANGE;
             case VIRTUAL: return Opcode.INVOKE_VIRTUAL_RANGE;
@@ -789,6 +787,30 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
+    @Override
+    public void visitPolymorphicInvoke(MethodRef method, MethodDescriptor descriptor, Register instance, List<Register> arguments) {
+        MethodReference methodRef = DexUtils.convertMethodRef(method);
+        MethodProtoReference methodProto = DexUtils.convertMethodProto(descriptor);
+
+        List<Register> registers = new ArrayList<>(arguments.size() + 1);
+        registers.add(instance);
+        registers.addAll(arguments);
+
+        int registerCount = registers.size();
+        if (registerCount <= 5) {
+            Iterator<Register> registerIter = registers.iterator();
+            Register registerC = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerD = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerE = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerF = registerIter.hasNext() ? registerIter.next() : null;
+            Register registerG = registerIter.hasNext() ? registerIter.next() : null;
+            visitInstruction(new Insn45ccProvider(Opcode.INVOKE_POLYMORPHIC, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef, methodProto));
+        } else {
+            Insn4rccProvider insn = new Insn4rccProvider(Opcode.INVOKE_POLYMORPHIC_RANGE, registers.get(0), registerCount, methodRef, methodProto);
+            registerConstraints.add(new RegisterConstraint(insn, registers));
+            visitInstruction(insn);
+        }
+    }
 
     @Override
     public void visitCustomInvoke(List<Register> arguments, String methodName, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
@@ -796,11 +818,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 .map(this::convertBootstrapConstant)
                 .collect(Collectors.toList());
 
-        String returnType = DexUtils.toDexReturnType(descriptor.getReturnType());
-        List<String> parameters = descriptor.getParameterTypes().stream()
-                .map(DexUtils::toDexType)
-                .collect(Collectors.toList());
-        MethodProtoReference methodProto = new ImmutableMethodProtoReference(parameters, returnType);
+        MethodProtoReference methodProto = DexUtils.convertMethodProto(descriptor);
 
         String callSiteName = Integer.toString(this.callSiteIndex++);
         CallSiteReference callSiteRef = new ImmutableCallSiteReference(callSiteName, convertMethodHandle(bootstrapMethod), methodName, methodProto, extraArguments);
@@ -914,15 +932,15 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     public void visitIf(IfInstruction.Comparison comparison, Register op1, Optional<Register> op2Opt, me.aki.tactical.dex.insn.Instruction target) {
         if (op2Opt.isPresent()) {
             Register op2 = op2Opt.get();
-            Opcode opcode = getTwoRegisterComparionsOpcode(comparison);
+            Opcode opcode = getTwoRegisterComparisonOpcode(comparison);
             visitInstruction(new Insn22tProvider(opcode, op1, op2, target));
         } else {
-            Opcode opcode = getZeroComparionsOpcode(comparison);
+            Opcode opcode = getZeroComparisonOpcode(comparison);
             visitInstruction(new Insn21tProvider(opcode, op1, target));
         }
     }
 
-    private Opcode getTwoRegisterComparionsOpcode(IfInstruction.Comparison comparison) {
+    private Opcode getTwoRegisterComparisonOpcode(IfInstruction.Comparison comparison) {
         switch (comparison) {
             case EQUAL: return Opcode.IF_EQ;
             case NON_EQUAL: return Opcode.IF_NE;
@@ -934,7 +952,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
-    private Opcode getZeroComparionsOpcode(IfInstruction.Comparison comparison) {
+    private Opcode getZeroComparisonOpcode(IfInstruction.Comparison comparison) {
         switch (comparison) {
             case EQUAL: return Opcode.IF_EQZ;
             case NON_EQUAL: return Opcode.IF_NEZ;
@@ -977,7 +995,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     // UTILS //
 
-    public class RegisterConstraint {
+    public static class RegisterConstraint {
         /**
          * Instruction that requires the constraint.
          */

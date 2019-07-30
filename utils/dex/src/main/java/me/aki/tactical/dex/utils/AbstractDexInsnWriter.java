@@ -359,10 +359,6 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
                     invoke = new InvokeInterface(method, instanceRegister, argumentRegisters);
                     break;
 
-                case POLYMORPHIC:
-                    invoke = new InvokePolymorphic(method, instanceRegister, argumentRegisters);
-                    break;
-
                 case SUPER:
                     invoke = new InvokeSuper(method, instanceRegister, argumentRegisters);
                     break;
@@ -377,6 +373,15 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
         }
 
         visitInstruction(new InvokeInstruction(invoke));
+    }
+
+    @Override
+    public void visitPolymorphicInvoke(MethodRef method, MethodDescriptor descriptor, R instance, List<R> arguments) {
+        List<Register> argumentRegisters = arguments.stream()
+                .map(this::convertRegister)
+                .collect(Collectors.toList());
+
+        visitInstruction(new InvokeInstruction(new InvokePolymorphic(method, descriptor, convertRegister(instance), argumentRegisters)));
     }
 
     @Override

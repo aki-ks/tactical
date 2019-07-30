@@ -4,10 +4,14 @@ description := "Referenced based java bytecode intermediation"
 ThisBuild / organization := "me.aki.tactical"
 ThisBuild / version := "0.1"
 
+// necessary while we use a custom dexlib2 build
+ThisBuild / resolvers += Resolver.mavenLocal
+//
+
 val javaVersion = "1.10"
 
 val asmVersion = "7.0"
-val smaliVersion = "2.2.5"
+val smaliVersion = "2.2.7-8c279e7f" // https://github.com/JesusFreke/smali/pull/705/commits/8c279e7f852283bbd700ad531853f4fa51f14fc5
 
 val fastparseVersion = "1.0.0"
 

@@ -328,12 +328,18 @@ public class DexInsnVisitor<I, R> {
     // METHOD INVOKE
 
     public static enum InvokeType {
-        DIRECT, INTERFACE, POLYMORPHIC, STATIC, SUPER, VIRTUAL
+        DIRECT, INTERFACE, STATIC, SUPER, VIRTUAL
     }
 
     public void visitInvoke(InvokeType invoke, MethodRef method, Optional<R> instance, List<R> arguments) {
         if (iv != null) {
             iv.visitInvoke(invoke, method, instance, arguments);
+        }
+    }
+
+    public void visitPolymorphicInvoke(MethodRef method, MethodDescriptor descriptor, R instance, List<R> arguments) {
+        if (iv != null) {
+            iv.visitPolymorphicInvoke(method, descriptor, instance, arguments);
         }
     }
 
