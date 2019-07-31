@@ -111,7 +111,7 @@ public class DexInsnReader {
             }
         } else if (instruction instanceof BranchInstruction) {
             if (instruction instanceof GotoInstruction) {
-                iv.visitGoto(((GotoInstruction) instruction).getLocation());
+                iv.visitGoto(((GotoInstruction) instruction).getTarget());
             } else if (instruction instanceof IfInstruction) {
                 IfInstruction ifInsn = (IfInstruction) instruction;
                 iv.visitIf(ifInsn.getComparison(), ifInsn.getOp1(), ifInsn.getOp2(), ifInsn.getTarget());

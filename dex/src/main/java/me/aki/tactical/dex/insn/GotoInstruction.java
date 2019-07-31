@@ -13,32 +13,32 @@ public class GotoInstruction implements BranchInstruction {
     /**
      * Branch to this instruction.
      */
-    private Instruction location;
+    private Instruction target;
 
-    public GotoInstruction(Instruction location) {
-        this.location = location;
+    public GotoInstruction(Instruction target) {
+        this.target = target;
     }
 
-    public Instruction getLocation() {
-        return location;
+    public Instruction getTarget() {
+        return target;
     }
 
-    public void setLocation(Instruction location) {
-        this.location = location;
+    public void setTarget(Instruction target) {
+        this.target = target;
     }
 
-    public RWCell<Instruction> getLocationCell() {
-        return RWCell.of(this::getLocation, this::setLocation, Instruction.class);
+    public RWCell<Instruction> getTargetCell() {
+        return RWCell.of(this::getTarget, this::setTarget, Instruction.class);
     }
 
     @Override
     public List<Instruction> getBranchTargets() {
-        return List.of(location);
+        return List.of(target);
     }
 
     @Override
     public List<RWCell<Instruction>> getBranchTargetCells() {
-        return List.of(getLocationCell());
+        return List.of(getTargetCell());
     }
 
     @Override

@@ -412,7 +412,7 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     public void visitGoto(I target) {
         GotoInstruction instruction = new GotoInstruction(null);
 
-        registerReference(target, instruction.getLocationCell());
+        registerReference(target, instruction.getTargetCell());
 
         visitInstruction(instruction);
     }
