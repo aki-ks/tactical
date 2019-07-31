@@ -11,7 +11,7 @@ ThisBuild / resolvers += Resolver.mavenLocal
 val javaVersion = "1.10"
 
 val asmVersion = "7.0"
-val smaliVersion = "2.2.7-8c279e7f" // https://github.com/JesusFreke/smali/pull/705/commits/8c279e7f852283bbd700ad531853f4fa51f14fc5
+val smaliVersion = "2.2.7-cb231dd4" // https://github.com/JesusFreke/smali/pull/705/commits/cb231dd48c34a0eda5fb346fc55674efbcc9a855
 
 val fastparseVersion = "1.0.0"
 
@@ -122,3 +122,8 @@ lazy val utilsRef = (project in file ("utils/ref"))
 lazy val utilsDex = (project in file ("utils/dex"))
   .dependsOn(utilsCore, dex)
   .settings(javaSettings(Compile))
+  .settings(javaTest)
+  .settings(
+    libraryDependencies += "org.smali" % "dexlib2" % smaliVersion,
+    libraryDependencies += "org.smali" % "smali" % smaliVersion
+  )
