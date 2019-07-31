@@ -41,7 +41,7 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
                 Stream.of(body.getInstructions().getNext(instruction)) : Stream.empty();
 
         if (instruction instanceof BranchInstruction) {
-            Stream<Instruction> branchTargets = ((BranchInstruction) succeedingInsn).getBranchTargets().stream();
+            Stream<Instruction> branchTargets = ((BranchInstruction) instruction).getBranchTargets().stream();
             return Stream.concat(succeedingInsn, branchTargets);
         } else {
             return succeedingInsn;
