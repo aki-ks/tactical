@@ -1,14 +1,7 @@
 package me.aki.tactical.core.utils;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -124,6 +117,8 @@ public abstract class AbstractCfgGraph<I> {
         return !nodes.containsKey(instruction);
     }
 
+
+
     /**
      * Get the first instruction of the method that is its entry point.
      *
@@ -156,6 +151,31 @@ public abstract class AbstractCfgGraph<I> {
      * @return does the range only contain deadcode
      */
     public abstract boolean isDeadCode(I start, I end);
+
+    /**
+     * Execute a function for each node in the CFG graph.
+     * 
+     * @param function
+     */
+    public void forEachNode(Consumer<Node> function) {
+        Set<Node> visited = new HashSet<>();
+        Deque<Node> worklist = new ArrayDeque<>();
+
+        worklist.add(getHead());
+        worklist.addAll(getHandlerNodes());
+
+        while (!worklist.isEmpty()) {
+            Node node = worklist.poll();
+            if (!visited.add(node)) {
+                continue;
+            }
+
+            function.accept(node);
+
+            worklist.addAll(node.getSucceeding());
+        }
+    }
+
 
     protected class TryCatchBlock {
         /**

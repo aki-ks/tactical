@@ -113,7 +113,7 @@ public class BodyConverter {
         SmaliDexInsnWriter writer = new SmaliDexInsnWriter(body.getRegisters(), insnRefs);
         SmaliDexInsnReader reader = new SmaliDexInsnReader(insnIndex, writer);
 
-        forEachNode(node -> {
+        cfg.forEachNode(node -> {
             reader.accept(node.getInstruction());
 
             List<me.aki.tactical.dex.insn.Instruction> instructions = writer.popInstructions();
@@ -136,26 +136,6 @@ public class BodyConverter {
             if (insn != null) body.getInstructions().add(insn);
         }
     }
-
-    private void forEachNode(Consumer<SmaliCfgGraph.Node> f) {
-        Set<SmaliCfgGraph.Node> visited = new HashSet<>();
-        Deque<SmaliCfgGraph.Node> worklist = new ArrayDeque<>();
-        worklist.add(this.cfg.getHead());
-        worklist.addAll(this.cfg.getHandlerNodes());
-
-        while (!worklist.isEmpty()) {
-            SmaliCfgGraph.Node node = worklist.poll();
-            if (!visited.add(node)) {
-                // Node already visited
-                continue;
-            }
-
-            f.accept(node);
-
-            worklist.addAll(node.getSucceeding());
-        }
-    }
-
 
     private void convertTryCatchBlocks() {
         for (TryBlock<? extends ExceptionHandler> smaliBlock : smaliBody.getTryBlocks()) {

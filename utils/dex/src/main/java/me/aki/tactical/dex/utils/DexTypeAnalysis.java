@@ -41,7 +41,7 @@ public class DexTypeAnalysis {
      * Store for each instruction which register it writes to and what type the value will be of.
      */
     private void computeWriteTypes() {
-        forEachNode(node -> {
+        cfgGraph.forEachNode(node -> {
             Instruction instruction = node.getInstruction();
 
             RegisterState state = new RegisterState(instruction);
@@ -56,31 +56,11 @@ public class DexTypeAnalysis {
         });
     }
 
-    private void forEachNode(Consumer<DexCfgGraph.Node> function) {
-        Set<DexCfgGraph.Node> visitedNodes = new HashSet<>();
-        Deque<DexCfgGraph.Node> worklist = new ArrayDeque<>();
-
-        worklist.add(cfgGraph.getHead());
-        worklist.addAll(cfgGraph.getHandlerNodes());
-
-        while (!worklist.isEmpty()) {
-            DexCfgGraph.Node node = worklist.poll();
-            if (!visitedNodes.add(node)) {
-                // This instruction was already visited
-                continue;
-            }
-
-            function.accept(node);
-
-            worklist.addAll(node.getSucceeding());
-        }
-    }
-
     /**
      * Compute for each instruction which types the registers will have before the instruction was executed.
      */
     private void computeRegisterStates() {
-        forEachNode(node -> {
+        cfgGraph.forEachNode(node -> {
             RegisterState state = this.states.get(node.getInstruction());
             if (state.writtenRegister != null) {
                 for (DexCfgGraph.Node successor : node.getSucceeding()) {
@@ -197,7 +177,7 @@ public class DexTypeAnalysis {
      * Check whether the type that the instructions requires in registers match those that previous instructions wrote.
      */
     private void validateRegisterStates() {
-        forEachNode(node -> {
+        cfgGraph.forEachNode(node -> {
             Instruction instruction = node.getInstruction();
             RegisterState state = getRegisterStates(instruction);
             new DexInsnReader(new TypeReadVisitor() {
