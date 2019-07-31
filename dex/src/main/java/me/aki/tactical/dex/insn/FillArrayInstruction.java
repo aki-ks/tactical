@@ -66,10 +66,10 @@ public class FillArrayInstruction implements Instruction {
     }
 
     public static enum NumberSize {
-        BYTE(1),   // 1 BYTE
+        BYTE(1),   // 1 byte
         SHORT(2),  // 2 bytes
         INT(4),    // 4 bytes
-        LONG(8);    // 8 bytes
+        LONG(8);   // 8 bytes
 
         private final int byteSize;
 

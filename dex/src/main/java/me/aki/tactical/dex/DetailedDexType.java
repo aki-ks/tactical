@@ -5,12 +5,22 @@ package me.aki.tactical.dex;
  * other int-like (boolean, byte, short, char) types.
  */
 public enum DetailedDexType {
-    BOOLEAN,
-    BYTE,
-    SHORT,
-    CHAR,
+    BOOLEAN(DexType.NORMAL),
+    BYTE(DexType.NORMAL),
+    SHORT(DexType.NORMAL),
+    CHAR(DexType.NORMAL),
 
-    NORMAL, // int or float
-    WIDE, // long or double
-    OBJECT;
+    NORMAL(DexType.NORMAL), // int or float
+    WIDE(DexType.WIDE), // long or double
+    OBJECT(DexType.OBJECT);
+
+    private final DexType dexType;
+
+    DetailedDexType(DexType dexType) {
+        this.dexType = dexType;
+    }
+
+    public DexType toDexType() {
+        return dexType;
+    }
 }
