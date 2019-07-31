@@ -15,6 +15,7 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
 
     public DexCfgGraph(DexBody body) {
         this.body = body;
+        this.analyze();
     }
 
     public DexBody getBody() {

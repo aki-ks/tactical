@@ -25,7 +25,6 @@ public class SmaliCfgGraph extends AbstractCfgGraph<Instruction> {
     public SmaliCfgGraph(InstructionIndex insnIndex, List<? extends TryBlock<? extends ExceptionHandler>> exceptionHandlers) {
         this.insnIndex = insnIndex;
         this.exceptionHandlers = exceptionHandlers;
-
         this.analyze();
     }
 
