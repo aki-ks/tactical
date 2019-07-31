@@ -14,6 +14,8 @@ public class Path {
     public static final Path STRING = Path.of("java", "lang", "String");
     public static final Path CLASS = Path.of("java", "lang", "Class");
     public static final Path THROWABLE = Path.of("java", "lang", "Throwable");
+    public static final Path METHOD_HANDLE = Path.of("java", "lang", "invoke", "MethodHandle");
+    public static final Path METHOD_TYPE = Path.of("java", "lang", "invoke", "MethodType");
 
     /**
      * Packages of the class stored in an immutable list.

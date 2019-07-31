@@ -12,6 +12,8 @@ public class ObjectType implements RefType {
     public static final ObjectType STRING = new ObjectType(Path.STRING);
     public static final ObjectType CLASS = new ObjectType(Path.CLASS);
     public static final ObjectType THROWABLE = new ObjectType(Path.THROWABLE);
+    public static final ObjectType METHOD_HANDLE = new ObjectType(Path.METHOD_HANDLE);
+    public static final ObjectType METHOD_TYPE = new ObjectType(Path.METHOD_TYPE);
 
     private final Path name;
 

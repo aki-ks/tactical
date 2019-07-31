@@ -42,6 +42,6 @@ public class HandleConstant implements BootstrapConstant, PushableConstant, DexC
 
     @Override
     public ObjectType getType() {
-        return new ObjectType(Path.of("java", "lang", "invoke", "MethodHandle"));
+        return ObjectType.METHOD_HANDLE;
     }
 }

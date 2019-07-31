@@ -68,6 +68,6 @@ public class MethodTypeConstant implements BootstrapConstant, PushableConstant, 
 
     @Override
     public ObjectType getType() {
-        return new ObjectType(Path.of("java", "lang", "invoke", "MethodType"));
+        return ObjectType.METHOD_TYPE;
     }
 }
