@@ -77,7 +77,7 @@ public class BodyConverter {
     private void convertRegisters() {
         List<Register> registers = body.getRegisters();
         for (int i = 0; i < smaliBody.getRegisterCount(); i++) {
-            registers.add(new Register());
+            registers.add(new Register(null));
         }
 
         RWCell<Integer> cursor = RWCell.of(smaliBody.getRegisterCount(), Integer.class);

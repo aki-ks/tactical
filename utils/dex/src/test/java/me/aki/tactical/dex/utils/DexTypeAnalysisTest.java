@@ -27,9 +27,9 @@ public class DexTypeAnalysisTest {
         MethodRef longMethod = new MethodRef(Path.of("Test"), "foo", List.of(LongType.getInstance()), Optional.empty());
         MethodRef stringMethod = new MethodRef(Path.of("Test"), "foo", List.of(new ObjectType(Path.of("java", "lang", "String"))), Optional.empty());
 
-        Register registerA = new Register();
-        Register registerB = new Register();
-        Register registerC = new Register();
+        Register registerA = new Register(null);
+        Register registerB = new Register(null);
+        Register registerC = new Register(null);
 
         DexBody body = new DexBody();
         List<Instruction> insns = body.getInstructions();
@@ -72,7 +72,7 @@ public class DexTypeAnalysisTest {
     public void testBasicBranchTyping() {
         FieldRef fieldRef = new FieldRef(Path.of("Test"), "foo", IntType.getInstance());
 
-        Register registerA = new Register();
+        Register registerA = new Register(null);
 
         DexBody body = new DexBody();
         List<Instruction> insns = body.getInstructions();
@@ -113,8 +113,8 @@ public class DexTypeAnalysisTest {
     public void testMergeBranchTyping() {
         FieldRef fieldRef = new FieldRef(Path.of("Test"), "foo", IntType.getInstance());
 
-        Register registerA = new Register();
-        Register registerB = new Register();
+        Register registerA = new Register(null);
+        Register registerB = new Register(null);
 
         DexBody body = new DexBody();
         List<Instruction> insns = body.getInstructions();
