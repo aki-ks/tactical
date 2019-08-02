@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class FillArrayInstruction implements Instruction {
 
     @Override
     public Optional<Register> getWrittenRegister() {
-        return Optional.empty();
+        return Optional.of(array);
     }
 
     public static enum NumberSize {
