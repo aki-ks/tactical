@@ -14,11 +14,6 @@ import java.util.Optional;
  */
 public class NotInstruction implements Instruction {
     /**
-     * Type of number to be negated.
-     */
-    private PrimitiveType type;
-
-    /**
      * Register that contains the value to be negated.
      */
     private Register value;
@@ -28,22 +23,9 @@ public class NotInstruction implements Instruction {
      */
     private Register result;
 
-    public NotInstruction(PrimitiveType type, Register value, Register result) {
-        setType(type);
+    public NotInstruction(Register value, Register result) {
         this.value = value;
         this.result = result;
-    }
-
-    public PrimitiveType getType() {
-        return type;
-    }
-
-    public void setType(PrimitiveType type) {
-        if (!(type instanceof IntLikeType) || !(type instanceof LongType)) {
-            throw new IllegalArgumentException("Only values of int or long type can be bitwise negated");
-        }
-
-        this.type = type;
     }
 
     public Register getValue() {

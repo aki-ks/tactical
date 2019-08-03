@@ -12,11 +12,6 @@ import java.util.Optional;
  */
 public class NegInstruction implements Instruction {
     /**
-     * Type of number to be negated.
-     */
-    private PrimitiveType type;
-
-    /**
      * Register that contains the value to be negated.
      */
     private Register value;
@@ -26,18 +21,9 @@ public class NegInstruction implements Instruction {
      */
     private Register result;
 
-    public NegInstruction(PrimitiveType type, Register value, Register result) {
-        this.type = type;
+    public NegInstruction(Register value, Register result) {
         this.value = value;
         this.result = result;
-    }
-
-    public PrimitiveType getType() {
-        return type;
-    }
-
-    public void setType(PrimitiveType type) {
-        this.type = type;
     }
 
     public Register getValue() {

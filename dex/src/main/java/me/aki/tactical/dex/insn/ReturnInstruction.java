@@ -1,7 +1,6 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.util.RWCell;
-import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -13,27 +12,14 @@ import java.util.Optional;
  * @see ReturnVoidInstruction to return from 'void' methods
  */
 public class ReturnInstruction implements Instruction {
-    /**
-     * Type of value to be returned.
-     */
-    private DexType type;
 
     /**
      * Register that contains the value to be returned.
      */
     private Register register;
 
-    public ReturnInstruction(DexType type, Register register) {
-        this.type = type;
+    public ReturnInstruction(Register register) {
         this.register = register;
-    }
-
-    public DexType getType() {
-        return type;
-    }
-
-    public void setType(DexType type) {
-        this.type = type;
     }
 
     public Register getRegister() {

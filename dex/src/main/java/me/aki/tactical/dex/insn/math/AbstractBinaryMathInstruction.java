@@ -13,11 +13,6 @@ import java.util.Optional;
  */
 public abstract class AbstractBinaryMathInstruction implements Instruction {
     /**
-     * Type of values that this instruction operates on.
-     */
-    private PrimitiveType type;
-
-    /**
      * First operator of the mathematical operation.
      */
     private Register op1;
@@ -32,23 +27,10 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
      */
     private Register result;
 
-    public AbstractBinaryMathInstruction(PrimitiveType type, Register op1, Register op2, Register result) {
+    public AbstractBinaryMathInstruction(Register op1, Register op2, Register result) {
         this.op1 = op1;
         this.op2 = op2;
         this.result = result;
-        setType(type);
-    }
-
-    public PrimitiveType getType() {
-        return type;
-    }
-
-    public void setType(PrimitiveType type) {
-        if (isTypeSupported(type)) {
-            this.type = type;
-        } else {
-            throw new IllegalStateException("Type " + type.getClass().getSimpleName() + " is not supported by " + this.getClass().getSimpleName());
-        }
     }
 
     public Register getOp1() {
@@ -86,8 +68,6 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
     public RWCell<Register> getResultCell() {
         return RWCell.of(this::getResult, this::setResult, Register.class);
     }
-
-    protected abstract boolean isTypeSupported(PrimitiveType type);
 
     @Override
     public List<Register> getReadRegisters() {

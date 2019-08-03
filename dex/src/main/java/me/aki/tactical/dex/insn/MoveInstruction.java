@@ -1,7 +1,6 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.util.RWCell;
-import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -12,11 +11,6 @@ import java.util.Optional;
  */
 public class MoveInstruction implements Instruction {
     /**
-     * Type of value to be moved.
-     */
-    private DexType type;
-
-    /**
      * Where to read the value from.
      */
     private Register from;
@@ -26,18 +20,9 @@ public class MoveInstruction implements Instruction {
      */
     private Register to;
 
-    public MoveInstruction(DexType type, Register from, Register to) {
-        this.type = type;
+    public MoveInstruction(Register from, Register to) {
         this.from = from;
         this.to = to;
-    }
-
-    public DexType getType() {
-        return type;
-    }
-
-    public void setType(DexType type) {
-        this.type = type;
     }
 
     public Register getFrom() {

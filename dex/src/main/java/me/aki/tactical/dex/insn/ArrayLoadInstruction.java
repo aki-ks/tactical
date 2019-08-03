@@ -1,7 +1,6 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.util.RWCell;
-import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -11,11 +10,6 @@ import java.util.Optional;
  * Get one value contained within an array
  */
 public class ArrayLoadInstruction implements Instruction {
-    /**
-     * Type of element to get.
-     */
-    private DetailedDexType type;
-
     /**
      * Register that contains the array to read from.
      */
@@ -31,19 +25,10 @@ public class ArrayLoadInstruction implements Instruction {
      */
     private Register result;
 
-    public ArrayLoadInstruction(DetailedDexType type, Register array, Register index, Register result) {
-        this.type = type;
+    public ArrayLoadInstruction(Register array, Register index, Register result) {
         this.array = array;
         this.index = index;
         this.result = result;
-    }
-
-    public DetailedDexType getType() {
-        return type;
-    }
-
-    public void setType(DetailedDexType type) {
-        this.type = type;
     }
 
     public Register getArray() {

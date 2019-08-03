@@ -1,7 +1,6 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.util.RWCell;
-import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -11,11 +10,6 @@ import java.util.Optional;
  * Store an element at an index within an array.
  */
 public class ArrayStoreInstruction implements Instruction {
-    /**
-     * Type of element to store within the array.
-     */
-    private DetailedDexType type;
-
     /**
      * Register that contains the array to store the element in.
      */
@@ -31,19 +25,10 @@ public class ArrayStoreInstruction implements Instruction {
      */
     private Register value;
 
-    public ArrayStoreInstruction(DetailedDexType type, Register array, Register index, Register value) {
-        this.type = type;
+    public ArrayStoreInstruction(Register array, Register index, Register value) {
         this.array = array;
         this.index = index;
         this.value = value;
-    }
-
-    public DetailedDexType getType() {
-        return type;
-    }
-
-    public void setType(DetailedDexType type) {
-        this.type = type;
     }
 
     public Register getArray() {
