@@ -5,6 +5,7 @@ import me.aki.tactical.core.type.ByteType;
 import me.aki.tactical.core.type.CharType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.ShortType;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -74,6 +75,10 @@ public class PrimitiveCastInstruction implements Instruction {
         this.fromRegister = fromRegister;
     }
 
+    public RWCell<Register> getFromRegisterCell() {
+        return RWCell.of(this::getFromRegister, this::setFromRegister, Register.class);
+    }
+
     public Register getToRegister() {
         return toRegister;
     }
@@ -82,13 +87,27 @@ public class PrimitiveCastInstruction implements Instruction {
         this.toRegister = toRegister;
     }
 
+    public RWCell<Register> getToRegisterCell() {
+        return RWCell.of(this::getToRegister, this::setToRegister, Register.class);
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return List.of(fromRegister);
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of(getFromRegisterCell());
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.of(toRegister);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getToRegisterCell());
     }
 }

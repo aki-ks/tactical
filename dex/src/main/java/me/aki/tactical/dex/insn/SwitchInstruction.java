@@ -38,6 +38,10 @@ public class SwitchInstruction implements BranchInstruction {
         this.value = value;
     }
 
+    public RWCell<Register> getValueCell() {
+        return RWCell.of(this::getValue, this::setValue, Register.class);
+    }
+
     public LinkedHashMap<Integer, Instruction> getBranchTable() {
         return branchTable;
     }
@@ -64,7 +68,17 @@ public class SwitchInstruction implements BranchInstruction {
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of(getValueCell());
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
         return Optional.empty();
     }
 }

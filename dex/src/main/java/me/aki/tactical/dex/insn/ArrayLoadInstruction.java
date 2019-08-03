@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DetailedDexType;
 import me.aki.tactical.dex.Register;
 
@@ -53,12 +54,20 @@ public class ArrayLoadInstruction implements Instruction {
         this.array = array;
     }
 
+    public RWCell<Register> getArrayCell() {
+        return RWCell.of(this::getArray, this::setArray, Register.class);
+    }
+
     public Register getIndex() {
         return index;
     }
 
     public void setIndex(Register index) {
         this.index = index;
+    }
+
+    public RWCell<Register> getIndexCell() {
+        return RWCell.of(this::getIndex, this::setIndex, Register.class);
     }
 
     public Register getResult() {
@@ -69,13 +78,27 @@ public class ArrayLoadInstruction implements Instruction {
         this.result = result;
     }
 
+    public RWCell<Register> getResultCell() {
+        return RWCell.of(this::getResult, this::setResult, Register.class);
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return List.of(array, index);
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of(getArrayCell(), getIndexCell());
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.of(result);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getResultCell());
     }
 }

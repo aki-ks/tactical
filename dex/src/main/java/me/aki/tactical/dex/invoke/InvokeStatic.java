@@ -1,6 +1,7 @@
 package me.aki.tactical.dex.invoke;
 
 import me.aki.tactical.core.MethodRef;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -16,5 +17,10 @@ public class InvokeStatic extends ConcreteInvoke {
     @Override
     public List<Register> getRegisterReads() {
         return List.copyOf(getArguments());
+    }
+
+    @Override
+    public List<RWCell<Register>> getRegisterReadCells() {
+        return getArgumentCells();
     }
 }

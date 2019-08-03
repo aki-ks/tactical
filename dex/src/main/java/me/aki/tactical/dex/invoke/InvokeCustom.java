@@ -3,6 +3,7 @@ package me.aki.tactical.dex.invoke;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.constant.BootstrapConstant;
 import me.aki.tactical.core.handle.Handle;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -78,5 +79,10 @@ public class InvokeCustom extends Invoke {
     @Override
     public List<Register> getRegisterReads() {
         return List.copyOf(getArguments());
+    }
+
+    @Override
+    public List<RWCell<Register>> getRegisterReadCells() {
+        return getArgumentCells();
     }
 }

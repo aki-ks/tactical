@@ -1,10 +1,12 @@
 package me.aki.tactical.dex.invoke;
 
 import me.aki.tactical.core.MethodRef;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -29,9 +31,19 @@ public abstract class InstanceInvoke extends ConcreteInvoke {
         this.instance = instance;
     }
 
+    public RWCell<Register> getInstanceCell() {
+        return RWCell.of(this::getInstance, this::setInstance, Register.class);
+    }
+
     @Override
     public List<Register> getRegisterReads() {
         return Stream.concat(Stream.of(instance), getArguments().stream())
                 .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<RWCell<Register>> getRegisterReadCells() {
+        return Stream.concat(Stream.of(getInstanceCell()), getArgumentCells().stream())
+                .collect(Collectors.toList());
     }
 }

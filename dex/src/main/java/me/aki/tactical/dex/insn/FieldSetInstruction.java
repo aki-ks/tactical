@@ -1,11 +1,13 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Store a value in a field
@@ -48,12 +50,20 @@ public class FieldSetInstruction implements Instruction {
         this.instance = instance;
     }
 
+    public Optional<RWCell<Register>> getInstanceCell() {
+        return instance.map(x -> RWCell.of(() -> this.instance.get(), instance -> this.instance = Optional.of(instance), Register.class));
+    }
+
     public Register getValue() {
         return value;
     }
 
     public void setValue(Register value) {
         this.value = value;
+    }
+
+    public RWCell<Register> getValueCell() {
+        return RWCell.of(this::getValue, this::setValue, Register.class);
     }
 
     @Override
@@ -65,7 +75,20 @@ public class FieldSetInstruction implements Instruction {
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        List<RWCell<Register>> registers = new ArrayList<>();
+        getInstanceCell().ifPresent(registers::add);
+        registers.add(getValueCell());
+        return registers;
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
         return Optional.empty();
     }
 }

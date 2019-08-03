@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -17,7 +18,17 @@ public class ReturnVoidInstruction implements Instruction {
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of();
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
         return Optional.empty();
     }
 

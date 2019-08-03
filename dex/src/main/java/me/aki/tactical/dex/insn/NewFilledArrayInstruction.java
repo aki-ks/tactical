@@ -1,10 +1,13 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.type.ArrayType;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Create a new array filled with values from certain registers.
@@ -43,13 +46,29 @@ public class NewFilledArrayInstruction implements Instruction {
         this.registers = registers;
     }
 
+    public List<RWCell<Register>> getRegisterCells() {
+        return IntStream.range(0, this.registers.size())
+                .mapToObj(index -> RWCell.ofList(this.registers, index, Register.class))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return List.copyOf(this.registers);
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return getRegisterCells();
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
         return Optional.empty();
     }
 }

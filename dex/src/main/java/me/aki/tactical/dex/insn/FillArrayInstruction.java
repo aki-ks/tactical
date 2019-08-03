@@ -40,6 +40,10 @@ public class FillArrayInstruction implements Instruction {
         this.array = array;
     }
 
+    public RWCell<Register> getArrayCell() {
+        return RWCell.of(this::getArray, this::setArray, Register.class);
+    }
+
     public NumberSize getElementSize() {
         return elementSize;
     }
@@ -62,8 +66,18 @@ public class FillArrayInstruction implements Instruction {
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of();
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.of(array);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getArrayCell());
     }
 
     public static enum NumberSize {

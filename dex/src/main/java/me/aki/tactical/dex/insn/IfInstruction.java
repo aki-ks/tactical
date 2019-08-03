@@ -57,12 +57,20 @@ public class IfInstruction implements BranchInstruction {
         this.op1 = op1;
     }
 
+    public RWCell<Register> getOp1Cell() {
+        return RWCell.of(this::getOp1, this::setOp1, Register.class);
+    }
+
     public Optional<Register> getOp2() {
         return op2;
     }
 
     public void setOp2(Optional<Register> op2) {
         this.op2 = op2;
+    }
+
+    public Optional<RWCell<Register>> getOp2Cell() {
+        return op2.map(x -> RWCell.of(() -> this.op2.get(), op2 -> this.op2 = Optional.of(op2), Register.class));
     }
 
     public Instruction getTarget() {
@@ -94,7 +102,18 @@ public class IfInstruction implements BranchInstruction {
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return Stream.concat(Stream.of(getOp1Cell()), getOp2Cell().stream())
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
         return Optional.empty();
     }
 

@@ -1,6 +1,7 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -51,6 +52,10 @@ public class FieldGetInstruction implements Instruction {
         this.instance = instance;
     }
 
+    public Optional<RWCell<Register>> getInstanceCell() {
+        return instance.map(x -> RWCell.of(() -> this.instance.get(), instance -> this.instance = Optional.of(instance), Register.class));
+    }
+
     public Register getResult() {
         return result;
     }
@@ -59,13 +64,27 @@ public class FieldGetInstruction implements Instruction {
         this.result = result;
     }
 
+    public RWCell<Register> getResultCell() {
+        return RWCell.of(this::getResult, this::setResult, Register.class);
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return instance.map(List::of).orElseGet(List::of);
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return getInstanceCell().map(List::of).orElseGet(List::of);
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.of(result);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getResultCell());
     }
 }

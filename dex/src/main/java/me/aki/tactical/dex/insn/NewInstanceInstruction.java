@@ -1,6 +1,7 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.Path;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -41,13 +42,27 @@ public class NewInstanceInstruction implements Instruction {
         this.result = result;
     }
 
+    public RWCell<Register> getResultCell() {
+        return RWCell.of(this::getResult, this::setResult, Register.class);
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return List.of();
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of();
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.of(result);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getResultCell());
     }
 }

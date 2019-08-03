@@ -1,6 +1,7 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.type.ArrayType;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
@@ -47,6 +48,10 @@ public class NewArrayInstruction implements Instruction {
         this.size = size;
     }
 
+    public RWCell<Register> getSizeCell() {
+        return RWCell.of(this::getSize, this::setSize, Register.class);
+    }
+
     public Register getResult() {
         return result;
     }
@@ -55,13 +60,27 @@ public class NewArrayInstruction implements Instruction {
         this.result = result;
     }
 
+    public RWCell<Register> getResultCell() {
+        return RWCell.of(this::getResult, this::setResult, Register.class);
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return List.of(size);
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of(getSizeCell());
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.of(result);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getResultCell());
     }
 }

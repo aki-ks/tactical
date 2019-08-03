@@ -1,5 +1,6 @@
 package me.aki.tactical.dex.insn.litmath;
 
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.Instruction;
 
@@ -39,6 +40,10 @@ public abstract class AbstractBinaryLitMathInstruction implements Instruction {
         this.op1 = op1;
     }
 
+    public RWCell<Register> getOp1Cell() {
+        return RWCell.of(this::getOp1, this::setOp1, Register.class);
+    }
+
     public short getOp2() {
         return op2;
     }
@@ -55,13 +60,27 @@ public abstract class AbstractBinaryLitMathInstruction implements Instruction {
         this.result = result;
     }
 
+    public RWCell<Register> getResultCell() {
+        return RWCell.of(this::getResult, this::setResult, Register.class);
+    }
+
     @Override
     public List<Register> getReadRegisters() {
         return List.of(op1);
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of(getOp1Cell());
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
         return Optional.of(result);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getResultCell());
     }
 }

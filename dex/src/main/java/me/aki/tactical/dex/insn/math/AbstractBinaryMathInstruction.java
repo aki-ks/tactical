@@ -1,6 +1,7 @@
 package me.aki.tactical.dex.insn.math;
 
 import me.aki.tactical.core.type.PrimitiveType;
+import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.Instruction;
 
@@ -58,12 +59,20 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
         this.op1 = op1;
     }
 
+    public RWCell<Register> getOp1Cell() {
+        return RWCell.of(this::getOp1, this::setOp1, Register.class);
+    }
+
     public Register getOp2() {
         return op2;
     }
 
     public void setOp2(Register op2) {
         this.op2 = op2;
+    }
+
+    public RWCell<Register> getOp2Cell() {
+        return RWCell.of(this::getOp2, this::setOp2, Register.class);
     }
 
     public Register getResult() {
@@ -74,6 +83,10 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
         this.result = result;
     }
 
+    public RWCell<Register> getResultCell() {
+        return RWCell.of(this::getResult, this::setResult, Register.class);
+    }
+
     protected abstract boolean isTypeSupported(PrimitiveType type);
 
     @Override
@@ -82,7 +95,17 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of(getOp1Cell(), getOp2Cell());
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
-        return Optional.of(op1);
+        return Optional.of(result);
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
+        return Optional.of(getResultCell());
     }
 }

@@ -47,7 +47,17 @@ public class GotoInstruction implements BranchInstruction {
     }
 
     @Override
+    public List<RWCell<Register>> getReadRegisterCells() {
+        return List.of();
+    }
+
+    @Override
     public Optional<Register> getWrittenRegister() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<RWCell<Register>> getWrittenRegisterCell() {
         return Optional.empty();
     }
 
