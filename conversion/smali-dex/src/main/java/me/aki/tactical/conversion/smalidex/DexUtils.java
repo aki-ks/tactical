@@ -2,6 +2,10 @@ package me.aki.tactical.conversion.smalidex;
 
 import me.aki.tactical.core.*;
 import me.aki.tactical.core.type.*;
+import me.aki.tactical.core.util.RWCell;
+import me.aki.tactical.dex.DexBody;
+import me.aki.tactical.dex.Register;
+import me.aki.tactical.dex.insn.Instruction;
 import org.jf.dexlib2.iface.reference.FieldReference;
 import org.jf.dexlib2.iface.reference.MethodProtoReference;
 import org.jf.dexlib2.iface.reference.MethodReference;
@@ -9,9 +13,7 @@ import org.jf.dexlib2.immutable.reference.ImmutableFieldReference;
 import org.jf.dexlib2.immutable.reference.ImmutableMethodProtoReference;
 import org.jf.dexlib2.immutable.reference.ImmutableMethodReference;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DexUtils {
@@ -222,16 +224,15 @@ public class DexUtils {
         return new ImmutableMethodReference(definingClass, name, parameters, returnType);
     }
 
-    public static <T> T unreachable() {
-        throw new RuntimeException("Unreachable");
-    }
-
-
     public static MethodProtoReference convertMethodProto(MethodDescriptor descriptor) {
         String returnType = DexUtils.toDexReturnType(descriptor.getReturnType());
         List<String> parameters = descriptor.getParameterTypes().stream()
                 .map(DexUtils::toDexType)
                 .collect(Collectors.toList());
         return new ImmutableMethodProtoReference(parameters, returnType);
+    }
+
+    public static <T> T unreachable() {
+        throw new RuntimeException("Unreachable");
     }
 }

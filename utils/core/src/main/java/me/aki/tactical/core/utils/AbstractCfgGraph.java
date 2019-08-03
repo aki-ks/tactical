@@ -154,8 +154,8 @@ public abstract class AbstractCfgGraph<I> {
 
     /**
      * Execute a function for each node in the CFG graph.
-     * 
-     * @param function
+     *
+     * @param function the function to be executed
      */
     public void forEachNode(Consumer<Node> function) {
         Set<Node> visited = new HashSet<>();
