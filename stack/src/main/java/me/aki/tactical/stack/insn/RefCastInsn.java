@@ -2,10 +2,8 @@ package me.aki.tactical.stack.insn;
 
 import me.aki.tactical.core.type.RefType;
 
-import java.util.Objects;
-
 /**
- * Pop a reference type, cast it to another object/array-type and push it again.
+ * Pop a reference value, cast it to another object/array-type and push it again.
  *
  * @see PrimitiveCastInsn for casts between primitive types.
  */
