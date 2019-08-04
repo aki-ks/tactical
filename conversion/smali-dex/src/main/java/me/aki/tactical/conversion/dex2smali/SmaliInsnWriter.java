@@ -9,8 +9,6 @@ import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.*;
 import me.aki.tactical.core.handle.*;
 import me.aki.tactical.core.type.*;
-import me.aki.tactical.dex.DetailedDexType;
-import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
@@ -25,6 +23,7 @@ import org.jf.dexlib2.immutable.value.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Instruction, Register> {
     private List<InstructionProvider<? extends Instruction>> instructions = new ArrayList<>();
@@ -68,6 +67,80 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     public List<InstructionProvider<? extends Instruction>> getPayloadInstructions() {
         return payloadInstructions;
+    }
+
+    private Type requireEqual(Type typeA, Type typeB, Type typeC) {
+        if (typeA.equals(typeB) && typeB.equals(typeC)) {
+            return typeA;
+        } else if (typeA instanceof ObjectType && typeB instanceof ObjectType && typeC instanceof ObjectType) {
+            return ObjectType.OBJECT;
+        } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType && typeC instanceof IntLikeType) {
+            return IntType.getInstance();
+        }
+
+        throw new IllegalStateException("Expected equal types, got " + typeA + ", " + typeB + " and " + typeC);
+    }
+
+    private Type requireEqual(Type typeA, Type typeB) {
+        if (typeA.equals(typeB)) {
+            return typeA;
+        } else if (typeA instanceof ObjectType && typeB instanceof ObjectType) {
+            return ObjectType.OBJECT;
+        } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
+            return IntType.getInstance();
+        }
+
+        throw new IllegalStateException("Expected equal types, got " + typeA + " and " + typeB);
+    }
+
+    private List<Type> requireEqual(Stream<Type> typesA, Stream<Type> typesB) {
+        List<Type> list = new ArrayList<>();
+        Iterator<Type> iterA = typesA.iterator();
+        Iterator<Type> iterB = typesB.iterator();
+
+        while (iterA.hasNext() && iterB.hasNext()) {
+            list.add(requireEqual(iterA.next(), iterB.next()));
+        }
+
+        if (iterA.hasNext() || iterB.hasNext()) {
+            throw new IllegalStateException("Type count mismatch");
+        } else {
+            return list;
+        }
+    }
+
+    private ArrayType requireArrayType(Type type) {
+        if (type instanceof ArrayType) {
+            return (ArrayType) type;
+        } else {
+            throw new IllegalStateException("Expected an ArrayType, got " + type);
+        }
+    }
+
+    private ObjectType requireObjectType(Type type) {
+        if (type instanceof ArrayType) {
+            return (ObjectType) type;
+        } else {
+            throw new IllegalStateException("Expected an ObjectType, got " + type);
+        }
+    }
+
+    private void requireIntOrRefType(Type typeA, Type typeB) {
+        if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
+            return;
+        } else if (typeA instanceof RefType && typeB instanceof RefType) {
+            return;
+        }
+
+        throw new RuntimeException("Expected two int or ref types, got " + typeA + " and " + typeB);
+    }
+
+    private void requireIntOrRefType(Type type) {
+        if (type instanceof IntLikeType || type instanceof RefType) {
+            return;
+        }
+
+        throw new RuntimeException("Expected an int or ref type, got " + type);
     }
 
     @Override
@@ -155,23 +228,57 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     // MATH //
 
-    @Override
-    public void visitAdd(PrimitiveType type, Register op1, Register op2, Register result) {
+    private void visitMathInsn(Register op1, Register op2, Register result,
+                               Opcode opInt, Opcode opLong, Opcode opFloat, Opcode opDouble,
+                               Opcode opInt2addr, Opcode opLong2addr, Opcode opFloat2addr, Opcode opDouble2addr) {
+        Type type = requireEqual(op1.getType(), op2.getType(), result.getType());
+
         if (op1.equals(result)) {
             Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.ADD_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.ADD_LONG_2ADDR; }
-                public Opcode caseFloat() { return Opcode.ADD_FLOAT_2ADDR; }
-                public Opcode caseDouble() { return Opcode.ADD_DOUBLE_2ADDR; }
+                public Opcode caseIntLike(IntLikeType type) { return opInt2addr; }
+                public Opcode caseLong() { return opLong2addr; }
+                public Opcode caseFloat() { return opFloat2addr; }
+                public Opcode caseDouble() { return opDouble2addr; }
             });
 
             visitInstruction(new Insn12xProvider(opcode, op1, op2));
         } else {
             Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.ADD_INT; }
-                public Opcode caseLong() { return Opcode.ADD_LONG; }
-                public Opcode caseFloat() { return Opcode.ADD_FLOAT; }
-                public Opcode caseDouble() { return Opcode.ADD_DOUBLE; }
+                public Opcode caseIntLike(IntLikeType type) { return opInt; }
+                public Opcode caseLong() { return opLong; }
+                public Opcode caseFloat() { return opFloat; }
+                public Opcode caseDouble() { return opDouble; }
+            });
+
+            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
+        }
+    }
+
+    private void visitMathInsn(Register op1, Register op2, Register result, Opcode opInt, Opcode opLong, Opcode opInt2addr, Opcode opLong2addr) {
+        Type type = requireEqual(op1.getType(), op2.getType(), result.getType());
+
+        visitMathInsnUnchecked(type, op1, op2, result, opInt, opLong, opInt2addr, opLong2addr);
+    }
+
+    private void visitBitShiftInsn(Register op1, Register op2, Register result, Opcode opInt, Opcode opLong, Opcode opInt2addr, Opcode opLong2addr) {
+        Type type = requireEqual(op1.getType(), result.getType());
+        requireEqual(op2.getType(), IntType.getInstance());
+
+        visitMathInsnUnchecked(type, op1, op2, result, opInt, opLong, opInt2addr, opLong2addr);
+    }
+
+    private void visitMathInsnUnchecked(Type type, Register op1, Register op2, Register result, Opcode opInt, Opcode opLong, Opcode opInt2addr, Opcode opLong2addr) {
+        if (op1.equals(result)) {
+            Opcode opcode = match(type, new ILTypeMatch<>() {
+                public Opcode caseIntLike(IntLikeType type) { return opInt2addr; }
+                public Opcode caseLong() { return opLong2addr; }
+            });
+
+            visitInstruction(new Insn12xProvider(opcode, op1, op2));
+        } else {
+            Opcode opcode = match(type, new ILTypeMatch<>() {
+                public Opcode caseIntLike(IntLikeType type) { return opInt; }
+                public Opcode caseLong() { return opLong; }
             });
 
             visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
@@ -179,209 +286,133 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     @Override
-    public void visitSub(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.SUB_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.SUB_LONG_2ADDR; }
-                public Opcode caseFloat() { return Opcode.SUB_FLOAT_2ADDR; }
-                public Opcode caseDouble() { return Opcode.SUB_DOUBLE_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.SUB_INT; }
-                public Opcode caseLong() { return Opcode.SUB_LONG; }
-                public Opcode caseFloat() { return Opcode.SUB_FLOAT; }
-                public Opcode caseDouble() { return Opcode.SUB_DOUBLE; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitAdd(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.ADD_INT,
+                Opcode.ADD_LONG,
+                Opcode.ADD_FLOAT,
+                Opcode.ADD_DOUBLE,
+                Opcode.ADD_INT_2ADDR,
+                Opcode.ADD_LONG_2ADDR,
+                Opcode.ADD_FLOAT_2ADDR,
+                Opcode.ADD_DOUBLE_2ADDR
+        );
     }
 
     @Override
-    public void visitMul(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.MUL_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.MUL_LONG_2ADDR; }
-                public Opcode caseFloat() { return Opcode.MUL_FLOAT_2ADDR; }
-                public Opcode caseDouble() { return Opcode.MUL_DOUBLE_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.MUL_INT; }
-                public Opcode caseLong() { return Opcode.MUL_LONG; }
-                public Opcode caseFloat() { return Opcode.MUL_FLOAT; }
-                public Opcode caseDouble() { return Opcode.MUL_DOUBLE; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitSub(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.SUB_INT,
+                Opcode.SUB_LONG,
+                Opcode.SUB_FLOAT,
+                Opcode.SUB_DOUBLE,
+                Opcode.SUB_INT_2ADDR,
+                Opcode.SUB_LONG_2ADDR,
+                Opcode.SUB_FLOAT_2ADDR,
+                Opcode.SUB_DOUBLE_2ADDR
+        );
     }
 
     @Override
-    public void visitDiv(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.DIV_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.DIV_LONG_2ADDR; }
-                public Opcode caseFloat() { return Opcode.DIV_FLOAT_2ADDR; }
-                public Opcode caseDouble() { return Opcode.DIV_DOUBLE_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.DIV_INT; }
-                public Opcode caseLong() { return Opcode.DIV_LONG; }
-                public Opcode caseFloat() { return Opcode.DIV_FLOAT; }
-                public Opcode caseDouble() { return Opcode.DIV_DOUBLE; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitMul(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.MUL_INT,
+                Opcode.MUL_LONG,
+                Opcode.MUL_FLOAT,
+                Opcode.MUL_DOUBLE,
+                Opcode.MUL_INT_2ADDR,
+                Opcode.MUL_LONG_2ADDR,
+                Opcode.MUL_FLOAT_2ADDR,
+                Opcode.MUL_DOUBLE_2ADDR
+        );
     }
 
     @Override
-    public void visitMod(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.REM_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.REM_LONG_2ADDR; }
-                public Opcode caseFloat() { return Opcode.REM_FLOAT_2ADDR; }
-                public Opcode caseDouble() { return Opcode.REM_DOUBLE_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILFDTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.REM_INT; }
-                public Opcode caseLong() { return Opcode.REM_LONG; }
-                public Opcode caseFloat() { return Opcode.REM_FLOAT; }
-                public Opcode caseDouble() { return Opcode.REM_DOUBLE; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitDiv(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.DIV_INT,
+                Opcode.DIV_LONG,
+                Opcode.DIV_FLOAT,
+                Opcode.DIV_DOUBLE,
+                Opcode.DIV_INT_2ADDR,
+                Opcode.DIV_LONG_2ADDR,
+                Opcode.DIV_FLOAT_2ADDR,
+                Opcode.DIV_DOUBLE_2ADDR
+        );
     }
 
     @Override
-    public void visitAnd(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.AND_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.AND_LONG_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.AND_INT; }
-                public Opcode caseLong() { return Opcode.AND_LONG; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitMod(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.REM_INT,
+                Opcode.REM_LONG,
+                Opcode.REM_FLOAT,
+                Opcode.REM_DOUBLE,
+                Opcode.REM_INT_2ADDR,
+                Opcode.REM_LONG_2ADDR,
+                Opcode.REM_FLOAT_2ADDR,
+                Opcode.REM_DOUBLE_2ADDR
+        );
     }
 
     @Override
-    public void visitOr(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.OR_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.OR_LONG_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.OR_INT; }
-                public Opcode caseLong() { return Opcode.OR_LONG; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitAnd(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.AND_INT,
+                Opcode.AND_LONG,
+                Opcode.AND_INT_2ADDR,
+                Opcode.AND_LONG_2ADDR
+        );
     }
 
     @Override
-    public void visitXor(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.XOR_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.XOR_LONG_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.XOR_INT; }
-                public Opcode caseLong() { return Opcode.XOR_LONG; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitOr(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.OR_INT,
+                Opcode.OR_LONG,
+                Opcode.OR_INT_2ADDR,
+                Opcode.OR_LONG_2ADDR
+        );
     }
 
     @Override
-    public void visitShl(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.SHL_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.SHL_LONG_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.SHL_INT; }
-                public Opcode caseLong() { return Opcode.SHL_LONG; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitXor(Register op1, Register op2, Register result) {
+        visitMathInsn(op1, op2, result,
+                Opcode.XOR_INT,
+                Opcode.XOR_LONG,
+                Opcode.XOR_INT_2ADDR,
+                Opcode.XOR_LONG_2ADDR
+        );
     }
 
     @Override
-    public void visitShr(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.SHR_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.SHR_LONG_2ADDR; }
-            });
-
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.SHR_INT; }
-                public Opcode caseLong() { return Opcode.SHR_LONG; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    public void visitShl(Register op1, Register op2, Register result) {
+        visitBitShiftInsn(op1, op2, result,
+                Opcode.SHL_INT,
+                Opcode.SHL_LONG,
+                Opcode.SHL_INT_2ADDR,
+                Opcode.SHL_LONG_2ADDR
+        );
     }
 
     @Override
-    public void visitUShr(PrimitiveType type, Register op1, Register op2, Register result) {
-        if (op1.equals(result)) {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.USHR_INT_2ADDR; }
-                public Opcode caseLong() { return Opcode.USHR_LONG_2ADDR; }
-            });
+    public void visitShr(Register op1, Register op2, Register result) {
+        visitBitShiftInsn(op1, op2, result,
+                Opcode.SHR_INT,
+                Opcode.SHR_LONG,
+                Opcode.SHR_INT_2ADDR,
+                Opcode.SHR_LONG_2ADDR
+        );
+    }
 
-            visitInstruction(new Insn12xProvider(opcode, op1, op2));
-        } else {
-            Opcode opcode = match(type, new ILTypeMatch<>() {
-                public Opcode caseIntLike(IntLikeType type) { return Opcode.USHR_INT; }
-                public Opcode caseLong() { return Opcode.USHR_LONG; }
-            });
-
-            visitInstruction(new Insn23xProvider(opcode, result, op1, op2));
-        }
+    @Override
+    public void visitUShr(Register op1, Register op2, Register result) {
+        visitBitShiftInsn(op1, op2, result,
+                Opcode.USHR_INT,
+                Opcode.USHR_LONG,
+                Opcode.USHR_INT_2ADDR,
+                Opcode.USHR_LONG_2ADDR
+        );
     }
 
     // LITERAL MATH //
@@ -426,31 +457,40 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         visitLiteralMathInsn(Opcode.XOR_INT_LIT8, Opcode.XOR_INT_LIT16, op1, literal, result);
     }
 
-    private void visitLiteralMathInsn(Opcode lit8, Opcode lit16, Register op1, short literal, Register result) {
-        if (Byte.MIN_VALUE <= literal && literal <= Byte.MAX_VALUE) {
-            visitInstruction(new Insn22bProvider(lit8, result, op1, literal));
-        } else {
-            visitInstruction(new Insn22sProvider(lit16, result, op1, literal));
-        }
-    }
-
     @Override
     public void visitLitShl(Register op1, short literal, Register result) {
-        visitInstruction(new Insn22bProvider(Opcode.SHL_INT_LIT8, result, op1, literal));
+        visitLiteralMath(op1, literal, result, Opcode.SHL_INT_LIT8);
     }
 
     @Override
     public void visitLitShr(Register op1, short literal, Register result) {
-        visitInstruction(new Insn22bProvider(Opcode.SHR_INT_LIT8, result, op1, literal));
+        visitLiteralMath(op1, literal, result, Opcode.SHR_INT_LIT8);
     }
 
     @Override
     public void visitLitUShr(Register op1, short literal, Register result) {
-        visitInstruction(new Insn22bProvider(Opcode.USHR_INT_LIT8, result, op1, literal));
+        visitLiteralMath(op1, literal, result, Opcode.USHR_INT_LIT8);
+    }
+
+    private void visitLiteralMath(Register op1, short literal, Register result, Opcode ushrIntLit8) {
+        requireEqual(op1.getType(), result.getType(), IntType.getInstance());
+
+        visitInstruction(new Insn22bProvider(ushrIntLit8, result, op1, literal));
+    }
+
+    private void visitLiteralMathInsn(Opcode opLit8, Opcode opLit16, Register op1, short literal, Register result) {
+        requireEqual(op1.getType(), result.getType(), IntType.getInstance());
+
+        if (Byte.MIN_VALUE <= literal && literal <= Byte.MAX_VALUE) {
+            visitLiteralMath(op1, literal, result, opLit8);
+        } else {
+            visitInstruction(new Insn22sProvider(opLit16, result, op1, literal));
+        }
     }
 
     @Override
-    public void visitNeg(PrimitiveType type, Register value, Register result) {
+    public void visitNeg(Register value, Register result) {
+        Type type = requireEqual(value.getType(), result.getType());
         Opcode opcode = match(type, new ILFDTypeMatch<>() {
             public Opcode caseIntLike(IntLikeType type) { return Opcode.NEG_INT; }
             public Opcode caseLong() { return Opcode.NEG_LONG; }
@@ -462,7 +502,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     @Override
-    public void visitNot(PrimitiveType type, Register value, Register result) {
+    public void visitNot(Register value, Register result) {
+        Type type = requireEqual(value.getType(), result.getType());
         Opcode opcode = match(type, new ILTypeMatch<>() {
             public Opcode caseIntLike(IntLikeType type) { return Opcode.NOT_INT; }
             public Opcode caseLong() { return Opcode.NOT_LONG; }
@@ -477,7 +518,10 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     @Override
-    public void visitCmpl(PrimitiveType type, Register op1, Register op2, Register result) {
+    public void visitCmpl(Register op1, Register op2, Register result) {
+        Type type = requireEqual(op1.getType(), op2.getType());
+        requireEqual(result.getType(), IntType.getInstance());
+
         Opcode opcode = match(type, new FDTypeMatch<>() {
             public Opcode caseFloat() { return Opcode.CMPL_FLOAT; }
             public Opcode caseDouble() { return Opcode.CMPL_DOUBLE; }
@@ -487,7 +531,10 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     @Override
-    public void visitCmpg(PrimitiveType type, Register op1, Register op2, Register result) {
+    public void visitCmpg(Register op1, Register op2, Register result) {
+        Type type = requireEqual(op1.getType(), op2.getType());
+        requireEqual(result.getType(), IntType.getInstance());
+
         Opcode opcode = match(type, new FDTypeMatch<>() {
             public Opcode caseFloat() { return Opcode.CMPG_FLOAT; }
             public Opcode caseDouble() { return Opcode.CMPG_DOUBLE; }
@@ -504,44 +551,61 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     @Override
-    public void visitArrayLoad(DetailedDexType type, Register array, Register index, Register result) {
-        visitInstruction(new Insn23xProvider(getArrayLoadOpcode(type), result, array, index));
+    public void visitArrayLoad(Register array, Register index, Register result) {
+        Type baseType = requireArrayType(array.getType()).getLowerType();
+        requireEqual(result.getType(), baseType);
+        requireEqual(index.getType(), IntType.getInstance());
+
+        visitInstruction(new Insn23xProvider(getArrayLoadOpcode(baseType), result, array, index));
     }
 
-    private Opcode getArrayLoadOpcode(DetailedDexType type) {
-        switch (type) {
-            case BOOLEAN: return Opcode.AGET_BOOLEAN;
-            case BYTE: return Opcode.AGET_BYTE;
-            case SHORT: return Opcode.AGET_SHORT;
-            case CHAR: return Opcode.AGET_CHAR;
-            case NORMAL: return Opcode.AGET;
-            case OBJECT: return Opcode.AGET_OBJECT;
-            case WIDE: return Opcode.AGET_WIDE;
-            default: return DexUtils.unreachable();
-        }
+    private Opcode getArrayLoadOpcode(Type type) {
+        return match(type, new TypeMatch<>() {
+            public Opcode caseBoolean() { return Opcode.AGET_BOOLEAN; }
+            public Opcode caseByte() { return Opcode.AGET_BYTE; }
+            public Opcode caseChar() { return Opcode.AGET_CHAR; }
+            public Opcode caseShort() { return Opcode.AGET_SHORT; }
+            public Opcode caseInt() { return Opcode.AGET;}
+            public Opcode caseLong() { return Opcode.AGET_WIDE; }
+            public Opcode caseFloat() { return Opcode.AGET; }
+            public Opcode caseDouble() { return Opcode.AGET_WIDE; }
+            public Opcode caseArray(ArrayType type) { return Opcode.AGET_OBJECT; }
+            public Opcode caseObject(ObjectType type) { return Opcode.AGET_OBJECT; }
+        });
     }
 
     @Override
-    public void visitArrayStore(DetailedDexType type, Register array, Register index, Register value) {
-        visitInstruction(new Insn23xProvider(getArrayStoreOpcode(type), value, array, index));
+    public void visitArrayStore(Register array, Register index, Register value) {
+        Type baseType = requireArrayType(array.getType()).getLowerType();
+        requireEqual(value.getType(), baseType);
+        requireEqual(index.getType(), IntType.getInstance());
+
+        visitInstruction(new Insn23xProvider(getArrayStoreOpcode(baseType), value, array, index));
     }
 
-    private Opcode getArrayStoreOpcode(DetailedDexType type) {
-        switch (type) {
-            case BOOLEAN: return Opcode.APUT_BOOLEAN;
-            case BYTE: return Opcode.APUT_BYTE;
-            case SHORT: return Opcode.APUT_SHORT;
-            case CHAR: return Opcode.APUT_CHAR;
-            case NORMAL: return Opcode.APUT;
-            case OBJECT: return Opcode.APUT_OBJECT;
-            case WIDE: return Opcode.APUT_WIDE;
-            default: return DexUtils.unreachable();
-        }
+    private Opcode getArrayStoreOpcode(Type type) {
+        return match(type, new TypeMatch<>() {
+            public Opcode caseBoolean() { return Opcode.APUT_BOOLEAN; }
+            public Opcode caseByte() { return Opcode.APUT_BYTE; }
+            public Opcode caseChar() { return Opcode.APUT_CHAR; }
+            public Opcode caseShort() { return Opcode.APUT_SHORT; }
+            public Opcode caseInt() { return Opcode.APUT; }
+            public Opcode caseLong() { return Opcode.APUT_WIDE; }
+            public Opcode caseFloat() { return Opcode.APUT; }
+            public Opcode caseDouble() { return Opcode.APUT_WIDE; }
+            public Opcode caseArray(ArrayType type) { return Opcode.APUT_OBJECT; }
+            public Opcode caseObject(ObjectType type) { return Opcode.APUT_OBJECT; }
+        });
     }
 
     @Override
     public void visitFillArray(Register array, FillArrayInstruction.NumberSize elementSize, List<FillArrayInstruction.NumericConstant> values) {
-        List<Number> numbers = values.stream().map(FillArrayInstruction.NumericConstant::longValue).collect(Collectors.toList());
+        requireArrayType(array.getType());
+
+        List<Number> numbers = values.stream()
+                .map(FillArrayInstruction.NumericConstant::longValue)
+                .collect(Collectors.toList());
+
         ArrayPayloadProvider arrayPayload = new ArrayPayloadProvider(elementSize.getByteSize(), numbers);
 
         visitPayloadInstruction(arrayPayload);
@@ -550,12 +614,20 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitNewArray(ArrayType type, Register size, Register result) {
+        requireEqual(size.getType(), IntType.getInstance());
+        requireArrayType(result.getType());
+
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
         visitInstruction(new Insn22cProvider(Opcode.NEW_ARRAY, result, size, typeRef));
     }
 
     @Override
     public void visitNewFilledArray(ArrayType type, List<Register> registers) {
+        Type baseType = type.getLowerType();
+        for (Register register : registers) {
+            requireEqual(register.getType(), baseType);
+        }
+
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
         int registerCount = registers.size();
         if (registerCount <= 5) {
@@ -577,6 +649,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitPrimitiveCast(PrimitiveType fromType, PrimitiveType toType, Register fromRegister, Register toRegister) {
+        requireEqual(fromRegister.getType(), fromType);
+        requireEqual(toRegister.getType(), toType);
+
         Opcode opcode = match(fromType, new ILFDTypeMatch<>() {
             public Opcode caseIntLike(IntLikeType type) {
                 return match(toType, new PrimitiveTypeMatch<>() {
@@ -624,6 +699,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitRefCast(RefType type, Register register) {
+        requireObjectType(register.getType());
+
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
         visitInstruction(new Insn21cProvider(Opcode.CHECK_CAST, register, typeRef));
     }
@@ -632,11 +709,15 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitMonitorEnter(Register value) {
+        requireObjectType(value.getType());
+
         visitInstruction(new Insn11xProvider(Opcode.MONITOR_ENTER, value));
     }
 
     @Override
     public void visitMonitorExit(Register value) {
+        requireObjectType(value.getType());
+
         visitInstruction(new Insn11xProvider(Opcode.MONITOR_EXIT, value));
     }
 
@@ -644,12 +725,17 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitNew(Path type, Register result) {
+        requireObjectType(result.getType());
+
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toObjectDescriptor(type));
         visitInstruction(new Insn21cProvider(Opcode.NEW_INSTANCE, result, typeRef));
     }
 
     @Override
     public void visitInstanceOf(RefType type, Register value, Register result) {
+        requireObjectType(result.getType());
+        requireEqual(result.getType(), IntType.getInstance());
+
         TypeReference typeRef = new ImmutableTypeReference(DexUtils.toDexType(type));
         visitInstruction(new Insn22cProvider(Opcode.INSTANCE_OF, result, value, typeRef));
     }
@@ -657,17 +743,23 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     // METHOD EXIT INSTRUCTIONS //
 
     @Override
-    public void visitReturn(DexType type, Register register) {
-        visitInstruction(new Insn11xProvider(getReturnOpcode(type), register));
+    public void visitReturn(Register register) {
+        visitInstruction(new Insn11xProvider(getReturnOpcode(register.getType()), register));
     }
 
-    private Opcode getReturnOpcode(DexType type) {
-        switch (type) {
-            case NORMAL: return Opcode.RETURN;
-            case WIDE: return Opcode.RETURN_WIDE;
-            case OBJECT: return Opcode.RETURN_OBJECT;
-            default: return DexUtils.unreachable();
-        }
+    private Opcode getReturnOpcode(Type type) {
+        return match(type, new TypeMatch<>() {
+            public Opcode caseBoolean() { return Opcode.RETURN; }
+            public Opcode caseByte() { return Opcode.RETURN; }
+            public Opcode caseChar() { return Opcode.RETURN; }
+            public Opcode caseShort() { return Opcode.RETURN; }
+            public Opcode caseInt() { return Opcode.RETURN; }
+            public Opcode caseLong() { return Opcode.RETURN_WIDE; }
+            public Opcode caseFloat() { return Opcode.RETURN; }
+            public Opcode caseDouble() { return Opcode.RETURN_WIDE; }
+            public Opcode caseArray(ArrayType type) { return Opcode.RETURN_OBJECT; }
+            public Opcode caseObject(ObjectType type) { return Opcode.RETURN_OBJECT; }
+        });
     }
 
     @Override
@@ -677,15 +769,20 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitThrow(Register exception) {
+        requireObjectType(exception.getType());
+
         visitInstruction(new Insn11xProvider(Opcode.THROW, exception));
     }
 
     // FIELD ACCESS //
 
     @Override
-    public void visitFieldGet(FieldRef field, Optional<Register> instance, Register result) {
+    public void visitFieldGet(FieldRef field, Optional<Register> instanceOpt, Register result) {
         FieldReference fieldRef = DexUtils.convertFieldRef(field);
-        boolean isInstance = instance.isPresent();
+        boolean isInstance = instanceOpt.isPresent();
+
+        requireEqual(result.getType(), field.getType());
+        instanceOpt.ifPresent(instance -> requireObjectType(instance.getType()));
 
         Opcode opcode = match(field.getType(), new TypeMatch<>() {
             public Opcode caseBoolean() { return isInstance ? Opcode.IGET_BOOLEAN : Opcode.SGET_BOOLEAN; }
@@ -702,16 +799,19 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         });
 
         if (isInstance) {
-            visitInstruction(new Insn22cProvider(opcode, result, instance.get(), fieldRef));
+            visitInstruction(new Insn22cProvider(opcode, result, instanceOpt.get(), fieldRef));
         } else {
             visitInstruction(new Insn21cProvider(opcode, result, fieldRef));
         }
     }
 
     @Override
-    public void visitFieldSet(FieldRef field, Optional<Register> instance, Register value) {
+    public void visitFieldSet(FieldRef field, Optional<Register> instanceOpt, Register value) {
         FieldReference fieldRef = DexUtils.convertFieldRef(field);
-        boolean isInstance = instance.isPresent();
+        boolean isInstance = instanceOpt.isPresent();
+
+        requireEqual(value.getType(), field.getType());
+        instanceOpt.ifPresent(instance -> requireObjectType(instance.getType()));
 
         Opcode opcode = match(field.getType(), new TypeMatch<>() {
             public Opcode caseBoolean() { return isInstance ? Opcode.IPUT_BOOLEAN : Opcode.SPUT_BOOLEAN; }
@@ -728,25 +828,20 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         });
 
         if (isInstance) {
-            visitInstruction(new Insn22cProvider(opcode, value, instance.get(), fieldRef));
+            visitInstruction(new Insn22cProvider(opcode, value, instanceOpt.get(), fieldRef));
         } else {
             visitInstruction(new Insn21cProvider(opcode, value, fieldRef));
         }
     }
 
     @Override
-    public void visitInvoke(InvokeType invoke, MethodRef method, Optional<Register> instance, List<Register> arguments) {
+    public void visitInvoke(InvokeType invoke, MethodRef method, Optional<Register> instanceOpt, List<Register> arguments) {
         MethodReference methodRef = DexUtils.convertMethodRef(method);
 
-        List<Register> registers;
-        if (instance.isPresent()) {
-            registers = new ArrayList<>(arguments.size() + 1);
-            registers.add(instance.get());
-            registers.addAll(arguments);
-        } else {
-            registers = new ArrayList<>(arguments);
-        }
+        requireEqual(method.getArguments().stream(), arguments.stream().map(Register::getType));
+        instanceOpt.ifPresent(instance -> requireObjectType(instance.getType()));
 
+        List<Register> registers = concat(instanceOpt, arguments);
         int registerCount = registers.size();
         if (registerCount <= 5) {
             Opcode opcode = getInvokeOpcode(invoke);
@@ -762,6 +857,17 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             Insn3rcProvider insn = new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef);
             registerConstraints.add(new RegisterConstraint(insn, registers));
             visitInstruction(insn);
+        }
+    }
+
+    private <T> List<T> concat(Optional<T> headOpt, List<T> tail) {
+        if (headOpt.isPresent()) {
+            List<T> values = new ArrayList<>(tail.size() + 1);
+            values.add(headOpt.get());
+            values.addAll(tail);
+            return values;
+        } else {
+            return new ArrayList<>(tail);
         }
     }
 
@@ -792,6 +898,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         MethodReference methodRef = DexUtils.convertMethodRef(method);
         MethodProtoReference methodProto = DexUtils.convertMethodProto(descriptor);
 
+        requireEqual(method.getArguments().stream(), arguments.stream().map(Register::getType));
+        requireObjectType(instance.getType());
+
         List<Register> registers = new ArrayList<>(arguments.size() + 1);
         registers.add(instance);
         registers.addAll(arguments);
@@ -814,6 +923,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitCustomInvoke(List<Register> arguments, String methodName, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
+        requireEqual(descriptor.getParameterTypes().stream(), arguments.stream().map(Register::getType));
+
         List<EncodedValue> extraArguments = bootstrapArguments.stream()
                 .map(this::convertBootstrapConstant)
                 .collect(Collectors.toList());
@@ -870,49 +981,46 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     // MOVE INSTRUCTIONS //
 
     @Override
-    public void visitMove(DexType type, Register from, Register to) {
+    public void visitMove(Register from, Register to) {
+        Type fromType = from.getType();
+        Type toType = to.getType();
+
         Opcode opcode;
         Opcode opcodeFrom16;
         Opcode opcode16;
-
-        switch (type) {
-            case NORMAL:
-                opcode = Opcode.MOVE;
-                opcodeFrom16 = Opcode.MOVE_FROM16;
-                opcode16 = Opcode.MOVE_16;
-                break;
-
-            case OBJECT:
-                opcode = Opcode.MOVE_OBJECT;
-                opcodeFrom16 = Opcode.MOVE_OBJECT_FROM16;
-                opcode16 = Opcode.MOVE_OBJECT_16;
-                break;
-
-            case WIDE:
-                opcode = Opcode.MOVE_WIDE;
-                opcodeFrom16 = Opcode.MOVE_WIDE_FROM16;
-                opcode16 = Opcode.MOVE_WIDE_16;
-                break;
-
-            default:
-                throw new RuntimeException("Unreachable");
+        if (fromType instanceof ObjectType && toType instanceof ObjectType ||
+                fromType instanceof ArrayType && toType instanceof ArrayType) {
+            opcode = Opcode.MOVE_OBJECT;
+            opcodeFrom16 = Opcode.MOVE_OBJECT_FROM16;
+            opcode16 = Opcode.MOVE_OBJECT_16;
+        } else if (fromType instanceof DoubleType && toType instanceof DoubleType ||
+                fromType instanceof LongType && toType instanceof LongType) {
+            opcode = Opcode.MOVE_WIDE;
+            opcodeFrom16 = Opcode.MOVE_WIDE_FROM16;
+            opcode16 = Opcode.MOVE_WIDE_16;
+        } else if (fromType instanceof IntLikeType && toType instanceof IntLikeType ||
+                fromType instanceof FloatType && toType instanceof FloatType) {
+            opcode = Opcode.MOVE;
+            opcodeFrom16 = Opcode.MOVE_FROM16;
+            opcode16 = Opcode.MOVE_16;
+        } else {
+            throw new RuntimeException("Type mismatch: " + fromType + " and " + toType);
         }
 
         visitInstruction(new MoveLikeInsnProvider(opcode, opcodeFrom16, opcode16, to, from));
     }
 
     @Override
-    public void visitMoveResult(DexType type, Register register) {
-        visitInstruction(new Insn11xProvider(getMoveResultOpcode(type), register));
+    public void visitMoveResult(Register register) {
+        visitInstruction(new Insn11xProvider(getMoveResultOpcode(register.getType()), register));
     }
 
-    private Opcode getMoveResultOpcode(DexType type) {
-        switch (type) {
-            case NORMAL: return Opcode.MOVE_RESULT;
-            case OBJECT: return Opcode.MOVE_RESULT_OBJECT;
-            case WIDE: return Opcode.MOVE_RESULT_WIDE;
-            default: return DexUtils.unreachable();
-        }
+    private Opcode getMoveResultOpcode(Type type) {
+        return match(type, new NormalWideObjectMatcher<Opcode>() {
+            public Opcode caseNormal(PrimitiveType type) { return Opcode.MOVE_RESULT; }
+            public Opcode caseWide(PrimitiveType type) { return Opcode.MOVE_RESULT_WIDE; }
+            public Opcode caseObject(RefType type) { return Opcode.MOVE_RESULT_OBJECT; }
+        });
     }
 
     @Override
@@ -924,17 +1032,20 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitGoto(me.aki.tactical.dex.insn.Instruction target) {
-        GotoInsnProvider insnCell = new GotoInsnProvider(target);
-        visitInstruction(insnCell);
+        visitInstruction(new GotoInsnProvider(target));
     }
 
     @Override
     public void visitIf(IfInstruction.Comparison comparison, Register op1, Optional<Register> op2Opt, me.aki.tactical.dex.insn.Instruction target) {
         if (op2Opt.isPresent()) {
             Register op2 = op2Opt.get();
+            requireIntOrRefType(op1.getType(), op2.getType());
+
             Opcode opcode = getTwoRegisterComparisonOpcode(comparison);
             visitInstruction(new Insn22tProvider(opcode, op1, op2, target));
         } else {
+            requireIntOrRefType(op1.getType());
+
             Opcode opcode = getZeroComparisonOpcode(comparison);
             visitInstruction(new Insn21tProvider(opcode, op1, target));
         }
@@ -969,13 +1080,13 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         Opcode opcode;
         AbstractSwitchPayloadProvider<?> payload;
 
-        TreeSet<Integer> sortedkeys = new TreeSet<>(branchTable.keySet());
-        if (isRange(sortedkeys)) {
+        TreeSet<Integer> sortedKeys = new TreeSet<>(branchTable.keySet());
+        if (isRange(sortedKeys)) {
             opcode = Opcode.PACKED_SWITCH;
-            payload = new PackedSwitchPayloadProvider(sortedkeys, branchTable);
+            payload = new PackedSwitchPayloadProvider(sortedKeys, branchTable);
         } else {
             opcode = Opcode.SPARSE_SWITCH;
-            payload = new SparseSwitchPayloadProvider(sortedkeys, branchTable);
+            payload = new SparseSwitchPayloadProvider(sortedKeys, branchTable);
         }
 
         visitPayloadInstruction(payload);
@@ -1017,25 +1128,32 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
-    private <T> T match(RefType type, RefTypeMatch<T> matcher) {
+    private <T> T match(Type type, NormalWideObjectMatcher<T> matcher) {
+        return  type instanceof RefType ? matcher.caseObject((RefType) type) :
+                type instanceof IntLikeType || type instanceof FloatType ? matcher.caseNormal((PrimitiveType) type) :
+                type instanceof LongType || type instanceof DoubleType ? matcher.caseWide((PrimitiveType) type) :
+                DexUtils.unreachable();
+    }
+
+    private <T> T match(Type type, RefTypeMatch<T> matcher) {
         return type instanceof ObjectType ? matcher.caseObject((ObjectType) type) :
                 type instanceof ArrayType ? matcher.caseArray((ArrayType) type) :
                 DexUtils.unreachable();
     }
 
-    private <T> T match(PrimitiveType type, ILTypeMatch<T> matcher) {
+    private <T> T match(Type type, ILTypeMatch<T> matcher) {
         return type instanceof IntLikeType ? matcher.caseIntLike((IntLikeType) type) :
                 type instanceof LongType ? matcher.caseLong() :
                 DexUtils.unreachable();
     }
 
-    private <T> T match(PrimitiveType type, FDTypeMatch<T> matcher) {
+    private <T> T match(Type type, FDTypeMatch<T> matcher) {
         return type instanceof FloatType ? matcher.caseFloat() :
                 type instanceof DoubleType ? matcher.caseDouble() :
                 DexUtils.unreachable();
     }
 
-    private <T> T match(PrimitiveType type, ILFDTypeMatch<T> matcher) {
+    private <T> T match(Type type, ILFDTypeMatch<T> matcher) {
         return type instanceof IntLikeType ? matcher.caseIntLike((IntLikeType) type) :
                 type instanceof LongType ? matcher.caseLong() :
                 type instanceof FloatType ? matcher.caseFloat() :
@@ -1043,7 +1161,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 DexUtils.unreachable();
     }
 
-    private <T> T match(PrimitiveType type, PrimitiveTypeMatch<T> matcher) {
+    private <T> T match(Type type, PrimitiveTypeMatch<T> matcher) {
         return match(type, new ILFDTypeMatch<>() {
             @Override
             public T caseIntLike(IntLikeType type) {
@@ -1096,6 +1214,12 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
                 constant instanceof HandleConstant ? matcher.caseHandleConstant((HandleConstant) constant) :
                 constant instanceof MethodTypeConstant ? matcher.caseMethodTypeConstant((MethodTypeConstant) constant) :
                 DexUtils.unreachable();
+    }
+
+    interface NormalWideObjectMatcher<T> {
+        T caseNormal(PrimitiveType type);
+        T caseWide(PrimitiveType type);
+        T caseObject(RefType type);
     }
 
     interface RefTypeMatch<T> {

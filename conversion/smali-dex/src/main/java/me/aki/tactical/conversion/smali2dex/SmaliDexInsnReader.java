@@ -8,8 +8,6 @@ import me.aki.tactical.core.Path;
 import me.aki.tactical.core.constant.*;
 import me.aki.tactical.core.handle.*;
 import me.aki.tactical.core.type.*;
-import me.aki.tactical.dex.DetailedDexType;
-import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.utils.DexInsnVisitor;
@@ -43,43 +41,25 @@ public class SmaliDexInsnReader {
 
             case MOVE:
             case MOVE_FROM16:
-            case MOVE_16: {
-                TwoRegisterInstruction insn = (TwoRegisterInstruction) instruction;
-                iv.visitMove(DexType.NORMAL, insn.getRegisterB(), insn.getRegisterA());
-                break;
-            }
+            case MOVE_16:
 
             case MOVE_WIDE:
             case MOVE_WIDE_FROM16:
-            case MOVE_WIDE_16: {
-                TwoRegisterInstruction insn = (TwoRegisterInstruction) instruction;
-                iv.visitMove(DexType.WIDE, insn.getRegisterB(), insn.getRegisterA());
-                break;
-            }
+            case MOVE_WIDE_16:
 
             case MOVE_OBJECT:
             case MOVE_OBJECT_FROM16:
             case MOVE_OBJECT_16: {
                 TwoRegisterInstruction insn = (TwoRegisterInstruction) instruction;
-                iv.visitMove(DexType.OBJECT, insn.getRegisterB(), insn.getRegisterA());
+                iv.visitMove(insn.getRegisterB(), insn.getRegisterA());
                 break;
             }
 
-            case MOVE_RESULT: {
-                Instruction11x insn = (Instruction11x) instruction;
-                iv.visitMoveResult(DexType.NORMAL, insn.getRegisterA());
-                break;
-            }
-
-            case MOVE_RESULT_WIDE: {
-                Instruction11x insn = (Instruction11x) instruction;
-                iv.visitMoveResult(DexType.WIDE, insn.getRegisterA());
-                break;
-            }
-
+            case MOVE_RESULT:
+            case MOVE_RESULT_WIDE:
             case MOVE_RESULT_OBJECT: {
                 Instruction11x insn = (Instruction11x) instruction;
-                iv.visitMoveResult(DexType.OBJECT, insn.getRegisterA());
+                iv.visitMoveResult(insn.getRegisterA());
                 break;
             }
 
@@ -96,19 +76,11 @@ public class SmaliDexInsnReader {
                 break;
             }
 
-            case RETURN: {
-                Instruction11x insn = (Instruction11x) instruction;
-                iv.visitReturn(DexType.NORMAL, insn.getRegisterA());
-                break;
-            }
-            case RETURN_WIDE: {
-                Instruction11x insn = (Instruction11x) instruction;
-                iv.visitReturn(DexType.WIDE, insn.getRegisterA());
-                break;
-            }
+            case RETURN:
+            case RETURN_WIDE:
             case RETURN_OBJECT: {
                 Instruction11x insn = (Instruction11x) instruction;
-                iv.visitReturn(DexType.OBJECT, insn.getRegisterA());
+                iv.visitReturn(insn.getRegisterA());
                 break;
             }
 
@@ -298,26 +270,20 @@ public class SmaliDexInsnReader {
 
             // CMP //
 
-            case CMPL_FLOAT: {
-                Instruction23x insn = (Instruction23x) instruction;
-                iv.visitCmpl(FloatType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
-                break;
-            }
-            case CMPG_FLOAT: {
-                Instruction23x insn = (Instruction23x) instruction;
-                iv.visitCmpg(FloatType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
-                break;
-            }
+            case CMPL_FLOAT:
             case CMPL_DOUBLE: {
                 Instruction23x insn = (Instruction23x) instruction;
-                iv.visitCmpl(DoubleType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                iv.visitCmpl(insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
                 break;
             }
+
+            case CMPG_FLOAT:
             case CMPG_DOUBLE: {
                 Instruction23x insn = (Instruction23x) instruction;
-                iv.visitCmpg(DoubleType.getInstance(), insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                iv.visitCmpg(insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
                 break;
             }
+
             case CMP_LONG: {
                 Instruction23x insn = (Instruction23x) instruction;
                 iv.visitCmp(insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
@@ -354,8 +320,7 @@ public class SmaliDexInsnReader {
             case AGET_CHAR:
             case AGET_SHORT: {
                 Instruction23x insn = (Instruction23x) instruction;
-                DetailedDexType type = getDetailedDexType(insn.getOpcode());
-                iv.visitArrayLoad(type, insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                iv.visitArrayLoad(insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
                 break;
             }
 
@@ -367,8 +332,7 @@ public class SmaliDexInsnReader {
             case APUT_CHAR:
             case APUT_SHORT: {
                 Instruction23x insn = (Instruction23x) instruction;
-                DetailedDexType type = getDetailedDexType(insn.getOpcode());
-                iv.visitArrayStore(type, insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
+                iv.visitArrayStore(insn.getRegisterB(), insn.getRegisterC(), insn.getRegisterA());
                 break;
             }
 
@@ -433,14 +397,14 @@ public class SmaliDexInsnReader {
             case NEG_FLOAT:
             case NEG_DOUBLE: {
                 Instruction12x insn = (Instruction12x) instruction;
-                iv.visitNeg(getPrimitiveType(insn.getOpcode()), insn.getRegisterB(), insn.getRegisterA());
+                iv.visitNeg(insn.getRegisterB(), insn.getRegisterA());
                 break;
             }
 
             case NOT_INT:
             case NOT_LONG: {
                 Instruction12x insn = (Instruction12x) instruction;
-                iv.visitNot(getPrimitiveType(insn.getOpcode()), insn.getRegisterB(), insn.getRegisterA());
+                iv.visitNot(insn.getRegisterB(), insn.getRegisterA());
                 break;
             }
 
@@ -735,134 +699,6 @@ public class SmaliDexInsnReader {
         }
     }
 
-    private DetailedDexType getDetailedDexType(Opcode opcode) {
-        switch (opcode) {
-            case AGET:
-            case APUT:
-                return DetailedDexType.NORMAL;
-
-            case AGET_WIDE:
-            case APUT_WIDE:
-                return DetailedDexType.WIDE;
-
-            case AGET_OBJECT:
-            case APUT_OBJECT:
-                return DetailedDexType.OBJECT;
-
-            case AGET_BOOLEAN:
-            case APUT_BOOLEAN:
-                return DetailedDexType.BOOLEAN;
-
-            case AGET_BYTE:
-            case APUT_BYTE:
-                return DetailedDexType.BYTE;
-
-            case AGET_CHAR:
-            case APUT_CHAR:
-                return DetailedDexType.CHAR;
-
-            case AGET_SHORT:
-            case APUT_SHORT:
-                return DetailedDexType.SHORT;
-
-            default:
-                throw new AssertionError();
-        }
-    }
-
-    private PrimitiveType getPrimitiveType(Opcode opcode) {
-        switch (opcode) {
-            case NOT_INT:
-            case NEG_INT:
-
-            case ADD_INT:
-            case SUB_INT:
-            case MUL_INT:
-            case DIV_INT:
-            case REM_INT:
-            case AND_INT:
-            case OR_INT:
-            case XOR_INT:
-            case SHL_INT:
-            case SHR_INT:
-            case USHR_INT:
-
-            case ADD_INT_2ADDR:
-            case SUB_INT_2ADDR:
-            case MUL_INT_2ADDR:
-            case DIV_INT_2ADDR:
-            case REM_INT_2ADDR:
-            case AND_INT_2ADDR:
-            case OR_INT_2ADDR:
-            case XOR_INT_2ADDR:
-            case SHL_INT_2ADDR:
-            case SHR_INT_2ADDR:
-            case USHR_INT_2ADDR:
-                return IntType.getInstance();
-
-            case NOT_LONG:
-            case NEG_LONG:
-
-            case ADD_LONG:
-            case SUB_LONG:
-            case MUL_LONG:
-            case DIV_LONG:
-            case REM_LONG:
-            case AND_LONG:
-            case OR_LONG:
-            case XOR_LONG:
-            case SHL_LONG:
-            case SHR_LONG:
-            case USHR_LONG:
-
-            case ADD_LONG_2ADDR:
-            case SUB_LONG_2ADDR:
-            case MUL_LONG_2ADDR:
-            case DIV_LONG_2ADDR:
-            case REM_LONG_2ADDR:
-            case AND_LONG_2ADDR:
-            case OR_LONG_2ADDR:
-            case XOR_LONG_2ADDR:
-            case SHL_LONG_2ADDR:
-            case SHR_LONG_2ADDR:
-            case USHR_LONG_2ADDR:
-                return LongType.getInstance();
-
-            case NEG_FLOAT:
-
-            case ADD_FLOAT:
-            case SUB_FLOAT:
-            case MUL_FLOAT:
-            case DIV_FLOAT:
-            case REM_FLOAT:
-
-            case ADD_FLOAT_2ADDR:
-            case SUB_FLOAT_2ADDR:
-            case MUL_FLOAT_2ADDR:
-            case DIV_FLOAT_2ADDR:
-            case REM_FLOAT_2ADDR:
-                return FloatType.getInstance();
-
-            case NEG_DOUBLE:
-
-            case ADD_DOUBLE:
-            case SUB_DOUBLE:
-            case MUL_DOUBLE:
-            case DIV_DOUBLE:
-            case REM_DOUBLE:
-
-            case ADD_DOUBLE_2ADDR:
-            case SUB_DOUBLE_2ADDR:
-            case MUL_DOUBLE_2ADDR:
-            case DIV_DOUBLE_2ADDR:
-            case REM_DOUBLE_2ADDR:
-                return DoubleType.getInstance();
-
-            default:
-                throw new AssertionError();
-        }
-    }
-
     private void visitPrimitiveCast(Instruction12x instruction) {
         PrimitiveType fromType;
         PrimitiveType toType;
@@ -944,24 +780,22 @@ public class SmaliDexInsnReader {
     }
 
     private void visit2AddrMathInsn(Instruction12x instruction) {
-        PrimitiveType type = getPrimitiveType(instruction.getOpcode());
         Integer result = instruction.getRegisterA();
         Integer op1 = instruction.getRegisterA();
         Integer op2 = instruction.getRegisterB();
 
-        visitMathInsn(instruction.getOpcode(), type, op1, op2, result);
+        visitMathInsn(instruction.getOpcode(), op1, op2, result);
     }
 
     private void visitMathInsn(Instruction23x instruction) {
-        PrimitiveType type = getPrimitiveType(instruction.getOpcode());
         Integer result = instruction.getRegisterA();
         Integer op1 = instruction.getRegisterB();
         Integer op2 = instruction.getRegisterC();
 
-        visitMathInsn(instruction.getOpcode(), type, op1, op2, result);
+        visitMathInsn(instruction.getOpcode(), op1, op2, result);
     }
 
-    private void visitMathInsn(Opcode opcode, PrimitiveType type, Integer op1, Integer op2, Integer result) {
+    private void visitMathInsn(Opcode opcode, Integer op1, Integer op2, Integer result) {
         switch (opcode) {
             case ADD_INT:
             case ADD_LONG:
@@ -971,7 +805,7 @@ public class SmaliDexInsnReader {
             case ADD_LONG_2ADDR:
             case ADD_FLOAT_2ADDR:
             case ADD_DOUBLE_2ADDR:
-                iv.visitAdd(type, op1, op2, result);
+                iv.visitAdd(op1, op2, result);
                 break;
 
             case SUB_INT:
@@ -982,7 +816,7 @@ public class SmaliDexInsnReader {
             case SUB_LONG_2ADDR:
             case SUB_FLOAT_2ADDR:
             case SUB_DOUBLE_2ADDR:
-                iv.visitSub(type, op1, op2, result);
+                iv.visitSub(op1, op2, result);
                 break;
 
             case MUL_INT:
@@ -993,7 +827,7 @@ public class SmaliDexInsnReader {
             case MUL_LONG_2ADDR:
             case MUL_FLOAT_2ADDR:
             case MUL_DOUBLE_2ADDR:
-                iv.visitMul(type, op1, op2, result);
+                iv.visitMul(op1, op2, result);
                 break;
 
             case DIV_INT:
@@ -1004,7 +838,7 @@ public class SmaliDexInsnReader {
             case DIV_LONG_2ADDR:
             case DIV_FLOAT_2ADDR:
             case DIV_DOUBLE_2ADDR:
-                iv.visitDiv(type, op1, op2, result);
+                iv.visitDiv(op1, op2, result);
                 break;
 
             case REM_INT:
@@ -1015,49 +849,49 @@ public class SmaliDexInsnReader {
             case REM_LONG_2ADDR:
             case REM_FLOAT_2ADDR:
             case REM_DOUBLE_2ADDR:
-                iv.visitMod(type, op1, op2, result);
+                iv.visitMod(op1, op2, result);
                 break;
 
             case AND_INT:
             case AND_LONG:
             case AND_INT_2ADDR:
             case AND_LONG_2ADDR:
-                iv.visitAnd(type, op1, op2, result);
+                iv.visitAnd(op1, op2, result);
                 break;
 
             case OR_INT:
             case OR_LONG:
             case OR_INT_2ADDR:
             case OR_LONG_2ADDR:
-                iv.visitOr(type, op1, op2, result);
+                iv.visitOr(op1, op2, result);
                 break;
 
             case XOR_INT:
             case XOR_LONG:
             case XOR_INT_2ADDR:
             case XOR_LONG_2ADDR:
-                iv.visitXor(type, op1, op2, result);
+                iv.visitXor(op1, op2, result);
                 break;
 
             case SHL_INT:
             case SHL_LONG:
             case SHL_INT_2ADDR:
             case SHL_LONG_2ADDR:
-                iv.visitShl(type, op1, op2, result);
+                iv.visitShl(op1, op2, result);
                 break;
 
             case SHR_INT:
             case SHR_LONG:
             case SHR_INT_2ADDR:
             case SHR_LONG_2ADDR:
-                iv.visitShr(type, op1, op2 ,result);
+                iv.visitShr(op1, op2 ,result);
                 break;
 
             case USHR_INT:
             case USHR_LONG:
             case USHR_INT_2ADDR:
             case USHR_LONG_2ADDR:
-                iv.visitUShr(type, op1, op2, result);
+                iv.visitUShr(op1, op2, result);
                 break;
 
             default:

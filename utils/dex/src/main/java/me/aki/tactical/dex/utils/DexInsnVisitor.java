@@ -10,8 +10,6 @@ import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
-import me.aki.tactical.dex.DetailedDexType;
-import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.insn.Instruction;
@@ -45,69 +43,69 @@ public class DexInsnVisitor<I, R> {
 
     // MATH
 
-    public void visitAdd(PrimitiveType type, R op1, R op2, R result) {
+    public void visitAdd(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitAdd(type, op1, op2, result);
+            iv.visitAdd(op1, op2, result);
         }
     }
 
-    public void visitSub(PrimitiveType type, R op1, R op2, R result) {
+    public void visitSub(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitSub(type, op1, op2, result);
+            iv.visitSub(op1, op2, result);
         }
     }
 
-    public void visitMul(PrimitiveType type, R op1, R op2, R result) {
+    public void visitMul(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitMul(type, op1, op2, result);
+            iv.visitMul(op1, op2, result);
         }
     }
 
-    public void visitDiv(PrimitiveType type, R op1, R op2, R result) {
+    public void visitDiv(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitDiv(type, op1, op2, result);
+            iv.visitDiv(op1, op2, result);
         }
     }
 
-    public void visitMod(PrimitiveType type, R op1, R op2, R result) {
+    public void visitMod(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitMod(type, op1, op2, result);
+            iv.visitMod(op1, op2, result);
         }
     }
 
-    public void visitAnd(PrimitiveType type, R op1, R op2, R result) {
+    public void visitAnd(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitAnd(type, op1, op2, result);
+            iv.visitAnd(op1, op2, result);
         }
     }
 
-    public void visitOr(PrimitiveType type, R op1, R op2, R result) {
+    public void visitOr(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitOr(type, op1, op2, result);
+            iv.visitOr(op1, op2, result);
         }
     }
 
-    public void visitXor(PrimitiveType type, R op1, R op2, R result) {
+    public void visitXor(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitXor(type, op1, op2, result);
+            iv.visitXor(op1, op2, result);
         }
     }
 
-    public void visitShl(PrimitiveType type, R op1, R op2, R result) {
+    public void visitShl(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitShl(type, op1, op2, result);
+            iv.visitShl(op1, op2, result);
         }
     }
 
-    public void visitShr(PrimitiveType type, R op1, R op2, R result) {
+    public void visitShr(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitShr(type, op1, op2, result);
+            iv.visitShr(op1, op2, result);
         }
     }
 
-    public void visitUShr(PrimitiveType type, R op1, R op2, R result) {
+    public void visitUShr(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitUShr(type, op1, op2, result);
+            iv.visitUShr(op1, op2, result);
         }
     }
 
@@ -181,15 +179,15 @@ public class DexInsnVisitor<I, R> {
 
     // Math-like instructions
 
-    public void visitNeg(PrimitiveType type, R value, R result) {
+    public void visitNeg(R value, R result) {
         if (iv != null) {
-            iv.visitNeg(type, value, result);
+            iv.visitNeg(value, result);
         }
     }
 
-    public void visitNot(PrimitiveType type, R value, R result) {
+    public void visitNot(R value, R result) {
         if (iv != null) {
-            iv.visitNot(type, value, result);
+            iv.visitNot(value, result);
         }
     }
 
@@ -199,15 +197,15 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitCmpl(PrimitiveType type, R op1, R op2, R result) {
+    public void visitCmpl(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitCmpl(type, op1, op2, result);
+            iv.visitCmpl(op1, op2, result);
         }
     }
 
-    public void visitCmpg(PrimitiveType type, R op1, R op2, R result) {
+    public void visitCmpg(R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitCmpg(type, op1, op2, result);
+            iv.visitCmpg(op1, op2, result);
         }
     }
 
@@ -219,15 +217,15 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitArrayLoad(DetailedDexType type, R array, R index, R result) {
+    public void visitArrayLoad(R array, R index, R result) {
         if (iv != null) {
-            iv.visitArrayLoad(type, array, index, result);
+            iv.visitArrayLoad(array, index, result);
         }
     }
 
-    public void visitArrayStore(DetailedDexType type, R array, R index, R value) {
+    public void visitArrayStore(R array, R index, R value) {
         if (iv != null) {
-            iv.visitArrayStore(type, array, index, value);
+            iv.visitArrayStore(array, index, value);
         }
     }
 
@@ -293,9 +291,9 @@ public class DexInsnVisitor<I, R> {
 
     // METHOD EXIT INSTRUCTIONS
 
-    public void visitReturn(DexType type, R register) {
+    public void visitReturn(R register) {
         if (iv != null) {
-            iv.visitReturn(type, register);
+            iv.visitReturn(register);
         }
     }
 
@@ -351,15 +349,15 @@ public class DexInsnVisitor<I, R> {
 
     // MOVE INSTRUCTIONS
 
-    public void visitMove(DexType type, R from, R to) {
+    public void visitMove(R from, R to) {
         if (iv != null) {
-            iv.visitMove(type, from, to);
+            iv.visitMove(from, to);
         }
     }
 
-    public void visitMoveResult(DexType type, R register) {
+    public void visitMoveResult(R register) {
         if (iv != null) {
-            iv.visitMoveResult(type, register);
+            iv.visitMoveResult(register);
         }
     }
 

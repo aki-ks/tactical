@@ -10,8 +10,6 @@ import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
-import me.aki.tactical.dex.DetailedDexType;
-import me.aki.tactical.dex.DexType;
 import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 
@@ -35,69 +33,69 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitAdd(PrimitiveType type, R op1, R op2, R result) {
-        super.visitAdd(type, op1, op2, result);
-        System.out.println("visitAdd(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitAdd(R op1, R op2, R result) {
+        super.visitAdd(op1, op2, result);
+        System.out.println("visitAdd(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitSub(PrimitiveType type, R op1, R op2, R result) {
-        super.visitSub(type, op1, op2, result);
-        System.out.println("visitSub(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitSub(R op1, R op2, R result) {
+        super.visitSub(op1, op2, result);
+        System.out.println("visitSub(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitMul(PrimitiveType type, R op1, R op2, R result) {
-        super.visitMul(type, op1, op2, result);
-        System.out.println("visitMul(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitMul(R op1, R op2, R result) {
+        super.visitMul(op1, op2, result);
+        System.out.println("visitMul(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitDiv(PrimitiveType type, R op1, R op2, R result) {
-        super.visitDiv(type, op1, op2, result);
-        System.out.println("visitDiv(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitDiv(R op1, R op2, R result) {
+        super.visitDiv(op1, op2, result);
+        System.out.println("visitDiv(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitMod(PrimitiveType type, R op1, R op2, R result) {
-        super.visitMod(type, op1, op2, result);
-        System.out.println("visitMod(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitMod(R op1, R op2, R result) {
+        super.visitMod(op1, op2, result);
+        System.out.println("visitMod(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitAnd(PrimitiveType type, R op1, R op2, R result) {
-        super.visitAnd(type, op1, op2, result);
-        System.out.println("visitAnd(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitAnd(R op1, R op2, R result) {
+        super.visitAnd(op1, op2, result);
+        System.out.println("visitAnd(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitOr(PrimitiveType type, R op1, R op2, R result) {
-        super.visitOr(type, op1, op2, result);
-        System.out.println("visitOr(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitOr(R op1, R op2, R result) {
+        super.visitOr(op1, op2, result);
+        System.out.println("visitOr(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitXor(PrimitiveType type, R op1, R op2, R result) {
-        super.visitXor(type, op1, op2, result);
-        System.out.println("visitXor(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitXor(R op1, R op2, R result) {
+        super.visitXor(op1, op2, result);
+        System.out.println("visitXor(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitShl(PrimitiveType type, R op1, R op2, R result) {
-        super.visitShl(type, op1, op2, result);
-        System.out.println("visitShl(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitShl(R op1, R op2, R result) {
+        super.visitShl(op1, op2, result);
+        System.out.println("visitShl(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitShr(PrimitiveType type, R op1, R op2, R result) {
-        super.visitShr(type, op1, op2, result);
-        System.out.println("visitShr(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitShr(R op1, R op2, R result) {
+        super.visitShr(op1, op2, result);
+        System.out.println("visitShr(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitUShr(PrimitiveType type, R op1, R op2, R result) {
-        super.visitUShr(type, op1, op2, result);
-        System.out.println("visitUShr(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitUShr(R op1, R op2, R result) {
+        super.visitUShr(op1, op2, result);
+        System.out.println("visitUShr(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
@@ -167,15 +165,15 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitNeg(PrimitiveType type, R value, R result) {
-        super.visitNeg(type, value, result);
-        System.out.println("visitNeg(type = " + type + ", value = " + value + ", result = " + result + ")");
+    public void visitNeg(R value, R result) {
+        super.visitNeg(value, result);
+        System.out.println("visitNeg(value = " + value + ", result = " + result + ")");
     }
 
     @Override
-    public void visitNot(PrimitiveType type, R value, R result) {
-        super.visitNot(type, value, result);
-        System.out.println("visitNot(type = " + type + ", value = " + value + ", result = " + result + ")");
+    public void visitNot(R value, R result) {
+        super.visitNot(value, result);
+        System.out.println("visitNot(value = " + value + ", result = " + result + ")");
     }
 
     @Override
@@ -185,15 +183,15 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitCmpl(PrimitiveType type, R op1, R op2, R result) {
-        super.visitCmpl(type, op1, op2, result);
-        System.out.println("visitCmpl(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitCmpl(R op1, R op2, R result) {
+        super.visitCmpl(op1, op2, result);
+        System.out.println("visitCmpl(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
-    public void visitCmpg(PrimitiveType type, R op1, R op2, R result) {
-        super.visitCmpg(type, op1, op2, result);
-        System.out.println("visitCmpg(type = " + type + ", op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
+    public void visitCmpg(R op1, R op2, R result) {
+        super.visitCmpg(op1, op2, result);
+        System.out.println("visitCmpg(op1 = " + op1 + ", op2 = " + op2 + ", result = " + result + ")");
     }
 
     @Override
@@ -203,15 +201,15 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitArrayLoad(DetailedDexType type, R array, R index, R result) {
-        super.visitArrayLoad(type, array, index, result);
-        System.out.println("visitArrayLoad(type = " + type + ", array = " + array + ", index = " + index + ", result = " + result + ")");
+    public void visitArrayLoad(R array, R index, R result) {
+        super.visitArrayLoad(array, index, result);
+        System.out.println("visitArrayLoad(array = " + array + ", index = " + index + ", result = " + result + ")");
     }
 
     @Override
-    public void visitArrayStore(DetailedDexType type, R array, R index, R value) {
-        super.visitArrayStore(type, array, index, value);
-        System.out.println("visitArrayStore(type = " + type + ", array = " + array + ", index = " + index + ", value = " + value + ")");
+    public void visitArrayStore(R array, R index, R value) {
+        super.visitArrayStore(array, index, value);
+        System.out.println("visitArrayStore(array = " + array + ", index = " + index + ", value = " + value + ")");
     }
 
     @Override
@@ -259,7 +257,7 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     @Override
     public void visitNew(Path type, R result) {
         super.visitNew(type, result);
-        System.out.println("visitNew(type = " + type + ", result = " + result + ")");
+        System.out.println("visitNew(result = " + result + ")");
     }
 
     @Override
@@ -269,9 +267,9 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitReturn(DexType type, R register) {
-        super.visitReturn(type, register);
-        System.out.println("visitReturn(type = " + type + ", register = " + register + ")");
+    public void visitReturn(R register) {
+        super.visitReturn(register);
+        System.out.println("visitReturn(register = " + register + ")");
     }
 
     @Override
@@ -317,15 +315,15 @@ public class DebugDexInsnVisitor<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitMove(DexType type, R from, R to) {
-        super.visitMove(type, from, to);
-        System.out.println("visitMove(type = " + type + ", from = " + from + ", to = " + to + ")");
+    public void visitMove(R from, R to) {
+        super.visitMove(from, to);
+        System.out.println("visitMove(from = " + from + ", to = " + to + ")");
     }
 
     @Override
-    public void visitMoveResult(DexType type, R register) {
-        super.visitMoveResult(type, register);
-        System.out.println("visitMoveResult(type = " + type + ", register = " + register + ")");
+    public void visitMoveResult(R register) {
+        super.visitMoveResult(register);
+        System.out.println("visitMoveResult(register = " + register + ")");
     }
 
     @Override
