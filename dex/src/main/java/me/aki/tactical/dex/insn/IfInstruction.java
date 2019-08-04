@@ -23,9 +23,7 @@ public class IfInstruction implements BranchInstruction {
     private Register op1;
 
     /**
-     * Register containing the second value to be compared.
-     *
-     * If the register is not present, the first value is compared against zero.
+     * The first register is either compared against this register or <tt>zero</tt>/<tt>null</tt>.
      */
     private Optional<Register> op2;
 
