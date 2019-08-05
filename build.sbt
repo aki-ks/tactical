@@ -68,6 +68,10 @@ lazy val textifierRef = (project in file ("textify/ref"))
   .dependsOn(ref, textifierCore)
   .settings(javaSettings(Compile))
 
+lazy val textifierDex = (project in file("textify/dex"))
+  .dependsOn(dex, textifierCore)
+  .settings(javaSettings(Compile))
+
 lazy val parserCore = (project in file ("parser/core"))
   .dependsOn(core, textifierCore % Test)
   .settings(parserSettings)
