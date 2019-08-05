@@ -5,7 +5,6 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.RefBody;
 import me.aki.tactical.ref.Statement;
-import me.aki.tactical.ref.TryCatchBlock;
 
 import java.util.List;
 import java.util.Map;
@@ -61,7 +60,7 @@ public class RefUtils {
      */
     public static Stream<RCell<Expression>> getExpressionCells(RefBody refBody) {
         Stream<RCell<Expression>> stmtRefs = refBody.getStatements().stream()
-                .flatMap(stmt -> stmt.getRecursiveReferencedValueCells().stream());
+                .flatMap(stmt -> stmt.getAllReadValueCells().stream());
 
         Stream<RCell<Expression>> tryCatchRefs = refBody.getTryCatchBlocks().stream()
                 .map(block -> block.getExceptionLocalCell().r(Expression.class));

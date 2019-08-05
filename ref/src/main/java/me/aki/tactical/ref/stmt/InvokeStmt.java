@@ -1,7 +1,6 @@
 package me.aki.tactical.ref.stmt;
 
 import me.aki.tactical.core.util.RCell;
-import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.expr.InvokeExpr;
@@ -30,7 +29,7 @@ public class InvokeStmt implements Statement {
     }
 
     @Override
-    public List<RCell<Expression>> getReferencedValueCells() {
-        return invoke.getReferencedValueCells();
+    public List<RCell<Expression>> getReadValueCells() {
+        return invoke.getReadValueCells();
     }
 }

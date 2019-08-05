@@ -55,20 +55,33 @@ public class AssignStmt implements Statement {
     }
 
     @Override
-    public List<RCell<Expression>> getReferencedValueCells() {
-        return List.of(getVariableCell().r(Expression.class), getValueCell());
-    }
-
-    @Override
     public List<Expression> getReadValues() {
-        return Stream.concat(Stream.of(getValue()), getValue().getRecursiveReferencedValues().stream())
-                .collect(Collectors.toUnmodifiableList());
+        return List.of(getValue());
     }
 
     @Override
     public List<RCell<Expression>> getReadValueCells() {
-        return Stream.concat(Stream.of(getValueCell()), getValue().getRecursiveReferencedValueCells().stream())
-                .collect(Collectors.toUnmodifiableList());
+        return List.of(getValueCell());
+    }
+
+    @Override
+    public List<Expression> getAllReadValues() {
+        Stream<Expression> allReads = getReadValues().stream()
+                .flatMap(read -> Stream.concat(Stream.of(read), read.getAllReadValues().stream()));
+
+        Stream<Expression> readsOfWrites = getVariable().getAllReadValues().stream();
+
+        return Stream.concat(allReads, readsOfWrites).collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<RCell<Expression>> getAllReadValueCells() {
+        Stream<RCell<Expression>> allReadCells = getReadValueCells().stream()
+                .flatMap(readCell -> Stream.concat(Stream.of(readCell), readCell.get().getAllReadValueCells().stream()));
+
+        Stream<RCell<Expression>> readCellsOfWrite = getVariable().getAllReadValueCells().stream();
+
+        return Stream.concat(allReadCells, readCellsOfWrite).collect(Collectors.toUnmodifiableList());
     }
 
     @Override

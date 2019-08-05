@@ -1,9 +1,7 @@
 package me.aki.tactical.ref;
 
-import me.aki.tactical.core.util.RCell;
 import me.aki.tactical.core.util.RWCell;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface Statement extends Referencing {
@@ -14,26 +12,6 @@ public interface Statement extends Referencing {
      */
     default boolean continuesExecution() {
         return true;
-    }
-
-    /**
-     * Return all values that this statements reads from. These are all values returned by
-     * {@link #getRecursiveReferencedValues()} except the variable in an assign statement.
-     *
-     * @return all expressions that this statement reads from.
-     */
-    default List<Expression> getReadValues() {
-        return this.getRecursiveReferencedValues();
-    }
-
-    /**
-     * Return cells containing all values that this statements reads from. These are all values
-     * returned by {@link #getRecursiveReferencedValueCells()} except the variable in an assign statement.
-     *
-     * @return cells containing all expressions that this statement reads from.
-     */
-    default List<RCell<Expression>> getReadValueCells() {
-        return this.getRecursiveReferencedValueCells();
     }
 
     /**

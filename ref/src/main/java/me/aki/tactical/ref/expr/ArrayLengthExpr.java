@@ -40,7 +40,7 @@ public class ArrayLengthExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReadValueCells() {
         return List.of(getArrayCell());
     }
 

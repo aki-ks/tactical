@@ -100,7 +100,7 @@ public class CommonOperations {
     public static Map<RefLocal, List<Statement>> getLocalReadMap(RefBody body) {
         final Map<RefLocal, List<Statement>> localReadMap = new HashMap<>();
         for (Statement statement : body.getStatements()) {
-            for (Expression expr : statement.getReadValues()) {
+            for (Expression expr : statement.getAllReadValues()) {
                 if (expr instanceof RefLocal) {
                     localReadMap.computeIfAbsent((RefLocal) expr, x -> new ArrayList<>()).add(statement);
                 }

@@ -49,7 +49,7 @@ public class ReturnStmt implements Statement {
     }
 
     @Override
-    public List<RCell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReadValueCells() {
         return getValueCell().map(List::<RCell<Expression>>of).orElse(List.of());
     }
 

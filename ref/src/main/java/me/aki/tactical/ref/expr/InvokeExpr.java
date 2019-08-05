@@ -2,7 +2,6 @@ package me.aki.tactical.ref.expr;
 
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RCell;
-import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.invoke.AbstractInvoke;
 import me.aki.tactical.ref.stmt.InvokeStmt;
@@ -40,8 +39,8 @@ public class InvokeExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReferencedValueCells() {
-        return invoke.getReferencedValueCells();
+    public List<RCell<Expression>> getReadValueCells() {
+        return invoke.getReadValueCells();
     }
 
     @Override

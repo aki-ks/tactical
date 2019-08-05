@@ -1,7 +1,6 @@
 package me.aki.tactical.ref;
 
 import me.aki.tactical.core.util.RCell;
-import me.aki.tactical.core.util.RWCell;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,49 +11,53 @@ import java.util.stream.Stream;
  */
 public interface Referencing {
     /**
-     * Get cells containing all expressions referenced by this entity.
+     * Get cells containing all expressions that this entity reads from.
      *
-     * @return cells of all referenced expressions
+     * @return cells of all read expressions
      */
-    List<RCell<Expression>> getReferencedValueCells();
+    List<RCell<Expression>> getReadValueCells();
 
     /**
-     * Get all expressions referenced by this entity.
+     * Get all expressions that this entity reads from.
      *
-     * @return all references expressions
+     * @return all read expressions
      */
-    default List<Expression> getReferencedValues() {
-        return getReferencedValueCells().stream()
+    default List<Expression> getReadValues() {
+        return getReadValueCells().stream()
                 .map(RCell::get)
                 .collect(Collectors.toUnmodifiableList());
     }
 
     /**
-     * Get all expressions referenced by this entity and also add their used references.
+     * Get all expressions read by this entity and also expressions read by those.
      *
-     * @return cells of all (recursive collected) referenced expressions
+     * @return cells of all referenced expressions
      */
-    default List<Expression> getRecursiveReferencedValues() {
-        return getRecursiveReferencedValueStream().collect(Collectors.toUnmodifiableList());
-    }
+    default List<Expression> getAllReadValues() {
+        class Inner {
+            private Stream<Expression> getRecursiveReferencedValueStream(Referencing ref) {
+                return ref.getReadValueCells().stream()
+                        .map(RCell::get)
+                        .flatMap(expr -> Stream.concat(Stream.of(expr), getRecursiveReferencedValueStream(expr)));
+            }
+        }
 
-    private Stream<Expression> getRecursiveReferencedValueStream() {
-        return getReferencedValueCells().stream()
-                .map(RCell::get)
-                .flatMap(expr -> Stream.concat(Stream.of(expr), ((Referencing) expr).getRecursiveReferencedValueStream()));
+        return new Inner().getRecursiveReferencedValueStream(this).collect(Collectors.toUnmodifiableList());
     }
 
     /**
-     * Get all expressions referenced by this entity and also add their used references.
+     * Get all expressions that this entity reads from and also expressions read by those.
      *
-     * @return cells of all (recursive collected) referenced expressions
+     * @return cells of all referenced expressions
      */
-    default List<RCell<Expression>> getRecursiveReferencedValueCells() {
-        return getRecursiveReferencedValueCellStream().collect(Collectors.toUnmodifiableList());
-    }
+    default List<RCell<Expression>> getAllReadValueCells() {
+        class Inner {
+            private Stream<RCell<Expression>> getRecursiveReferencedValueCellStream(Referencing ref) {
+                return ref.getReadValueCells().stream()
+                        .flatMap(refCell -> Stream.concat(Stream.of(refCell), getRecursiveReferencedValueCellStream(refCell.get())));
+            }
+        }
 
-    private Stream<RCell<Expression>> getRecursiveReferencedValueCellStream() {
-        return getReferencedValueCells().stream()
-                .flatMap(refCell -> Stream.concat(Stream.of(refCell), ((Referencing) refCell.get()).getRecursiveReferencedValueCellStream()));
+        return new Inner().getRecursiveReferencedValueCellStream(this).collect(Collectors.toUnmodifiableList());
     }
 }

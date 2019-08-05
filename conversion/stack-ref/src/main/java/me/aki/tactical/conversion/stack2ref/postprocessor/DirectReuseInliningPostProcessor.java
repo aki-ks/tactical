@@ -42,7 +42,7 @@ public class DirectReuseInliningPostProcessor implements PostProcessor {
                 return;
             }
 
-            readingStatement.getReadValueCells().stream()
+            readingStatement.getAllReadValueCells().stream()
                     .filter(cell -> cell.get() == local)
                     .findAny().get()
                     .w(Expression.class).set(writingStatement.getValue());

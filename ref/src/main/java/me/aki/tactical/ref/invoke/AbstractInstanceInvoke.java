@@ -34,7 +34,7 @@ public class AbstractInstanceInvoke extends AbstractConcreteInvoke {
     }
 
     @Override
-    public List<RCell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReadValueCells() {
         List<RCell<Expression>> cells = new ArrayList<>();
         cells.add(getInstanceCell());
         cells.addAll(getArgumentCells());

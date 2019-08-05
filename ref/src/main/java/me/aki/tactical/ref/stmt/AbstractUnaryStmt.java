@@ -27,7 +27,7 @@ public class AbstractUnaryStmt implements Statement {
     }
 
     @Override
-    public List<RCell<Expression>> getReferencedValueCells() {
+    public List<RCell<Expression>> getReadValueCells() {
         return List.of(getValueCell());
     }
 }
