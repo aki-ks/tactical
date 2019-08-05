@@ -27,9 +27,10 @@ public class DirectReuseInliningPostProcessor implements PostProcessor {
         final Map<RefLocal, List<Statement>> localReadMap = CommonOperations.getLocalReadMap(body);
         final Map<RefLocal, List<AssignStmt>> localWriteMap = CommonOperations.getLocalWriteMap(body);
 
-        localWriteMap.forEach((local, writingStatements) -> {
-            List<Statement> readingStatements = localReadMap.get(local);
-            if (writingStatements.size() != 1 || readingStatements == null || readingStatements.size() != 1) {
+        List.copyOf(body.getLocals()).forEach(local -> {
+            List<Statement> readingStatements = localReadMap.getOrDefault(local, List.of());
+            List<AssignStmt> writingStatements = localWriteMap.getOrDefault(local, List.of());
+            if (writingStatements.size() != 1 || readingStatements.size() != 1) {
                 // The local is read or written none or multiple times, so we cannot inline it.
                 return;
             }
