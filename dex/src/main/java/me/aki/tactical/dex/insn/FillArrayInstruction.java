@@ -16,7 +16,7 @@ public class FillArrayInstruction implements Instruction {
     private Register array;
 
     /**
-     * The bytes size of values in the array.
+     * The bytes size of values in the {@link FillArrayInstruction#values} array.
      */
     private NumberSize elementSize;
 

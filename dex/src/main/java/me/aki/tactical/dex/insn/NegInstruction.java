@@ -1,6 +1,6 @@
 package me.aki.tactical.dex.insn;
 
-import me.aki.tactical.core.type.PrimitiveType;
+import me.aki.tactical.core.type.*;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
@@ -12,6 +12,14 @@ import java.util.Optional;
  */
 public class NegInstruction implements Instruction {
     /**
+     * Type of number that this instruction operates on.
+     *
+     * It should either be {@link IntType#getInstance()}, {@link LongType#getInstance()},
+     * {@link FloatType#getInstance()} or {@link DoubleType#getInstance()}}
+     */
+    private PrimitiveType type;
+
+    /**
      * Register that contains the value to be negated.
      */
     private Register value;
@@ -21,9 +29,18 @@ public class NegInstruction implements Instruction {
      */
     private Register result;
 
-    public NegInstruction(Register value, Register result) {
+    public NegInstruction(PrimitiveType type, Register value, Register result) {
+        setType(type);
         this.value = value;
         this.result = result;
+    }
+
+    public PrimitiveType getType() {
+        return type;
+    }
+
+    public void setType(PrimitiveType type) {
+        this.type = type;
     }
 
     public Register getValue() {

@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  */
 public class IfInstruction implements BranchInstruction {
     /**
-     * How to compared the two values.
+     * How to compare the two values.
      */
     private Comparison comparison;
 
@@ -121,9 +121,9 @@ public class IfInstruction implements BranchInstruction {
         /**
          * Get the comparison that would result in the opposite value.
          *
-         * @return get the opposite comparison
+         * @return get the negated comparison
          */
-        public Comparison opposite() {
+        public Comparison negate() {
             switch (this) {
                 case EQUAL: return NON_EQUAL;
                 case NON_EQUAL: return EQUAL;

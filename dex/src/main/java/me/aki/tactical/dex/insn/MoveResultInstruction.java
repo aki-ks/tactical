@@ -20,6 +20,7 @@ public class MoveResultInstruction implements Instruction {
     public MoveResultInstruction(Register register) {
         this.register = register;
     }
+
     public Register getRegister() {
         return register;
     }

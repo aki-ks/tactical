@@ -1,5 +1,7 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.type.*;
+import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
@@ -10,6 +12,14 @@ import java.util.Optional;
  * Get one value contained within an array
  */
 public class ArrayLoadInstruction implements Instruction {
+    /**
+     * Type of the value to be read from the array.
+     *
+     * It should be either one of the {@link PrimitiveType PrimitiveType} singletons or
+     * an instance of a {@link RefType} such as {@link ObjectType#OBJECT}.
+     */
+    private Type type;
+
     /**
      * Register that contains the array to read from.
      */
@@ -25,10 +35,19 @@ public class ArrayLoadInstruction implements Instruction {
      */
     private Register result;
 
-    public ArrayLoadInstruction(Register array, Register index, Register result) {
+    public ArrayLoadInstruction(Type type, Register array, Register index, Register result) {
+        this.type = type;
         this.array = array;
         this.index = index;
         this.result = result;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Register getArray() {

@@ -25,37 +25,37 @@ public class DexInsnReader {
         if (instruction instanceof AbstractBinaryMathInstruction) {
             if (instruction instanceof AddInstruction) {
                 AddInstruction mathInsn = (AddInstruction) instruction;
-                iv.visitAdd(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitAdd(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof SubInstruction) {
                 SubInstruction mathInsn = (SubInstruction) instruction;
-                iv.visitSub(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitSub(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof MulInstruction) {
                 MulInstruction mathInsn = (MulInstruction) instruction;
-                iv.visitMul(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitMul(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof DivInstruction) {
                 DivInstruction mathInsn = (DivInstruction) instruction;
-                iv.visitDiv(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitDiv(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof ModInstruction) {
                 ModInstruction mathInsn = (ModInstruction) instruction;
-                iv.visitMod(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitMod(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof AndInstruction) {
                 AndInstruction mathInsn = (AndInstruction) instruction;
-                iv.visitAnd(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitAnd(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof OrInstruction) {
                 OrInstruction mathInsn = (OrInstruction) instruction;
-                iv.visitOr(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitOr(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof XorInstruction) {
                 XorInstruction mathInsn = (XorInstruction) instruction;
-                iv.visitXor(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitXor(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof ShlInstruction) {
                 ShlInstruction mathInsn = (ShlInstruction) instruction;
-                iv.visitShl(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitShl(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof ShrInstruction) {
                 ShrInstruction mathInsn = (ShrInstruction) instruction;
-                iv.visitShr(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitShr(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else if (instruction instanceof UShrInstruction) {
                 UShrInstruction mathInsn = (UShrInstruction) instruction;
-                iv.visitUShr(mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
+                iv.visitUShr(mathInsn.getType(), mathInsn.getOp1(), mathInsn.getOp2(), mathInsn.getResult());
             } else {
                 throw new AssertionError();
             }
@@ -102,10 +102,10 @@ public class DexInsnReader {
                 iv.visitCmp(cmp.getOp1(), cmp.getOp2(), cmp.getResult());
             } else if (instruction instanceof CmplInstruction) {
                 CmplInstruction cmpl = (CmplInstruction) instruction;
-                iv.visitCmpl(cmpl.getOp1(), cmpl.getOp2(), cmpl.getResult());
+                iv.visitCmpl(cmpl.getType(), cmpl.getOp1(), cmpl.getOp2(), cmpl.getResult());
             } else if (instruction instanceof CmpgInstruction) {
                 CmpgInstruction cmpg = (CmpgInstruction) instruction;
-                iv.visitCmpg(cmpg.getOp1(), cmpg.getOp2(), cmpg.getResult());
+                iv.visitCmpg(cmpg.getType(), cmpg.getOp1(), cmpg.getOp2(), cmpg.getResult());
             } else {
                 throw new AssertionError();
             }
@@ -129,10 +129,10 @@ public class DexInsnReader {
             iv.visitArrayLength(lengthInsn.getArray(), lengthInsn.getResult());
         } else if (instruction instanceof ArrayLoadInstruction) {
             ArrayLoadInstruction loadInsn = (ArrayLoadInstruction) instruction;
-            iv.visitArrayLoad(loadInsn.getArray(), loadInsn.getIndex(), loadInsn.getResult());
+            iv.visitArrayLoad(loadInsn.getType(), loadInsn.getArray(), loadInsn.getIndex(), loadInsn.getResult());
         } else if (instruction instanceof ArrayStoreInstruction) {
             ArrayStoreInstruction storeInsn = (ArrayStoreInstruction) instruction;
-            iv.visitArrayStore(storeInsn.getArray(), storeInsn.getIndex(), storeInsn.getIndex());
+            iv.visitArrayStore(storeInsn.getType(), storeInsn.getArray(), storeInsn.getIndex(), storeInsn.getIndex());
         } else if (instruction instanceof FieldGetInstruction) {
             FieldGetInstruction fieldInsn = (FieldGetInstruction) instruction;
             iv.visitFieldGet(fieldInsn.getField(), fieldInsn.getInstance(), fieldInsn.getResult());
@@ -158,13 +158,13 @@ public class DexInsnReader {
             iv.visitMoveException(moveInsn.getRegister());
         } else if (instruction instanceof MoveInstruction) {
             MoveInstruction moveInsn = (MoveInstruction) instruction;
-            iv.visitMove(moveInsn.getFrom(), moveInsn.getTo());
+            iv.visitMove(moveInsn.getType(), moveInsn.getFrom(), moveInsn.getTo());
         } else if (instruction instanceof MoveResultInstruction) {
             MoveResultInstruction moveInsn = (MoveResultInstruction) instruction;
             iv.visitMoveResult(moveInsn.getRegister());
         } else if (instruction instanceof NegInstruction) {
             NegInstruction newInsn = (NegInstruction) instruction;
-            iv.visitNeg(newInsn.getValue(), newInsn.getResult());
+            iv.visitNeg(newInsn.getType(), newInsn.getValue(), newInsn.getResult());
         } else if (instruction instanceof NewArrayInstruction) {
             NewArrayInstruction newArrayInsn = (NewArrayInstruction) instruction;
             iv.visitNewArray(newArrayInsn.getArrayType(), newArrayInsn.getSize(), newArrayInsn.getResult());
@@ -176,7 +176,7 @@ public class DexInsnReader {
             iv.visitNew(newInsn.getType(), newInsn.getResult());
         } else if (instruction instanceof NotInstruction) {
             NotInstruction notInsn = (NotInstruction) instruction;
-            iv.visitNot(notInsn.getValue(), notInsn.getResult());
+            iv.visitNot(notInsn.getType(), notInsn.getValue(), notInsn.getResult());
         } else if (instruction instanceof PrimitiveCastInstruction) {
             PrimitiveCastInstruction castInsn = (PrimitiveCastInstruction) instruction;
             iv.visitPrimitiveCast(castInsn.getFromType(), castInsn.getToType(), castInsn.getFromRegister(), castInsn.getToRegister());

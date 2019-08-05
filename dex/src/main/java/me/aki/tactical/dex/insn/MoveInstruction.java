@@ -1,5 +1,9 @@
 package me.aki.tactical.dex.insn;
 
+import me.aki.tactical.core.type.ObjectType;
+import me.aki.tactical.core.type.PrimitiveType;
+import me.aki.tactical.core.type.RefType;
+import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
@@ -11,6 +15,14 @@ import java.util.Optional;
  */
 public class MoveInstruction implements Instruction {
     /**
+     * Type of the value to be moved into another register.
+     *
+     * It should be either one of the {@link PrimitiveType PrimitiveType} singletons or
+     * an instance of a {@link RefType} such as {@link ObjectType#OBJECT}.
+     */
+    private Type type;
+
+    /**
      * Where to read the value from.
      */
     private Register from;
@@ -20,9 +32,18 @@ public class MoveInstruction implements Instruction {
      */
     private Register to;
 
-    public MoveInstruction(Register from, Register to) {
+    public MoveInstruction(Type type, Register from, Register to) {
+        this.type = type;
         this.from = from;
         this.to = to;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Register getFrom() {

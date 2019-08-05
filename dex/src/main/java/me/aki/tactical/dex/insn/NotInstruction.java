@@ -1,6 +1,7 @@
 package me.aki.tactical.dex.insn;
 
 import me.aki.tactical.core.type.IntLikeType;
+import me.aki.tactical.core.type.IntType;
 import me.aki.tactical.core.type.LongType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.util.RWCell;
@@ -14,6 +15,13 @@ import java.util.Optional;
  */
 public class NotInstruction implements Instruction {
     /**
+     * Type of value that this instruction negates.
+     *
+     * This should be {@link IntType#getInstance()} or {@link LongType#getInstance()}.
+     */
+    private PrimitiveType type;
+
+    /**
      * Register that contains the value to be negated.
      */
     private Register value;
@@ -23,9 +31,22 @@ public class NotInstruction implements Instruction {
      */
     private Register result;
 
-    public NotInstruction(Register value, Register result) {
+    public NotInstruction(PrimitiveType type, Register value, Register result) {
+        setType(type);
         this.value = value;
         this.result = result;
+    }
+
+    public PrimitiveType getType() {
+        return type;
+    }
+
+    public void setType(PrimitiveType type) {
+        if (type instanceof IntLikeType || type instanceof LongType) {
+            this.type = type;
+        } else {
+            throw new IllegalArgumentException("Expected an int or long type");
+        }
     }
 
     public Register getValue() {

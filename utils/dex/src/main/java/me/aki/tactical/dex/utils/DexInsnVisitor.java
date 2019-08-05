@@ -10,6 +10,7 @@ import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
+import me.aki.tactical.core.type.Type;
 import me.aki.tactical.dex.insn.FillArrayInstruction;
 import me.aki.tactical.dex.insn.IfInstruction;
 import me.aki.tactical.dex.insn.Instruction;
@@ -43,69 +44,69 @@ public class DexInsnVisitor<I, R> {
 
     // MATH
 
-    public void visitAdd(R op1, R op2, R result) {
+    public void visitAdd(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitAdd(op1, op2, result);
+            iv.visitAdd(type, op1, op2, result);
         }
     }
 
-    public void visitSub(R op1, R op2, R result) {
+    public void visitSub(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitSub(op1, op2, result);
+            iv.visitSub(type, op1, op2, result);
         }
     }
 
-    public void visitMul(R op1, R op2, R result) {
+    public void visitMul(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitMul(op1, op2, result);
+            iv.visitMul(type, op1, op2, result);
         }
     }
 
-    public void visitDiv(R op1, R op2, R result) {
+    public void visitDiv(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitDiv(op1, op2, result);
+            iv.visitDiv(type, op1, op2, result);
         }
     }
 
-    public void visitMod(R op1, R op2, R result) {
+    public void visitMod(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitMod(op1, op2, result);
+            iv.visitMod(type, op1, op2, result);
         }
     }
 
-    public void visitAnd(R op1, R op2, R result) {
+    public void visitAnd(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitAnd(op1, op2, result);
+            iv.visitAnd(type, op1, op2, result);
         }
     }
 
-    public void visitOr(R op1, R op2, R result) {
+    public void visitOr(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitOr(op1, op2, result);
+            iv.visitOr(type, op1, op2, result);
         }
     }
 
-    public void visitXor(R op1, R op2, R result) {
+    public void visitXor(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitXor(op1, op2, result);
+            iv.visitXor(type, op1, op2, result);
         }
     }
 
-    public void visitShl(R op1, R op2, R result) {
+    public void visitShl(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitShl(op1, op2, result);
+            iv.visitShl(type, op1, op2, result);
         }
     }
 
-    public void visitShr(R op1, R op2, R result) {
+    public void visitShr(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitShr(op1, op2, result);
+            iv.visitShr(type, op1, op2, result);
         }
     }
 
-    public void visitUShr(R op1, R op2, R result) {
+    public void visitUShr(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitUShr(op1, op2, result);
+            iv.visitUShr(type, op1, op2, result);
         }
     }
 
@@ -179,15 +180,15 @@ public class DexInsnVisitor<I, R> {
 
     // Math-like instructions
 
-    public void visitNeg(R value, R result) {
+    public void visitNeg(PrimitiveType type, R value, R result) {
         if (iv != null) {
-            iv.visitNeg(value, result);
+            iv.visitNeg(type, value, result);
         }
     }
 
-    public void visitNot(R value, R result) {
+    public void visitNot(PrimitiveType type, R value, R result) {
         if (iv != null) {
-            iv.visitNot(value, result);
+            iv.visitNot(type, value, result);
         }
     }
 
@@ -197,15 +198,15 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitCmpl(R op1, R op2, R result) {
+    public void visitCmpl(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitCmpl(op1, op2, result);
+            iv.visitCmpl(type, op1, op2, result);
         }
     }
 
-    public void visitCmpg(R op1, R op2, R result) {
+    public void visitCmpg(PrimitiveType type, R op1, R op2, R result) {
         if (iv != null) {
-            iv.visitCmpg(op1, op2, result);
+            iv.visitCmpg(type, op1, op2, result);
         }
     }
 
@@ -217,15 +218,15 @@ public class DexInsnVisitor<I, R> {
         }
     }
 
-    public void visitArrayLoad(R array, R index, R result) {
+    public void visitArrayLoad(Type type, R array, R index, R result) {
         if (iv != null) {
-            iv.visitArrayLoad(array, index, result);
+            iv.visitArrayLoad(type, array, index, result);
         }
     }
 
-    public void visitArrayStore(R array, R index, R value) {
+    public void visitArrayStore(Type type, R array, R index, R value) {
         if (iv != null) {
-            iv.visitArrayStore(array, index, value);
+            iv.visitArrayStore(type, array, index, value);
         }
     }
 
@@ -349,9 +350,9 @@ public class DexInsnVisitor<I, R> {
 
     // MOVE INSTRUCTIONS
 
-    public void visitMove(R from, R to) {
+    public void visitMove(Type type, R from, R to) {
         if (iv != null) {
-            iv.visitMove(from, to);
+            iv.visitMove(type, from, to);
         }
     }
 

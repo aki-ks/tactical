@@ -10,6 +10,7 @@ import me.aki.tactical.core.handle.Handle;
 import me.aki.tactical.core.type.ArrayType;
 import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.type.RefType;
+import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.ArrayLengthInstruction;
@@ -114,58 +115,58 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitAdd(R op1, R op2, R result) {
-        visitInstruction(new AddInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitAdd(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new AddInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitSub(R op1, R op2, R result) {
-        visitInstruction(new SubInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitSub(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new SubInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitMul(R op1, R op2, R result) {
-        visitInstruction(new MulInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitMul(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new MulInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitDiv(R op1, R op2, R result) {
-        visitInstruction(new DivInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitDiv(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new DivInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitMod(R op1, R op2, R result) {
-        visitInstruction(new ModInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitMod(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new ModInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitAnd(R op1, R op2, R result) {
-        visitInstruction(new AndInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitAnd(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new AndInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitOr(R op1, R op2, R result) {
-        visitInstruction(new OrInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitOr(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new OrInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitXor(R op1, R op2, R result) {
-        visitInstruction(new XorInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitXor(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new XorInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitShl(R op1, R op2, R result) {
-        visitInstruction(new ShlInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitShl(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new ShlInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitShr(R op1, R op2, R result) {
-        visitInstruction(new ShrInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitShr(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new ShrInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitUShr(R op1, R op2, R result) {
-        visitInstruction(new UShrInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitUShr(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new UShrInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
@@ -224,13 +225,13 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitNeg(R value, R result) {
-        visitInstruction(new NegInstruction(convertRegister(value), convertRegister(result)));
+    public void visitNeg(PrimitiveType type, R value, R result) {
+        visitInstruction(new NegInstruction(type, convertRegister(value), convertRegister(result)));
     }
 
     @Override
-    public void visitNot(R value, R result) {
-        visitInstruction(new NotInstruction(convertRegister(value), convertRegister(result)));
+    public void visitNot(PrimitiveType type, R value, R result) {
+        visitInstruction(new NotInstruction(type, convertRegister(value), convertRegister(result)));
     }
 
     @Override
@@ -239,13 +240,13 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitCmpl(R op1, R op2, R result) {
-        visitInstruction(new CmplInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitCmpl(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new CmplInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
-    public void visitCmpg(R op1, R op2, R result) {
-        visitInstruction(new CmpgInstruction(convertRegister(op1), convertRegister(op2), convertRegister(result)));
+    public void visitCmpg(PrimitiveType type, R op1, R op2, R result) {
+        visitInstruction(new CmpgInstruction(type, convertRegister(op1), convertRegister(op2), convertRegister(result)));
     }
 
     @Override
@@ -254,13 +255,13 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitArrayLoad(R array, R index, R result) {
-        visitInstruction(new ArrayLoadInstruction(convertRegister(array), convertRegister(index), convertRegister(result)));
+    public void visitArrayLoad(Type type, R array, R index, R result) {
+        visitInstruction(new ArrayLoadInstruction(type, convertRegister(array), convertRegister(index), convertRegister(result)));
     }
 
     @Override
-    public void visitArrayStore(R array, R index, R value) {
-        visitInstruction(new ArrayStoreInstruction(convertRegister(array), convertRegister(index), convertRegister(value)));
+    public void visitArrayStore(Type type, R array, R index, R value) {
+        visitInstruction(new ArrayStoreInstruction(type, convertRegister(array), convertRegister(index), convertRegister(value)));
     }
 
     @Override
@@ -392,8 +393,8 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
     }
 
     @Override
-    public void visitMove(R from, R to) {
-        visitInstruction(new MoveInstruction(convertRegister(from), convertRegister(to)));
+    public void visitMove(Type type, R from, R to) {
+        visitInstruction(new MoveInstruction(type, convertRegister(from), convertRegister(to)));
     }
 
     @Override

@@ -1,6 +1,5 @@
 package me.aki.tactical.dex.insn.math;
 
-import me.aki.tactical.core.type.PrimitiveType;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.Instruction;
