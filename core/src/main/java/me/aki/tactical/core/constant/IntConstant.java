@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 
 import java.util.Objects;
 
-public class IntConstant implements FieldConstant, BootstrapConstant, PushableConstant, Constant {
+public class IntConstant implements PrimitiveValueConstant {
     private final int value;
 
     public IntConstant(int value) {

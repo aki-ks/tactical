@@ -93,8 +93,14 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             RefType classConstant = ((ClassConstant) constant).getValue();
             String type = DexUtils.toDexType(classConstant);
             visitInstruction(new Insn21cProvider(Opcode.CONST_CLASS, target, new ImmutableTypeReference(type)));
-        } else if (constant instanceof DexNumberConstant) {
-            visitNumberConstant((DexNumberConstant) constant, target);
+        } else if (constant instanceof PrimitiveValueConstant) {
+            if (constant instanceof IntConstant || constant instanceof FloatConstant) {
+                visit32bitConstant((PrimitiveValueConstant) constant, target);
+            } else if (constant instanceof LongConstant || constant instanceof DoubleConstant) {
+                visit64bitConstant((PrimitiveValueConstant) constant, target);
+            } else {
+                DexUtils.unreachable();
+            }
         } else if (constant instanceof HandleConstant) {
             MethodHandleReference reference = convertMethodHandle(((HandleConstant) constant).getHandle());
             visitInstruction(new Insn21cProvider(Opcode.CONST_METHOD_HANDLE, target, reference));
@@ -115,31 +121,35 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         }
     }
 
-    private void visitNumberConstant(DexNumberConstant constant, Register target) {
-        if (constant instanceof DexNumber32Constant) {
-            int literal = ((DexNumber32Constant) constant).intValue();
-            if (-8 <= literal && literal <= 7) {
-                visitInstruction(new Insn11nProvider(Opcode.CONST_4, target, literal));
-            } else if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
-                visitInstruction(new Insn21sProvider(Opcode.CONST_16, target, literal));
-            } else if ((literal & 0x0000FFFF) == 0) {
-                visitInstruction(new Insn21ihProvider(Opcode.CONST_WIDE_HIGH16, target, literal));
-            } else {
-                visitInstruction(new Insn31iProvider(Opcode.CONST, target, literal));
-            }
-        } else if (constant instanceof DexNumber64Constant) {
-            long literal = ((DexNumber64Constant) constant).longValue();
-            if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
-                visitInstruction(new Insn21sProvider(Opcode.CONST_WIDE_16, target, (int) literal));
-            } else if (Integer.MIN_VALUE <= literal && literal <= Integer.MAX_VALUE) {
-                visitInstruction(new Insn31iProvider(Opcode.CONST_WIDE_32, target, (int) literal));
-            } else if ((literal & 0x0000FFFFFFFFFFFL) == 0) {
-                visitInstruction(new Insn21lhProvider(Opcode.CONST_WIDE_HIGH16, target, literal));
-            } else {
-                visitInstruction(new Insn51lProvider(Opcode.CONST_WIDE, target, literal));
-            }
+    private void visit32bitConstant(PrimitiveValueConstant constant, Register target) {
+        int literal = constant instanceof IntConstant ? ((IntConstant) constant).getValue() :
+                constant instanceof FloatConstant ? Float.floatToRawIntBits(((FloatConstant) constant).getValue()) :
+                DexUtils.unreachable();
+
+        if (-8 <= literal && literal <= 7) {
+            visitInstruction(new Insn11nProvider(Opcode.CONST_4, target, literal));
+        } else if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
+            visitInstruction(new Insn21sProvider(Opcode.CONST_16, target, literal));
+        } else if ((literal & 0x0000FFFF) == 0) {
+            visitInstruction(new Insn21ihProvider(Opcode.CONST_HIGH16, target, literal));
         } else {
-            DexUtils.unreachable();
+            visitInstruction(new Insn31iProvider(Opcode.CONST, target, literal));
+        }
+    }
+
+    private void visit64bitConstant(PrimitiveValueConstant constant, Register target) {
+        long literal = constant instanceof LongConstant ? ((LongConstant) constant).getValue() :
+                constant instanceof DoubleConstant ? Double.doubleToLongBits(((DoubleConstant) constant).getValue()) :
+                DexUtils.unreachable();
+
+        if (Short.MIN_VALUE <= literal && literal <= Short.MAX_VALUE) {
+            visitInstruction(new Insn21sProvider(Opcode.CONST_WIDE_16, target, (int) literal));
+        } else if (Integer.MIN_VALUE <= literal && literal <= Integer.MAX_VALUE) {
+            visitInstruction(new Insn31iProvider(Opcode.CONST_WIDE_32, target, (int) literal));
+        } else if ((literal & 0x0000FFFFFFFFFFFL) == 0) {
+            visitInstruction(new Insn21lhProvider(Opcode.CONST_WIDE_HIGH16, target, literal));
+        } else {
+            visitInstruction(new Insn51lProvider(Opcode.CONST_WIDE, target, literal));
         }
     }
 

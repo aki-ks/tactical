@@ -5,7 +5,7 @@ import me.aki.tactical.core.type.Type;
 
 import java.util.Objects;
 
-public class FloatConstant implements FieldConstant, BootstrapConstant, PushableConstant, Constant {
+public class FloatConstant implements PrimitiveValueConstant {
     private final float value;
 
     public FloatConstant(float value) {
