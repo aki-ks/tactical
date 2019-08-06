@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.smali2dex;
 
+import me.aki.tactical.conversion.smali2dex.typing.UntypedNumberConstant;
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;

@@ -1,5 +1,7 @@
 package me.aki.tactical.conversion.smali2dex;
 
+import me.aki.tactical.conversion.smali2dex.typing.InsnTyper;
+import me.aki.tactical.conversion.smali2dex.typing.UntypedInfo;
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
@@ -10,6 +12,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.TryCatchBlock;
+import me.aki.tactical.dex.utils.DexCfgGraph;
 import org.jf.dexlib2.DebugItemType;
 import org.jf.dexlib2.iface.ExceptionHandler;
 import org.jf.dexlib2.iface.MethodImplementation;
@@ -18,9 +21,9 @@ import org.jf.dexlib2.iface.debug.*;
 import org.jf.dexlib2.iface.instruction.Instruction;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Utility for conversion of a smali {@link MethodImplementation} body into a tactical {@link DexBody}
@@ -31,7 +34,9 @@ public class BodyConverter {
 
     private final DexBody body;
     private final InstructionIndex insnIndex;
-    private final SmaliCfgGraph cfg;
+    private final SmaliCfgGraph smaliCfg;
+
+    private DexCfgGraph dexCfg;
 
     /**
      * Map smali instructions to their converted tactical dex form.
@@ -52,13 +57,15 @@ public class BodyConverter {
      */
     private final Map<Instruction, Collection<RWCell<me.aki.tactical.dex.insn.Instruction>>> insnRefs = new HashMap<>();
 
+    private List<UntypedInfo> untypedInfos;
+
     public BodyConverter(Method method, MethodImplementation smaliBody) {
         this.method = method;
         this.smaliBody = smaliBody;
 
         this.body = new DexBody();
         this.insnIndex = new InstructionIndex(smaliBody.getInstructions());
-        this.cfg = new SmaliCfgGraph(this.insnIndex, smaliBody.getTryBlocks());
+        this.smaliCfg = new SmaliCfgGraph(this.insnIndex, smaliBody.getTryBlocks());
 
         this.convertRegisters();
 
@@ -68,6 +75,8 @@ public class BodyConverter {
         this.convertTryCatchBlocks();
 
         this.convertDebug();
+
+        this.resolveUntypedCells();
     }
 
     public DexBody getBody() {
@@ -113,17 +122,17 @@ public class BodyConverter {
         SmaliDexInsnWriter writer = new SmaliDexInsnWriter(body.getRegisters(), insnRefs);
         SmaliDexInsnReader reader = new SmaliDexInsnReader(insnIndex, writer);
 
-        cfg.forEachNode(node -> {
+        smaliCfg.forEachNode(node -> {
             reader.accept(node.getInstruction());
 
             List<me.aki.tactical.dex.insn.Instruction> instructions = writer.popInstructions();
             switch (instructions.size()) {
                 case 0:
-                    nonConvertedInstructions.add(node.getInstruction());
+                    this.nonConvertedInstructions.add(node.getInstruction());
                     break;
 
                 case 1:
-                    convertedInsns.put(node.getInstruction(), instructions.get(0));
+                    this.convertedInsns.put(node.getInstruction(), instructions.get(0));
                     break;
 
                 default:
@@ -131,10 +140,17 @@ public class BodyConverter {
             }
         });
 
-        for (Instruction smaliInsn : smaliBody.getInstructions()) {
+        for (Instruction smaliInsn : insnIndex.getInstructions()) {
             me.aki.tactical.dex.insn.Instruction insn = this.convertedInsns.get(smaliInsn);
             if (insn != null) body.getInstructions().add(insn);
         }
+
+        this.untypedInfos = writer.getUntypedTypes();
+    }
+
+    private void resolveUntypedCells() {
+        this.dexCfg = new DexCfgGraph(this.body);
+        new InsnTyper(this.method, this.body, this.dexCfg, this.untypedInfos).doTyping();
     }
 
     private void convertTryCatchBlocks() {

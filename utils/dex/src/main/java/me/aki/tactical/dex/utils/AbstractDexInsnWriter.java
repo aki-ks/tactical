@@ -101,7 +101,7 @@ public abstract class AbstractDexInsnWriter<I, R> extends DexInsnVisitor<I, R> {
         return currentList;
     }
 
-    private void visitInstruction(Instruction instruction) {
+    protected void visitInstruction(Instruction instruction) {
         this.instructions.add(instruction);
     }
 
