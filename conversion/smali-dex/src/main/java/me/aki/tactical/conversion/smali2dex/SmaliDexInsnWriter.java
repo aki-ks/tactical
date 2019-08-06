@@ -67,12 +67,18 @@ public class SmaliDexInsnWriter extends AbstractDexInsnWriter<org.jf.dexlib2.ifa
             return typeOpt.isPresent();
         }
 
-        private PrimitiveValueConstant toConstant(Type type) {
-            return type instanceof IntLikeType ? new IntConstant(this.constant.intValue()) :
-            type instanceof LongType ? new LongConstant(this.constant.longValue()) :
-            type instanceof FloatType ? new FloatConstant(this.constant.floatValue()) :
-            type instanceof DoubleType ? new DoubleConstant(this.constant.doubleValue()) :
-            DexUtils.unreachable();
+        private DexConstant toConstant(Type type) {
+            if (type instanceof RefType) {
+                long value = this.constant.longValue();
+                if (value != 0) throw new IllegalStateException("Numeric constant " + value + " cannot be of " + type);
+                return NullConstant.getInstance();
+            } else {
+                return type instanceof IntLikeType ? new IntConstant(this.constant.intValue()) :
+                        type instanceof LongType ? new LongConstant(this.constant.longValue()) :
+                        type instanceof FloatType ? new FloatConstant(this.constant.floatValue()) :
+                        type instanceof DoubleType ? new DoubleConstant(this.constant.doubleValue()) :
+                        DexUtils.unreachable();
+            }
         }
 
         @Override

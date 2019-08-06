@@ -70,6 +70,8 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
         Optional<Type> type;
         if (constant instanceof UntypedNumberConstant) {
             type = Optional.empty();
+        } else if (constant instanceof NullConstant) {
+            type = Optional.of(ObjectType.OBJECT);
         } else if (constant instanceof IntConstant) {
             type = Optional.of(IntType.getInstance());
         } else if (constant instanceof LongConstant) {

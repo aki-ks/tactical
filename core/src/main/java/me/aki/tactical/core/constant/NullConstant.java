@@ -6,7 +6,7 @@ import me.aki.tactical.core.type.Type;
 /**
  * The "null" value.
  */
-public class NullConstant implements PushableConstant, Constant {
+public class NullConstant implements PushableConstant, Constant, DexConstant {
     private final static NullConstant INSTANCE = new NullConstant();
 
     public static NullConstant getInstance() {

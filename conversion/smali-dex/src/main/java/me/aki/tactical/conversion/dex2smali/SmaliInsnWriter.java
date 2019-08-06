@@ -89,7 +89,9 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitConstant(DexConstant constant, Register target) {
-        if (constant instanceof ClassConstant) {
+        if (constant instanceof NullConstant) {
+            visitInstruction(new Insn11nProvider(Opcode.CONST, target, 0));
+        } else if (constant instanceof ClassConstant) {
             RefType classConstant = ((ClassConstant) constant).getValue();
             String type = DexUtils.toDexType(classConstant);
             visitInstruction(new Insn21cProvider(Opcode.CONST_CLASS, target, new ImmutableTypeReference(type)));
