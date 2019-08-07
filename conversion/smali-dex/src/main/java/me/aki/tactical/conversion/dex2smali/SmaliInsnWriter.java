@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.dex2smali;
 
+import com.google.common.collect.ImmutableList;
 import me.aki.tactical.conversion.dex2smali.provider.*;
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.*;
@@ -21,6 +22,7 @@ import org.jf.dexlib2.iface.reference.*;
 import org.jf.dexlib2.iface.value.EncodedValue;
 import org.jf.dexlib2.immutable.reference.*;
 import org.jf.dexlib2.immutable.value.*;
+import org.jf.dexlib2.util.DexUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -741,13 +743,31 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             Register registerE = registerIter.hasNext() ? registerIter.next() : null;
             Register registerF = registerIter.hasNext() ? registerIter.next() : null;
             Register registerG = registerIter.hasNext() ? registerIter.next() : null;
-            visitInstruction(new Insn35cProvider(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef));
+
+            if (invoke == InvokeType.POLYMORPHIC) {
+                visitInstruction(new Insn45ccProvider(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, withVarArgDescriptor(methodRef), getProto(methodRef)));
+            } else {
+                visitInstruction(new Insn35cProvider(opcode, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef));
+            }
         } else {
             Opcode opcode = getInvokeRangeOpcode(invoke);
-            Insn3rcProvider insn = new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef);
+
+            InstructionProvider<?> insn = invoke == InvokeType.POLYMORPHIC ?
+                    new Insn4rccProvider(Opcode.INVOKE_POLYMORPHIC_RANGE, registers.get(0), registerCount, withVarArgDescriptor(methodRef), getProto(methodRef)) :
+                    new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef);
+
             registerConstraints.add(new RegisterConstraint(insn, registers));
             visitInstruction(insn);
         }
+    }
+
+    private MethodReference withVarArgDescriptor(MethodReference methodRef) {
+        ImmutableList<String> params = ImmutableList.of(DexUtils.toDexType(new ArrayType(ObjectType.OBJECT, 1)));
+        return new ImmutableMethodReference(methodRef.getDefiningClass(), methodRef.getName(), params, methodRef.getReturnType());
+    }
+
+    private MethodProtoReference getProto(MethodReference methodRef) {
+        return new ImmutableMethodProtoReference(methodRef.getParameterTypes(), methodRef.getReturnType());
     }
 
     private <T> List<T> concat(Optional<T> headOpt, List<T> tail) {
@@ -768,6 +788,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             case STATIC: return Opcode.INVOKE_STATIC;
             case SUPER: return Opcode.INVOKE_SUPER;
             case VIRTUAL: return Opcode.INVOKE_VIRTUAL;
+            case POLYMORPHIC: return Opcode.INVOKE_POLYMORPHIC;
             default: return DexUtils.unreachable();
         }
     }
@@ -779,32 +800,8 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             case STATIC: return Opcode.INVOKE_STATIC_RANGE;
             case SUPER: return Opcode.INVOKE_SUPER_RANGE;
             case VIRTUAL: return Opcode.INVOKE_VIRTUAL_RANGE;
+            case POLYMORPHIC: return Opcode.INVOKE_POLYMORPHIC_RANGE;
             default: return DexUtils.unreachable();
-        }
-    }
-
-    @Override
-    public void visitPolymorphicInvoke(MethodRef method, MethodDescriptor descriptor, Register instance, List<Register> arguments) {
-        MethodReference methodRef = DexUtils.convertMethodRef(method);
-        MethodProtoReference methodProto = DexUtils.convertMethodProto(descriptor);
-
-        List<Register> registers = new ArrayList<>(arguments.size() + 1);
-        registers.add(instance);
-        registers.addAll(arguments);
-
-        int registerCount = registers.size();
-        if (registerCount <= 5) {
-            Iterator<Register> registerIter = registers.iterator();
-            Register registerC = registerIter.hasNext() ? registerIter.next() : null;
-            Register registerD = registerIter.hasNext() ? registerIter.next() : null;
-            Register registerE = registerIter.hasNext() ? registerIter.next() : null;
-            Register registerF = registerIter.hasNext() ? registerIter.next() : null;
-            Register registerG = registerIter.hasNext() ? registerIter.next() : null;
-            visitInstruction(new Insn45ccProvider(Opcode.INVOKE_POLYMORPHIC, registerCount, registerC, registerD, registerE, registerF, registerG, methodRef, methodProto));
-        } else {
-            Insn4rccProvider insn = new Insn4rccProvider(Opcode.INVOKE_POLYMORPHIC_RANGE, registers.get(0), registerCount, methodRef, methodProto);
-            registerConstraints.add(new RegisterConstraint(insn, registers));
-            visitInstruction(insn);
         }
     }
 

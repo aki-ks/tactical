@@ -19,6 +19,7 @@ import org.jf.dexlib2.iface.instruction.*;
 import org.jf.dexlib2.iface.instruction.formats.*;
 import org.jf.dexlib2.iface.reference.*;
 import org.jf.dexlib2.iface.value.*;
+import org.jf.dexlib2.immutable.reference.ImmutableMethodReference;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -543,12 +544,12 @@ public class SmaliDexInsnReader {
 
             case INVOKE_POLYMORPHIC: {
                 Instruction45cc insn = (Instruction45cc) instruction;
-                visitPolymorphicInvoke(insn, getRegisters(insn));
+                visitInvoke(insn, getRegisters(insn));
                 break;
             }
             case INVOKE_POLYMORPHIC_RANGE: {
                 Instruction4rcc insn = (Instruction4rcc) instruction;
-                visitPolymorphicInvoke(insn, getRegisters(insn));
+                visitInvoke(insn, getRegisters(insn));
                 break;
             }
 
@@ -1085,17 +1086,18 @@ public class SmaliDexInsnReader {
 
         Optional<Integer> instanceRegister;
         List<Integer> argumentRegisters;
-        switch (insn.getOpcode()) {
-            case INVOKE_STATIC:
-            case INVOKE_STATIC_RANGE:
-                instanceRegister = Optional.empty();
-                argumentRegisters = new ArrayList<>(registers);
-                break;
+        if (invokeType == DexInsnVisitor.InvokeType.STATIC) {
+            instanceRegister = Optional.empty();
+            argumentRegisters = new ArrayList<>(registers);
+        } else {
+            instanceRegister = Optional.of(registers.get(0));
+            argumentRegisters = new ArrayList<>(registers.subList(1, registers.size()));
+        }
 
-            default:
-                instanceRegister = Optional.of(registers.get(0));
-                argumentRegisters = new ArrayList<>(registers.subList(1, registers.size()));
-                break;
+        if (invokeType == DexInsnVisitor.InvokeType.POLYMORPHIC) {
+            MethodProtoReference proto = (MethodProtoReference) ((DualReferenceInstruction) insn).getReference2();
+            MethodDescriptor descriptor = DexUtils.convertMethodDescriptor(proto);
+            method = new MethodRef(method.getOwner(), method.getName(), descriptor.getParameterTypes(), descriptor.getReturnType());
         }
 
         dropDummyRegisters(method.getArguments(), argumentRegisters);
@@ -1125,21 +1127,13 @@ public class SmaliDexInsnReader {
             case INVOKE_VIRTUAL_RANGE:
                 return DexInsnVisitor.InvokeType.VIRTUAL;
 
+            case INVOKE_POLYMORPHIC:
+            case INVOKE_POLYMORPHIC_RANGE:
+                return DexInsnVisitor.InvokeType.POLYMORPHIC;
+
             default:
                 throw new AssertionError();
         }
-    }
-
-    private void visitPolymorphicInvoke(DualReferenceInstruction insn, List<Integer> registers) {
-        MethodRef method = DexUtils.toMethodRef((MethodReference) insn.getReference());
-        MethodDescriptor descriptor = DexUtils.convertMethodDescriptor((MethodProtoReference) insn.getReference2());
-
-        Integer instance = registers.get(0);
-        List<Integer> arguments = registers.subList(1, registers.size());
-
-        dropDummyRegisters(descriptor.getParameterTypes(), arguments);
-
-        iv.visitPolymorphicInvoke(method, descriptor, instance, arguments);
     }
 
     private void visitCustomInvoke(ReferenceInstruction insn, List<Integer> arguments) {

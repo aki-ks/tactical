@@ -479,20 +479,6 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
     }
 
     @Override
-    public void visitPolymorphicInvoke(MethodRef method, MethodDescriptor descriptor, Register instance, List<Register> arguments) {
-        super.visitPolymorphicInvoke(method, descriptor, instance, arguments);
-
-        RegisterAccess action = new RegisterAccess();
-        action.withRead(instance, ObjectType.OBJECT);
-
-        Iterator<Type> argumentRegisterIter = descriptor.getParameterTypes().iterator();
-        for (Register argument : arguments) {
-            action.withRead(argument, argumentRegisterIter.next());
-        }
-        visit(action);
-    }
-
-    @Override
     public void visitCustomInvoke(List<Register> arguments, String name, MethodDescriptor descriptor, List<BootstrapConstant> bootstrapArguments, Handle bootstrapMethod) {
         super.visitCustomInvoke(arguments, name, descriptor, bootstrapArguments, bootstrapMethod);
 
