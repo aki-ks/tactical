@@ -1,18 +1,6 @@
 package me.aki.tactical.core.textify;
 
-import me.aki.tactical.core.constant.BootstrapConstant;
-import me.aki.tactical.core.constant.ClassConstant;
-import me.aki.tactical.core.constant.DoubleConstant;
-import me.aki.tactical.core.constant.DynamicConstant;
-import me.aki.tactical.core.constant.FieldConstant;
-import me.aki.tactical.core.constant.FloatConstant;
-import me.aki.tactical.core.constant.IntConstant;
-import me.aki.tactical.core.constant.LongConstant;
-import me.aki.tactical.core.constant.HandleConstant;
-import me.aki.tactical.core.constant.MethodTypeConstant;
-import me.aki.tactical.core.constant.NullConstant;
-import me.aki.tactical.core.constant.PushableConstant;
-import me.aki.tactical.core.constant.StringConstant;
+import me.aki.tactical.core.constant.*;
 
 import java.util.List;
 
@@ -102,14 +90,18 @@ public class ConstantTextifier {
     public static final Textifier<PushableConstant> PUSHABLE = (printer, constant) -> {
         if (constant instanceof NullConstant) {
             NULL.textify(printer, (NullConstant) constant);
-        } else if (constant instanceof IntConstant) {
-            INT.textify(printer, (IntConstant) constant);
-        } else if (constant instanceof LongConstant) {
-            LONG.textify(printer, (LongConstant) constant);
-        } else if (constant instanceof FloatConstant) {
-            FLOAT.textify(printer, (FloatConstant) constant);
-        } else if (constant instanceof DoubleConstant) {
-            DOUBLE.textify(printer, (DoubleConstant) constant);
+        } else if (constant instanceof PrimitiveValueConstant) {
+            if (constant instanceof IntConstant) {
+                INT.textify(printer, (IntConstant) constant);
+            } else if (constant instanceof LongConstant) {
+                LONG.textify(printer, (LongConstant) constant);
+            } else if (constant instanceof FloatConstant) {
+                FLOAT.textify(printer, (FloatConstant) constant);
+            } else if (constant instanceof DoubleConstant) {
+                DOUBLE.textify(printer, (DoubleConstant) constant);
+            } else {
+                throw new AssertionError();
+            }
         } else if (constant instanceof StringConstant) {
             STRING.textify(printer, (StringConstant) constant);
         } else if (constant instanceof ClassConstant) {
@@ -124,4 +116,33 @@ public class ConstantTextifier {
             throw new AssertionError();
         }
     };
+
+    public static final Textifier<DexConstant> DEX = (printer, constant) -> {
+        if (constant instanceof NullConstant) {
+            NULL.textify(printer, (NullConstant) constant);
+        } else if (constant instanceof PrimitiveValueConstant) {
+            if (constant instanceof IntConstant) {
+                INT.textify(printer, (IntConstant) constant);
+            } else if (constant instanceof LongConstant) {
+                LONG.textify(printer, (LongConstant) constant);
+            } else if (constant instanceof FloatConstant) {
+                FLOAT.textify(printer, (FloatConstant) constant);
+            } else if (constant instanceof DoubleConstant) {
+                DOUBLE.textify(printer, (DoubleConstant) constant);
+            } else {
+                throw new AssertionError();
+            }
+        } else if (constant instanceof StringConstant) {
+            STRING.textify(printer, (StringConstant) constant);
+        } else if (constant instanceof ClassConstant) {
+            CLASS.textify(printer, (ClassConstant) constant);
+        } else if (constant instanceof MethodTypeConstant) {
+            METHOD_TYPE.textify(printer, (MethodTypeConstant) constant);
+        } else if (constant instanceof HandleConstant) {
+            HANDLE.textify(printer, (HandleConstant) constant);
+        } else {
+            throw new AssertionError();
+        }
+    };
+
 }

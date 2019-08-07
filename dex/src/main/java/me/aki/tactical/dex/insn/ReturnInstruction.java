@@ -12,7 +12,6 @@ import java.util.Optional;
  * @see ReturnVoidInstruction to return from 'void' methods
  */
 public class ReturnInstruction implements Instruction {
-
     /**
      * Register that contains the value to be returned.
      */

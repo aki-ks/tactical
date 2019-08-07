@@ -37,7 +37,7 @@ Building a referenced based intermediation for java bytecode is the main objecti
   * [X] Textifier for core
   * [X] Textifier for stack
   * [X] Textifier for ref
-  * [ ] Textifier for dex
+  * [X] Textifier for dex
   * [X] Parser for core
   * [X] Parser for stack
   * [X] Parser for ref
