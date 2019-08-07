@@ -2,6 +2,7 @@ package me.aki.tactical.conversion.dex2smali;
 
 import me.aki.tactical.conversion.dex2smali.provider.*;
 import org.jf.dexlib2.Opcode;
+import org.jf.dexlib2.iface.instruction.Instruction;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -11,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CodeUnitComputationTest {
     @Test
     public void testAffectionMapForwardBranch() {
-        List<InstructionProvider<?>> insns = Arrays.asList(
+        List<InstructionProvider<? extends Instruction>> insns = Arrays.asList(
         /* 0 */ new Insn10xProvider(Opcode.RETURN_VOID),
         /* 1 */ new Insn21tProvider(Opcode.IF_NEZ, null, null /* 4 */),
         /* 2 */ new Insn10xProvider(Opcode.RETURN_VOID),
@@ -25,7 +26,7 @@ public class CodeUnitComputationTest {
 
         // ---------------------------------
 
-        Map<InstructionProvider<?>, Set<OffsetCell>> affectedCells = new CodeUnitComputation(insns).getAffectionMap();
+        Map<InstructionProvider<? extends Instruction>, Set<OffsetCell>> affectedCells = new CodeUnitComputation(insns).getAffectionMap();
         assertEquals(Set.of(), affectedCells.getOrDefault(insns.get(0), Set.of()));
         assertEquals(Set.of(ifnezCell), affectedCells.getOrDefault(insns.get(1), Set.of()));
         assertEquals(Set.of(ifnezCell), affectedCells.getOrDefault(insns.get(2), Set.of()));
@@ -36,7 +37,7 @@ public class CodeUnitComputationTest {
 
     @Test
     public void testAffectionMapBackwardsBranch() {
-        List<InstructionProvider<?>> insns = Arrays.asList(
+        List<InstructionProvider<? extends Instruction>> insns = Arrays.asList(
         /* 0 */ new Insn10xProvider(Opcode.RETURN_VOID),
         /* 1 */ new Insn10xProvider(Opcode.RETURN_VOID),
         /* 2 */ new Insn10xProvider(Opcode.RETURN_VOID),
@@ -49,7 +50,7 @@ public class CodeUnitComputationTest {
 
         // ---------------------------------
 
-        Map<InstructionProvider<?>, Set<OffsetCell>> affectedCells = new CodeUnitComputation(insns).getAffectionMap();
+        Map<InstructionProvider<? extends Instruction>, Set<OffsetCell>> affectedCells = new CodeUnitComputation(insns).getAffectionMap();
         assertEquals(Set.of(), affectedCells.getOrDefault(insns.get(0), Set.of()));
         assertEquals(Set.of(ifnezCell), affectedCells.getOrDefault(insns.get(1), Set.of()));
         assertEquals(Set.of(ifnezCell), affectedCells.getOrDefault(insns.get(2), Set.of()));
@@ -60,7 +61,7 @@ public class CodeUnitComputationTest {
     @Test
     public void testCalculateOffsetEqualSize() {
         int insnSize = 1;
-        List<InstructionProvider<?>> insns = Arrays.asList(
+        List<InstructionProvider<? extends Instruction>> insns = Arrays.asList(
                 /* 0 */ new Insn10xProvider(null),
                 /* 1 */ new Insn10xProvider(null),
                 /* 2 */ new Insn10xProvider(null)
@@ -82,7 +83,7 @@ public class CodeUnitComputationTest {
 
     @Test
     public void testCalculateOffsetMixedSize() {
-        List<InstructionProvider<?>> insns = Arrays.asList(
+        List<InstructionProvider<? extends Instruction>> insns = Arrays.asList(
             /* 0 */ new Insn10xProvider(null), // Size 1
             /* 1 */ new Insn21cProvider(null, null, null), // Size 2
             /* 2 */ new Insn31iProvider(null, null, 0), // Size 3

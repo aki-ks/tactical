@@ -11,7 +11,7 @@ public class OffsetCell extends RWCell.Heap<Integer> {
     /**
      * The offset should be calculated relative to this instruction.
      */
-    private final InstructionProvider<?> relativeTo;
+    private final InstructionProvider<? extends Instruction> relativeTo;
 
     /**
      * The cell should point at this instruction.
@@ -19,19 +19,19 @@ public class OffsetCell extends RWCell.Heap<Integer> {
      */
     private Either<me.aki.tactical.dex.insn.Instruction, InstructionProvider<? extends Instruction>> target;
 
-    public OffsetCell(InstructionProvider<?> relativeTo, InstructionProvider<? extends Instruction> target) {
+    public OffsetCell(InstructionProvider<? extends Instruction> relativeTo, InstructionProvider<? extends Instruction> target) {
         super(Integer.class, 0);
         this.relativeTo = relativeTo;
         this.target = Either.right(target);
     }
 
-    public OffsetCell(InstructionProvider<?> relativeTo, me.aki.tactical.dex.insn.Instruction target) {
+    public OffsetCell(InstructionProvider<? extends Instruction> relativeTo, me.aki.tactical.dex.insn.Instruction target) {
         super(Integer.class, 0);
         this.relativeTo = relativeTo;
         this.target = Either.left(target);
     }
 
-    public InstructionProvider<?> getRelativeTo() {
+    public InstructionProvider<? extends Instruction> getRelativeTo() {
         return relativeTo;
     }
 

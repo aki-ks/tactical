@@ -15,19 +15,19 @@ import java.util.*;
  * This can invalidate already computed offset.
  */
 public class CodeUnitComputation {
-    private final InsertList<InstructionProvider<?>> instructions;
+    private final InsertList<InstructionProvider<? extends Instruction>> instructions;
 
     /**
      * Store for each instruction which cells must get updated if they change their size.
      */
-    private final Map<InstructionProvider<?>, Set<OffsetCell>> affectionMap = new HashMap<>();
+    private final Map<InstructionProvider<? extends Instruction>, Set<OffsetCell>> affectionMap = new HashMap<>();
 
-    public CodeUnitComputation(List<InstructionProvider<?>> instructions) {
+    public CodeUnitComputation(List<InstructionProvider<? extends Instruction>> instructions) {
         this.instructions = new LinkedInsertList<>(instructions);
         this.instructions.forEach(this::addToAffectionMap);
     }
 
-    Map<InstructionProvider<?>, Set<OffsetCell>> getAffectionMap() {
+    Map<InstructionProvider<? extends Instruction>, Set<OffsetCell>> getAffectionMap() {
         return affectionMap;
     }
 
@@ -43,13 +43,13 @@ public class CodeUnitComputation {
      *
      * @param instruction
      */
-    private void addToAffectionMap(InstructionProvider<?> instruction) {
+    private void addToAffectionMap(InstructionProvider<? extends Instruction> instruction) {
         Set<OffsetCell> notYetAddedCells = new HashSet<>(instruction.getOffsetCells());
 
-        InstructionProvider<?> forwardCursor = instruction;
-        InstructionProvider<?> backwardCursor = instruction;
-        Set<InstructionProvider<?>> forwardPath = new HashSet<>();
-        Set<InstructionProvider<?>> backwardPath = new HashSet<>();
+        InstructionProvider<? extends Instruction> forwardCursor = instruction;
+        InstructionProvider<? extends Instruction> backwardCursor = instruction;
+        Set<InstructionProvider<? extends Instruction>> forwardPath = new HashSet<>();
+        Set<InstructionProvider<? extends Instruction>> backwardPath = new HashSet<>();
 
         while (!notYetAddedCells.isEmpty()) {
             if (forwardCursor == null && backwardCursor == null) {
@@ -78,7 +78,7 @@ public class CodeUnitComputation {
      * @param cursor an instruction
      * @param path a set containing all instruction between the {@link OffsetCell#getRelativeTo()} instruction of the cells and the cursor
      */
-    private void addToMapIfAffected(Set<OffsetCell> cells, InstructionProvider<?> cursor, Set<InstructionProvider<?>> path) {
+    private void addToMapIfAffected(Set<OffsetCell> cells, InstructionProvider<? extends Instruction> cursor, Set<InstructionProvider<? extends Instruction>> path) {
         Iterator<OffsetCell> cellIter = cells.iterator();
         while (cellIter.hasNext()) {
             OffsetCell cell = cellIter.next();
@@ -96,8 +96,8 @@ public class CodeUnitComputation {
      * @param instructions instructions that affect the cell
      * @param cell the cell that gets affected
      */
-    private void setCellAffectedByInstructions(Set<InstructionProvider<?>> instructions, OffsetCell cell) {
-        for (InstructionProvider<?> affectedInsn : instructions) {
+    private void setCellAffectedByInstructions(Set<InstructionProvider<? extends Instruction>> instructions, OffsetCell cell) {
+        for (InstructionProvider<? extends Instruction> affectedInsn : instructions) {
             affectionMap.computeIfAbsent(affectedInsn, x -> new HashSet<>()).add(cell);
         }
     }
@@ -106,7 +106,7 @@ public class CodeUnitComputation {
         instructions.forEach(this::updateOffset);
     }
 
-    private void updateOffset(InstructionProvider<?> instruction) {
+    private void updateOffset(InstructionProvider<? extends Instruction> instruction) {
         Format formatBeforeUpdate = instruction.getFormat();
 
         for (OffsetCell offsetCell : instruction.getOffsetCells()) {
@@ -131,11 +131,11 @@ public class CodeUnitComputation {
      * @param target calculate the offset of this instruction
      * @return the offset between the two instructions
      */
-    int calculateOffset(InstructionProvider<?> relativeTo, InstructionProvider<?> target) {
+    int calculateOffset(InstructionProvider<? extends Instruction> relativeTo, InstructionProvider<? extends Instruction> target) {
         int forwardOffset = 0;
         int backwardOffset = 0;
-        InstructionProvider<?> forwardCursor = relativeTo;
-        InstructionProvider<?> backwardCursor = relativeTo;
+        InstructionProvider<? extends Instruction> forwardCursor = relativeTo;
+        InstructionProvider<? extends Instruction> backwardCursor = relativeTo;
 
         while (forwardCursor != null || backwardCursor != null) {
             if (forwardCursor != null) {

@@ -752,7 +752,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         } else {
             Opcode opcode = getInvokeRangeOpcode(invoke);
 
-            InstructionProvider<?> insn = invoke == InvokeType.POLYMORPHIC ?
+            InstructionProvider<? extends Instruction> insn = invoke == InvokeType.POLYMORPHIC ?
                     new Insn4rccProvider(Opcode.INVOKE_POLYMORPHIC_RANGE, registers.get(0), registerCount, withVarArgDescriptor(methodRef), getProto(methodRef)) :
                     new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef);
 
@@ -1006,16 +1006,16 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         /**
          * Instruction that requires the constraint.
          */
-        private final InstructionProvider<?> instruction;
+        private final InstructionProvider<? extends Instruction> instruction;
 
         private final List<Register> registers;
 
-        public RegisterConstraint(InstructionProvider<?> instruction, List<Register> registers) {
+        public RegisterConstraint(InstructionProvider<? extends Instruction> instruction, List<Register> registers) {
             this.instruction = instruction;
             this.registers = registers;
         }
 
-        public InstructionProvider<?> getInstruction() {
+        public InstructionProvider<? extends Instruction> getInstruction() {
             return instruction;
         }
 
