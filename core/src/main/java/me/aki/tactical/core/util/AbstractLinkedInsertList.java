@@ -1,12 +1,6 @@
 package me.aki.tactical.core.util;
 
-import java.util.AbstractList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * A linked {@link InsertList} that maintains a {@link HashMap} from all elements to their nodes.
@@ -233,8 +227,8 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
         if (index == size()) {
             add(element);
         } else {
-            Node node = new Node(element);
-            node.insertAfter(nodeByIndex(index));
+            Node loc = nodeByIndex(index);
+            new Node(element).insertBefore(loc);
         }
     }
 
