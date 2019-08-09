@@ -9,30 +9,14 @@ import org.jf.dexlib2.immutable.instruction.ImmutableInstruction3rc;
 
 import java.util.List;
 
-public class Insn3rcProvider implements InstructionProvider<Instruction3rc> {
+public class Insn3rcProvider extends RangeInsnProvider<Instruction3rc> {
     private final Opcode opcode;
-    private final RegisterCell startRegister;
-    private final int registerCount;
     private final Reference reference;
 
     public Insn3rcProvider(Opcode opcode, Register startCell, int registerCount, Reference reference) {
+        super(startCell, registerCount);
         this.opcode = opcode;
-        this.startRegister = new RegisterCell(startCell);
-        this.registerCount = registerCount;
         this.reference = reference;
-    }
-
-    public RegisterCell getStartRegister() {
-        return startRegister;
-    }
-
-    public int getRegisterCount() {
-        return registerCount;
-    }
-
-    @Override
-    public List<RegisterCell> getRegisterCells() {
-        return List.of(startRegister);
     }
 
     @Override
@@ -47,6 +31,6 @@ public class Insn3rcProvider implements InstructionProvider<Instruction3rc> {
 
     @Override
     public Instruction3rc newInstance() {
-        return new ImmutableInstruction3rc(opcode, startRegister.get(), registerCount, reference);
+        return new ImmutableInstruction3rc(opcode, getStartRegisterCell().get(), getRegisterCount(), reference);
     }
 }

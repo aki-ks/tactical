@@ -22,7 +22,6 @@ import org.jf.dexlib2.iface.reference.*;
 import org.jf.dexlib2.iface.value.EncodedValue;
 import org.jf.dexlib2.immutable.reference.*;
 import org.jf.dexlib2.immutable.value.*;
-import org.jf.dexlib2.util.DexUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,6 +56,10 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     public SmaliInsnWriter(Optional<Type> returnType) {
         this.returnType = returnType;
+    }
+
+    public List<RegisterConstraint> getRegisterConstraints() {
+        return registerConstraints;
     }
 
     public void setInstruction(DexCfgGraph.Node instruction) {
@@ -553,7 +556,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             visitInstruction(new Insn35cProvider(Opcode.FILLED_NEW_ARRAY, registerCount, registerC, registerD, registerE, registerF, registerG, typeRef));
         } else {
             Insn3rcProvider insn = new Insn3rcProvider(Opcode.FILLED_NEW_ARRAY_RANGE, registers.get(0), registerCount, typeRef);
-            registerConstraints.add(new RegisterConstraint(insn, registers));
+            registerConstraints.add(new RegisterConstraint(insn, registers, insn.getStartRegisterCell()));
             visitInstruction(insn);
         }
     }
@@ -752,11 +755,11 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
         } else {
             Opcode opcode = getInvokeRangeOpcode(invoke);
 
-            InstructionProvider<? extends Instruction> insn = invoke == InvokeType.POLYMORPHIC ?
+            RangeInsnProvider<? extends Instruction> insn = invoke == InvokeType.POLYMORPHIC ?
                     new Insn4rccProvider(Opcode.INVOKE_POLYMORPHIC_RANGE, registers.get(0), registerCount, withVarArgDescriptor(methodRef), getProto(methodRef)) :
                     new Insn3rcProvider(opcode, registers.get(0), registerCount, methodRef);
 
-            registerConstraints.add(new RegisterConstraint(insn, registers));
+            registerConstraints.add(new RegisterConstraint(insn, registers, insn.getStartRegisterCell()));
             visitInstruction(insn);
         }
     }
@@ -827,7 +830,7 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
             visitInstruction(new Insn35cProvider(Opcode.INVOKE_CUSTOM, registerCount, registerC, registerD, registerE, registerF, registerG, callSiteRef));
         } else {
             Insn3rcProvider insn = new Insn3rcProvider(Opcode.INVOKE_CUSTOM_RANGE, arguments.get(0), registerCount, callSiteRef);
-            registerConstraints.add(new RegisterConstraint(insn, arguments));
+            registerConstraints.add(new RegisterConstraint(insn, arguments, insn.getStartRegisterCell()));
             visitInstruction(insn);
         }
     }
@@ -1001,28 +1004,6 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
     }
 
     // UTILS //
-
-    public static class RegisterConstraint {
-        /**
-         * Instruction that requires the constraint.
-         */
-        private final InstructionProvider<? extends Instruction> instruction;
-
-        private final List<Register> registers;
-
-        public RegisterConstraint(InstructionProvider<? extends Instruction> instruction, List<Register> registers) {
-            this.instruction = instruction;
-            this.registers = registers;
-        }
-
-        public InstructionProvider<? extends Instruction> getInstruction() {
-            return instruction;
-        }
-
-        public List<Register> getRegisters() {
-            return registers;
-        }
-    }
 
     private <T> T match(Type type, RefTypeMatch<T> matcher) {
         return type instanceof ObjectType ? matcher.caseObject((ObjectType) type) :

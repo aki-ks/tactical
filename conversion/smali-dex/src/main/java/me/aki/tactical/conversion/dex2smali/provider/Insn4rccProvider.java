@@ -9,28 +9,16 @@ import org.jf.dexlib2.immutable.instruction.ImmutableInstruction4rcc;
 
 import java.util.List;
 
-public class Insn4rccProvider implements InstructionProvider<Instruction4rcc> {
+public class Insn4rccProvider extends RangeInsnProvider<Instruction4rcc> {
     private final Opcode opcode;
-    private final RegisterCell startRegister;
-    private final int registerCount;
     private final Reference methodRef;
     private final Reference methodProto;
 
     public Insn4rccProvider(Opcode opcode, Register startRegister, int registerCount, Reference methodRef, Reference methodProto) {
+        super(startRegister, registerCount);
         this.opcode = opcode;
-        this.startRegister = new RegisterCell(startRegister);
-        this.registerCount = registerCount;
         this.methodRef = methodRef;
         this.methodProto = methodProto;
-    }
-
-    public RegisterCell getStartRegisterCell() {
-        return startRegister;
-    }
-
-    @Override
-    public List<RegisterCell> getRegisterCells() {
-        return List.of(startRegister);
     }
 
     @Override
@@ -45,6 +33,6 @@ public class Insn4rccProvider implements InstructionProvider<Instruction4rcc> {
 
     @Override
     public Instruction4rcc newInstance() {
-        return new ImmutableInstruction4rcc(opcode, startRegister.get(), registerCount, methodRef, methodProto);
+        return new ImmutableInstruction4rcc(opcode, getStartRegisterCell().get(), getRegisterCount(), methodRef, methodProto);
     }
 }
