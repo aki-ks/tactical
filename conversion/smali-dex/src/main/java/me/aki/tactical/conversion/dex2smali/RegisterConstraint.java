@@ -18,12 +18,12 @@ public class RegisterConstraint {
      */
     private final InstructionProvider<? extends Instruction> instruction;
 
-    private final List<Register> registers;
-
     /**
-     * The cell for the first register of the
+     * The cell for the first register of the range
      */
     private final RegisterCell firstRegisterCell;
+
+    private List<Register> registers;
 
     public RegisterConstraint(InstructionProvider<? extends Instruction> instruction, List<Register> registers, RegisterCell firstRegisterCell) {
         this.instruction = instruction;
@@ -35,11 +35,15 @@ public class RegisterConstraint {
         return instruction;
     }
 
+    public RegisterCell getFirstRegisterCell() {
+        return firstRegisterCell;
+    }
+
     public List<Register> getRegisters() {
         return registers;
     }
 
-    public RegisterCell getFirstRegisterCell() {
-        return firstRegisterCell;
+    public void setRegisters(List<Register> registers) {
+        this.registers = registers;
     }
 }

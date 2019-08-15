@@ -7,7 +7,7 @@ import me.aki.tactical.dex.Register;
  * A RWCell that should contain the register index of a tactical {@link Register}.
  */
 public class RegisterCell extends RWCell.Heap<Integer> {
-    private final Register register;
+    private Register register;
 
     public RegisterCell(Register register) {
         super(Integer.class, 0);
@@ -16,5 +16,9 @@ public class RegisterCell extends RWCell.Heap<Integer> {
 
     public Register getRegister() {
         return register;
+    }
+
+    public void setRegister(Register register) {
+        this.register = register;
     }
 }
