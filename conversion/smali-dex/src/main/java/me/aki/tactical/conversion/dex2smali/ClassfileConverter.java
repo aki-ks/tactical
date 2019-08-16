@@ -95,7 +95,7 @@ public class ClassfileConverter {
         String returnType = DexUtils.toDexReturnType(method.getReturnType());
         int accessFlags = FlagConverter.METHOD.toBitMap(method.getFlags());
         Set<? extends org.jf.dexlib2.iface.Annotation> annotations = AnnotationConverter.convertAnnotations(method.getAnnotations());
-        MethodImplementation methodImplementation = method.getBody().map(this::convertMethodBody).orElse(null);
+        MethodImplementation methodImplementation = method.getBody().map(body -> convertMethodBody(body, method)).orElse(null);
         return new ImmutableMethod(definingClass, method.getName(), parameters, returnType, accessFlags, annotations, methodImplementation);
     }
 
@@ -116,11 +116,10 @@ public class ClassfileConverter {
         return params;
     }
 
-    private MethodImplementation convertMethodBody(Body body) {
+    private MethodImplementation convertMethodBody(Body body, Method method) {
         if (body instanceof DexBody) {
             DexBody dexBody = (DexBody) body;
-
-            throw new RuntimeException("NOT YET IMPLEMENTED");
+            return new BodyConverter(method, dexBody).convert();
         } else {
             throw new IllegalStateException("Expected DexBody, found " + body.getClass().getSimpleName());
         }
