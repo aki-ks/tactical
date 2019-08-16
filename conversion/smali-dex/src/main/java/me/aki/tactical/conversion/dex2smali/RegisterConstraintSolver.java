@@ -44,12 +44,14 @@ public class RegisterConstraintSolver {
         this.body = body;
         this.instructionProviders = instructionProviders;
         this.registerConstraints = registerConstraints;
-    }
 
-    public void solve() {
         for (RegisterConstraint collision : findAllCollidingRanges()) {
             solveCollision(collision);
         }
+    }
+
+    public Set<InsertList<Register>> getRanges() {
+        return ranges;
     }
 
     /**
