@@ -1,5 +1,6 @@
 package me.aki.tactical.conversion.smali2dex;
 
+import me.aki.tactical.conversion.smali2dex.typing.AmbiguousType;
 import me.aki.tactical.conversion.smali2dex.typing.UntypedNumberConstant;
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.FieldRef;
@@ -19,7 +20,6 @@ import org.jf.dexlib2.iface.instruction.*;
 import org.jf.dexlib2.iface.instruction.formats.*;
 import org.jf.dexlib2.iface.reference.*;
 import org.jf.dexlib2.iface.value.*;
-import org.jf.dexlib2.immutable.reference.ImmutableMethodReference;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,17 +43,22 @@ public class SmaliDexInsnReader {
 
             case MOVE:
             case MOVE_FROM16:
-            case MOVE_16:
+            case MOVE_16: {
+                visitMove(AmbiguousType.IntOrFloat.getInstance(), (TwoRegisterInstruction) instruction);
+                break;
+            }
 
             case MOVE_WIDE:
             case MOVE_WIDE_FROM16:
-            case MOVE_WIDE_16:
+            case MOVE_WIDE_16: {
+                visitMove(AmbiguousType.LongOrDouble.getInstance(), (TwoRegisterInstruction) instruction);
+                break;
+            }
 
             case MOVE_OBJECT:
             case MOVE_OBJECT_FROM16:
             case MOVE_OBJECT_16: {
-                TwoRegisterInstruction insn = (TwoRegisterInstruction) instruction;
-                iv.visitMove(null, insn.getRegisterB(), insn.getRegisterA());
+                visitMove(ObjectType.OBJECT, (TwoRegisterInstruction) instruction);
                 break;
             }
 
@@ -91,14 +96,16 @@ public class SmaliDexInsnReader {
             case CONST_4:
             case CONST_16:
             case CONST:
-            case CONST_HIGH16:
+            case CONST_HIGH16: {
+                visitNumberConstant(AmbiguousType.IntOrFloat.getInstance(), instruction);
+                break;
+            }
+
             case CONST_WIDE_16:
             case CONST_WIDE_32:
             case CONST_WIDE:
             case CONST_WIDE_HIGH16: {
-                int registerA = ((OneRegisterInstruction) instruction).getRegisterA();
-                long literal = ((WideLiteralInstruction) instruction).getWideLiteral();
-                iv.visitConstant(new UntypedNumberConstant(literal), registerA);
+                visitNumberConstant(AmbiguousType.LongOrDouble.getInstance(), instruction);
                 break;
             }
             case CONST_STRING: {
@@ -631,12 +638,27 @@ public class SmaliDexInsnReader {
             case IPUT_OBJECT_VOLATILE:
             case SGET_OBJECT_VOLATILE:
             case SPUT_OBJECT_VOLATILE:
-                // Baksmali should alread have deodexed the code, so there are no odex only instructions in the code
+                // Baksmali should already have deodexed the code, so there are no odex only instructions in the code
                 throw new IllegalStateException("Unexpected ODEX instruction " + instruction.getOpcode());
 
             default:
                 throw new AssertionError();
         }
+    }
+
+    private void visitMove(Type type, TwoRegisterInstruction instruction) {
+        iv.visitMove(type, instruction.getRegisterB(), instruction.getRegisterA());
+    }
+
+    private void visitNumberConstant(AmbiguousType type, Instruction instruction) {
+        int registerA = ((OneRegisterInstruction) instruction).getRegisterA();
+        long literal = ((WideLiteralInstruction) instruction).getWideLiteral();
+
+        if (literal == 0L && type instanceof AmbiguousType.IntOrFloat) {
+            type = AmbiguousType.IntOrFloatOrRef.getInstance();
+        }
+
+        iv.visitConstant(new UntypedNumberConstant(type, literal), registerA);
     }
 
     private Type getTypeFromArrayAccessOpcode(Opcode opcode) {
@@ -663,10 +685,11 @@ public class SmaliDexInsnReader {
 
             case AGET:
             case APUT:
+                return AmbiguousType.IntOrFloat.getInstance();
+
             case AGET_WIDE:
             case APUT_WIDE:
-                // The type is not distinct, it gets set later by computing additional type informations.
-                return null;
+                return AmbiguousType.LongOrDouble.getInstance();
 
             default:
                 return DexUtils.unreachable();

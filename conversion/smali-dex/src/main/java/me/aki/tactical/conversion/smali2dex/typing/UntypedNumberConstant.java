@@ -5,26 +5,31 @@ import me.aki.tactical.core.type.Type;
 
 /**
  * A numeric constant whose type is not known.
- * Its value can be interpreted as int, long, float or double.
+ * Its value can be interpreted as int/long/null or float/double.
  *
  * This constant is temporary created during conversion.
  */
 public class UntypedNumberConstant implements DexConstant {
+    private final AmbiguousType type;
     private final long value;
 
-    public UntypedNumberConstant(int value) {
+    public UntypedNumberConstant(AmbiguousType type, int value) {
+        this.type = type;
         this.value = value;
     }
 
-    public UntypedNumberConstant(long value) {
+    public UntypedNumberConstant(AmbiguousType type, long value) {
+        this.type = type;
         this.value = value;
     }
 
-    public UntypedNumberConstant(float value) {
+    public UntypedNumberConstant(AmbiguousType type, float value) {
+        this.type = type;
         this.value = Float.floatToRawIntBits(value);
     }
 
-    public UntypedNumberConstant(double value) {
+    public UntypedNumberConstant(AmbiguousType type, double value) {
+        this.type = type;
         this.value = Double.doubleToLongBits(value);
     }
 
@@ -46,7 +51,6 @@ public class UntypedNumberConstant implements DexConstant {
 
     @Override
     public Type getType() {
-        // Is not statically known
-        return null;
+        return type;
     }
 }
