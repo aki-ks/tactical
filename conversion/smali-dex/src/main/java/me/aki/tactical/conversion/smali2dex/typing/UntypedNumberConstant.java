@@ -1,13 +1,13 @@
 package me.aki.tactical.conversion.smali2dex.typing;
 
 import me.aki.tactical.core.constant.DexConstant;
-import me.aki.tactical.core.type.Type;
 
 /**
  * A numeric constant whose type is not known.
  * Its value can be interpreted as int/long/null or float/double.
  *
- * This constant is temporary created during conversion.
+ * This constant is temporary created during conversion and
+ * gets resolved by the {@link DexTyper}.
  */
 public class UntypedNumberConstant implements DexConstant {
     private final AmbiguousType type;
@@ -50,7 +50,7 @@ public class UntypedNumberConstant implements DexConstant {
     }
 
     @Override
-    public Type getType() {
+    public AmbiguousType getType() {
         return type;
     }
 }

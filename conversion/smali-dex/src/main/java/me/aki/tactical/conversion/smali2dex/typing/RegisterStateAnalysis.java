@@ -1,4 +1,4 @@
-package me.aki.tactical.conversion.smali2dex.utils;
+package me.aki.tactical.conversion.smali2dex.typing;
 
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.Register;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Analyses which instructions may have written the values that is stored at a certain location in code in registers.
  */
-public class LocalStateAnalysis {
+public class RegisterStateAnalysis {
     private final DexCfgGraph cfgGraph;
     private final DexBody body;
 
@@ -32,7 +32,7 @@ public class LocalStateAnalysis {
      */
     private Map<Register, RegisterStates> registerStatesMap;
 
-    public LocalStateAnalysis(DexCfgGraph cfgGraph) {
+    public RegisterStateAnalysis(DexCfgGraph cfgGraph) {
         this.cfgGraph = cfgGraph;
         this.body = cfgGraph.getBody();
 

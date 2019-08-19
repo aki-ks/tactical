@@ -1,6 +1,5 @@
-package me.aki.tactical.conversion.smali2dex.postprocessor;
+package me.aki.tactical.conversion.smali2dex.typing;
 
-import me.aki.tactical.conversion.smali2dex.utils.LocalStateAnalysis;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.Register;
@@ -43,35 +42,40 @@ import java.util.Set;
  * Since it is not possible to access values assigned to <tt>x</tt> by the first group from the second group,
  * all uses of <tt>x</tt> in the second group can be replaced against a new variable.
  */
-public class RegisterPartitioner implements PostProcessor {
-    @Override
+public class RegisterPartitioner {
+    private final DexCfgGraph dexCfgGraph;
+
+    public RegisterPartitioner(DexCfgGraph dexCfgGraph) {
+        this.dexCfgGraph = dexCfgGraph;
+    }
+
     public void process(DexBody body) {
-        LocalStateAnalysis localStateAnalysis = new LocalStateAnalysis(new DexCfgGraph(body));
+        RegisterStateAnalysis registerStateAnalysis = new RegisterStateAnalysis(dexCfgGraph);
 
         // the register list may get modified during the blow iteration
         List<Register> registerListCopy = List.copyOf(body.getRegisters());
 
         for (Register register : registerListCopy) {
-            LocalStateAnalysis.RegisterStates registerState = localStateAnalysis.getRegisterState(register);
-            for (Set<LocalStateAnalysis.RegisterState> group : registerState.getGroups()) {
+            RegisterStateAnalysis.RegisterStates registerState = registerStateAnalysis.getRegisterState(register);
+            for (Set<RegisterStateAnalysis.RegisterState> group : registerState.getGroups()) {
                 processGroup(body, registerState, register, group);
             }
         }
     }
 
-    private void processGroup(DexBody body, LocalStateAnalysis.RegisterStates registerState, Register register, Set<LocalStateAnalysis.RegisterState> group) {
+    private void processGroup(DexBody body, RegisterStateAnalysis.RegisterStates registerState, Register register, Set<RegisterStateAnalysis.RegisterState> group) {
         Register newRegister = getRegisterForGroup(body, group);
 
         // Update the assign instructions
-        for (LocalStateAnalysis.RegisterState state : group) {
-            if (state instanceof LocalStateAnalysis.RegisterState.Assignment) {
+        for (RegisterStateAnalysis.RegisterState state : group) {
+            if (state instanceof RegisterStateAnalysis.RegisterState.Assignment) {
                 Instruction instruction = state.getNode().getInstruction();
                 instruction.getWrittenRegisterCell().get().set(newRegister);
             }
         }
 
         // Update all instructions in the group that read from the register
-        for (LocalStateAnalysis.RegisterState state : group) {
+        for (RegisterStateAnalysis.RegisterState state : group) {
             for (Instruction instruction : registerState.getInstructions(state)) {
                 for (RWCell<Register> cell : instruction.getReadRegisterCells()) {
                     if (cell.get() == register) {
@@ -93,12 +97,12 @@ public class RegisterPartitioner implements PostProcessor {
      * @param group the group for which we want a new register
      * @return either a new or a this or parameter register
      */
-    private Register getRegisterForGroup(DexBody body, Set<LocalStateAnalysis.RegisterState> group) {
-        for (LocalStateAnalysis.RegisterState registerState : group) {
-            if (registerState instanceof LocalStateAnalysis.RegisterState.This) {
+    private Register getRegisterForGroup(DexBody body, Set<RegisterStateAnalysis.RegisterState> group) {
+        for (RegisterStateAnalysis.RegisterState registerState : group) {
+            if (registerState instanceof RegisterStateAnalysis.RegisterState.This) {
                 return body.getThisRegister().get();
-            } else if (registerState instanceof LocalStateAnalysis.RegisterState.Parameter) {
-                int index = ((LocalStateAnalysis.RegisterState.Parameter) registerState).getIndex();
+            } else if (registerState instanceof RegisterStateAnalysis.RegisterState.Parameter) {
+                int index = ((RegisterStateAnalysis.RegisterState.Parameter) registerState).getIndex();
                 return body.getParameterRegisters().get(index);
             }
         }

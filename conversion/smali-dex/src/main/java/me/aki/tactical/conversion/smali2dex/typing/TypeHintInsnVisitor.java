@@ -1,6 +1,5 @@
 package me.aki.tactical.conversion.smali2dex.typing;
 
-import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.MethodDescriptor;
 import me.aki.tactical.core.MethodRef;
@@ -16,15 +15,15 @@ import me.aki.tactical.dex.utils.DexInsnVisitor;
 import java.util.*;
 
 /**
- * This InsnVisitor reports for most instructions which type they expect to read from registers and which types they will write.
+ * This InsnVisitor reports which types instructions expect to read from registers and which types they will write.
+ * Note: It is not always possible to tell the exact type since some instructions are ambiguous.
  *
- * It's limitations are:
- * - int/float/long/double constants cannot be distinguished
- * - moves of int/float/long/double values cannot be distinguished
- * - returns of int/float/long/double values cannot be distinguished
- * - reads and writes on int/float/long/double arrays cannot be distinguished
+ * Following events will generate {@link AmbiguousType AmbiguousTypes}
+ * - int/float/null and long/double constants cannot be distinguished
+ * - moves of int/float/null or long/double values cannot be distinguished
+ * - reads from and writes into int/float/null or long/double arrays cannot be distinguished
  *
- * Note: The {@link TypeHintInsnVisitor#setInstruction(DexCfgGraph.Node)} method must be called before any instruction visit.
+ * Note: The {@link TypeHintInsnVisitor#setNode(DexCfgGraph.Node)} method must be called before any instruction visit.
  */
 public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Register> {
     /**
@@ -35,7 +34,7 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
     /**
      * Cfg node of the instruction that is currently visited
      */
-    protected DexCfgGraph.Node instruction;
+    protected DexCfgGraph.Node node;
 
     public TypeHintInsnVisitor(Optional<Type> returnType) {
         this.returnType = returnType;
@@ -48,12 +47,12 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
 
     /**
      * Set the instruction that will be visited next.
-     * It must be a cfg node so move-result instructions can access the previous instruction.
+     * A cfg node is required so move-result instructions can access the previous instruction.
      *
-     * @param instruction the instruction that is visited next
+     * @param node the instruction that is visited next
      */
-    public void setInstruction(DexCfgGraph.Node instruction) {
-        this.instruction = instruction;
+    public void setNode(DexCfgGraph.Node node) {
+        this.node = node;
     }
 
     protected abstract void visit(RegisterAccess action);
@@ -67,32 +66,8 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
     public void visitConstant(DexConstant constant, Register target) {
         super.visitConstant(constant, target);
 
-        Optional<Type> type;
-        if (constant instanceof UntypedNumberConstant) {
-            type = Optional.empty();
-        } else if (constant instanceof NullConstant) {
-            type = Optional.of(ObjectType.OBJECT);
-        } else if (constant instanceof IntConstant) {
-            type = Optional.of(IntType.getInstance());
-        } else if (constant instanceof LongConstant) {
-            type = Optional.of(LongType.getInstance());
-        } else if (constant instanceof FloatConstant) {
-            type = Optional.of(FloatType.getInstance());
-        } else if (constant instanceof DoubleConstant) {
-            type = Optional.of(DoubleType.getInstance());
-        } else if (constant instanceof StringConstant) {
-            type = Optional.of(ObjectType.STRING);
-        } else if (constant instanceof ClassConstant) {
-            type = Optional.of(ObjectType.CLASS);
-        } else if (constant instanceof HandleConstant) {
-            type = Optional.of(ObjectType.METHOD_HANDLE);
-        } else if (constant instanceof MethodTypeConstant) {
-            type = Optional.of(ObjectType.METHOD_TYPE);
-        } else {
-            type = DexUtils.unreachable();
-        }
-
-        visit(new RegisterAccess().withWrite(target, type));
+        visit(new RegisterAccess()
+                .withWrite(target, constant.getType()));
     }
 
     @Override
@@ -331,7 +306,7 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
         super.visitArrayLoad(type, array, index, result);
 
         visit(new RegisterAccess()
-                .withRead(array, arrayType())
+                .withRead(array, arrayOfType(type))
                 .withRead(index, IntType.getInstance())
                 .withWrite(result, type));
     }
@@ -341,9 +316,13 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
         super.visitArrayStore(type, array, index, value);
 
         visit(new RegisterAccess()
-                .withRead(array, arrayType())
+                .withRead(array, arrayOfType(type))
                 .withRead(index, IntType.getInstance())
                 .withRead(value, type));
+    }
+
+    private RefType arrayOfType(Type baseType) {
+        return baseType instanceof AmbiguousType ? arrayType() : new ArrayType(baseType, 1);
     }
 
     @Override
@@ -494,19 +473,16 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
     public void visitMove(Type type, Register from, Register to) {
         super.visitMove(type, from, to);
 
-        // `type` may be null if it was not yet resolved
-        Optional<Type> typeOpt = Optional.ofNullable(type);
-
         visit(new RegisterAccess()
-                .withRead(from, typeOpt)
-                .withWrite(to, typeOpt));
+                .withRead(from, type)
+                .withWrite(to, type));
     }
 
     @Override
     public void visitMoveResult(Register register) {
         super.visitMoveResult(register);
 
-        List<DexCfgGraph.Node> predecessors = instruction.getPreceeding();
+        List<DexCfgGraph.Node> predecessors = node.getPreceding();
         if (predecessors.size() != 1) {
             // More than one predecessor can only exist if some instruction branches to this move-result instruction.
             // This is not allowed since move-result instructions must directly follow their value providing instruction
@@ -516,13 +492,14 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
         Instruction predecessor = predecessors.iterator().next().getInstruction();
         if (predecessor instanceof InvokeInstruction) {
             Optional<Type> type = ((InvokeInstruction) predecessor).getInvoke().getDescriptor().getReturnType();
-            if (!type.isPresent()) {
-                throw new IllegalStateException("Cannot move result value of void");
+            if (type.isPresent()) {
+                visit(new RegisterAccess().withWrite(register, type.get()));
+            } else {
+                throw new IllegalStateException("Cannot move result value of void type");
             }
-
-            visit(new RegisterAccess().withWrite(register, type));
         } else if (predecessor instanceof NewFilledArrayInstruction) {
-            visit(new RegisterAccess().withWrite(register, arrayType()));
+            ArrayType arrayType = ((NewFilledArrayInstruction) predecessor).getType();
+            visit(new RegisterAccess().withWrite(register, arrayType));
         } else {
             throw new IllegalStateException("There's nothing to move after a " + predecessor.getClass().getSimpleName());
         }
@@ -563,42 +540,36 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
      * Types of the values read and written by instructions into/from registers.
      */
     public static class RegisterAccess {
-        private final Map<Register, Optional<Type>> reads;
-        private final Map<Register, Optional<Type>> writes;
+        private final Map<Register, Type> reads = new HashMap<>();
 
-        public RegisterAccess() {
-            this(new HashMap<>(), new HashMap<>());
-        }
-
-        public RegisterAccess(Map<Register, Optional<Type>> reads, Map<Register, Optional<Type>> writes) {
-            this.reads = reads;
-            this.writes = writes;
-        }
+        private Register writtenRegister = null;
+        private Type writtenType = null;
 
         private RegisterAccess withRead(Register register, Type type) {
-            return withRead(register, Optional.of(type));
-        }
-
-        private RegisterAccess withRead(Register register, Optional<Type> type) {
             this.reads.put(register, type);
             return this;
         }
 
         private RegisterAccess withWrite(Register register, Type type) {
-            return withWrite(register, Optional.of(type));
+            if (writtenRegister == null) {
+                this.writtenRegister = register;
+                this.writtenType = type;
+                return this;
+            } else {
+                throw new RuntimeException("Register write was already set");
+            }
         }
 
-        private RegisterAccess withWrite(Register register, Optional<Type> type) {
-            this.writes.put(register, type);
-            return this;
-        }
-
-        public Map<Register, Optional<Type>> getReads() {
+        public Map<Register, Type> getReads() {
             return reads;
         }
 
-        public Map<Register, Optional<Type>> getWrites() {
-            return writes;
+        public Register getWrittenRegister() {
+            return writtenRegister;
+        }
+
+        public Type getWrittenType() {
+            return writtenType;
         }
     }
 }

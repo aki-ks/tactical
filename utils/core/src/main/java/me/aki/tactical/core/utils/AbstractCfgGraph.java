@@ -54,7 +54,7 @@ public abstract class AbstractCfgGraph<I> {
                 worklist.add(nextNode);
 
                 node.succeeding.add(nextNode);
-                nextNode.preceeding.add(node);
+                nextNode.preceding.add(node);
             });
         }
     }
@@ -213,7 +213,7 @@ public abstract class AbstractCfgGraph<I> {
         /**
          * Get the nodes that branch to this node.
          */
-        private final List<Node> preceeding = new ArrayList<>();
+        private final List<Node> preceding = new ArrayList<>();
 
         /**
          * Get the nodes where this node might branch to.
@@ -230,12 +230,12 @@ public abstract class AbstractCfgGraph<I> {
             return instruction;
         }
 
-        public List<Node> getPreceeding() {
-            return Collections.unmodifiableList(preceeding);
+        public List<Node> getPreceding() {
+            return preceding;
         }
 
         public List<Node> getSucceeding() {
-            return Collections.unmodifiableList(succeeding);
+            return succeeding;
         }
     }
 }
