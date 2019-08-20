@@ -52,7 +52,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
         this.last = node;
     }
 
-    private Node nodeByElement(Object element) {
+    private Node nodeByElement(T element) {
         return nodes.get(element);
     }
 
@@ -233,8 +233,9 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean remove(Object obj) {
-        Node node = nodeByElement(obj);
+        Node node = nodeByElement((T) obj);
         if (node == null) {
             return false;
         } else {
@@ -298,11 +299,11 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
         private Node next;
         private Node prev;
 
-        public Node(T element) {
+        private Node(T element) {
             this(element, null, null);
         }
 
-        public Node(T element, Node next, Node prev) {
+        private Node(T element, Node next, Node prev) {
             if (nodes.containsKey(element)) {
                 throw new IllegalArgumentException("List already contains element");
             }
@@ -319,7 +320,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
          * @param newElement the element to be set
          * @return the old element of this node.
          */
-        public T setElement(T newElement) {
+        private T setElement(T newElement) {
             T oldElement = this.element;
             if (newElement != oldElement) {
                 if (nodes.containsKey(newElement)) {
@@ -336,7 +337,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
         /**
          * Remove this node from the list.
          */
-        public void remove() {
+        private void remove() {
             if (prev == null) {
                 AbstractLinkedInsertList.this.first = next;
             } else {
@@ -349,7 +350,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
                 next.prev = prev;
             }
 
-            nodes.remove(this);
+            nodes.remove(element);
         }
 
         /**
@@ -357,7 +358,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
          *
          * @param location insert after that node
          */
-        public void insertAfter(Node location) {
+        private void insertAfter(Node location) {
             if (location == null) {
                 first = this;
                 last = this;
@@ -379,7 +380,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
          *
          * @param location insert after that node
          */
-        public void insertBefore(Node location) {
+        private void insertBefore(Node location) {
             if (location == null) {
                 first = this;
                 last = this;
@@ -400,7 +401,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
     private class Iter implements Iterator<T> {
         private Node node;
 
-        public Iter(Node node) {
+        private Iter(Node node) {
             this.node = node;
         }
 
@@ -421,7 +422,7 @@ public class AbstractLinkedInsertList<T> extends AbstractList<T> implements Inse
         private Node node;
         private final Node end;
 
-        public RangeIter(Node start, Node end) {
+        private RangeIter(Node start, Node end) {
             this.node = start;
             this.end = end;
         }
