@@ -482,7 +482,7 @@ public abstract class TypeHintInsnVisitor extends DexInsnVisitor<Instruction, Re
     public void visitMoveResult(Register register) {
         super.visitMoveResult(register);
 
-        List<DexCfgGraph.Node> predecessors = node.getPreceding();
+        Set<DexCfgGraph.Node> predecessors = node.getPreceding();
         if (predecessors.size() != 1) {
             // More than one predecessor can only exist if some instruction branches to this move-result instruction.
             // This is not allowed since move-result instructions must directly follow their value providing instruction

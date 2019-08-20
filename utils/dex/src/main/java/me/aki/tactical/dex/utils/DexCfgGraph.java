@@ -2,8 +2,7 @@ package me.aki.tactical.dex.utils;
 
 import me.aki.tactical.core.utils.AbstractCfgGraph;
 import me.aki.tactical.dex.DexBody;
-import me.aki.tactical.dex.insn.BranchInstruction;
-import me.aki.tactical.dex.insn.Instruction;
+import me.aki.tactical.dex.insn.*;
 
 import java.util.Collection;
 import java.util.Iterator;

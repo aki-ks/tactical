@@ -213,12 +213,12 @@ public abstract class AbstractCfgGraph<I> {
         /**
          * Get the nodes that branch to this node.
          */
-        private final List<Node> preceding = new ArrayList<>();
+        private final Set<Node> preceding = new HashSet<>();
 
         /**
          * Get the nodes where this node might branch to.
          */
-        private final List<Node> succeeding = new ArrayList<>();
+        private final Set<Node> succeeding = new HashSet<>();
 
         private boolean visited = false;
 
@@ -230,11 +230,11 @@ public abstract class AbstractCfgGraph<I> {
             return instruction;
         }
 
-        public List<Node> getPreceding() {
+        public Set<Node> getPreceding() {
             return preceding;
         }
 
-        public List<Node> getSucceeding() {
+        public Set<Node> getSucceeding() {
             return succeeding;
         }
     }

@@ -891,13 +891,13 @@ public class SmaliInsnWriter extends DexInsnVisitor<me.aki.tactical.dex.insn.Ins
 
     @Override
     public void visitMoveResult(Register register) {
-        List<DexCfgGraph.Node> preceedingNodes = instruction.getPreceding();
+        Set<DexCfgGraph.Node> preceedingNodes = instruction.getPreceding();
         if (preceedingNodes.size() != 1) {
             throw new IllegalStateException("There should only be exactly one instruction preceding a move-result instruction");
         }
 
         Opcode opcode;
-        me.aki.tactical.dex.insn.Instruction precedingInsn = preceedingNodes.get(0).getInstruction();
+        me.aki.tactical.dex.insn.Instruction precedingInsn = preceedingNodes.iterator().next().getInstruction();
         if (precedingInsn instanceof NewFilledArrayInstruction) {
             opcode = Opcode.MOVE_RESULT_OBJECT;
         } else if (precedingInsn instanceof InvokeInstruction) {
