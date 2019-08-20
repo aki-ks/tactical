@@ -3,11 +3,10 @@ package me.aki.tactical.dex.utils;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.core.utils.AbstractCfgGraph;
 import me.aki.tactical.dex.DexBody;
+import me.aki.tactical.dex.TryCatchBlock;
 import me.aki.tactical.dex.insn.*;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,30 +64,52 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
     /**
      * Remove an instruction from the method and the CfgGraph.
      *
-     * Note: Instructions of type {@link ReturnInstruction}, {@link ReturnVoidInstruction} or {@link ThrowInstruction} cannot be removed.
-     * Since no instruction is executed after them, branches to that instruction cannot be redirected to its successor.
+     * Note: Only instructions that {@link Instruction#continuesExecution() continueExecution} can be removed.
      *
-     * @param node the non-method-exiting instruction to be removed
+     * @param node the instruction to be removed
      */
     public void remove(Node node) {
         Instruction insn = node.getInstruction();
         Instruction successor = getSucceedingInstruction(insn);
-        Instruction predecessor = getPrecedingInstruction(insn);
+        Optional<Instruction> predecessor = getPrecedingInstruction(insn);
 
+        Node successorNode = getNode(successor);
+        Optional<Node> predecessorNodeOpt = predecessor.map(this::getNode);
+
+        // Let all instructions that branch to the instruction
+        // branch to the succeeding instruction instead.
         for (Node preceding : node.getPreceding()) {
-            Instruction precedingInsn = preceding.getInstruction();
-            if (precedingInsn instanceof BranchInstruction) {
-                List<RWCell<Instruction>> targetCells = ((BranchInstruction) precedingInsn).getBranchTargetCells();
-                for (RWCell<Instruction> targetCell : targetCells) {
-                    if (targetCell.get() == insn) {
-                        targetCell.set(successor);
-                    }
-                }
-            } else if (precedingInsn != predecessor) {
-                // The instruction should only be reachable by its
-                // predecessor or by instructions that branch to it.
+            preceding.getSucceeding().remove(node);
+
+            preceding.getSucceeding().add(successorNode);
+            successorNode.getPreceding().add(preceding);
+
+            if (preceding.getInstruction() instanceof BranchInstruction) {
+                ((BranchInstruction) preceding.getInstruction()).getBranchTargetCells().stream()
+                        .filter(targetCell -> targetCell.get() == insn)
+                        .forEach(targetCell -> targetCell.set(successor));
+            } else if (!(predecessor.isPresent() && predecessor.get() == preceding.getInstruction())) {
+                // The instruction should only be reachable by its predecessor or instructions that branch to it.
                 throw new IllegalStateException();
             }
+        }
+
+        // Remove the instruction as predecessor of all nodes that it branches to
+        for (Node succeeding : node.getSucceeding()) {
+            succeeding.getPreceding().remove(node);
+        }
+
+        predecessorNodeOpt.ifPresent(predecessorNode -> successorNode.getPreceding().add(predecessorNode));
+
+        // Update try/catch blocks
+        boolean isExceptionHandler = getHandlerNodes().remove(node);
+        if (isExceptionHandler) {
+            getHandlerNodes().add(successorNode);
+
+            body.getTryCatchBlocks().stream()
+                    .flatMap(tryCatchBlock -> tryCatchBlock.getHandlers().stream())
+                    .filter(h -> h.getHandler() == insn)
+                    .forEach(h -> h.setHandler(successor));
         }
 
         nodes.remove(insn);
@@ -99,18 +120,12 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
         if (insn.continuesExecution()) {
             return body.getInstructions().getNext(insn);
         } else {
-            if (insn instanceof ReturnInstruction || insn instanceof ReturnVoidInstruction || insn instanceof ThrowInstruction) {
-                throw new IllegalArgumentException("Cannot remove method exiting instruction");
-            } else if (insn instanceof GotoInstruction) {
-                return ((GotoInstruction) insn).getTarget();
-            } else {
-                throw new AssertionError();
-            }
+            throw new IllegalArgumentException("Cannot remove instruction that does not continue the method execution");
         }
     }
 
-    private Instruction getPrecedingInstruction(Instruction insn) {
+    private Optional<Instruction> getPrecedingInstruction(Instruction insn) {
         Instruction prevInsn = body.getInstructions().getPrevious(insn);
-        return prevInsn.continuesExecution() ? prevInsn : null;
+        return prevInsn != null && prevInsn.continuesExecution() ? Optional.of(prevInsn) : Optional.empty();
     }
 }
