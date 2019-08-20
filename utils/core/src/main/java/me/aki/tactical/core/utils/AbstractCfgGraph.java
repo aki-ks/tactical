@@ -16,7 +16,7 @@ public abstract class AbstractCfgGraph<I> {
      * Map instructions to their corresponding node.
      * This map contains only instructions that can possibly be reached.
      */
-    private final Map<I, Node> nodes = new HashMap<>();
+    protected final Map<I, Node> nodes = new HashMap<>();
 
     private Collection<TryCatchBlock> tryCatchBlocks;
 
