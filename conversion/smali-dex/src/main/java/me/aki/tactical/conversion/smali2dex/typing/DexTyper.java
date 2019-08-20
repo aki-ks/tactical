@@ -96,7 +96,13 @@ public class DexTyper {
      */
     public void propagateRegisterState(DexCfgGraph.Node node, TypeHintInsnVisitor.RegisterAccess access) {
         class ReadTypePropagation {
+            private final Set<DexCfgGraph.Node> visited = new HashSet<>();
+
             private void propagateTypeBackwards(DexCfgGraph.Node node, Register register, Type mergeInType) {
+                if (!visited.add(node)) {
+                    return;
+                }
+
                 RegisterState state = getStateAt(node.getInstruction());
                 state.readTypeInfo.merge(register, mergeInType, this::mergeReadType);
 
@@ -167,7 +173,13 @@ public class DexTyper {
         }
 
         class WrittenTypePropagation {
-            private void propagateForward(DexCfgGraph.Node node, Register register, Type type) {
+            private final Map<DexCfgGraph.Node, Type> visited = new HashMap<>();
+
+            private void propagateTypeForward(DexCfgGraph.Node node, Register register, Type type) {
+                if (visited.put(node, type) == type) {
+                    return;
+                }
+
                 RegisterState state = getStateAt(node.getInstruction());
 
                 state.writtenTypeInfo.merge(register, type, this::mergeWrittenType);
@@ -182,15 +194,11 @@ public class DexTyper {
                     // Types that will be in the register coming from all possible branches
                     List<Type> previousTypes = succeeding.getPreceding().stream()
                             .map(n -> getStateAt(n.getInstruction()).writtenTypeInfo.get(register))
+                            .filter(Objects::nonNull)
                             .collect(Collectors.toList());
 
-                    if (previousTypes.contains(null)) {
-                        // Not all branches from which this instruction is reachable have written
-                        // to the register or the type comping from that branch was not yet computed.
-                    } else {
-                        Type mergedType = previousTypes.stream().reduce(this::mergeWrittenType).get();
-                        propagateForward(succeeding, register, mergedType);
-                    }
+                    Type mergedType = previousTypes.stream().reduce(this::mergeWrittenType).get();
+                    propagateTypeForward(succeeding, register, mergedType);
                 }
             }
 
@@ -221,14 +229,13 @@ public class DexTyper {
 
             /**
              * Merge an ambiguous Type with another type.
-             * More precise types dominate.
              *
              * If one type is more precise / less ambiguous than the other type,
              * than that type dominates and is returned.
              *
              * @param ambiguousType an ambiguous type
-             * @param type type to be merged in
-             * @return the more precise type of both
+             * @param type an ambiguous or non-ambiguous type to be merged in
+             * @return the more precise type of both or a {@link TypeConflict}
              */
             private Type mergeWrittenAmbiguousType(AmbiguousType ambiguousType, Type type) {
                 if (ambiguousType instanceof AmbiguousType.LongOrDouble) {
@@ -237,8 +244,7 @@ public class DexTyper {
                     }
                 } else if (ambiguousType instanceof AmbiguousType.IntOrFloat) {
                     if (type instanceof AmbiguousType.IntOrFloatOrRef) {
-                        // IntOrFloatOrRef is a more imprecise type than IntOrFloat.
-                        // This method should return the most precise of both types.
+                        // Since IntOrFloat is a more precise than IntOrFloatOrRef, we return it
                         return AmbiguousType.IntOrFloat.getInstance();
                     }
                     if (isIntOrFloatType(type)) {
@@ -252,18 +258,15 @@ public class DexTyper {
                     return DexUtils.unreachable();
                 }
 
-                // We've got a merge conflict
-                return null;
+                return TypeConflict.INSTANCE;
             }
         }
 
-        ReadTypePropagation readPropagation = new ReadTypePropagation();
         access.getReads().forEach((register, type) ->
-                readPropagation.propagateTypeBackwards(node, register, type));
+                new ReadTypePropagation().propagateTypeBackwards(node, register, type));
 
         if (access.getWrittenRegister() != null) {
-            WrittenTypePropagation writePropagation = new WrittenTypePropagation();
-            writePropagation.propagateForward(node, access.getWrittenRegister(), access.getWrittenType());
+            new WrittenTypePropagation().propagateTypeForward(node, access.getWrittenRegister(), access.getWrittenType());
         }
     }
 
