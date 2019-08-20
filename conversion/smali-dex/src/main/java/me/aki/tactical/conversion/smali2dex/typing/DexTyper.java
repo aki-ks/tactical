@@ -4,9 +4,7 @@ import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.constant.*;
 import me.aki.tactical.core.type.*;
-import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.core.util.RWCell;
-import me.aki.tactical.core.utils.AbstractCfgGraph;
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.*;
@@ -26,7 +24,7 @@ import java.util.stream.Stream;
 public class DexTyper {
     private final Method method;
     private final DexBody body;
-    private DexCfgGraph cfgGraph;
+    private final DexCfgGraph cfgGraph;
 
     private final Map<Instruction, RegisterState> states = new HashMap<>();
 
@@ -56,7 +54,7 @@ public class DexTyper {
                 propagateRegisterState(node, access);
 
                 if (isAmbiguous(access)) {
-                    AmbiguousInsnInfo<? extends Instruction> ambiguousInsnInfo = toAmbiguousInsnInfo(node.getInstruction());
+                    AmbiguousInsnInfo<? extends Instruction> ambiguousInsnInfo = toAmbiguousInsnInfo(node);
                     ambiguousInstructions.add(ambiguousInsnInfo);
                 }
             }
@@ -66,15 +64,16 @@ public class DexTyper {
                         action.getReads().values().stream().anyMatch(typ -> typ instanceof AmbiguousType);
             }
 
-            private AmbiguousInsnInfo<? extends Instruction> toAmbiguousInsnInfo(Instruction insn) {
+            private AmbiguousInsnInfo<? extends Instruction> toAmbiguousInsnInfo(DexCfgGraph.Node node) {
+                Instruction insn = node.getInstruction();
                 if (insn instanceof ArrayLoadInstruction) {
-                    return new ArrayLoad((ArrayLoadInstruction) insn);
+                    return new ArrayLoad(node, (ArrayLoadInstruction) insn);
                 } else if (insn instanceof ArrayStoreInstruction) {
-                    return new ArrayStore((ArrayStoreInstruction) insn);
+                    return new ArrayStore(node, (ArrayStoreInstruction) insn);
                 } else if (insn instanceof MoveInstruction) {
-                    return new Move((MoveInstruction) insn);
+                    return new Move(node, (MoveInstruction) insn);
                 } else if (insn instanceof ConstInstruction) {
-                    return new Constant((ConstInstruction) insn);
+                    return new Constant(node, (ConstInstruction) insn);
                 } else {
                     return DexUtils.unreachable();
                 }
@@ -287,7 +286,7 @@ public class DexTyper {
         this.ambiguousInstructions.removeIf(ambiguousInstruction -> {
             boolean wasTypeComputed = ambiguousInstruction.tryTypeComputation();
             if (wasTypeComputed) {
-                AbstractCfgGraph<Instruction>.Node node = cfgGraph.getNode(ambiguousInstruction.instruction);
+                DexCfgGraph.Node node = ambiguousInstruction.node;
                 propagateRegisterState(node, recomputeRegisterAccess(node));
             }
             return wasTypeComputed;
@@ -329,27 +328,26 @@ public class DexTyper {
      *     goto foo;
      * </code></pre>
      */
+    @SuppressWarnings("unchecked")
     private void removeUnusedAmbiguousMoves() {
-        Set<AmbiguousInsnInfo<? extends Instruction>> unusedMoves = new HashSet<>();
-        Set<MoveInstruction> unusedMoveInstructions = new HashSet<>();
+        Set<AmbiguousInsnInfo<? extends MoveInstruction>> unusedMoves = new HashSet<>();
+        Set<MoveInstruction> unusedMoveInsns = new HashSet<>();
 
         class IsUnusedMoveAnalysis {
             private final Set<DexCfgGraph.Node> visited = new HashSet<>();
             private final boolean isUnused;
 
-            public IsUnusedMoveAnalysis(MoveInstruction instruction) {
-                this.isUnused = isUnused(cfgGraph.getNode(instruction), instruction);
+            public IsUnusedMoveAnalysis(AmbiguousInsnInfo<? extends MoveInstruction> ambiguousInsn) {
+                this.isUnused = isUnused(ambiguousInsn.node, ambiguousInsn.instruction);
             }
 
             private boolean isUnused(DexCfgGraph.Node node, MoveInstruction instruction) {
-                if (!visited.add(node) || unusedMoveInstructions.contains(instruction)) {
+                if (!visited.add(node) || unusedMoveInsns.contains(instruction)) {
                     return true;
                 }
 
-                Set<DexCfgGraph.Node> readingInsnNodes = getReadingRegisters(node, instruction.getTo());
-                for (DexCfgGraph.Node readingInsnNode : readingInsnNodes) {
-                    Instruction readingInsn = readingInsnNode.getInstruction();
-                    if (readingInsn instanceof MoveInstruction) {
+                for (DexCfgGraph.Node readingInsn : getReadingRegisters(node, instruction.getTo())) {
+                    if (readingInsn.getInstruction() instanceof MoveInstruction) {
                         if (!isUnused(node, instruction)) {
                             return false;
                         }
@@ -365,18 +363,17 @@ public class DexTyper {
 
         for (AmbiguousInsnInfo<? extends Instruction> ambiguousInsn : this.ambiguousInstructions) {
             if (ambiguousInsn.instruction instanceof MoveInstruction) {
-                MoveInstruction moveInsn = (MoveInstruction) ambiguousInsn.instruction;
+                AmbiguousInsnInfo<? extends MoveInstruction> moveInsn = (AmbiguousInsnInfo<? extends MoveInstruction>) ambiguousInsn;
                 if (new IsUnusedMoveAnalysis(moveInsn).isUnused) {
-                    unusedMoves.add(ambiguousInsn);
-                    unusedMoveInstructions.add(moveInsn);
+                    unusedMoves.add(moveInsn);
+                    unusedMoveInsns.add(moveInsn.instruction);
                 }
             }
         }
 
-        InsertList<Instruction> insnList = this.body.getInstructions();
         unusedMoves.forEach(ambiguousMove -> {
             ambiguousInstructions.remove(ambiguousMove);
-            insnList.remove(ambiguousMove.instruction);
+            removeNode(ambiguousMove);
         });
     }
 
@@ -447,12 +444,6 @@ public class DexTyper {
                     return false;
                 }
 
-                if (!body.getInstructions().contains(node.getInstruction())) {
-                    // The 'removeUnusedAmbiguousMoves' method may remove instructions
-                    // but does not update the cfg, so we skip those instruction.
-                    return isReadBySuccessors(node);
-                }
-
                 if (node.getInstruction().getReadRegisters().contains(this.register)) {
                     return true;
                 }
@@ -477,17 +468,20 @@ public class DexTyper {
         }
 
         this.ambiguousInstructions.removeIf(ambiguousInsn -> {
-            Instruction insn = ambiguousInsn.getInstruction();
-            if (insn instanceof ConstInstruction) {
-                Register register = ((ConstInstruction) insn).getRegister();
-                DexCfgGraph.Node node = this.cfgGraph.getNode(ambiguousInsn.instruction);
-                if (!new IsReadCheck(node, register).isRead()) {
-                    body.getInstructions().remove(insn);
+            if (ambiguousInsn.getInstruction() instanceof ConstInstruction) {
+                ConstInstruction instruction = (ConstInstruction) ambiguousInsn.getInstruction();
+                if (!new IsReadCheck(ambiguousInsn.node, instruction.getRegister()).isRead()) {
+                    removeNode(ambiguousInsn);
                     return true;
                 }
             }
             return false;
         });
+    }
+
+    private void removeNode(AmbiguousInsnInfo<? extends Instruction> ambiguousInsn) {
+        states.remove(ambiguousInsn.instruction);
+        cfgGraph.remove(ambiguousInsn.node);
     }
 
     /**
@@ -603,9 +597,15 @@ public class DexTyper {
     }
 
     private abstract class AmbiguousInsnInfo<I extends Instruction> {
+        protected final DexCfgGraph.Node node;
         protected final I instruction;
 
-        protected AmbiguousInsnInfo(I instruction) {
+        protected AmbiguousInsnInfo(DexCfgGraph.Node node, I instruction) {
+            if (node.getInstruction() != instruction) {
+                throw new IllegalArgumentException();
+            }
+
+            this.node = node;
             this.instruction = instruction;
         }
 
@@ -625,10 +625,9 @@ public class DexTyper {
          * @return type of the value read from the register
          */
         protected Type getReadType(Register register) {
-            DexCfgGraph.Node currentNode = cfgGraph.getNode(instruction);
-            Type typeReadByInsn = getStateAt(currentNode.getInstruction()).readTypeInfo.get(register);
+            Type typeReadByInsn = getStateAt(node.getInstruction()).readTypeInfo.get(register);
 
-            return currentNode.getPreceding().stream()
+            return node.getPreceding().stream()
                     .map(node -> getStateAt(node.getInstruction()).writtenTypeInfo.get(register))
                     .map(this::requireNoTypeConflict)
                     .reduce(typeReadByInsn, this::mergeTypes);
@@ -652,10 +651,9 @@ public class DexTyper {
          * @return type of the value written to the register
          */
         protected Type getWrittenType(Register register) {
-            DexCfgGraph.Node currentNode = cfgGraph.getNode(instruction);
-            Type typeWrittenByInsn = requireNoTypeConflict(getStateAt(currentNode.getInstruction()).writtenTypeInfo.get(register));
+            Type typeWrittenByInsn = requireNoTypeConflict(getStateAt(node.getInstruction()).writtenTypeInfo.get(register));
 
-            return currentNode.getSucceeding().stream()
+            return node.getSucceeding().stream()
                     .map(node -> getStateAt(node.getInstruction()).readTypeInfo.get(register))
                     .filter(Objects::nonNull) // filter branches that do not read from the register
                     .reduce(typeWrittenByInsn, this::mergeTypes);
@@ -722,8 +720,8 @@ public class DexTyper {
     }
 
     private class ArrayLoad extends AmbiguousInsnInfo<ArrayLoadInstruction> {
-        public ArrayLoad(ArrayLoadInstruction insn) {
-            super(insn);
+        public ArrayLoad(DexCfgGraph.Node node, ArrayLoadInstruction insn) {
+            super(node, insn);
         }
 
         @Override
@@ -742,8 +740,8 @@ public class DexTyper {
     }
 
     private class ArrayStore extends AmbiguousInsnInfo<ArrayStoreInstruction> {
-        public ArrayStore(ArrayStoreInstruction insn) {
-            super(insn);
+        public ArrayStore(DexCfgGraph.Node node, ArrayStoreInstruction insn) {
+            super(node, insn);
         }
 
         @Override
@@ -762,8 +760,8 @@ public class DexTyper {
     }
 
     private class Move extends AmbiguousInsnInfo<MoveInstruction> {
-        public Move(MoveInstruction insn) {
-            super(insn);
+        public Move(DexCfgGraph.Node node, MoveInstruction insn) {
+            super(node, insn);
         }
 
         @Override
@@ -779,8 +777,8 @@ public class DexTyper {
     }
 
     private class Constant extends AmbiguousInsnInfo<ConstInstruction> {
-        public Constant(ConstInstruction insn) {
-            super(insn);
+        public Constant(DexCfgGraph.Node node, ConstInstruction insn) {
+            super(node, insn);
         }
 
         @Override
