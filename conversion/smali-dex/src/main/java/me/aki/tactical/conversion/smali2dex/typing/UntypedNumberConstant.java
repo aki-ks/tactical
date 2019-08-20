@@ -53,4 +53,14 @@ public class UntypedNumberConstant implements DexConstant {
     public AmbiguousType getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return UntypedNumberConstant.class.getSimpleName() + '{' +
+                "intValue()=" + intValue() +
+                ", longValue()=" + longValue() +
+                ", floatValue()=" + floatValue() +
+                ", doubleValue()=" + doubleValue() +
+                '}';
+    }
 }

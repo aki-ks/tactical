@@ -58,7 +58,9 @@ public class SmaliDexInsnReader {
             case MOVE_OBJECT:
             case MOVE_OBJECT_FROM16:
             case MOVE_OBJECT_16: {
-                visitMove(ObjectType.OBJECT, (TwoRegisterInstruction) instruction);
+                // If the constant zero is stored in a register, it is legal bytecode
+                // to move it with a move-object instruction and then use it as an int value.
+                visitMove(AmbiguousType.IntOrFloatOrRef.getInstance(), (TwoRegisterInstruction) instruction);
                 break;
             }
 

@@ -39,14 +39,7 @@ public class DexTyper {
         this.method = method;
         this.body = cfgGraph.getBody();
         this.cfgGraph = cfgGraph;
-
         computeRegisterStates();
-        resolveAmbiguousInstructions();
-        setRegisterTypes();
-    }
-
-    public RegisterState getStateAt(DexCfgGraph.Node node) {
-        return states.computeIfAbsent(node.getInstruction(), RegisterState::new);
     }
 
     public RegisterState getStateAt(Instruction insn) {
@@ -105,7 +98,7 @@ public class DexTyper {
     public void propagateRegisterState(DexCfgGraph.Node node, TypeHintInsnVisitor.RegisterAccess access) {
         class ReadTypePropagation {
             private void propagateTypeBackwards(DexCfgGraph.Node node, Register register, Type mergeInType) {
-                RegisterState state = getStateAt(node);
+                RegisterState state = getStateAt(node.getInstruction());
                 state.readTypeInfo.merge(register, mergeInType, this::mergeReadType);
 
                 for (DexCfgGraph.Node predecessor : node.getPreceding()) {
@@ -124,6 +117,8 @@ public class DexTyper {
              *
              * If one type is more ambiguous / less precise than the other type,
              * than that type dominates and is returned.
+             *
+             * If two precise types are merged, they may turn into an ambiguous type.
              *
              * @param a one type
              * @param b another type
@@ -155,6 +150,16 @@ public class DexTyper {
                         return IntType.getInstance();
                     } else if (a instanceof RefType && b instanceof RefType) {
                         return ObjectType.OBJECT;
+                    } else if ((a instanceof IntType || a instanceof FloatType || a instanceof RefType) &&
+                            (b instanceof IntType || b instanceof FloatType || b instanceof RefType)) {
+                        if (a instanceof RefType || b instanceof RefType) {
+                            return AmbiguousType.IntOrFloatOrRef.getInstance();
+                        } else {
+                            return AmbiguousType.IntOrFloat.getInstance();
+                        }
+                    } else if ((a instanceof LongType || a instanceof DoubleType) &&
+                            (b instanceof LongType || a instanceof DoubleType)) {
+                        return AmbiguousType.LongOrDouble.getInstance();
                     }
                 }
 
@@ -164,7 +169,7 @@ public class DexTyper {
 
         class WrittenTypePropagation {
             private void propagateForward(DexCfgGraph.Node node, Register register, Type type) {
-                RegisterState state = getStateAt(node);
+                RegisterState state = getStateAt(node.getInstruction());
 
                 state.writtenTypeInfo.merge(register, type, this::mergeWrittenType);
 
@@ -177,7 +182,7 @@ public class DexTyper {
 
                     // Types that will be in the register coming from all possible branches
                     List<Type> previousTypes = succeeding.getPreceding().stream()
-                            .map(n -> getStateAt(n).writtenTypeInfo.get(register))
+                            .map(n -> getStateAt(n.getInstruction()).writtenTypeInfo.get(register))
                             .collect(Collectors.toList());
 
                     if (previousTypes.contains(null)) {
@@ -185,7 +190,7 @@ public class DexTyper {
                         // to the register or the type comping from that branch was not yet computed.
                     } else {
                         Type mergedType = previousTypes.stream().reduce(this::mergeWrittenType).get();
-                        propagateForward(node, register, mergedType);
+                        propagateForward(succeeding, register, mergedType);
                     }
                 }
             }
@@ -276,7 +281,7 @@ public class DexTyper {
         return type instanceof AmbiguousType.LongOrDouble || type instanceof LongType || type instanceof DoubleType;
     }
 
-    private void resolveAmbiguousInstructions() {
+    public void typeInstructions() {
         int ambiguousInsnsBefore = this.ambiguousInstructions.size();
 
         this.ambiguousInstructions.removeIf(ambiguousInstruction -> {
@@ -300,7 +305,7 @@ public class DexTyper {
                 // Some ambiguous instructions have been typed.
                 // Since there is now more type information available,
                 // we can probably resolve the types remaining ambiguous instructions
-                resolveAmbiguousInstructions();
+                typeInstructions();
             }
         }
     }
@@ -476,10 +481,12 @@ public class DexTyper {
             if (insn instanceof ConstInstruction) {
                 Register register = ((ConstInstruction) insn).getRegister();
                 DexCfgGraph.Node node = this.cfgGraph.getNode(ambiguousInsn.instruction);
-                return !new IsReadCheck(node, register).isRead();
-            } else {
-                return false;
+                if (!new IsReadCheck(node, register).isRead()) {
+                    body.getInstructions().remove(insn);
+                    return true;
+                }
             }
+            return false;
         });
     }
 
@@ -513,7 +520,7 @@ public class DexTyper {
      * All these types are merged together. If the {@link RegisterPartitioner} was ran,
      * this should not possibly create a merge conflict.
      */
-    private void setRegisterTypes() {
+    public void typeRegisters() {
         Map<Register, Set<Instruction>> readMap = CommonOperations.getReadMap(this.body);
         Map<Register, Set<Instruction>> writeMap = CommonOperations.getWriteMap(this.body);
 
@@ -619,10 +626,10 @@ public class DexTyper {
          */
         protected Type getReadType(Register register) {
             DexCfgGraph.Node currentNode = cfgGraph.getNode(instruction);
-            Type typeReadByInsn = getStateAt(currentNode).readTypeInfo.get(register);
+            Type typeReadByInsn = getStateAt(currentNode.getInstruction()).readTypeInfo.get(register);
 
             return currentNode.getPreceding().stream()
-                    .map(node -> getStateAt(node).writtenTypeInfo.get(register))
+                    .map(node -> getStateAt(node.getInstruction()).writtenTypeInfo.get(register))
                     .map(this::requireNoTypeConflict)
                     .reduce(typeReadByInsn, this::mergeTypes);
         }
@@ -646,10 +653,10 @@ public class DexTyper {
          */
         protected Type getWrittenType(Register register) {
             DexCfgGraph.Node currentNode = cfgGraph.getNode(instruction);
-            Type typeWrittenByInsn = requireNoTypeConflict(getStateAt(currentNode).writtenTypeInfo.get(register));
+            Type typeWrittenByInsn = requireNoTypeConflict(getStateAt(currentNode.getInstruction()).writtenTypeInfo.get(register));
 
             return currentNode.getSucceeding().stream()
-                    .map(node -> getStateAt(node).readTypeInfo.get(register))
+                    .map(node -> getStateAt(node.getInstruction()).readTypeInfo.get(register))
                     .filter(Objects::nonNull) // filter branches that do not read from the register
                     .reduce(typeWrittenByInsn, this::mergeTypes);
         }
@@ -800,7 +807,7 @@ public class DexTyper {
                 if (constant.longValue() == 0L) {
                     return NullConstant.getInstance();
                 } else {
-                    throw new RuntimeException("Cannot convert constant " + constant + " to a referene type");
+                    throw new RuntimeException("Cannot convert constant " + constant + " to a reference type");
                 }
             } else {
                 return DexUtils.unreachable();
