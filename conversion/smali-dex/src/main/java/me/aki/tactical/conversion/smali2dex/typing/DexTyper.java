@@ -13,7 +13,6 @@ import me.aki.tactical.dex.utils.DexCfgGraph;
 import me.aki.tactical.dex.utils.DexInsnReader;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -170,18 +169,20 @@ public class DexTyper {
 
         if (!this.ambiguousInstructions.isEmpty()) {
             if (ambiguousInsnsBefore == this.ambiguousInstructions.size()) {
+                // The regular typing procedure could not resolve all types of 'move' and 'const' instructions.
+                // We try to resolve some rare edge-cases that must be handled specially.
                 removeUnusedAmbiguousMoves();
                 removeUnusedAmbiguousConstInstructions();
 
-                if (!ambiguousInstructions.isEmpty()) {
+                if (ambiguousInsnsBefore == this.ambiguousInstructions.size()) {
                     throw new RuntimeException("Could not type all instructions of ambiguous types");
                 }
-            } else {
-                // Some ambiguous instructions have been typed.
-                // Since there is now more type information available,
-                // we can probably resolve the remaining ambiguous instructions
-                typeInstructions();
             }
+
+            // Some ambiguous instructions have been typed.
+            // Since there is now more type information available,
+            // we can probably resolve the remaining ambiguous instructions
+            typeInstructions();
         }
     }
 
@@ -210,27 +211,21 @@ public class DexTyper {
         Set<MoveInstruction> unusedMoveInsns = new HashSet<>();
 
         class IsUnusedMoveAnalysis {
-            private final Set<DexCfgGraph.Node> visited = new HashSet<>();
+            private final Set<Instruction> visited = new HashSet<>();
             private final boolean isUnused;
 
-            public IsUnusedMoveAnalysis(AmbiguousInsnInfo<? extends MoveInstruction> ambiguousInsn) {
-                this.isUnused = isUnused(ambiguousInsn.node, ambiguousInsn.instruction);
+            public IsUnusedMoveAnalysis(MoveInstruction moveInstruction) {
+                this.isUnused = isUnused(moveInstruction);
             }
 
-            private boolean isUnused(DexCfgGraph.Node node, MoveInstruction instruction) {
-                if (!visited.add(node) || unusedMoveInsns.contains(instruction)) {
+            private boolean isUnused(MoveInstruction instruction) {
+                if (!visited.add(instruction) || unusedMoveInsns.contains(instruction)) {
                     return true;
                 }
 
-                for (DexCfgGraph.Node readingInsn : getReadingRegisters(node, instruction.getTo())) {
-                    if (readingInsn.getInstruction() instanceof MoveInstruction) {
-                        if (!isUnused(node, instruction)) {
-                            return false;
-                        }
-                    } else {
-                        // The only instructions that are possibly not yet typed are constant and move instructions.
-                        // Since constant instructions do not read from registers, this may only be a move instruction.
-                        throw new IllegalStateException();
+                for (Instruction readingInsn : getStateAt(instruction).getReadersOfWrittenValue(instruction.getTo())) {
+                    if (!(readingInsn instanceof MoveInstruction) || !isUnused((MoveInstruction) readingInsn)) {
+                        return false;
                     }
                 }
                 return true;
@@ -240,7 +235,7 @@ public class DexTyper {
         for (AmbiguousInsnInfo<? extends Instruction> ambiguousInsn : this.ambiguousInstructions) {
             if (ambiguousInsn.instruction instanceof MoveInstruction) {
                 AmbiguousInsnInfo<? extends MoveInstruction> moveInsn = (AmbiguousInsnInfo<? extends MoveInstruction>) ambiguousInsn;
-                if (new IsUnusedMoveAnalysis(moveInsn).isUnused) {
+                if (new IsUnusedMoveAnalysis(moveInsn.instruction).isUnused) {
                     unusedMoves.add(moveInsn);
                     unusedMoveInsns.add(moveInsn.instruction);
                 }
@@ -251,46 +246,6 @@ public class DexTyper {
             ambiguousInstructions.remove(ambiguousMove);
             removeNode(ambiguousMove);
         });
-    }
-
-    /**
-     * Find all registers that read the value that a certain instruction wrote in a register.
-     *
-     * @param node the instruction that wrote to the register
-     * @param register the register that the instruction wrote to
-     * @return all instructions that may possibly read the written value
-     */
-    private Set<DexCfgGraph.Node> getReadingRegisters(DexCfgGraph.Node node, Register register) {
-        class Inner {
-            private final Set<DexCfgGraph.Node> reads = new HashSet<>();
-            private final Set<DexCfgGraph.Node> visited = new HashSet<>();
-
-            private void addSucceedingReads(DexCfgGraph.Node node) {
-                node.getSucceeding().forEach(this::addReadsOfThisOrSuceedingNode);
-            }
-
-            private void addReadsOfThisOrSuceedingNode(DexCfgGraph.Node node) {
-                if (!this.visited.add(node)) {
-                    return;
-                }
-
-                if (node.getInstruction().getReadRegisters().contains(register)) {
-                    reads.add(node);
-                }
-
-                Optional<Register> writeOpt = node.getInstruction().getWrittenRegister();
-                if (writeOpt.isPresent() && writeOpt.get() == register) {
-                    // The value in the register is overwritten by this instruction,
-                    // so succeeding instructions cannot read the values.
-                } else {
-                    addSucceedingReads(node);
-                }
-            }
-        }
-
-        Inner inner = new Inner();
-        inner.addSucceedingReads(node);
-        return inner.reads;
     }
 
     /**
@@ -443,13 +398,13 @@ public class DexTyper {
 
         /**
          * Map registers to all instructions that may possible read the value that is currently
-         * (when the instruction is executed) present in the register.
+         * (before the instruction is executed) present in the register.
          */
         private final Map<Register, Set<Instruction>> reads = new HashMap<>();
 
         /**
          * Map registers to all instructions that may possibly have written the value that is currently
-         * (when the instruction is executed) present in the register.
+         * (after the instruction is executed) present in the register.
          */
         private final Map<Register, Set<Instruction>> writes = new HashMap<>();
 
@@ -488,6 +443,33 @@ public class DexTyper {
                 throw new IllegalStateException("Instruction " + insn + " does not read from register " + register);
             }
         }
+
+        /**
+         * Get all instructions that may read the value that this instruction stored in a register.
+         *
+         * @param register the register that the value was stored in
+         * @return all instructions that can possibly read the written value
+         */
+        public Set<Instruction> getReadersOfWrittenValue(Register register) {
+            return node.getSucceeding().stream()
+                    .map(node -> getStateAt(node.getInstruction()).reads)
+                    .flatMap(readMap -> readMap.getOrDefault(register, Set.of()).stream())
+                    .collect(Collectors.toSet());
+        }
+
+        /**
+         * Get all instructions that may have written the value that this instruction reads from a register.
+         *
+         * @param register the register that the instruction reads from
+         * @return all instructions that may have written the read value
+         */
+        private Set<Instruction> getValueWriters(Register register) {
+            return node.getPreceding().stream()
+                    .map(node -> getStateAt(node.getInstruction()).writes)
+                    .flatMap(writeMap -> writeMap.getOrDefault(register, Set.of()).stream())
+                    .collect(Collectors.toSet());
+        }
+
     }
 
     private abstract class AmbiguousInsnInfo<I extends Instruction> {
