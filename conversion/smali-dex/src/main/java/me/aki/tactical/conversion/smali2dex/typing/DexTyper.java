@@ -13,7 +13,6 @@ import me.aki.tactical.dex.utils.DexCfgGraph;
 import me.aki.tactical.dex.utils.DexInsnReader;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -22,6 +21,8 @@ import java.util.stream.Stream;
  * This is accomplished by looking at the types that register expect to read and write.
  */
 public class DexTyper {
+    private final TypeMerge typeMerge = new TypeMerge();
+
     private final Method method;
     private final DexBody body;
     private final DexCfgGraph cfgGraph;
@@ -37,21 +38,24 @@ public class DexTyper {
         this.method = method;
         this.body = cfgGraph.getBody();
         this.cfgGraph = cfgGraph;
-        computeRegisterStates();
+
+        createInitialRegisterStates();
+        propagateRegisterAccesses();
     }
 
     public RegisterState getStateAt(Instruction insn) {
-        return states.computeIfAbsent(insn, RegisterState::new);
+        return states.get(insn);
     }
 
     /**
-     * Update the {@link RegisterState RegisterStates} of all instructions and create a list of all ambiguous instructions.
+     * Create a {@link RegisterState} with the computed {@link RegisterState#access} for each instruction.
+     * The {@link RegisterState#reads} and {@link RegisterState#writes} are not yet computed.
      */
-    private void computeRegisterStates() {
+    private void createInitialRegisterStates() {
         TypeHintInsnVisitor iv = new TypeHintInsnVisitor(this.method.getReturnType()) {
             @Override
             protected void visit(RegisterAccess access) {
-                propagateRegisterState(node, access);
+                states.put(node.getInstruction(), new RegisterState(node, access));
 
                 if (isAmbiguous(access)) {
                     AmbiguousInsnInfo<? extends Instruction> ambiguousInsnInfo = toAmbiguousInsnInfo(node);
@@ -59,9 +63,9 @@ public class DexTyper {
                 }
             }
 
-            private boolean isAmbiguous(RegisterAccess action) {
-                return action.getWrittenType() instanceof AmbiguousType ||
-                        action.getReads().values().stream().anyMatch(typ -> typ instanceof AmbiguousType);
+            private boolean isAmbiguous(RegisterAccess access) {
+                return access.getWrittenType() instanceof AmbiguousType ||
+                        access.getReads().values().stream().anyMatch(typ -> typ instanceof AmbiguousType);
             }
 
             private AmbiguousInsnInfo<? extends Instruction> toAmbiguousInsnInfo(DexCfgGraph.Node node) {
@@ -88,23 +92,19 @@ public class DexTyper {
     }
 
     /**
-     * Distribute the read and written types of an instruction through the {@link RegisterState#readTypeInfo} and
-     * {@link RegisterState#writtenTypeInfo} of other instructions.
-     *
-     * @param node the instruction whose read/write information should get propagated
-     * @param access the read and written types of the instruction
+     * Distribute the information that an instruction reads or writes from/to a register through the
+     * {@link RegisterState#reads} and {@link RegisterState#writes} of all affected instructions.
      */
-    public void propagateRegisterState(DexCfgGraph.Node node, TypeHintInsnVisitor.RegisterAccess access) {
-        class ReadTypePropagation {
-            private final Set<DexCfgGraph.Node> visited = new HashSet<>();
-
-            private void propagateTypeBackwards(DexCfgGraph.Node node, Register register, Type mergeInType) {
-                if (!visited.add(node)) {
+    public void propagateRegisterAccesses() {
+        class TypePropagation {
+            private void propagateReadBackwards(DexCfgGraph.Node node, Instruction readingInsn, Register register) {
+                RegisterState state = getStateAt(node.getInstruction());
+                Set<Instruction> reads = state.reads.computeIfAbsent(register, x -> new HashSet<>());
+                if (!reads.add(readingInsn)) {
+                    // We've already propagated this read to this instruction.
+                    // This occurs if we propagate a type through some kind of loop.
                     return;
                 }
-
-                RegisterState state = getStateAt(node.getInstruction());
-                state.readTypeInfo.merge(register, mergeInType, this::mergeReadType);
 
                 for (DexCfgGraph.Node predecessor : node.getPreceding()) {
                     Optional<Register> writtenRegister = predecessor.getInstruction().getWrittenRegister();
@@ -113,76 +113,19 @@ public class DexTyper {
                         continue;
                     }
 
-                    propagateTypeBackwards(predecessor, register, mergeInType);
+                    propagateReadBackwards(predecessor, readingInsn, register);
                 }
             }
 
-            /**
-             * Merge two types into one common type.
-             *
-             * If one type is more ambiguous / less precise than the other type,
-             * than that type dominates and is returned.
-             *
-             * If two precise types are merged, they may turn into an ambiguous type.
-             *
-             * @param a one type
-             * @param b another type
-             * @return a common supertype of both types
-             */
-            private Type mergeReadType(Type a, Type b) {
-                if (a.equals(b)) {
-                    return a;
-                }
-
-                if (a instanceof AmbiguousType || b instanceof AmbiguousType) {
-                    if (a instanceof AmbiguousType.IntOrFloatOrRef || b instanceof AmbiguousType.IntOrFloatOrRef) {
-                        if (isIntOrFloatOrRefType(a) && isIntOrFloatOrRefType(b)) {
-                            return AmbiguousType.IntOrFloatOrRef.getInstance();
-                        }
-                    } else if (a instanceof AmbiguousType.IntOrFloat || b instanceof AmbiguousType.IntOrFloat) {
-                        if (isIntOrFloatType(a) && isIntOrFloatType(b)) {
-                            return AmbiguousType.IntOrFloat.getInstance();
-                        }
-                    } else if (a instanceof AmbiguousType.LongOrDouble || b instanceof AmbiguousType.LongOrDouble) {
-                        if (isLongOrDoubleType(a) && isLongOrDoubleType(b)) {
-                            return AmbiguousType.LongOrDouble.getInstance();
-                        }
-                    } else {
-                        return DexUtils.unreachable();
-                    }
-                } else {
-                    if (a instanceof IntLikeType && b instanceof IntLikeType) {
-                        return IntType.getInstance();
-                    } else if (a instanceof RefType && b instanceof RefType) {
-                        return ObjectType.OBJECT;
-                    } else if ((a instanceof IntType || a instanceof FloatType || a instanceof RefType) &&
-                            (b instanceof IntType || b instanceof FloatType || b instanceof RefType)) {
-                        if (a instanceof RefType || b instanceof RefType) {
-                            return AmbiguousType.IntOrFloatOrRef.getInstance();
-                        } else {
-                            return AmbiguousType.IntOrFloat.getInstance();
-                        }
-                    } else if ((a instanceof LongType || a instanceof DoubleType) &&
-                            (b instanceof LongType || a instanceof DoubleType)) {
-                        return AmbiguousType.LongOrDouble.getInstance();
-                    }
-                }
-
-                throw new IllegalStateException("Cannot merge read of type " + a + " and " + b);
-            }
-        }
-
-        class WrittenTypePropagation {
-            private final Map<DexCfgGraph.Node, Type> visited = new HashMap<>();
-
-            private void propagateTypeForward(DexCfgGraph.Node node, Register register, Type type) {
-                if (visited.put(node, type) == type) {
-                    return;
-                }
-
+            private void propagateWriteForward(DexCfgGraph.Node node, Instruction writingInsn, Register register) {
                 RegisterState state = getStateAt(node.getInstruction());
 
-                state.writtenTypeInfo.merge(register, type, this::mergeWrittenType);
+                Set<Instruction> writes = state.writes.computeIfAbsent(register, x -> new HashSet<>());
+                if (!writes.add(writingInsn)) {
+                    // We've already propagated this write to this instruction.
+                    // This may happen if we went through a loop.
+                    return;
+                }
 
                 for (DexCfgGraph.Node succeeding : node.getSucceeding()) {
                     Optional<Register> writtenRegister = succeeding.getInstruction().getWrittenRegister();
@@ -191,96 +134,24 @@ public class DexTyper {
                         continue;
                     }
 
-                    // Types that will be in the register coming from all possible branches
-                    List<Type> previousTypes = succeeding.getPreceding().stream()
-                            .map(n -> getStateAt(n.getInstruction()).writtenTypeInfo.get(register))
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList());
-
-                    Type mergedType = previousTypes.stream().reduce(this::mergeWrittenType).get();
-                    propagateTypeForward(succeeding, register, mergedType);
+                    propagateWriteForward(succeeding, writingInsn, register);
                 }
-            }
-
-            /**
-             * Merge two types into one common type.
-             */
-            private Type mergeWrittenType(Type typeA, Type typeB) {
-                if (typeA instanceof TypeConflict || typeB instanceof TypeConflict) {
-                    return TypeConflict.INSTANCE;
-                }
-
-                if (typeA instanceof AmbiguousType) {
-                    return mergeWrittenAmbiguousType((AmbiguousType) typeA, typeB);
-                } else if (typeB instanceof AmbiguousType) {
-                    return mergeWrittenAmbiguousType((AmbiguousType) typeB, typeA);
-                } else {
-                    if (typeA.equals(typeB)) {
-                        return typeA;
-                    } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
-                        return IntType.getInstance();
-                    } else if (typeA instanceof RefType && typeB instanceof RefType) {
-                        return ObjectType.OBJECT;
-                    }
-                }
-
-                return TypeConflict.INSTANCE;
-            }
-
-            /**
-             * Merge an ambiguous Type with another type.
-             *
-             * If one type is more precise / less ambiguous than the other type,
-             * than that type dominates and is returned.
-             *
-             * @param ambiguousType an ambiguous type
-             * @param type an ambiguous or non-ambiguous type to be merged in
-             * @return the more precise type of both or a {@link TypeConflict}
-             */
-            private Type mergeWrittenAmbiguousType(AmbiguousType ambiguousType, Type type) {
-                if (ambiguousType instanceof AmbiguousType.LongOrDouble) {
-                    if (isLongOrDoubleType(type)) {
-                        return type;
-                    }
-                } else if (ambiguousType instanceof AmbiguousType.IntOrFloat) {
-                    if (type instanceof AmbiguousType.IntOrFloatOrRef) {
-                        // Since IntOrFloat is a more precise than IntOrFloatOrRef, we return it
-                        return AmbiguousType.IntOrFloat.getInstance();
-                    }
-                    if (isIntOrFloatType(type)) {
-                        return type;
-                    }
-                } else if (ambiguousType instanceof AmbiguousType.IntOrFloatOrRef) {
-                    if (isIntOrFloatOrRefType(type)) {
-                        return type;
-                    }
-                } else {
-                    return DexUtils.unreachable();
-                }
-
-                return TypeConflict.INSTANCE;
             }
         }
 
-        access.getReads().forEach((register, type) ->
-                new ReadTypePropagation().propagateTypeBackwards(node, register, type));
+        TypePropagation typePropagation = new TypePropagation();
 
-        if (access.getWrittenRegister() != null) {
-            new WrittenTypePropagation().propagateTypeForward(node, access.getWrittenRegister(), access.getWrittenType());
+        for (RegisterState state : states.values()) {
+            TypeHintInsnVisitor.RegisterAccess access = state.access;
+
+            access.getReads().forEach((register, type) -> {
+                typePropagation.propagateReadBackwards(state.node, state.node.getInstruction(), register);
+            });
+
+            if (access.getWrittenRegister() != null) {
+                typePropagation.propagateWriteForward(state.node, state.node.getInstruction(), access.getWrittenRegister());
+            }
         }
-    }
-
-    private boolean isIntOrFloatType(Type type) {
-        return type instanceof AmbiguousType.IntOrFloat || type instanceof IntLikeType || type instanceof FloatType;
-    }
-
-    private boolean isIntOrFloatOrRefType(Type type) {
-        return type instanceof AmbiguousType.IntOrFloatOrRef || type instanceof AmbiguousType.IntOrFloat ||
-                type instanceof IntLikeType || type instanceof FloatType || type instanceof RefType;
-    }
-
-    private boolean isLongOrDoubleType(Type type) {
-        return type instanceof AmbiguousType.LongOrDouble || type instanceof LongType || type instanceof DoubleType;
     }
 
     public void typeInstructions() {
@@ -290,7 +161,7 @@ public class DexTyper {
             boolean wasTypeComputed = ambiguousInstruction.tryTypeComputation();
             if (wasTypeComputed) {
                 DexCfgGraph.Node node = ambiguousInstruction.node;
-                propagateRegisterState(node, recomputeRegisterAccess(node));
+                getStateAt(node.getInstruction()).access = recomputeRegisterAccess(node);
             }
             return wasTypeComputed;
         });
@@ -306,7 +177,7 @@ public class DexTyper {
             } else {
                 // Some ambiguous instructions have been typed.
                 // Since there is now more type information available,
-                // we can probably resolve the types remaining ambiguous instructions
+                // we can probably resolve the remaining ambiguous instructions
                 typeInstructions();
             }
         }
@@ -521,40 +392,26 @@ public class DexTyper {
         Map<Register, Set<Instruction>> readMap = CommonOperations.getReadMap(this.body);
         Map<Register, Set<Instruction>> writeMap = CommonOperations.getWriteMap(this.body);
 
-        body.getRegisters().removeIf(register -> {
-            Stream<Type> readTypes = readMap.getOrDefault(register, Set.of()).stream().map(insn -> getStateAt(insn).readTypeInfo.get(register));
-            Stream<Type> writtenTypes = writeMap.getOrDefault(register, Set.of()).stream().map(insn -> getStateAt(insn).writtenTypeInfo.get(register));
-            Optional<Type> registerType = Stream.concat(getRequiredType(register).stream(), Stream.concat(readTypes, writtenTypes)).reduce(this::mergeType);
+        this.body.getRegisters().removeIf(register -> {
+            Stream<Type> readTypes = readMap.getOrDefault(register, Set.of()).stream().flatMap(insn -> getStateAt(insn).getReadType(register).stream());
+            Stream<Type> writtenTypes = writeMap.getOrDefault(register, Set.of()).stream().map(insn -> getStateAt(insn).getWrittenType(register));
+            Stream<Type> derivedType = deriveTypeFromRegister(register).stream();
 
-            if (registerType.isPresent()) {
-                register.setType(registerType.get());
+            Optional<Type> mergedType = Stream.of(readTypes, writtenTypes, derivedType)
+                    .reduce(Stream.empty(), Stream::concat)
+                    .reduce(this.typeMerge::mergePreciseTypes);
+
+            if (mergedType.isPresent()) {
+                register.setType(mergedType.get());
                 return false;
             } else {
-                // The register neither used nor is it a parameter or this register.
+                // The register is neither used nor is it a parameter or this register, so it can safely be removed.
                 return true;
             }
         });
     }
 
-    private Type mergeType(Type typeA, Type typeB) {
-        if (typeA instanceof AmbiguousType || typeB instanceof AmbiguousType ||
-                typeA instanceof TypeConflict || typeB instanceof TypeConflict) {
-            // Ambiguous types should actually be resolved here.
-            throw new IllegalStateException();
-        }
-
-        if (typeA.equals(typeB)) {
-            return typeA;
-        } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
-            return IntType.getInstance();
-        } else if (typeA instanceof RefType && typeB instanceof RefType) {
-            return ObjectType.OBJECT;
-        } else {
-            throw new IllegalArgumentException("Cannot merge types " + typeA + " and " + typeB);
-        }
-    }
-
-    private Optional<Type> getRequiredType(Register register) {
+    private Optional<Type> deriveTypeFromRegister(Register register) {
         Optional<Register> thisRegister = body.getThisRegister();
         if (thisRegister.isPresent() && thisRegister.get() == register) {
             return Optional.of(ObjectType.OBJECT);
@@ -578,24 +435,56 @@ public class DexTyper {
         /**
          * This snapshot contains the register states at this location in code.
          */
-        private final Instruction instruction;
+        private final DexCfgGraph.Node node;
+
+        private TypeHintInsnVisitor.RegisterAccess access;
 
         /**
-         * Types that the values in the registers must have before the execution of the instruction.
-         *
-         * This information is only derived from read from registers.
+         * Map registers to all instructions that may possible read the value that is currently
+         * (when the instruction is executed) present in the register.
          */
-        private final Map<Register, Type> readTypeInfo = new HashMap<>();
+        private final Map<Register, Set<Instruction>> reads = new HashMap<>();
 
         /**
-         * Types that the values in the registers will have after the execution of the instruction.
-         *
-         * This information is only derived from writes to the registers.
+         * Map registers to all instructions that may possibly have written the value that is currently
+         * (when the instruction is executed) present in the register.
          */
-        private final Map<Register, Type> writtenTypeInfo = new HashMap<>();
+        private final Map<Register, Set<Instruction>> writes = new HashMap<>();
 
-        public RegisterState(Instruction instruction) {
-            this.instruction = instruction;
+        public RegisterState(DexCfgGraph.Node node, TypeHintInsnVisitor.RegisterAccess access) {
+            this.node = node;
+            this.access = access;
+        }
+
+        public Optional<Type> getReadType(Register register) {
+            return this.reads.getOrDefault(register, Set.of()).stream()
+                .map(insn -> getReadTypeAt(register, insn))
+                .reduce(typeMerge::mergeAmbiguousDominating);
+        }
+
+        private Type getReadTypeAt(Register register, Instruction insn) {
+            Type type = getStateAt(insn).access.getReads().get(register);
+            if (type == null) {
+                throw new IllegalStateException("Instruction " + insn + " does not write to register " + register);
+            } else {
+                return type;
+            }
+        }
+
+        public Type getWrittenType(Register register) {
+            return this.writes.getOrDefault(register, Set.of()).stream()
+                    .map(insn -> getWrittenTypeAt(insn, register))
+                    .reduce(typeMerge::mergePreciseDominating)
+                    .orElseThrow(() -> new IllegalStateException("Register " + register + " is never read before instruction " + node.getInstruction()));
+        }
+
+        private Type getWrittenTypeAt(Instruction insn, Register register) {
+            TypeHintInsnVisitor.RegisterAccess access = getStateAt(insn).access;
+            if (access.getWrittenRegister() == register) {
+                return access.getWrittenType();
+            } else {
+                throw new IllegalStateException("Instruction " + insn + " does not read from register " + register);
+            }
         }
     }
 
@@ -628,20 +517,16 @@ public class DexTyper {
          * @return type of the value read from the register
          */
         protected Type getReadType(Register register) {
-            Type typeReadByInsn = getStateAt(node.getInstruction()).readTypeInfo.get(register);
+            Optional<Type> typeFromRead = getStateAt(node.getInstruction()).getReadType(register);
 
-            return node.getPreceding().stream()
-                    .map(node -> getStateAt(node.getInstruction()).writtenTypeInfo.get(register))
-                    .map(this::requireNoTypeConflict)
-                    .reduce(typeReadByInsn, this::mergeTypes);
-        }
+            Type mergedWrittenTypes = node.getPreceding().stream()
+                    .map(node -> getStateAt(node.getInstruction()).getWrittenType(register))
+                    .reduce(typeMerge::mergePreciseDominating)
+                    .orElseThrow(() -> new IllegalStateException("No instruction has possibly written to a register that is read from"));
 
-        private Type requireNoTypeConflict(Type type) {
-            if (type instanceof TypeConflict) {
-                throw new IllegalStateException("Tried to read from register with a TypeConflict");
-            } else {
-                return type;
-            }
+            Type mergedType = typeFromRead.stream().reduce(mergedWrittenTypes, typeMerge::mergePreciseDominating);
+
+            return requireNoTypeConflict(mergedType);
         }
 
         /**
@@ -654,47 +539,21 @@ public class DexTyper {
          * @return type of the value written to the register
          */
         protected Type getWrittenType(Register register) {
-            Type typeWrittenByInsn = requireNoTypeConflict(getStateAt(node.getInstruction()).writtenTypeInfo.get(register));
+            Type typeWrittenByInsn = requireNoTypeConflict(getStateAt(node.getInstruction()).getWrittenType(register));
 
-            return node.getSucceeding().stream()
-                    .map(node -> getStateAt(node.getInstruction()).readTypeInfo.get(register))
-                    .filter(Objects::nonNull) // filter branches that do not read from the register
-                    .reduce(typeWrittenByInsn, this::mergeTypes);
+            Type mergedType = node.getSucceeding().stream()
+                    .flatMap(node -> getStateAt(node.getInstruction()).getReadType(register).stream())
+                    .reduce(typeWrittenByInsn, typeMerge::mergePreciseDominating);
+
+            return requireNoTypeConflict(mergedType);
         }
 
-        protected Type mergeTypes(Type typeA, Type typeB) {
-            if (typeA instanceof AmbiguousType) return mergeWithAmbiguousType((AmbiguousType) typeA, typeB);
-            if (typeB instanceof AmbiguousType) return mergeWithAmbiguousType((AmbiguousType) typeB, typeA);
-
-            if (typeA.equals(typeB)) {
-                return typeA;
-            } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
-                return IntType.getInstance();
-            } else if (typeA instanceof RefType && typeB instanceof RefType) {
-                return ObjectType.OBJECT;
+        private Type requireNoTypeConflict(Type type) {
+            if (type instanceof TypeConflict) {
+                throw new IllegalStateException("Tried to read from register with a TypeConflict");
             } else {
-                throw new IllegalArgumentException("Cannot merge types " + typeA + " and " + typeB);
+                return type;
             }
-        }
-
-        private Type mergeWithAmbiguousType(AmbiguousType typeA, Type typeB) {
-            if (typeA instanceof AmbiguousType.IntOrFloat) {
-                if (isIntOrFloatType(typeB)) {
-                    return typeB;
-                }
-            } else if (typeA instanceof AmbiguousType.IntOrFloatOrRef) {
-                if (isIntOrFloatOrRefType(typeB)) {
-                    return typeB;
-                }
-            } else if (typeA instanceof AmbiguousType.LongOrDouble) {
-                if (isLongOrDoubleType(typeB)) {
-                    return typeB;
-                }
-            } else {
-                return DexUtils.unreachable();
-            }
-
-            throw new IllegalStateException("Cannot merge " + typeA + " with " + typeB);
         }
 
         protected Type getLowerType(Type readType) {
@@ -732,7 +591,7 @@ public class DexTyper {
             Type arrayBaseType = getLowerType(getReadType(instruction.getArray()));
             Type valueType = getWrittenType(instruction.getResult());
 
-            Type type = mergeTypes(arrayBaseType, valueType);
+            Type type = typeMerge.mergePreciseDominating(arrayBaseType, valueType);
             if (type instanceof AmbiguousType) {
                 return false;
             } else {
@@ -752,7 +611,7 @@ public class DexTyper {
             Type arrayBaseType = getLowerType(getReadType(instruction.getArray()));
             Type valueType = getReadType(instruction.getValue());
 
-            Type type = mergeTypes(arrayBaseType, valueType);
+            Type type = typeMerge.mergePreciseDominating(arrayBaseType, valueType);
             if (type instanceof AmbiguousType) {
                 return false;
             } else {
@@ -769,7 +628,10 @@ public class DexTyper {
 
         @Override
         public boolean tryTypeComputation() {
-            Type type = mergeTypes(getReadType(instruction.getFrom()), getWrittenType(instruction.getTo()));
+            Type fromType = getReadType(instruction.getFrom());
+            Type toType = getWrittenType(instruction.getTo());
+
+            Type type = typeMerge.mergePreciseDominating(fromType, toType);
             if (type instanceof AmbiguousType) {
                 return false;
             } else {
@@ -824,6 +686,169 @@ public class DexTyper {
         @Override
         public String toString() {
             return TypeConflict.class.getSimpleName() + "{}";
+        }
+    }
+
+    /**
+     * A utility for merging two types into one single type.
+     */
+    private static class TypeMerge {
+        /**
+         * Merge two types into one common type.
+         *
+         * If one type is more ambiguous / less precise than the other type,
+         * than that type dominates and is returned.
+         *
+         * If two precise types are merged, they may turn into an ambiguous type.
+         *
+         * @param typeA one type
+         * @param typeB another type
+         * @return the merged type
+         */
+        public Type mergeAmbiguousDominating(Type typeA, Type typeB) {
+            if (typeA.equals(typeB)) {
+                return typeA;
+            }
+
+            if (typeA instanceof AmbiguousType || typeB instanceof AmbiguousType) {
+                if (typeA instanceof AmbiguousType.IntOrFloatOrRef || typeB instanceof AmbiguousType.IntOrFloatOrRef) {
+                    if (isIntOrFloatOrRefType(typeA) && isIntOrFloatOrRefType(typeB)) {
+                        return AmbiguousType.IntOrFloatOrRef.getInstance();
+                    }
+                } else if (typeA instanceof AmbiguousType.IntOrFloat || typeB instanceof AmbiguousType.IntOrFloat) {
+                    if (isIntOrFloatType(typeA) && isIntOrFloatType(typeB)) {
+                        return AmbiguousType.IntOrFloat.getInstance();
+                    }
+                } else if (typeA instanceof AmbiguousType.LongOrDouble || typeB instanceof AmbiguousType.LongOrDouble) {
+                    if (isLongOrDoubleType(typeA) && isLongOrDoubleType(typeB)) {
+                        return AmbiguousType.LongOrDouble.getInstance();
+                    }
+                } else {
+                    return DexUtils.unreachable();
+                }
+            } else {
+                if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
+                    return IntType.getInstance();
+                } else if (typeA instanceof RefType && typeB instanceof RefType) {
+                    return ObjectType.OBJECT;
+                } else if ((typeA instanceof IntType || typeA instanceof FloatType || typeA instanceof RefType) &&
+                        (typeB instanceof IntType || typeB instanceof FloatType || typeB instanceof RefType)) {
+                    if (typeA instanceof RefType || typeB instanceof RefType) {
+                        return AmbiguousType.IntOrFloatOrRef.getInstance();
+                    } else {
+                        return AmbiguousType.IntOrFloat.getInstance();
+                    }
+                } else if ((typeA instanceof LongType || typeA instanceof DoubleType) &&
+                        (typeB instanceof LongType || typeA instanceof DoubleType)) {
+                    return AmbiguousType.LongOrDouble.getInstance();
+                }
+            }
+
+            throw new IllegalStateException("Cannot merge types " + typeA + " and " + typeB);
+        }
+
+        /**
+         * Merge two types into one common type.
+         *
+         * If one type is less ambiguous / more precise than the other type,
+         * than that type dominates and is returned.
+         *
+         * @param typeA one type
+         * @param typeB another type
+         * @return the merged type or a {@link TypeConflict}
+         */
+        public Type mergePreciseDominating(Type typeA, Type typeB) {
+            if (typeA instanceof TypeConflict || typeB instanceof TypeConflict) {
+                return TypeConflict.INSTANCE;
+            }
+
+            if (typeA instanceof AmbiguousType) {
+                return mergeAmbiguousTypePreciseDominating((AmbiguousType) typeA, typeB);
+            }
+            if (typeB instanceof AmbiguousType) {
+                return mergeAmbiguousTypePreciseDominating((AmbiguousType) typeB, typeA);
+            }
+
+            if (typeA.equals(typeB)) {
+                return typeA;
+            } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
+                return IntType.getInstance();
+            } else if (typeA instanceof RefType && typeB instanceof RefType) {
+                return ObjectType.OBJECT;
+            } else {
+                return TypeConflict.INSTANCE;
+            }
+        }
+
+        /**
+         * Merge an ambiguous Type with another type.
+         *
+         * If one type is more precise / less ambiguous than the other type,
+         * than that type dominates and is returned.
+         *
+         * @param ambiguousType an ambiguous type
+         * @param type an ambiguous or non-ambiguous type to be merged in
+         * @return the more precise type of both or a {@link TypeConflict}
+         */
+        private Type mergeAmbiguousTypePreciseDominating(AmbiguousType ambiguousType, Type type) {
+            if (ambiguousType instanceof AmbiguousType.LongOrDouble) {
+                if (isLongOrDoubleType(type)) {
+                    return type;
+                }
+            } else if (ambiguousType instanceof AmbiguousType.IntOrFloat) {
+                if (type instanceof AmbiguousType.IntOrFloatOrRef) {
+                    // Since IntOrFloat is a more precise than IntOrFloatOrRef, we return it
+                    return AmbiguousType.IntOrFloat.getInstance();
+                }
+                if (isIntOrFloatType(type)) {
+                    return type;
+                }
+            } else if (ambiguousType instanceof AmbiguousType.IntOrFloatOrRef) {
+                if (isIntOrFloatOrRefType(type)) {
+                    return type;
+                }
+            } else {
+                return DexUtils.unreachable();
+            }
+
+            return TypeConflict.INSTANCE;
+        }
+
+        private boolean isIntOrFloatType(Type type) {
+            return type instanceof AmbiguousType.IntOrFloat || type instanceof IntLikeType || type instanceof FloatType;
+        }
+
+        private boolean isIntOrFloatOrRefType(Type type) {
+            return type instanceof AmbiguousType.IntOrFloatOrRef || type instanceof AmbiguousType.IntOrFloat ||
+                    type instanceof IntLikeType || type instanceof FloatType || type instanceof RefType;
+        }
+
+        private boolean isLongOrDoubleType(Type type) {
+            return type instanceof AmbiguousType.LongOrDouble || type instanceof LongType || type instanceof DoubleType;
+        }
+
+        /**
+         * Merge two types that are both non-ambiguous.
+         *
+         * @param typeA a non-ambiguous type
+         * @param typeB another non-ambiguous type
+         * @return the merged type
+         */
+        public Type mergePreciseTypes(Type typeA, Type typeB) {
+            if (typeA instanceof AmbiguousType || typeB instanceof AmbiguousType ||
+                    typeA instanceof TypeConflict || typeB instanceof TypeConflict) {
+                throw new IllegalArgumentException("Precise types are required, got " + typeA + " and " + typeB);
+            }
+
+            if (typeA.equals(typeB)) {
+                return typeA;
+            } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
+                return IntType.getInstance();
+            } else if (typeA instanceof RefType && typeB instanceof RefType) {
+                return ObjectType.OBJECT;
+            }
+
+            throw new IllegalArgumentException("Cannot merge types " + typeA + " and " + typeB);
         }
     }
 }
