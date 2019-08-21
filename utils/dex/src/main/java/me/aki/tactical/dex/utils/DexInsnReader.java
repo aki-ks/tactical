@@ -132,7 +132,7 @@ public class DexInsnReader {
             iv.visitArrayLoad(loadInsn.getType(), loadInsn.getArray(), loadInsn.getIndex(), loadInsn.getResult());
         } else if (instruction instanceof ArrayStoreInstruction) {
             ArrayStoreInstruction storeInsn = (ArrayStoreInstruction) instruction;
-            iv.visitArrayStore(storeInsn.getType(), storeInsn.getArray(), storeInsn.getIndex(), storeInsn.getIndex());
+            iv.visitArrayStore(storeInsn.getType(), storeInsn.getArray(), storeInsn.getIndex(), storeInsn.getValue());
         } else if (instruction instanceof FieldGetInstruction) {
             FieldGetInstruction fieldInsn = (FieldGetInstruction) instruction;
             iv.visitFieldGet(fieldInsn.getField(), fieldInsn.getInstance(), fieldInsn.getResult());
@@ -144,7 +144,7 @@ public class DexInsnReader {
             iv.visitFillArray(fillInsn.getArray(), fillInsn.getElementSize(), fillInsn.getValues());
         } else if (instruction instanceof InstanceOfInstruction) {
             InstanceOfInstruction instanceOfInsn = (InstanceOfInstruction) instruction;
-            iv.visitInstanceOf(instanceOfInsn.getType(), instanceOfInsn.getValue(),instanceOfInsn.getResult());
+            iv.visitInstanceOf(instanceOfInsn.getType(), instanceOfInsn.getValue(), instanceOfInsn.getResult());
         } else if (instruction instanceof InvokeInstruction) {
             visitInvoke((InvokeInstruction) instruction);
         } else if (instruction instanceof MonitorEnterInstruction) {
