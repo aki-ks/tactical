@@ -41,13 +41,6 @@ public class SmaliDexInsnReader {
 
             // MOVE //
 
-            case MOVE:
-            case MOVE_FROM16:
-            case MOVE_16: {
-                visitMove(AmbiguousType.IntOrFloat.getInstance(), (TwoRegisterInstruction) instruction);
-                break;
-            }
-
             case MOVE_WIDE:
             case MOVE_WIDE_FROM16:
             case MOVE_WIDE_16: {
@@ -55,11 +48,14 @@ public class SmaliDexInsnReader {
                 break;
             }
 
+            case MOVE:
+            case MOVE_FROM16:
+            case MOVE_16:
             case MOVE_OBJECT:
             case MOVE_OBJECT_FROM16:
             case MOVE_OBJECT_16: {
-                // If the constant zero is stored in a register, it is legal bytecode
-                // to move it with a move-object instruction and then use it as an int value.
+                // If the constant '0' is stored in a register, it is legal bytecode to move it
+                // with a 'move-object' or 'move' instruction and then use it as an int or reference value.
                 visitMove(AmbiguousType.IntOrFloatOrRef.getInstance(), (TwoRegisterInstruction) instruction);
                 break;
             }
