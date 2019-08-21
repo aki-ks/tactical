@@ -13,6 +13,8 @@ import me.aki.tactical.dex.utils.DexCfgGraph;
 import me.aki.tactical.dex.utils.DexInsnReader;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -758,6 +760,10 @@ public class DexTyper {
          * @return the merged type or a {@link TypeConflict}
          */
         public Type mergePreciseDominating(Type typeA, Type typeB) {
+            if (typeA == null) return typeB;
+            if (typeB == null) return typeA;
+            if (typeA.equals(typeB)) return typeA;
+
             if (typeA instanceof TypeConflict || typeB instanceof TypeConflict) {
                 return TypeConflict.INSTANCE;
             }
@@ -769,11 +775,11 @@ public class DexTyper {
                 return mergeAmbiguousTypePreciseDominating((AmbiguousType) typeB, typeA);
             }
 
-            if (typeA.equals(typeB)) {
-                return typeA;
-            } else if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
+            if (typeA instanceof IntLikeType && typeB instanceof IntLikeType) {
                 return IntType.getInstance();
             } else if (typeA instanceof RefType && typeB instanceof RefType) {
+                if (typeA instanceof ArrayType) return typeA;
+                if (typeB instanceof ArrayType) return typeB;
                 return ObjectType.OBJECT;
             } else {
                 return TypeConflict.INSTANCE;

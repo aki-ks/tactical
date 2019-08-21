@@ -3,18 +3,13 @@ package me.aki.tactical.conversion.smali2dex;
 import me.aki.tactical.conversion.smali2dex.typing.AmbiguousType;
 import me.aki.tactical.conversion.smali2dex.typing.DexTyper;
 import me.aki.tactical.conversion.smali2dex.typing.UntypedNumberConstant;
-import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.Method;
-import me.aki.tactical.core.MethodRef;
-import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.*;
 import me.aki.tactical.core.util.InsertList;
-import me.aki.tactical.core.utils.AbstractCfgGraph;
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.*;
 import me.aki.tactical.dex.insn.math.AddInstruction;
-import me.aki.tactical.dex.invoke.InvokeVirtual;
 import me.aki.tactical.dex.utils.DexCfgGraph;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,6 +48,28 @@ public class DexTyperTest {
                         ));
                     }, (method, body) -> {
                         assertEquals(type, body.getRegisters().get(0).getType());
+                    }
+            );
+        }
+    }
+
+    @Test
+    public void testSimpleUseOfMovedValue() {
+        for (Type type : List.of(IntType.getInstance(), FloatType.getInstance(), ObjectType.OBJECT)) {
+            typerTest(2, false, List.of(IntType.getInstance(), IntType.getInstance()), Optional.of(type),
+                    (method, body) -> {
+                        Register number0 = body.getRegisters().get(0);
+                        Register number1 = body.getRegisters().get(1);
+
+                        body.getInstructions().addAll(List.of(
+                                new ConstInstruction(constant(0), number1),
+                                new MoveInstruction(AmbiguousType.IntOrFloatOrRef.getInstance(), number1, number0),
+                                new ReturnInstruction(number0)
+                        ));
+                    }, (method, body) -> {
+                        Type registerType = body.getRegisters().get(0).getType();
+                        if (type instanceof RefType) assertTrue(registerType instanceof RefType);
+                        else assertEquals(type, registerType);
                     }
             );
         }
@@ -170,6 +186,70 @@ public class DexTyperTest {
         );
     }
 
+    @Test
+    public void testTypingArrayStore() {
+        for (Type baseType : List.of(IntType.getInstance(), FloatType.getInstance())) {
+            typerTest(4, false, List.of(IntType.getInstance(), IntType.getInstance()), Optional.empty(),
+                    (method, body) -> {
+                        Register size = body.getRegisters().get(0);
+                        Register array = body.getRegisters().get(1);
+                        Register index = body.getRegisters().get(2);
+                        Register value = body.getRegisters().get(3);
+
+                        body.getInstructions().addAll(List.of(
+                                new ConstInstruction(constant(4), size),
+                                new NewArrayInstruction(new ArrayType(baseType, 1), size, array),
+                                new ConstInstruction(constant(0), index),
+                                new ConstInstruction(constant(20), value),
+                                new ArrayStoreInstruction(AmbiguousType.IntOrFloat.getInstance(), array, index, value),
+                                new ReturnVoidInstruction()
+                        ));
+                    }, (method, body) -> {
+                        Register size = body.getRegisters().get(0);
+                        Register array = body.getRegisters().get(1);
+                        Register index = body.getRegisters().get(2);
+                        Register value = body.getRegisters().get(3);
+
+                        assertEquals(IntType.getInstance(), size.getType());
+                        assertEquals(array.getType(), new ArrayType(baseType, 1));
+                        assertEquals(IntType.getInstance(), index.getType());
+                        assertEquals(baseType, value.getType());
+                    }
+            );
+        }
+    }
+
+    @Test
+    public void testTypingArrayLoad() {
+        for (Type baseType : List.of(IntType.getInstance(), FloatType.getInstance())) {
+            typerTest(4, false, List.of(IntType.getInstance(), IntType.getInstance()), Optional.empty(),
+                    (method, body) -> {
+                        Register size = body.getRegisters().get(0);
+                        Register array = body.getRegisters().get(1);
+                        Register index = body.getRegisters().get(2);
+                        Register result = body.getRegisters().get(3);
+
+                        body.getInstructions().addAll(List.of(
+                                new ConstInstruction(constant(4), size),
+                                new NewArrayInstruction(new ArrayType(baseType, 1), size, array),
+                                new ConstInstruction(constant(0), index),
+                                new ArrayLoadInstruction(AmbiguousType.IntOrFloat.getInstance(), array, index, result),
+                                new ReturnVoidInstruction()
+                        ));
+                    }, (method, body) -> {
+                        Register size = body.getRegisters().get(0);
+                        Register array = body.getRegisters().get(1);
+                        Register index = body.getRegisters().get(2);
+                        Register result = body.getRegisters().get(3);
+
+                        assertEquals(IntType.getInstance(), size.getType());
+                        assertEquals(array.getType(), new ArrayType(baseType, 1));
+                        assertEquals(IntType.getInstance(), index.getType());
+                        assertEquals(baseType, result.getType());
+                    }
+            );
+        }
+    }
     private UntypedNumberConstant constant(int i) {
         AmbiguousType type = i == 0 ? AmbiguousType.IntOrFloatOrRef.getInstance() : AmbiguousType.IntOrFloat.getInstance();
         return new UntypedNumberConstant(type, i);
@@ -178,7 +258,6 @@ public class DexTyperTest {
     private UntypedNumberConstant wideConstant(long l) {
         return new UntypedNumberConstant(AmbiguousType.LongOrDouble.getInstance(), l);
     }
-
 
     private void typerTest(int registers, boolean hasThisRegister, List<Type> parameterTypes, Optional<Type> returnType, BiConsumer<Method, DexBody> initBody, BiConsumer<Method, DexBody> doAssertions) {
         DexBody body = new DexBody();
