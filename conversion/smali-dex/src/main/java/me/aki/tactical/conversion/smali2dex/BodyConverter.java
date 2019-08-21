@@ -1,12 +1,13 @@
 package me.aki.tactical.conversion.smali2dex;
 
-import me.aki.tactical.conversion.smali2dex.typing.InsnTyper;
-import me.aki.tactical.conversion.smali2dex.typing.UntypedInfo;
+import me.aki.tactical.conversion.smali2dex.typing.RegisterPartitioner;
+import me.aki.tactical.conversion.smali2dex.typing.DexTyper;
 import me.aki.tactical.conversion.smalidex.DexUtils;
 import me.aki.tactical.core.Method;
 import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.DoubleType;
 import me.aki.tactical.core.type.LongType;
+import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.DexBody;
@@ -21,9 +22,7 @@ import org.jf.dexlib2.iface.debug.*;
 import org.jf.dexlib2.iface.instruction.Instruction;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Utility for conversion of a smali {@link MethodImplementation} body into a tactical {@link DexBody}
@@ -35,8 +34,6 @@ public class BodyConverter {
     private final DexBody body;
     private final InstructionIndex insnIndex;
     private final SmaliCfgGraph smaliCfg;
-
-    private DexCfgGraph dexCfg;
 
     /**
      * Map smali instructions to their converted tactical dex form.
@@ -57,8 +54,6 @@ public class BodyConverter {
      */
     private final Map<Instruction, Collection<RWCell<me.aki.tactical.dex.insn.Instruction>>> insnRefs = new HashMap<>();
 
-    private List<UntypedInfo> untypedInfos;
-
     public BodyConverter(Method method, MethodImplementation smaliBody) {
         this.method = method;
         this.smaliBody = smaliBody;
@@ -67,6 +62,11 @@ public class BodyConverter {
         this.insnIndex = new InstructionIndex(smaliBody.getInstructions());
         this.smaliCfg = new SmaliCfgGraph(this.insnIndex, smaliBody.getTryBlocks());
 
+        this.doConversion();
+        this.doTyping();
+    }
+
+    private void doConversion() {
         this.convertRegisters();
 
         this.convertInsns();
@@ -75,8 +75,6 @@ public class BodyConverter {
         this.convertTryCatchBlocks();
 
         this.convertDebug();
-
-        this.resolveUntypedCells();
     }
 
     public DexBody getBody() {
@@ -84,38 +82,37 @@ public class BodyConverter {
     }
 
     private void convertRegisters() {
-        List<Register> registers = body.getRegisters();
-        for (int i = 0; i < smaliBody.getRegisterCount(); i++) {
+        final int registerCount = smaliBody.getRegisterCount();
+        List<Register> registers = new ArrayList<>(registerCount);
+        for (int i = 0; i < registerCount; i++) {
             registers.add(new Register(null));
         }
 
-        RWCell<Integer> cursor = RWCell.of(smaliBody.getRegisterCount(), Integer.class);
-
-        body.setParameterRegisters(mapReverseEval(method.getParameterTypes(), paramType -> {
-            int registerSize = paramType instanceof LongType || paramType instanceof DoubleType ? 2 : 1;
-            cursor.set(cursor.get() - registerSize);
-
-            return registers.get(cursor.get());
-        }));
+        int firstParameterIndex = convertParameterRegisters(registers, registerCount);
 
         if (!method.getFlag(Method.Flag.STATIC)) {
-            Register thisRegister = registers.get(cursor.get() - 1);
+            Register thisRegister = registers.get(firstParameterIndex - 1);
             body.setThisRegister(Optional.of(thisRegister));
         }
+
+        body.setRegisters(registers);
     }
 
-    /**
-     * Map all elements in a list, but start evaluate the lambda for the last elements of the list first.
-     */
-    private <T, U> List<U> mapReverseEval(List<T> list, Function<T, U> f) {
-        List<U> result = new LinkedList<>(); // O(1) insertion at index 0
+    private int convertParameterRegisters(List<Register> registers, int cursor) {
+        LinkedList<Register> parameterRegisters = new LinkedList<>(); // O(1) insertion at index 0
 
-        ListIterator<T> reverseIter = list.listIterator(list.size());
-        while (reverseIter.hasPrevious()) {
-            result.add(0, f.apply(reverseIter.previous()));
+        ListIterator<Type> parameterIterator = method.getParameterTypes().listIterator(method.getParameterTypes().size());
+        while (parameterIterator.hasPrevious()) {
+            Type paramType = parameterIterator.previous();
+            int registerSize = paramType instanceof LongType || paramType instanceof DoubleType ? 2 : 1;
+            cursor -= registerSize;
+
+            Register parameterRegister = registers.get(cursor);
+            parameterRegisters.add(0, parameterRegister);
         }
 
-        return result;
+        body.setParameterRegisters(new ArrayList<>(parameterRegisters));
+        return cursor;
     }
 
     private void convertInsns() {
@@ -144,13 +141,6 @@ public class BodyConverter {
             me.aki.tactical.dex.insn.Instruction insn = this.convertedInsns.get(smaliInsn);
             if (insn != null) body.getInstructions().add(insn);
         }
-
-        this.untypedInfos = writer.getUntypedTypes();
-    }
-
-    private void resolveUntypedCells() {
-        this.dexCfg = new DexCfgGraph(this.body);
-        new InsnTyper(this.method, this.body, this.dexCfg, this.untypedInfos).doTyping();
     }
 
     private void convertTryCatchBlocks() {
@@ -281,5 +271,16 @@ public class BodyConverter {
                     throw new AssertionError();
             }
         }
+    }
+
+    private void doTyping() {
+        DexCfgGraph cfgGraph = new DexCfgGraph(body);
+
+        // pre-processing required to make all registers typeable
+        new RegisterPartitioner(cfgGraph).process(body);
+
+        DexTyper dexTyper = new DexTyper(method, cfgGraph);
+        dexTyper.typeInstructions();
+        dexTyper.typeRegisters();
     }
 }
