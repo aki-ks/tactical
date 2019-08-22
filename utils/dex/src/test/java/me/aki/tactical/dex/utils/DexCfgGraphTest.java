@@ -299,4 +299,226 @@ public class DexCfgGraphTest {
         return body;
     }
 
+    @Test
+    public void testSimpleInsertBefore() {
+        DexBody body = newBody(1, false, 0);
+        Register register = body.getRegisters().get(0);
+        InsertList<Instruction> instructions = body.getInstructions();
+
+        Instruction insn0 = new ConstInstruction(new IntConstant(0), register);
+        Instruction insn1 = new ConstInstruction(new IntConstant(4), register); // to be inserted
+        Instruction insn2 = new ReturnInstruction(register);
+
+        instructions.addAll(List.of(insn0, insn2));
+        DexCfgGraph cfg = new DexCfgGraph(body);
+
+        // BEFORE
+        //    0
+        //    |
+        //    2
+        assertInstructions(cfg, List.of(insn0, insn2));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn2));
+        assertCfgNode(cfg, insn2, Set.of(insn0), Set.of());
+
+        cfg.insertBefore(cfg.getNode(insn2), insn1);
+
+        // AFTER
+        //    0
+        //    |
+        //    1
+        //    |
+        //    2
+        assertInstructions(cfg, List.of(insn0, insn1, insn2));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of());
+    }
+
+    @Test
+    public void testInsertBeforeFirstInstruction() {
+        DexBody body = newBody(1, false, 0);
+        Register register = body.getRegisters().get(0);
+        InsertList<Instruction> instructions = body.getInstructions();
+
+        Instruction insn0 = new ConstInstruction(new IntConstant(0), register); // to be inserted
+        Instruction insn1 = new ConstInstruction(new IntConstant(4), register);
+        Instruction insn2 = new ReturnInstruction(register);
+
+        instructions.addAll(List.of(insn1, insn2));
+        DexCfgGraph cfg = new DexCfgGraph(body);
+
+        // BEFORE
+        //    1
+        //    |
+        //    2
+        assertInstructions(cfg, List.of(insn1, insn2));
+        assertCfgNode(cfg, insn1, Set.of(), Set.of(insn2));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of());
+
+        cfg.insertBefore(cfg.getNode(insn1), insn0);
+
+        // AFTER
+        //    0
+        //    |
+        //    1
+        //    |
+        //    2
+        assertInstructions(cfg, List.of(insn0, insn1, insn2));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of());
+    }
+
+    @Test
+    public void testInsertBeforeBranchedToInsn() {
+        DexBody body = newBody(1, false, 0);
+        Register register = body.getRegisters().get(0);
+        InsertList<Instruction> instructions = body.getInstructions();
+
+        IfInstruction insn0 = new IfInstruction(IfInstruction.Comparison.EQUAL, register, Optional.empty(), null);
+        IfInstruction insn1 = new IfInstruction(IfInstruction.Comparison.GREATER_EQUAL, register, Optional.empty(), null);
+        Instruction insn2 = new ConstInstruction(new IntConstant(-1), register);
+        Instruction insn3 = new ConstInstruction(new IntConstant(5), register); // To be inserted
+        Instruction insn4 = new ReturnInstruction(register);
+        insn0.setTarget(insn4);
+        insn1.setTarget(insn4);
+
+        instructions.addAll(List.of(insn0, insn1, insn2, insn4));
+        DexCfgGraph cfg = new DexCfgGraph(body);
+
+        // BEFORE //
+        //    0
+        //    | \
+        //    1  |
+        //  / |  |
+        // |  2  |
+        //  \ | /
+        //    4
+        assertInstructions(cfg, List.of(insn0, insn1, insn2, insn4));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1, insn4));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2, insn4));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn4));
+        assertCfgNode(cfg, insn4, Set.of(insn0, insn1, insn2), Set.of());
+
+        cfg.insertBefore(cfg.getNode(insn4), insn3);
+
+        // After //
+        //    0
+        //    | \
+        //    1  |
+        //  / |  |
+        // |  2  |
+        //  \ | /
+        //    3
+        //    |
+        //    4
+        assertInstructions(cfg, List.of(insn0, insn1, insn2, insn3, insn4));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1, insn3));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2, insn3));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn3));
+        assertCfgNode(cfg, insn3, Set.of(insn0, insn1, insn2), Set.of(insn4));
+        assertCfgNode(cfg, insn4, Set.of(insn3), Set.of());
+    }
+
+    @Test
+    public void testInsertBranchInsn() {
+        DexBody body = newBody(1, false, 0);
+        Register register = body.getRegisters().get(0);
+        InsertList<Instruction> instructions = body.getInstructions();
+
+        Instruction insn0 = new ConstInstruction(new IntConstant(0), register);
+        IfInstruction insn1 = new IfInstruction(IfInstruction.Comparison.EQUAL, register, Optional.empty(), null); // to be inserted
+        Instruction insn2 = new ConstInstruction(new IntConstant(4), register);
+        Instruction insn3 = new ReturnInstruction(register);
+        insn1.setTarget(insn3);
+
+        instructions.addAll(List.of(insn0, insn2, insn3));
+        DexCfgGraph cfg = new DexCfgGraph(body);
+
+        // BEFORE
+        //    0
+        //    |
+        //    2
+        //    |
+        //    3
+        assertInstructions(cfg, List.of(insn0, insn2, insn3));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn2));
+        assertCfgNode(cfg, insn2, Set.of(insn0), Set.of(insn3));
+        assertCfgNode(cfg, insn3, Set.of(insn2), Set.of());
+
+        cfg.insertBefore(cfg.getNode(insn2), insn1);
+
+        // AFTER
+        //    0
+        //    |
+        //    1
+        //    | \
+        //    2  |
+        //    | /
+        //    3
+        assertInstructions(cfg, List.of(insn0, insn1, insn2, insn3));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2, insn3));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn3));
+        assertCfgNode(cfg, insn3, Set.of(insn1, insn2), Set.of());
+    }
+
+    @Test
+    public void testInsertBranchInstructionBeforeBranchedToInsn() {
+        DexBody body = newBody(1, false, 0);
+        Register register = body.getRegisters().get(0);
+        InsertList<Instruction> instructions = body.getInstructions();
+
+        IfInstruction insn0 = new IfInstruction(IfInstruction.Comparison.EQUAL, register, Optional.empty(), null);
+        IfInstruction insn1 = new IfInstruction(IfInstruction.Comparison.GREATER_EQUAL, register, Optional.empty(), null);
+        Instruction insn2 = new ConstInstruction(new IntConstant(-1), register);
+        IfInstruction insn3 = new IfInstruction(IfInstruction.Comparison.EQUAL, register, Optional.empty(), null);  // To be inserted
+        Instruction insn4 = new ConstInstruction(new IntConstant(5), register);
+        Instruction insn5 = new ReturnInstruction(register);
+        insn0.setTarget(insn4);
+        insn1.setTarget(insn4);
+        insn3.setTarget(insn5);
+
+        instructions.addAll(List.of(insn0, insn1, insn2, insn4, insn5));
+        DexCfgGraph cfg = new DexCfgGraph(body);
+
+        // BEFORE //
+        //    0
+        //    | \
+        //    1  |
+        //  / |  |
+        // |  2  |
+        //  \ | /
+        //    4
+        //    |
+        //    5
+        assertInstructions(cfg, List.of(insn0, insn1, insn2, insn4, insn5));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1, insn4));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2, insn4));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn4));
+        assertCfgNode(cfg, insn4, Set.of(insn0, insn1, insn2), Set.of(insn5));
+        assertCfgNode(cfg, insn5, Set.of(insn4), Set.of());
+
+        cfg.insertBefore(cfg.getNode(insn4), insn3);
+
+        // After //
+        //    0
+        //    | \
+        //    1  |
+        //  / |  |
+        // |  2  |
+        //  \ | /
+        //    3
+        //    | \
+        //    4  |
+        //    | /
+        //    5
+        assertInstructions(cfg, List.of(insn0, insn1, insn2, insn3, insn4, insn5));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1, insn3));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2, insn3));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn3));
+        assertCfgNode(cfg, insn3, Set.of(insn0, insn1, insn2), Set.of(insn4, insn5));
+        assertCfgNode(cfg, insn4, Set.of(insn3), Set.of(insn5));
+        assertCfgNode(cfg, insn5, Set.of(insn3, insn4), Set.of());
+    }
 }

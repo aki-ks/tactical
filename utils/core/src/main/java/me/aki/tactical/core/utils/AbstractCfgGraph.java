@@ -50,16 +50,20 @@ public abstract class AbstractCfgGraph<I> {
             node.visited = true;
 
             getReachableInstructions(node.getInstruction()).forEach(nextStmt -> {
-                Node nextNode = getOrCreateNode(nextStmt);
-                worklist.add(nextNode);
+                if (nextStmt == null) {
+                    throw new IllegalStateException("Illegal end of method");
+                } else {
+                    Node nextNode = getOrCreateNode(nextStmt);
+                    worklist.add(nextNode);
 
-                node.succeeding.add(nextNode);
-                nextNode.preceding.add(node);
+                    node.succeeding.add(nextNode);
+                    nextNode.preceding.add(node);
+                }
             });
         }
     }
 
-    private Node getOrCreateNode(I insn) {
+    protected Node getOrCreateNode(I insn) {
         Node node = nodes.get(insn);
         if (node == null) {
             nodes.put(insn, node = new Node(insn));

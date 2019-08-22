@@ -3,7 +3,6 @@ package me.aki.tactical.dex.utils;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.core.utils.AbstractCfgGraph;
 import me.aki.tactical.dex.DexBody;
-import me.aki.tactical.dex.TryCatchBlock;
 import me.aki.tactical.dex.insn.*;
 
 import java.util.*;
@@ -127,5 +126,55 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
     private Optional<Instruction> getPrecedingInstruction(Instruction insn) {
         Instruction prevInsn = body.getInstructions().getPrevious(insn);
         return prevInsn != null && prevInsn.continuesExecution() ? Optional.of(prevInsn) : Optional.empty();
+    }
+
+    public void insertBefore(Node location, Instruction insertInsn) {
+        Node insertNode = getOrCreateNode(insertInsn);
+
+        // All instructions that branch to the insertion location should branch to the inserted instruction instead
+        Optional<Instruction> predecessor = getPrecedingInstruction(location.getInstruction());
+        for (Node preceding : location.getPreceding()) {
+            preceding.getSucceeding().remove(location);
+            preceding.getSucceeding().add(insertNode);
+            insertNode.getPreceding().add(preceding);
+
+            if (preceding.getInstruction() instanceof BranchInstruction) {
+                List<RWCell<Instruction>> branchTargetCells = ((BranchInstruction) preceding.getInstruction()).getBranchTargetCells();
+                for (RWCell<Instruction> branchTargetCell : branchTargetCells) {
+                    if (branchTargetCell.get() == insertInsn) {
+                        branchTargetCell.set(insertInsn);
+                    }
+                }
+            } else if (!(predecessor.isPresent() && predecessor.get() == preceding.getInstruction())) {
+                // The instruction should only be reachable by its predecessor or instructions that branch to it.
+                throw new IllegalStateException();
+            }
+        }
+
+        // Create links between the inserted instruction and its new successor
+        location.getPreceding().clear();
+        location.getPreceding().add(insertNode);
+        insertNode.getSucceeding().add(location);
+
+        // Created links between the inserted instruction and all insns that it branches to
+        if (insertInsn instanceof BranchInstruction) {
+            for (Instruction branchTarget : ((BranchInstruction) insertInsn).getBranchTargets()) {
+                Node branchTargetNode = getNode(branchTarget);
+                branchTargetNode.getPreceding().add(insertNode);
+                insertNode.getSucceeding().add(branchTargetNode);
+            }
+        }
+
+        boolean isExceptionHandler = getHandlerNodes().remove(location);
+        if (isExceptionHandler) {
+            getHandlerNodes().add(insertNode);
+
+            body.getTryCatchBlocks().stream()
+                    .flatMap(tryCatchBlock -> tryCatchBlock.getHandlers().stream())
+                    .filter(h -> h.getHandler() == location.getInstruction())
+                    .forEach(h -> h.setHandler(insertInsn));
+        }
+
+        body.getInstructions().insertBefore(location.getInstruction(), insertInsn);
     }
 }
