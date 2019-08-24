@@ -128,20 +128,21 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
         return prevInsn != null && prevInsn.continuesExecution() ? Optional.of(prevInsn) : Optional.empty();
     }
 
-    public void insertBefore(Node location, Instruction insertInsn) {
+    public void insertBefore(Node locationNode, Instruction insertInsn) {
         Node insertNode = getOrCreateNode(insertInsn);
+        Instruction locationInsn = locationNode.getInstruction();
 
         // All instructions that branch to the insertion location should branch to the inserted instruction instead
-        Optional<Instruction> predecessor = getPrecedingInstruction(location.getInstruction());
-        for (Node preceding : location.getPreceding()) {
-            preceding.getSucceeding().remove(location);
+        Optional<Instruction> predecessor = getPrecedingInstruction(locationInsn);
+        for (Node preceding : locationNode.getPreceding()) {
+            preceding.getSucceeding().remove(locationNode);
             preceding.getSucceeding().add(insertNode);
             insertNode.getPreceding().add(preceding);
 
             if (preceding.getInstruction() instanceof BranchInstruction) {
                 List<RWCell<Instruction>> branchTargetCells = ((BranchInstruction) preceding.getInstruction()).getBranchTargetCells();
                 for (RWCell<Instruction> branchTargetCell : branchTargetCells) {
-                    if (branchTargetCell.get() == insertInsn) {
+                    if (branchTargetCell.get() == locationInsn) {
                         branchTargetCell.set(insertInsn);
                     }
                 }
@@ -152,9 +153,9 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
         }
 
         // Create links between the inserted instruction and its new successor
-        location.getPreceding().clear();
-        location.getPreceding().add(insertNode);
-        insertNode.getSucceeding().add(location);
+        locationNode.getPreceding().clear();
+        locationNode.getPreceding().add(insertNode);
+        insertNode.getSucceeding().add(locationNode);
 
         // Created links between the inserted instruction and all insns that it branches to
         if (insertInsn instanceof BranchInstruction) {
@@ -165,16 +166,16 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
             }
         }
 
-        boolean isExceptionHandler = getHandlerNodes().remove(location);
+        boolean isExceptionHandler = getHandlerNodes().remove(locationNode);
         if (isExceptionHandler) {
             getHandlerNodes().add(insertNode);
 
             body.getTryCatchBlocks().stream()
                     .flatMap(tryCatchBlock -> tryCatchBlock.getHandlers().stream())
-                    .filter(h -> h.getHandler() == location.getInstruction())
+                    .filter(h -> h.getHandler() == locationInsn)
                     .forEach(h -> h.setHandler(insertInsn));
         }
 
-        body.getInstructions().insertBefore(location.getInstruction(), insertInsn);
+        body.getInstructions().insertBefore(locationInsn, insertInsn);
     }
 }

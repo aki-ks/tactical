@@ -1,12 +1,20 @@
 package me.aki.tactical.dex.utils;
 
+import me.aki.tactical.core.FieldRef;
+import me.aki.tactical.core.MethodRef;
+import me.aki.tactical.core.Path;
+import me.aki.tactical.core.constant.FloatConstant;
 import me.aki.tactical.core.constant.IntConstant;
+import me.aki.tactical.core.type.FloatType;
+import me.aki.tactical.core.type.IntType;
+import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.util.InsertList;
 import me.aki.tactical.core.utils.AbstractCfgGraph;
 import me.aki.tactical.dex.DexBody;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.*;
 import me.aki.tactical.dex.insn.litmath.MulLitInstruction;
+import me.aki.tactical.dex.invoke.InvokeVirtual;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -418,6 +426,9 @@ public class DexCfgGraphTest {
         assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn3));
         assertCfgNode(cfg, insn3, Set.of(insn0, insn1, insn2), Set.of(insn4));
         assertCfgNode(cfg, insn4, Set.of(insn3), Set.of());
+
+        assertEquals(insn3, insn0.getTarget());
+        assertEquals(insn3, insn1.getTarget());
     }
 
     @Test
@@ -461,6 +472,7 @@ public class DexCfgGraphTest {
         assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2, insn3));
         assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn3));
         assertCfgNode(cfg, insn3, Set.of(insn1, insn2), Set.of());
+        assertEquals(insn3, insn1.getTarget());
     }
 
     @Test
@@ -520,5 +532,78 @@ public class DexCfgGraphTest {
         assertCfgNode(cfg, insn3, Set.of(insn0, insn1, insn2), Set.of(insn4, insn5));
         assertCfgNode(cfg, insn4, Set.of(insn3), Set.of(insn5));
         assertCfgNode(cfg, insn5, Set.of(insn3, insn4), Set.of());
+        assertEquals(insn3, insn0.getTarget());
+        assertEquals(insn3, insn1.getTarget());
+        assertEquals(insn5, insn3.getTarget());
+    }
+
+    @Test
+    public void foo() {
+        DexBody body = newBody(2, false, 0);
+        Register out = body.getRegisters().get(0);
+        Register number = body.getRegisters().get(1);
+        InsertList<Instruction> instructions = body.getInstructions();
+
+        Path printStream = Path.of("java", "io", "PrintStream");
+
+        Instruction insn0 = new FieldGetInstruction(new FieldRef(Path.of("java", "lang", "System"), "out", new ObjectType(printStream)), Optional.empty(), out);
+        Instruction insn1 = new ConstInstruction(new IntConstant(0), number);
+        IfInstruction insn2 = new IfInstruction(IfInstruction.Comparison.EQUAL, out, Optional.empty(), null);
+
+        Instruction insn3 = new InvokeInstruction(new InvokeVirtual(new MethodRef(printStream, "println", List.of(IntType.getInstance()), Optional.of(IntType.getInstance())), out, List.of(number)));
+        Instruction insn4 = new ReturnVoidInstruction();
+
+        Instruction insn5 = new ConstInstruction(new FloatConstant(0.0f), number);
+        Instruction insn6 = new InvokeInstruction(new InvokeVirtual(new MethodRef(printStream, "println", List.of(FloatType.getInstance()), Optional.of(IntType.getInstance())), out, List.of(number)));
+        Instruction insn7 = new ReturnVoidInstruction();
+
+        insn2.setTarget(insn6);
+
+        instructions.addAll(List.of(insn0, insn1, insn2, insn3, insn4, insn6, insn7));
+        DexCfgGraph cfg = new DexCfgGraph(body);
+
+        // BEFORE //
+        // 0
+        // |
+        // 1
+        // |
+        // 2
+        // | \
+        // 3  6
+        // |  |
+        // 4  7
+        assertInstructions(cfg, List.of(insn0, insn1, insn2, insn3, insn4, insn6, insn7));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn3, insn6));
+        assertCfgNode(cfg, insn3, Set.of(insn2), Set.of(insn4));
+        assertCfgNode(cfg, insn4, Set.of(insn3), Set.of());
+        assertCfgNode(cfg, insn6, Set.of(insn2), Set.of(insn7));
+        assertCfgNode(cfg, insn7, Set.of(insn6), Set.of());
+
+        cfg.insertBefore(cfg.getNode(insn6), insn5);
+
+        // AFTER //
+        // 0
+        // |
+        // 1
+        // |
+        // 2
+        // | \
+        // 3  5
+        // |  |
+        // 4  6
+        //    |
+        //    7
+        assertInstructions(cfg, List.of(insn0, insn1, insn2, insn3, insn4, insn5, insn6, insn7));
+        assertCfgNode(cfg, insn0, Set.of(), Set.of(insn1));
+        assertCfgNode(cfg, insn1, Set.of(insn0), Set.of(insn2));
+        assertCfgNode(cfg, insn2, Set.of(insn1), Set.of(insn3, insn5));
+        assertCfgNode(cfg, insn3, Set.of(insn2), Set.of(insn4));
+        assertCfgNode(cfg, insn4, Set.of(insn3), Set.of());
+        assertCfgNode(cfg, insn5, Set.of(insn2), Set.of(insn6));
+        assertCfgNode(cfg, insn6, Set.of(insn5), Set.of(insn7));
+        assertCfgNode(cfg, insn7, Set.of(insn6), Set.of());
+        assertEquals(insn5, insn2.getTarget());
     }
 }

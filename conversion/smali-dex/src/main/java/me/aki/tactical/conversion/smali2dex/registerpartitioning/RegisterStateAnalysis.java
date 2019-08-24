@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 /**
  * Analyses which instructions may have written the values that is stored at a certain location in code in registers.
+ *
+ * This utility is also detects writes to the same register that are actually independent and just reuse one register.
+ * {@link RegisterStates#getGroups()}
  */
 public class RegisterStateAnalysis {
     private final DexCfgGraph cfgGraph;
@@ -23,7 +26,7 @@ public class RegisterStateAnalysis {
     private Map<Register, Set<Instruction>> readMap;
 
     /**
-     * Store for each
+     * Store for each register which instructions write to it
      */
     private Map<Register, Set<Instruction>> writeMap;
 
@@ -126,6 +129,17 @@ public class RegisterStateAnalysis {
 
         /**
          * Get a groups of states that are independent of each other.
+         *
+         * <pre><code>
+         *     x = 20;
+         *     print(x);
+         *
+         *     // Here we override the value written by the first assignment.
+         *     // It is not possible to read that value from here on, so the instructions
+         *     // below are independent from the first two instructions.
+         *     x = 30;
+         *     print(x);
+         * </code></pre>
          *
          * @return groups of independent states
          */
