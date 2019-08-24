@@ -5,6 +5,7 @@ import me.aki.tactical.core.textify.ConstantTextifier;
 import me.aki.tactical.core.textify.Printer;
 import me.aki.tactical.core.textify.TextUtil;
 import me.aki.tactical.core.textify.TypeTextifier;
+import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.*;
@@ -35,7 +36,7 @@ public class InstructionTextifier implements CtxTextifier<Instruction> {
             printer.addText(" " + getCompareSymbol(value.getComparison()) + " ");
             value.getOp2().ifPresentOrElse(
                     op2 -> printer.addLiteral(ctx.getRegisterName(op2)),
-                    () -> printer.addText("0"));
+                    () -> printer.addText(value.getOp1().getType() instanceof RefType ? "null" : "0"));
             printer.addText(") goto ");
             printer.addLiteral(ctx.getLabel(value.getTarget()));
             printer.addText(";");
