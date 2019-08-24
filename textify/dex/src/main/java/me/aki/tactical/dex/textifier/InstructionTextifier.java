@@ -94,7 +94,7 @@ public class InstructionTextifier implements CtxTextifier<Instruction> {
                     TextUtil.assertionError();
 
             printer.addLiteral(ctx.getRegisterName(insn.getResult()));
-            printer.addLiteral(" = ");
+            printer.addText(" = ");
             printer.addLiteral(ctx.getRegisterName(insn.getOp1()));
             printer.addText(" ");
             printer.addText(getInsnKeyword(insn));
