@@ -5,8 +5,8 @@ import me.aki.tactical.core.util.RCell;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Negate the value of another (numeric) expression.
@@ -39,8 +39,8 @@ public class NegExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getValueCell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getValueCell());
     }
 
     @Override

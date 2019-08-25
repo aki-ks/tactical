@@ -7,6 +7,7 @@ import me.aki.tactical.ref.Expression;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,8 +55,8 @@ public class NewArrayExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.copyOf(getDimensionSizeCells());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.copyOf(getDimensionSizeCells());
     }
 
     @Override

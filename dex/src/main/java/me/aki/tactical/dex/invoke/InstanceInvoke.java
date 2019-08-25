@@ -5,6 +5,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -36,14 +37,14 @@ public abstract class InstanceInvoke extends ConcreteInvoke {
     }
 
     @Override
-    public List<Register> getRegisterReads() {
+    public Set<Register> getRegisterReads() {
         return Stream.concat(Stream.of(instance), getArguments().stream())
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public List<RWCell<Register>> getRegisterReadCells() {
+    public Set<RWCell<Register>> getRegisterReadCells() {
         return Stream.concat(Stream.of(getInstanceCell()), getArgumentCells().stream())
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

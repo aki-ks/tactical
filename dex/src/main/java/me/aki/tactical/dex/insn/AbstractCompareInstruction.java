@@ -5,6 +5,7 @@ import me.aki.tactical.dex.Register;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Compare two numbers from and the store the result in another {@link Register}.
@@ -72,13 +73,13 @@ public abstract class AbstractCompareInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(op1, op2);
+    public Set<Register> getReadRegisters() {
+        return Set.of(op1, op2);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getOp1Cell(), getOp2Cell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getOp1Cell(), getOp2Cell());
     }
 
     @Override

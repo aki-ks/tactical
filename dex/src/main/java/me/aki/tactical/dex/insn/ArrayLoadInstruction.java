@@ -5,8 +5,8 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Get one value contained within an array
@@ -87,13 +87,13 @@ public class ArrayLoadInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(array, index);
+    public Set<Register> getReadRegisters() {
+        return Set.of(array, index);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getArrayCell(), getIndexCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getArrayCell(), getIndexCell());
     }
 
     @Override

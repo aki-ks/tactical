@@ -3,8 +3,8 @@ package me.aki.tactical.dex.insn;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Move a caught exception to a {@link Register}.
@@ -32,13 +32,13 @@ public class MoveExceptionInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of();
+    public Set<Register> getReadRegisters() {
+        return Set.of();
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of();
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of();
     }
 
     @Override

@@ -6,8 +6,8 @@ import me.aki.tactical.core.util.RCell;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Get the length of an array.
@@ -40,8 +40,8 @@ public class ArrayLengthExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getArrayCell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getArrayCell());
     }
 
     @Override

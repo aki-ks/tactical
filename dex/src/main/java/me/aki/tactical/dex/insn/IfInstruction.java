@@ -3,8 +3,8 @@ package me.aki.tactical.dex.insn;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,25 +84,25 @@ public class IfInstruction implements BranchInstruction {
     }
 
     @Override
-    public List<Instruction> getBranchTargets() {
-        return List.of(target);
+    public Set<Instruction> getBranchTargets() {
+        return Set.of(target);
     }
 
     @Override
-    public List<RWCell<Instruction>> getBranchTargetCells() {
-        return List.of(getTargetCell());
+    public Set<RWCell<Instruction>> getBranchTargetCells() {
+        return Set.of(getTargetCell());
     }
 
     @Override
-    public List<Register> getReadRegisters() {
+    public Set<Register> getReadRegisters() {
         return Stream.concat(Stream.of(op1), op2.stream())
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
+    public Set<RWCell<Register>> getReadRegisterCells() {
         return Stream.concat(Stream.of(getOp1Cell()), getOp2Cell().stream())
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

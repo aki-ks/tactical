@@ -5,8 +5,9 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Return from a method.
@@ -49,8 +50,8 @@ public class ReturnStmt implements Statement {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return getValueCell().map(List::<RCell<Expression>>of).orElse(List.of());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return getValueCell().stream().collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

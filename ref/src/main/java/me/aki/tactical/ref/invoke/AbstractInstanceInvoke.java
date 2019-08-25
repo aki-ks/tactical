@@ -5,10 +5,9 @@ import me.aki.tactical.core.util.RCell;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Invoke a method of an instance of a class.
@@ -34,11 +33,9 @@ public class AbstractInstanceInvoke extends AbstractConcreteInvoke {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        List<RCell<Expression>> cells = new ArrayList<>();
-        cells.add(getInstanceCell());
-        cells.addAll(getArgumentCells());
-        return Collections.unmodifiableList(cells);
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Stream.concat(Stream.of(getInstanceCell()), getArgumentCells().stream())
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

@@ -4,8 +4,8 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -51,25 +51,25 @@ public class SwitchInstruction implements BranchInstruction {
     }
 
     @Override
-    public List<Instruction> getBranchTargets() {
-        return List.copyOf(branchTable.values());
+    public Set<Instruction> getBranchTargets() {
+        return Set.copyOf(branchTable.values());
     }
 
     @Override
-    public List<RWCell<Instruction>> getBranchTargetCells() {
+    public Set<RWCell<Instruction>> getBranchTargetCells() {
         return branchTable.keySet().stream()
                 .map(key -> RWCell.ofMap(key, branchTable, Instruction.class))
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(value);
+    public Set<Register> getReadRegisters() {
+        return Set.of(value);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getValueCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getValueCell());
     }
 
     @Override

@@ -4,8 +4,8 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.Instruction;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Mathematical operation that operates on one {@link Register} and an int literal.
@@ -65,13 +65,13 @@ public abstract class AbstractBinaryLitMathInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(op1);
+    public Set<Register> getReadRegisters() {
+        return Set.of(op1);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getOp1Cell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getOp1Cell());
     }
 
     @Override

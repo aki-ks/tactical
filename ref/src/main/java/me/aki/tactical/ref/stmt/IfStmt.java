@@ -6,7 +6,7 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.condition.Condition;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Branch to another statement if a certain condition is true
@@ -48,17 +48,17 @@ public class IfStmt implements BranchStmt {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
+    public Set<RCell<Expression>> getReadValueCells() {
         return condition.getReadValueCells();
     }
 
     @Override
-    public List<Statement> getBranchTargets() {
-        return List.of(getTarget());
+    public Set<Statement> getBranchTargets() {
+        return Set.of(getTarget());
     }
 
     @Override
-    public List<RWCell<Statement>> getBranchTargetsCells() {
-        return List.of(getTargetCell());
+    public Set<RWCell<Statement>> getBranchTargetsCells() {
+        return Set.of(getTargetCell());
     }
 }

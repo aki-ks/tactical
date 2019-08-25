@@ -7,6 +7,8 @@ import me.aki.tactical.dex.Register;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -67,19 +69,15 @@ public class FieldSetInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        List<Register> registers = new ArrayList<>();
-        instance.ifPresent(registers::add);
-        registers.add(value);
-        return List.copyOf(registers);
+    public Set<Register> getReadRegisters() {
+        return Stream.concat(instance.stream(), Stream.of(value))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        List<RWCell<Register>> registers = new ArrayList<>();
-        getInstanceCell().ifPresent(registers::add);
-        registers.add(getValueCell());
-        return registers;
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Stream.concat(getInstanceCell().stream(), Stream.of(getValueCell()))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

@@ -5,8 +5,8 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Referencing;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A condition that compares two values.
@@ -45,8 +45,8 @@ public abstract class Condition implements Referencing {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getValue1Cell(), getValue2Cell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getValue1Cell(), getValue2Cell());
     }
 
     public abstract Condition negate();

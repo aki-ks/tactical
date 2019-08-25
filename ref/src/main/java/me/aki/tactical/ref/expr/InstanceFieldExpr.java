@@ -5,8 +5,8 @@ import me.aki.tactical.core.util.RCell;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Reference the value of a non-static field.
@@ -35,8 +35,8 @@ public class InstanceFieldExpr extends AbstractFieldExpr {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getInstanceCell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getInstanceCell());
     }
 
     @Override

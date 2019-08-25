@@ -6,6 +6,7 @@ import me.aki.tactical.dex.Register;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Negate a numeric value.
@@ -68,13 +69,13 @@ public class NegInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(value);
+    public Set<Register> getReadRegisters() {
+        return Set.of(value);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getValueCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getValueCell());
     }
 
     @Override

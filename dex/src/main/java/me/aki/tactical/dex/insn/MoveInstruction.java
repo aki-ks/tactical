@@ -7,8 +7,8 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Move a value from one {@link Register} to another one.
@@ -71,13 +71,13 @@ public class MoveInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(from);
+    public Set<Register> getReadRegisters() {
+        return Set.of(from);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getFromCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getFromCell());
     }
 
     @Override

@@ -4,8 +4,9 @@ import me.aki.tactical.core.FieldRef;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Get the value of a field.
@@ -69,13 +70,13 @@ public class FieldGetInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return instance.map(List::of).orElseGet(List::of);
+    public Set<Register> getReadRegisters() {
+        return instance.stream().collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return getInstanceCell().map(List::of).orElseGet(List::of);
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return getInstanceCell().stream().collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

@@ -5,6 +5,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Invoke a static method.
@@ -15,12 +16,12 @@ public class InvokeStatic extends ConcreteInvoke {
     }
 
     @Override
-    public List<Register> getRegisterReads() {
-        return List.copyOf(getArguments());
+    public Set<Register> getRegisterReads() {
+        return Set.copyOf(getArguments());
     }
 
     @Override
-    public List<RWCell<Register>> getRegisterReadCells() {
-        return getArgumentCells();
+    public Set<RWCell<Register>> getRegisterReadCells() {
+        return Set.copyOf(getArgumentCells());
     }
 }

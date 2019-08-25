@@ -7,11 +7,11 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Variable;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
- * Reference a value contained in an array.
+ * Reference an element of an array.
  */
 public class ArrayBoxExpr implements Variable {
     /**
@@ -59,8 +59,8 @@ public class ArrayBoxExpr implements Variable {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getArrayCell(), getIndexCell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getArrayCell(), getIndexCell());
     }
 
     @Override

@@ -13,7 +13,12 @@ public class OrExpr extends AbstractBinaryExpr {
 
     @Override
     public Type getType() {
-        // both values should have the same type
-        return getValue1().getType();
+        Type type1 = getValue1().getType();
+        Type type2 = getValue2().getType();
+        if (type1.equals(type2)) {
+            return type1;
+        } else {
+            throw new IllegalStateException("Cannot or values of types " + type1 + " and " + type2);
+        }
     }
 }

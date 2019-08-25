@@ -3,8 +3,8 @@ package me.aki.tactical.dex.insn;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Throw an exception contained within a certain {@link Register}.
@@ -32,13 +32,13 @@ public class ThrowInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(register);
+    public Set<Register> getReadRegisters() {
+        return Set.of(register);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getRegisterCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getRegisterCell());
     }
 
     @Override

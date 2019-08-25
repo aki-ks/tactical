@@ -3,8 +3,8 @@ package me.aki.tactical.dex.insn;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Unconditional branch to another instruction.
@@ -32,23 +32,23 @@ public class GotoInstruction implements BranchInstruction {
     }
 
     @Override
-    public List<Instruction> getBranchTargets() {
-        return List.of(target);
+    public Set<Instruction> getBranchTargets() {
+        return Set.of(target);
     }
 
     @Override
-    public List<RWCell<Instruction>> getBranchTargetCells() {
-        return List.of(getTargetCell());
+    public Set<RWCell<Instruction>> getBranchTargetCells() {
+        return Set.of(getTargetCell());
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of();
+    public Set<Register> getReadRegisters() {
+        return Set.of();
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of();
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of();
     }
 
     @Override

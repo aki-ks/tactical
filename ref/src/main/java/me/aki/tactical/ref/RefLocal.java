@@ -2,9 +2,8 @@ package me.aki.tactical.ref;
 
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RCell;
-import me.aki.tactical.core.util.RWCell;
 
-import java.util.List;
+import java.util.Set;
 
 public class RefLocal implements Variable {
     /**
@@ -25,7 +24,7 @@ public class RefLocal implements Variable {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of();
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of();
     }
 }

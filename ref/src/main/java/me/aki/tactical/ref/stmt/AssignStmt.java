@@ -8,6 +8,7 @@ import me.aki.tactical.ref.Variable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,33 +56,33 @@ public class AssignStmt implements Statement {
     }
 
     @Override
-    public List<Expression> getReadValues() {
-        return List.of(getValue());
+    public Set<Expression> getReadValues() {
+        return Set.of(getValue());
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getValueCell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getValueCell());
     }
 
     @Override
-    public List<Expression> getAllReadValues() {
+    public Set<Expression> getAllReadValues() {
         Stream<Expression> allReads = getReadValues().stream()
                 .flatMap(read -> Stream.concat(Stream.of(read), read.getAllReadValues().stream()));
 
         Stream<Expression> readsOfWrites = getVariable().getAllReadValues().stream();
 
-        return Stream.concat(allReads, readsOfWrites).collect(Collectors.toUnmodifiableList());
+        return Stream.concat(allReads, readsOfWrites).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public List<RCell<Expression>> getAllReadValueCells() {
+    public Set<RCell<Expression>> getAllReadValueCells() {
         Stream<RCell<Expression>> allReadCells = getReadValueCells().stream()
                 .flatMap(readCell -> Stream.concat(Stream.of(readCell), readCell.get().getAllReadValueCells().stream()));
 
         Stream<RCell<Expression>> readCellsOfWrite = getVariable().getAllReadValueCells().stream();
 
-        return Stream.concat(allReadCells, readCellsOfWrite).collect(Collectors.toUnmodifiableList());
+        return Stream.concat(allReadCells, readCellsOfWrite).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

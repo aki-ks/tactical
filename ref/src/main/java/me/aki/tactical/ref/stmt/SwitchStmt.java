@@ -5,11 +5,9 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Compare an int value against a branch table or else branch to a default location.
@@ -79,22 +77,20 @@ public class SwitchStmt implements BranchStmt {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getValueCell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getValueCell());
     }
 
     @Override
-    public List<Statement> getBranchTargets() {
-        List<Statement> targets = new ArrayList<>(getBranchTable().values());
-        targets.add(getDefaultTarget());
-        return Collections.unmodifiableList(targets);
+    public Set<Statement> getBranchTargets() {
+        return Stream.concat(getBranchTargets().stream(), Stream.of(getDefaultTarget()))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public List<RWCell<Statement>> getBranchTargetsCells() {
-        List<RWCell<Statement>> cells = new ArrayList<>(getBranchTableCells());
-        cells.add(getDefaultTargetCell());
-        return Collections.unmodifiableList(cells);
+    public Set<RWCell<Statement>> getBranchTargetsCells() {
+        return Stream.concat(getBranchTargetsCells().stream(), Stream.of(getDefaultTargetCell()))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

@@ -5,6 +5,7 @@ import me.aki.tactical.dex.Register;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Fill an array with numeric constants.
@@ -60,13 +61,13 @@ public class FillArrayInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of();
+    public Set<Register> getReadRegisters() {
+        return Set.of();
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of();
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of();
     }
 
     @Override
@@ -93,7 +94,6 @@ public class FillArrayInstruction implements Instruction {
 
         /**
          * Get the size of this kind of numbers in bytes
-         * @return
          */
         public int getByteSize() {
             return byteSize;

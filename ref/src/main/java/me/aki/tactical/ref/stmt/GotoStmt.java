@@ -5,7 +5,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Unconditionally branch to another statement.
@@ -33,18 +33,18 @@ public class GotoStmt implements BranchStmt {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of();
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of();
     }
 
     @Override
-    public List<Statement> getBranchTargets() {
-        return List.of(getTarget());
+    public Set<Statement> getBranchTargets() {
+        return Set.of(getTarget());
     }
 
     @Override
-    public List<RWCell<Statement>> getBranchTargetsCells() {
-        return List.of(getTargetCell());
+    public Set<RWCell<Statement>> getBranchTargetsCells() {
+        return Set.of(getTargetCell());
     }
 
     @Override

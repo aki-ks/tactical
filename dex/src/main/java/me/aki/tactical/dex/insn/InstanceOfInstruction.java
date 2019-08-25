@@ -4,8 +4,8 @@ import me.aki.tactical.core.type.RefType;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Check whether a value is of a certain type and store the result in a {@link Register}.
@@ -67,13 +67,13 @@ public class InstanceOfInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(value);
+    public Set<Register> getReadRegisters() {
+        return Set.of(value);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getValueCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getValueCell());
     }
 
     @Override

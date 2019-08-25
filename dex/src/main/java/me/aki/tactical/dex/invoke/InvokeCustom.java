@@ -7,6 +7,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Dex equivalent of jvm invoke dynamic instruction.
@@ -77,12 +78,12 @@ public class InvokeCustom extends Invoke {
     }
 
     @Override
-    public List<Register> getRegisterReads() {
-        return List.copyOf(getArguments());
+    public Set<Register> getRegisterReads() {
+        return Set.copyOf(getArguments());
     }
 
     @Override
-    public List<RWCell<Register>> getRegisterReadCells() {
-        return getArgumentCells();
+    public Set<RWCell<Register>> getRegisterReadCells() {
+        return Set.copyOf(getArgumentCells());
     }
 }

@@ -5,7 +5,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Statement;
 
-import java.util.List;
+import java.util.Set;
 
 public class AbstractUnaryStmt implements Statement {
     private Expression value;
@@ -27,7 +27,7 @@ public class AbstractUnaryStmt implements Statement {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getValueCell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getValueCell());
     }
 }

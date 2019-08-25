@@ -6,7 +6,7 @@ import me.aki.tactical.ref.Statement;
 import me.aki.tactical.ref.expr.InvokeExpr;
 import me.aki.tactical.ref.invoke.AbstractInvoke;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Invoke a method without storing the return value.
@@ -29,7 +29,7 @@ public class InvokeStmt implements Statement {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
+    public Set<RCell<Expression>> getReadValueCells() {
         return invoke.getReadValueCells();
     }
 }

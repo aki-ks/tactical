@@ -4,9 +4,8 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.invoke.Invoke;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.Set;
 
 /**
  * Invoke a method. The return value can be retrieved with a {@link MoveResultInstruction}.
@@ -27,12 +26,12 @@ public class InvokeInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
+    public Set<Register> getReadRegisters() {
         return invoke.getRegisterReads();
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
+    public Set<RWCell<Register>> getReadRegisterCells() {
         return invoke.getRegisterReadCells();
     }
 

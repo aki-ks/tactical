@@ -4,8 +4,8 @@ import me.aki.tactical.core.util.RCell;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Reusable code for expressions that operate on two values.
@@ -44,8 +44,8 @@ public abstract class AbstractBinaryExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of(getValue1Cell(), getValue2Cell());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of(getValue1Cell(), getValue2Cell());
     }
 
     @Override

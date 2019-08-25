@@ -8,8 +8,8 @@ import me.aki.tactical.core.type.ShortType;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Cast a value from one primitive type to another.
@@ -92,13 +92,13 @@ public class PrimitiveCastInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(fromRegister);
+    public Set<Register> getReadRegisters() {
+        return Set.of(fromRegister);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getFromRegisterCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getFromRegisterCell());
     }
 
     @Override

@@ -7,6 +7,7 @@ import me.aki.tactical.ref.Expression;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class InvokeStatic extends AbstractConcreteInvoke implements AmbigiousInvoke {
     /**
@@ -28,8 +29,8 @@ public class InvokeStatic extends AbstractConcreteInvoke implements AmbigiousInv
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.copyOf(getArgumentCells());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.copyOf(getArgumentCells());
     }
 
     @Override

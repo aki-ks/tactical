@@ -7,8 +7,8 @@ import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Store an element at an index within an array.
@@ -89,13 +89,13 @@ public class ArrayStoreInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(array, index, value);
+    public Set<Register> getReadRegisters() {
+        return Set.of(array, index, value);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getArrayCell(), getIndexCell(), getValueCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getArrayCell(), getIndexCell(), getValueCell());
     }
 
     @Override

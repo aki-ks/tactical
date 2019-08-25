@@ -5,6 +5,7 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -44,12 +45,12 @@ public abstract class Invoke {
      *
      * @return all accessed registers
      */
-    public abstract List<Register> getRegisterReads();
+    public abstract Set<Register> getRegisterReads();
 
     /**
      * Cells of registers that this invoke reads from.
      *
      * @return all accessed registers
      */
-    public abstract List<RWCell<Register>> getRegisterReadCells();
+    public abstract Set<RWCell<Register>> getRegisterReadCells();
 }

@@ -2,7 +2,7 @@ package me.aki.tactical.ref;
 
 import me.aki.tactical.core.util.RCell;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,17 +15,17 @@ public interface Referencing {
      *
      * @return cells of all read expressions
      */
-    List<RCell<Expression>> getReadValueCells();
+    Set<RCell<Expression>> getReadValueCells();
 
     /**
      * Get all expressions that this entity reads from.
      *
      * @return all read expressions
      */
-    default List<Expression> getReadValues() {
+    default Set<Expression> getReadValues() {
         return getReadValueCells().stream()
                 .map(RCell::get)
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     /**
@@ -33,7 +33,7 @@ public interface Referencing {
      *
      * @return cells of all referenced expressions
      */
-    default List<Expression> getAllReadValues() {
+    default Set<Expression> getAllReadValues() {
         class Inner {
             private Stream<Expression> getRecursiveReferencedValueStream(Referencing ref) {
                 return ref.getReadValueCells().stream()
@@ -42,7 +42,7 @@ public interface Referencing {
             }
         }
 
-        return new Inner().getRecursiveReferencedValueStream(this).collect(Collectors.toUnmodifiableList());
+        return new Inner().getRecursiveReferencedValueStream(this).collect(Collectors.toUnmodifiableSet());
     }
 
     /**
@@ -50,7 +50,7 @@ public interface Referencing {
      *
      * @return cells of all referenced expressions
      */
-    default List<RCell<Expression>> getAllReadValueCells() {
+    default Set<RCell<Expression>> getAllReadValueCells() {
         class Inner {
             private Stream<RCell<Expression>> getRecursiveReferencedValueCellStream(Referencing ref) {
                 return ref.getReadValueCells().stream()
@@ -58,6 +58,6 @@ public interface Referencing {
             }
         }
 
-        return new Inner().getRecursiveReferencedValueCellStream(this).collect(Collectors.toUnmodifiableList());
+        return new Inner().getRecursiveReferencedValueCellStream(this).collect(Collectors.toUnmodifiableSet());
     }
 }

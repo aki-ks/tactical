@@ -6,8 +6,8 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.invoke.AbstractInvoke;
 import me.aki.tactical.ref.stmt.InvokeStmt;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * An expression for the result of a method invoke.
@@ -39,7 +39,7 @@ public class InvokeExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
+    public Set<RCell<Expression>> getReadValueCells() {
         return invoke.getReadValueCells();
     }
 

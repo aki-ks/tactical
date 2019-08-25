@@ -3,11 +3,10 @@ package me.aki.tactical.ref.expr;
 import me.aki.tactical.core.constant.PushableConstant;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RCell;
-import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Reference the value of a constant.
@@ -33,8 +32,8 @@ public class ConstantExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of();
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of();
     }
 
     @Override

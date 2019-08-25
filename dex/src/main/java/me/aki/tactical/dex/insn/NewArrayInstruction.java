@@ -6,6 +6,7 @@ import me.aki.tactical.dex.Register;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Create an array of a certain type of a runtime defined size.
@@ -65,13 +66,13 @@ public class NewArrayInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(size);
+    public Set<Register> getReadRegisters() {
+        return Set.of(size);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getSizeCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getSizeCell());
     }
 
     @Override

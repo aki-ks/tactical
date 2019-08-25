@@ -4,11 +4,10 @@ import me.aki.tactical.core.Path;
 import me.aki.tactical.core.type.ObjectType;
 import me.aki.tactical.core.type.Type;
 import me.aki.tactical.core.util.RCell;
-import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.ref.Expression;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Create a new instance of a class.
@@ -39,8 +38,8 @@ public class NewExpr implements Expression {
     }
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return List.of();
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.of();
     }
 
     @Override

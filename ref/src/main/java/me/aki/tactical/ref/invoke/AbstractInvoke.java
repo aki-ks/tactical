@@ -7,9 +7,7 @@ import me.aki.tactical.ref.Expression;
 import me.aki.tactical.ref.Referencing;
 
 import java.lang.invoke.CallSite;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -45,8 +43,8 @@ public abstract class AbstractInvoke implements Referencing {
     public abstract MethodDescriptor getMethodDescriptor();
 
     @Override
-    public List<RCell<Expression>> getReadValueCells() {
-        return new ArrayList<>(getArgumentCells());
+    public Set<RCell<Expression>> getReadValueCells() {
+        return Set.copyOf(getArgumentCells());
     }
 
     @Override

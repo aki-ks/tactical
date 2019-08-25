@@ -3,8 +3,8 @@ package me.aki.tactical.dex.insn;
 import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Get the length of an array.
@@ -52,13 +52,13 @@ public class ArrayLengthInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(array);
+    public Set<Register> getReadRegisters() {
+        return Set.of(array);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getArrayCell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getArrayCell());
     }
 
     @Override

@@ -6,6 +6,7 @@ import me.aki.tactical.dex.Register;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Create a new instance of a certain class and store it in a {@link Register}.
@@ -47,13 +48,13 @@ public class NewInstanceInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of();
+    public Set<Register> getReadRegisters() {
+        return Set.of();
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of();
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of();
     }
 
     @Override

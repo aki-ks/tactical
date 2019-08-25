@@ -140,7 +140,7 @@ public class DexCfgGraph extends AbstractCfgGraph<Instruction> {
             insertNode.getPreceding().add(preceding);
 
             if (preceding.getInstruction() instanceof BranchInstruction) {
-                List<RWCell<Instruction>> branchTargetCells = ((BranchInstruction) preceding.getInstruction()).getBranchTargetCells();
+                Set<RWCell<Instruction>> branchTargetCells = ((BranchInstruction) preceding.getInstruction()).getBranchTargetCells();
                 for (RWCell<Instruction> branchTargetCell : branchTargetCells) {
                     if (branchTargetCell.get() == locationInsn) {
                         branchTargetCell.set(insertInsn);

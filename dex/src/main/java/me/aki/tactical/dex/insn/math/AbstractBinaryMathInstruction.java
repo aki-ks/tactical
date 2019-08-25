@@ -4,8 +4,8 @@ import me.aki.tactical.core.util.RWCell;
 import me.aki.tactical.dex.Register;
 import me.aki.tactical.dex.insn.Instruction;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Math operation that operates on two registers and stores the result in another register.
@@ -69,13 +69,13 @@ public abstract class AbstractBinaryMathInstruction implements Instruction {
     }
 
     @Override
-    public List<Register> getReadRegisters() {
-        return List.of(op1, op2);
+    public Set<Register> getReadRegisters() {
+        return Set.of(op1, op2);
     }
 
     @Override
-    public List<RWCell<Register>> getReadRegisterCells() {
-        return List.of(getOp1Cell(), getOp2Cell());
+    public Set<RWCell<Register>> getReadRegisterCells() {
+        return Set.of(getOp1Cell(), getOp2Cell());
     }
 
     @Override
